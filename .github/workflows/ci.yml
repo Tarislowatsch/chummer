@@ -1,10 +1,20 @@
 name: CI
 
 on:
+  # Push is restricted to master rather than '**'. With push on every branch,
+  # a same-repo pull request builds twice, once per event. A concurrency group
+  # alone does not fix that: github.ref is refs/heads/<branch> for push and
+  # refs/pull/<n>/merge for pull_request, so the two runs land in different
+  # groups and neither cancels the other.
   push:
-    branches: ['**']
+    branches: [master]
   pull_request:
   workflow_dispatch:
+
+# Cancels superseded runs when a branch is pushed to repeatedly.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -17,7 +27,7 @@ jobs:
         configuration: [Debug, Release]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - uses: microsoft/setup-msbuild@v2
 

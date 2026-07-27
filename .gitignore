@@ -14,20 +14,10 @@
 _ReSharper*/
 *.DotSettings.user
 
-# Build results / intermediate
-*.dll
-*.exe
-*.pdb
-*.cache
-*.ilk
-*.meta
-*.obj
-*.iobj
-*.ipdb
-*.pch
-*.tlb
-*.tli
-*.tlh
+# Build intermediates that can appear outside bin/ and obj/.
+# Deliberately no blanket *.dll / *.exe / *.pdb here: bin/ and obj/ already
+# cover compiler output, and a blanket rule would silently swallow the first
+# third-party assembly someone checks in with a HintPath.
 *.tmp
 *.tmp_proj
 *.vspscc
