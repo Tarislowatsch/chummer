@@ -1041,6 +1041,35 @@
   <ItemGroup>
     <None Include="icons\emoticon_waii.png" />
   </ItemGroup>
+  <!-- Runtime content: game data, translations, character sheets, export
+       templates, default settings and the changelog shown by frmHistory.
+       Without these the build produces an executable that cannot start, since
+       every one of them is read from Application.StartupPath at run time.
+       Extensions are listed explicitly rather than using *.* so that downloaded
+       updater payloads (data\*.zip) and editor backups are never copied.
+       These wildcards are expanded by MSBuild at build time; Visual Studio may
+       materialise them into explicit entries when it saves the project, which
+       P0-12 makes unnecessary by moving to SDK-style globbing. -->
+  <ItemGroup>
+    <Content Include="data\**\*.xml;data\**\*.xsd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="lang\**\*.xml;lang\**\*.xsd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="sheets\**\*.xsl;sheets\**\*.xslt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="export\**\*.xsl;export\**\*.xslt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="settings\**\*.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="changelog.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

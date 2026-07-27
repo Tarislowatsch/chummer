@@ -26,28 +26,33 @@ jobs:
       - name: Build
         run: msbuild ChummerCS.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
 
-      # Verifies the build output can actually start. Missing executable fails;
-      # missing content warns until P0-13 adds CopyToOutputDirectory, where this
-      # becomes a hard failure. See docs/BUILDING.md.
+      # Verifies the build output can actually start. Every entry is read from
+      # Application.StartupPath at run time, so a missing one is a broken build
+      # even though the compiler is happy. See docs/BUILDING.md.
       - name: Check that runtime content reached the output directory
         shell: pwsh
         run: |
           $out = 'Chummer/bin/${{ matrix.configuration }}'
-          if (-not (Test-Path (Join-Path $out 'Chummer.exe'))) {
-            throw "Build reported success but $out/Chummer.exe does not exist."
+          $required = @{
+            'Chummer.exe'                = 'the application itself'
+            'data/gear.xml'              = 'game data'
+            'data/custom content'        = 'bundled custom content packages'
+            'lang/de_data.xml'           = 'translations'
+            'sheets/Shadowrun 4.xsl'     = 'character sheets'
+            'sheets/de'                  = 'localised character sheets'
+            'export/Squad Manager.xsl'   = 'export templates'
+            'settings/default.xml'       = 'default settings profile'
+            'changelog.txt'              = 'revision history shown by frmHistory'
           }
-          $content = @(
-            'data/gear.xml',
-            'lang/de_data.xml',
-            'sheets/Shadowrun 4.xsl',
-            'settings/default.xml',
-            'changelog.txt'
-          )
-          $missing = $content | Where-Object { -not (Test-Path (Join-Path $out $_)) }
+          $missing = $required.Keys | Where-Object { -not (Test-Path (Join-Path $out $_)) } | Sort-Object
           if ($missing) {
-            Write-Host "::warning::Build output is incomplete - the application cannot start from it (P0-13)."
             Write-Host "Missing from ${out}:"
-            $missing | ForEach-Object { Write-Host "  - $_" }
-          } else {
-            Write-Host "All required runtime content is present in $out."
+            $missing | ForEach-Object { Write-Host "  - $_  ($($required[$_]))" }
+            throw "Build output is incomplete - the application cannot start from it."
+          }
+          Write-Host "All required runtime content is present in $out."
+          Write-Host "Counts:"
+          foreach ($d in 'data', 'lang', 'sheets', 'export', 'settings') {
+            $n = (Get-ChildItem (Join-Path $out $d) -Recurse -File).Count
+            Write-Host ("  {0,-10} {1} files" -f $d, $n)
           }
