@@ -112,20 +112,17 @@ That belongs with P6-13.
 ### The runtime content check
 
 The last step verifies that the build output actually contains the files the
-application needs at startup — game data, translations, sheets, default
-settings and `changelog.txt`.
+application needs at startup — game data, bundled custom content, translations,
+character sheets including the localised ones, export templates, the default
+settings profile and `changelog.txt`.
 
-A missing executable fails the build immediately. Missing **content** is
-currently reported as a warning, not an error, and this is temporary:
+Any missing entry **fails the build**. This is not redundant with the compiler:
+every one of these is read from `Application.StartupPath` at run time, so a
+build can succeed and still produce an application that dies on startup. That
+was the state of this repository before P0-13 — the csproj declared no `Content`
+items at all, and the game data only reached the output directory because it had
+been committed there by hand.
 
-> The check becomes a hard failure as part of **P0-13**, which adds the
-> `CopyToOutputDirectory` entries that make the content reach the output
-> directory in the first place.
-
-The reason it warns rather than fails today is that the csproj declares no
-`Content` items at all, so *everything* on the list is missing and a hard
-failure would make CI permanently red without telling anyone anything new. The
-warning keeps the remaining distance to a working build visible on every run
-instead of letting a green check imply the application works — it does not yet.
-Whoever implements P0-13 flips the `Write-Host "::warning::"` to a `throw` in
-the same commit; the ticket is not done until CI enforces it.
+The check warned instead of failing between P0-15 and P0-13, while there was
+nothing yet to find; P0-13 turned it into a hard failure in the same commit that
+added the `CopyToOutputDirectory` entries.
