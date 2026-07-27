@@ -49,8 +49,9 @@ project.assets.json
 *.coverage
 *.coveragexml
 
-# Local working documents (rehabilitation backlog and notes), not part of the product
-docs/
+# The rehabilitation backlog is a local working document, not part of the product.
+# Other files under docs/ are tracked.
+docs/BACKLOG.md
 
 # OS noise
 Thumbs.db

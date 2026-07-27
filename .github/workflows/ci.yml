@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: build (${{ matrix.configuration }})
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: microsoft/setup-msbuild@v2
+
+      # MSBuild rather than `dotnet build`, and an explicit Platform.
+      # Rationale: docs/BUILDING.md
+      - name: Build
+        run: msbuild ChummerCS.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
+
+      # Verifies the build output can actually start. Missing executable fails;
+      # missing content warns until P0-13 adds CopyToOutputDirectory, where this
+      # becomes a hard failure. See docs/BUILDING.md.
+      - name: Check that runtime content reached the output directory
+        shell: pwsh
+        run: |
+          $out = 'Chummer/bin/${{ matrix.configuration }}'
+          if (-not (Test-Path (Join-Path $out 'Chummer.exe'))) {
+            throw "Build reported success but $out/Chummer.exe does not exist."
+          }
+          $content = @(
+            'data/gear.xml',
+            'lang/de_data.xml',
+            'sheets/Shadowrun 4.xsl',
+            'settings/default.xml',
+            'changelog.txt'
+          )
+          $missing = $content | Where-Object { -not (Test-Path (Join-Path $out $_)) }
+          if ($missing) {
+            Write-Host "::warning::Build output is incomplete - the application cannot start from it (P0-13)."
+            Write-Host "Missing from ${out}:"
+            $missing | ForEach-Object { Write-Host "  - $_" }
+          } else {
+            Write-Host "All required runtime content is present in $out."
+          }
