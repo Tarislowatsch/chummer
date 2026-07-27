@@ -1,0 +1,56 @@
+name: build
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # The project is old-style MSBuild (ToolsVersion 4.0), not SDK-style, so
+      # `dotnet build` cannot drive it until P0-12. MSBuild from the VS
+      # installation on the runner is the only thing that can build it today.
+      - uses: microsoft/setup-msbuild@v2
+
+      # Solution and project both only define the x86 platform; the Any CPU and
+      # Mixed Platforms entries in the .sln are dead aliases pointing at x86
+      # (cleaned up in P0-11), so the platform is passed explicitly rather than
+      # relying on a default that resolves differently per MSBuild version.
+      - name: Build
+        run: msbuild ChummerCS.sln /p:Configuration=Debug /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
+
+      # Phase 0 is not finished until a build produces a runnable application,
+      # which today it does not: the csproj declares no Content items at all, so
+      # the game data, translations and sheets never reach the output directory.
+      # This step reports that gap on every run so the remaining distance to a
+      # working build stays visible instead of hiding behind a green check.
+      # A missing executable is a hard failure; missing content is a warning
+      # until P0-13 adds CopyToOutputDirectory, where this turns into a failure.
+      - name: Check that runtime content reached the output directory
+        shell: pwsh
+        run: |
+          $out = 'Chummer/bin/Debug'
+          if (-not (Test-Path (Join-Path $out 'Chummer.exe'))) {
+            throw "Build reported success but $out/Chummer.exe does not exist."
+          }
+          $content = @(
+            'data/gear.xml',
+            'lang/de_data.xml',
+            'sheets/Shadowrun 4.xsl',
+            'settings/default.xml',
+            'changelog.txt'
+          )
+          $missing = $content | Where-Object { -not (Test-Path (Join-Path $out $_)) }
+          if ($missing) {
+            Write-Host "::warning::Build output is incomplete - the application cannot start from it (P0-13)."
+            Write-Host "Missing from ${out}:"
+            $missing | ForEach-Object { Write-Host "  - $_" }
+          } else {
+            Write-Host "All required runtime content is present in $out."
+          }
