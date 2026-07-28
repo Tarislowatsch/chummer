@@ -57,5 +57,40 @@ namespace Chummer.Tests
 		{
 			Assert.Equal(42, DataPaths.TopLevelRuleXmlCollections().Count());
 		}
+
+		// Exact for the same reason again, and here the number is derivable rather
+		// than merely observed: 27 top-level data files, of which four carry no
+		// <source> at all - books.xml (it is the declaration side), improvements.xml,
+		// packs.xml and ranges.xml. If a file ever stopped being scanned, its book
+		// references would go unchecked with nothing else to notice.
+		[Fact]
+		public void TopLevelRuleXmlFilesCitingBooksFindsEveryCitingFile()
+		{
+			Assert.Equal(23, DataPaths.TopLevelRuleXmlFilesCitingBooks().Count());
+		}
+
+		// Likewise derivable, and worth spelling out because three separate rules
+		// combine to produce it: 24 collections have items carrying <category>;
+		// three of them (armor.xml/mods, weapons.xml/mods, programs.xml/options)
+		// are deliberately exempt because no code reads a category list for them;
+		// and two more (lifestyles.xml/qualities, ranges.xml/ranges) sit in files
+		// that declare no block at all, so there is no local contract to check.
+		// 24 - 3 - 2 = 19. Any of those three rules quietly changing scope shows up
+		// here as a number that no longer adds up.
+		[Fact]
+		public void CategoryKeyedCollectionsCoversEveryGovernedCollection()
+		{
+			Assert.Equal(19, DataPaths.CategoryKeyedCollections().Count());
+		}
+
+		// The declaration side of the book-code check, guarded like the rest.
+		// The theory over the data would fail loudly if this came back empty, but
+		// it cannot notice books.xml quietly losing a code that no entry happens
+		// to cite - and the next entry to cite it would then look like the defect.
+		[Fact]
+		public void BookCodesFindsEveryDeclaredBook()
+		{
+			Assert.Equal(42, DataPaths.BookCodes.Count);
+		}
 	}
 }
