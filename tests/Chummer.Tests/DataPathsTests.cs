@@ -27,5 +27,21 @@ namespace Chummer.Tests
 		{
 			Assert.True(DataPaths.SheetXslFiles().Count() > 1);
 		}
+
+		// Exact rather than the ">N" style above: the top-level Chummer/data/*.xml
+		// set is a small, deliberately-enumerable universe (27 top-level XML
+		// files, 26 with a matching .xsd - only improvements.xml has none),
+		// unlike the recursively-grown data/lang/sheet corpora the guards above
+		// watch. An exact count turns a silently-dropped pair (see the
+		// file-rename risk noted on TopLevelRuleXmlWithSchemaFiles) into an
+		// immediate failure instead of a threshold that would tolerate losing
+		// one or two pairs unnoticed. The 26 is expected to stay put; a
+		// deliberate new top-level data file + schema is the one case where
+		// bumping this number on purpose is the correct fix, not a workaround.
+		[Fact]
+		public void TopLevelRuleXmlWithSchemaFilesFindsAllPairs()
+		{
+			Assert.Equal(26, DataPaths.TopLevelRuleXmlWithSchemaFiles().Count());
+		}
 	}
 }

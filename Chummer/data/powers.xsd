@@ -291,6 +291,20 @@
 					<xs:element name="required" minOccurs="0" maxOccurs="1">
 					  <xs:complexType>
 					    <xs:sequence>
+						  <xs:element name="oneof" minOccurs="0" maxOccurs="1">
+						    <xs:complexType>
+							  <xs:sequence>
+								<xs:element name="quality" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+							  </xs:sequence>
+							</xs:complexType>
+						  </xs:element>
+						  <xs:element name="allof" minOccurs="0" maxOccurs="1">
+						    <xs:complexType>
+							  <xs:sequence>
+								<xs:element name="quality" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+							  </xs:sequence>
+							</xs:complexType>
+						  </xs:element>
 						  <xs:element name="quality" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 						</xs:sequence>
 					  </xs:complexType>

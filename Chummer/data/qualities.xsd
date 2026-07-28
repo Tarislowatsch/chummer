@@ -362,6 +362,7 @@
 									</xs:sequence>
 								  </xs:complexType>
 								</xs:element>
+								<xs:element name="damageresistance" type="xs:string" minOccurs="0" maxOccurs="1" />
 								<xs:element name="ess" type="xs:string" minOccurs="0" maxOccurs="1" />
 								<xs:element name="skill" minOccurs="0" maxOccurs="unbounded">
 								  <xs:complexType>
@@ -468,6 +469,7 @@
 						    <xs:complexType>
 							  <xs:sequence>
 							    <xs:element name="quality" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+								<xs:element name="metagenetic" minOccurs="0" maxOccurs="1" />
 								<xs:element name="metatype" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 								<xs:element name="metatypecategory" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 								<xs:element name="metavariant" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
@@ -477,6 +479,7 @@
 						</xs:sequence>
 					  </xs:complexType>
 					</xs:element>
+					<xs:element name="latentsource" type="xs:string" minOccurs="0" maxOccurs="1" />
 					<xs:element name="addqualities" minOccurs="0" maxOccurs="1">
 					  <xs:complexType>
 					    <xs:sequence>

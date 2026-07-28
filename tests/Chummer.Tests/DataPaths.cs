@@ -56,6 +56,27 @@ namespace Chummer.Tests
 				.Select(path => new object[] { path });
 		}
 
+		// P1-05. Pairs each top-level Chummer/data/*.xml file with its same-named
+		// .xsd. Built from the .xml side and filtered by File.Exists rather than a
+		// hardcoded list of 26 names, so character.xsd (no matching character.xml)
+		// and improvements.xml (no matching improvements.xsd) drop out on their own.
+		// Deliberately SearchOption.TopDirectoryOnly: "custom content/<pack>/" uses
+		// inconsistent name-to-schema pairing and validating it is P1-16's job -
+		// "TopLevel" in the name says so without needing the reader to find this
+		// comment. Pairing by matching filename is itself a soft spot: a rename
+		// that touches only the .xml or only the .xsd side drops the pair from this
+		// method silently rather than erroring - accepted because the exact-count
+		// guard in DataPathsTests turns that silence into an immediate, loud
+		// failure instead of trying to prevent the rename from being possible.
+		public static IEnumerable<object[]> TopLevelRuleXmlWithSchemaFiles()
+		{
+			return Directory.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+				.OrderBy(path => path, StringComparer.Ordinal)
+				.Select(path => new { XmlPath = path, XsdPath = Path.ChangeExtension(path, ".xsd") })
+				.Where(pair => File.Exists(pair.XsdPath))
+				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });
+		}
+
 		private static string FindRepoRoot()
 		{
 			DirectoryInfo dir = new DirectoryInfo(AppContext.BaseDirectory);
