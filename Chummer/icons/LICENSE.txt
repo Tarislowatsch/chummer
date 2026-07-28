@@ -1,0 +1,16 @@
+Silk icon set
+=============
+
+The 56 PNG icons in this directory are from the Silk icon set created by
+Mark James, available at:
+
+    http://www.famfamfam.com/lab/icons/silk/
+
+Licensed under the Creative Commons Attribution 2.5 License:
+
+    https://creativecommons.org/licenses/by/2.5/
+
+That license requires attribution. The application already gives it at
+runtime (Chummer/frmAbout.cs), but the icons themselves are only used inside
+this repository as PNG files, without any accompanying license text — this
+file is that missing attribution. See docs/BACKLOG.md P0-19.
