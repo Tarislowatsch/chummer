@@ -3,8 +3,9 @@
 ## Requirements
 
 - Windows
-- MSBuild, from either Visual Studio (any edition, 2019 or newer) or the
-  standalone [Build Tools for Visual Studio][buildtools]
+- Either MSBuild, from Visual Studio (any edition, 2019 or newer) or the
+  standalone [Build Tools for Visual Studio][buildtools], or the
+  [.NET SDK](https://dotnet.microsoft.com/download) 6.0 or newer
 - The .NET Framework 4.8 targeting pack (the "Developer Pack"), which the
   Visual Studio installer offers under *.NET desktop development*
 
@@ -12,13 +13,18 @@
 msbuild ChummerCS.sln /p:Configuration=Debug /p:Platform=x86
 ```
 
-`dotnet build` does **not** work. The project is an old-style MSBuild project
-(`ToolsVersion="4.0"`), and the .NET SDK cannot drive that format. P0-12
-converts it to SDK-style, after which `dotnet build` becomes available.
+Since P0-12 the project is SDK-style, so the .NET SDK can drive it as well:
 
-There are no NuGet dependencies. All twelve assembly references are .NET
-Framework assemblies resolved from the targeting pack, so there is nothing to
-restore and no package cache to warm.
+```
+dotnet build ChummerCS.sln --configuration Debug -p:Platform=x86
+```
+
+This still builds .NET Framework 4.8, not .NET 8 — `dotnet` is the build driver
+here, not the target. It therefore needs the same 4.8 targeting pack as MSBuild.
+
+There are no NuGet dependencies. Every assembly reference is a .NET Framework
+assembly resolved from the targeting pack, so there is nothing to restore and no
+package cache to warm.
 
 [buildtools]: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
 
@@ -82,6 +88,44 @@ Deliberately out of scope; see the closing section of the backlog. In short:
 throws on modern .NET, and roughly 90 `.resx` files would have to be
 regenerated. Chummer5a evaluated the same migration and stayed on net48.
 
+## The project file
+
+`Chummer/Chummer.csproj` is SDK-style since P0-12. It went from 1,053 lines to
+about 110, most of which are comments: roughly 230 `<Compile>` entries, 90
+`<EmbeddedResource>` entries, 56 single-item `<ItemGroup>` blocks each holding
+one icon PNG, a ClickOnce bootstrapper block and nine of the twelve assembly
+references are now supplied by globs or by the SDK itself.
+
+Four deliberate decisions are worth knowing about, and each is commented in the
+project file itself:
+
+- **The output stays in `bin\Debug` and `bin\Release`.** The SDK default would
+  be `bin\x86\Debug\net48`. With exactly one target framework and one platform
+  those levels carry no information while breaking every existing path.
+- **`Properties\AssemblyInfo.cs` is still hand-maintained**
+  (`GenerateAssemblyInfo=false`), because it holds the version that `frmAbout`
+  displays and that `Character.Save` writes into every `.chum` file. The
+  generated `TargetFrameworkAttribute` is kept, since the .NET Framework reads
+  it to decide between 4.8 behaviour and 4.0 quirks mode.
+- **Debug information is now portable PDBs**, the SDK default, instead of
+  `full` for Debug and `pdbonly` for Release. This affects the debugger and
+  nothing the application does.
+- **`InheritedListView.cs` is explicitly excluded from compilation.** The file
+  contains `class MyListView`, a `ListView` that drops focus when scrolled. It
+  has a single commit — the 2013 import — was never listed in the old project
+  file and is referenced nowhere, so it has never been compiled. The SDK's
+  `**/*.cs` glob would have quietly started compiling it. Phase 0 does not
+  change what the build produces, so it is excluded rather than adopted or
+  deleted; whether it goes belongs to Phase 3, where dead code is the subject.
+  Anyone who removes the `<Compile Remove>` line is adding an unused type to
+  the assembly, not fixing an oversight.
+
+The roughly 90 `.resx` files needed no per-file entries. The SDK pairs
+`frmX.resx` with `frmX.cs` by convention and derives the same manifest resource
+names the old file produced, and the one `.resx` without a same-named source
+file, `Properties\Resources.resx`, falls back to root namespace plus path —
+`Chummer.Properties.Resources`, exactly what `Resources.Designer.cs` asks for.
+
 ## Platform configuration
 
 The solution offers only `x86`. It previously also listed `Any CPU` and
@@ -105,16 +149,21 @@ That belongs with P6-13.
   and a codebase with 715 empty `catch` blocks (P6-10) is exactly the kind that
   can behave differently under optimisation. Building only Debug would leave the
   configuration that ships unverified.
-- **MSBuild, not `dotnet build`**, for the reason given above.
 - **`Platform` is passed explicitly**, so the build does not depend on how a
   given MSBuild version resolves a default.
+- **A separate `dotnet build` job** proves the claim P0-12 makes. It builds
+  Debug only and skips the content check — same project file, same copy rules.
+  Without it, the SDK-style conversion could be undone by one legacy-only
+  construct and nobody would notice until they typed `dotnet build`.
 
 ### The runtime content check
 
 The last step verifies that the build output actually contains the files the
 application needs at startup — game data, bundled custom content, translations,
 character sheets including the localised ones, export templates, the default
-settings profile and `changelog.txt`.
+settings profile, `changelog.txt`, and `Chummer.exe.config` — without which the
+runtime declaration from P0-10 never reaches the user and the application falls
+back to 4.0 semantics with no build diagnostic anywhere.
 
 Any missing entry **fails the build**. This is not redundant with the compiler:
 every one of these is read from `Application.StartupPath` at run time, so a
