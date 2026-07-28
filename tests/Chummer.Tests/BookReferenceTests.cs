@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Chummer.Tests
@@ -20,10 +18,6 @@ namespace Chummer.Tests
 	// it that way, which is the cheapest moment to add such a check.
 	public class BookReferenceTests
 	{
-		// Enough to show a whole file's worth of a systematic mistake - a renamed
-		// or dropped book code - without an unbounded message.
-		private const int MaxUnknownCodesInMessage = 20;
-
 		[Theory]
 		[MemberData(nameof(DataPaths.TopLevelRuleXmlFilesCitingBooks), MemberType = typeof(DataPaths))]
 		public void EverySourceCitesADeclaredBook(string xmlPath)
@@ -39,20 +33,12 @@ namespace Chummer.Tests
 
 			if (unknown.Length > 0)
 			{
-				StringBuilder message = new StringBuilder();
-				message.Append(Path.GetFileName(xmlPath)).Append(" cites ").Append(unknown.Length)
-					.Append(" book code(s) that books.xml does not declare:");
-				foreach (var group in unknown.Take(MaxUnknownCodesInMessage))
-				{
-					message.Append("\n  '").Append(group.Key).Append("' used by ").Append(group.Count())
-						.Append(" entries, e.g. '").Append(group.First().ItemName).Append("'");
-				}
-				if (unknown.Length > MaxUnknownCodesInMessage)
-				{
-					message.Append("\n  ... and ").Append(unknown.Length - MaxUnknownCodesInMessage)
-						.Append(" more");
-				}
-				Assert.Fail(message.ToString());
+				Assert.Fail(FailureReport.Build(
+					Path.GetFileName(xmlPath) + " cites " + unknown.Length
+						+ " book code(s) that books.xml does not declare",
+					unknown,
+					group => "'" + group.Key + "' used by " + group.Count()
+						+ " entries, e.g. '" + group.First().ItemName + "'"));
 			}
 		}
 	}

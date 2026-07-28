@@ -71,16 +71,16 @@ namespace Chummer.Tests
 
 		// Likewise derivable, and worth spelling out because three separate rules
 		// combine to produce it: 24 collections have items carrying <category>;
-		// three of them (armor.xml/mods, weapons.xml/mods, programs.xml/options)
-		// are deliberately exempt because no code reads a category list for them;
-		// and two more (lifestyles.xml/qualities, ranges.xml/ranges) sit in files
-		// that declare no block at all, so there is no local contract to check.
-		// 24 - 3 - 2 = 19. Any of those three rules quietly changing scope shows up
+		// two of them (weapons.xml/mods, programs.xml/options) are deliberately
+		// exempt because no code resolves their categories against any block; and
+		// two more (lifestyles.xml/qualities, ranges.xml/ranges) sit in files that
+		// declare no block at all, so there is no local contract to check.
+		// 24 - 2 - 2 = 20. Any of those three rules quietly changing scope shows up
 		// here as a number that no longer adds up.
 		[Fact]
 		public void CategoryKeyedCollectionsCoversEveryGovernedCollection()
 		{
-			Assert.Equal(19, DataPaths.CategoryKeyedCollections().Count());
+			Assert.Equal(20, DataPaths.CategoryKeyedCollections().Count());
 		}
 
 		// The declaration side of the book-code check, guarded like the rest.

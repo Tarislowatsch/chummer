@@ -119,29 +119,53 @@ namespace Chummer.Tests
 		// somebody deliberately exempts it here. That direction matters: an
 		// inclusion list would leave new collections silently unchecked.
 		//
-		// Read off the consuming code, not off the data:
-		// - vehicles.xml/mods is the one collection keyed against a second block,
-		//   <modcategories> (frmSelectVehicleMod.cs:585). Note this one is weaker
-		//   than the rest: that lookup only translates the category for display and
-		//   falls back to the raw text when it finds nothing, so an undeclared
-		//   vehicle-mod category costs a translation, not reachability.
-		// - armor.xml/mods, weapons.xml/mods and programs.xml/options carry a
-		//   <category> that no form ever turns into a list. Their pickers browse by
-		//   something else entirely - mount plus book in frmSelectArmorMod.cs:58,
-		//   book alone in frmSelectProgramOption.cs:37 (which groups by
-		//   programtypes/programtype, not by category) - and every /chummer/mods/mod
-		//   lookup in the codebase selects by name. There is no block that ought to
-		//   declare these values, so "undeclared" is not a defect for them.
-		//   Coincidental overlap is what makes this worth pinning down rather than
-		//   guessing: three of armor.xml/mods' eight category values do happen to
-		//   appear in armor.xml's <categories>, and programs.xml/options' "Hacking"
-		//   likewise - reading that as evidence of governance would be reading a
-		//   collision as a rule.
+		// The rule, applied uniformly: a collection is governed by a block when
+		// some code resolves its <category> against that block. What a failure
+		// costs varies, and deliberately does not decide membership - "no dropdown
+		// reads it" is not the same as "nothing reads it":
+		// - Reachability, where a picker builds its list from the block and then
+		//   browses by the selected value (frmSelectWeapon.cs:47 and :82). An
+		//   undeclared value is unreachable in the UI.
+		// - Translation, where the block is the only place a translated label can
+		//   attach. clsXmlManager.cs:226 overlays a language file by matching its
+		//   category text against an existing node in the base file, so undeclared
+		//   means no node means no translation, permanently - and the untranslated
+		//   category goes onto the printed sheet (ArmorMod.Print, clsEquipment.cs:304).
+		// Both are silent, and both are the failure mode this check exists for.
+		//
+		// Hence the deviations, each read off the consuming code:
+		// - vehicles.xml/mods answers to <modcategories>, via
+		//   frmSelectVehicleMod.cs:585. VehicleMod also resolves its category twice
+		//   more, at clsEquipment.cs:13453 and :13628, but against /chummer/categories
+		//   - the *vehicle* block ("Bike", "Car", ...), which no mod category can
+		//   ever match. Those two are a bug, not a second contract, and encoding
+		//   them here would pin a defect in place; they are tracked separately.
+		// - weapons.xml/mods answers to nothing. WeaponMod translates its name and
+		//   page (clsEquipment.cs:8021-8029) and stops there - no category lookup
+		//   anywhere - and every /chummer/mods/mod query in the codebase selects by
+		//   name. frmSelectWeaponAccessory browses by mount and book.
+		// - programs.xml/options answers to nothing either, and for a stronger
+		//   reason: TechProgramOption (clsUnique.cs:6144) has no category member at
+		//   all. frmSelectProgramOption.cs:37 groups by programtypes/programtype,
+		//   not by <category>. Note this is *not* explained by the broken lookup at
+		//   clsUnique.cs:5868 - that one is TechProgram.DisplayCategory, which
+		//   belongs to programs.xml/programs, a collection already checked here and
+		//   clean.
+		//
+		// armor.xml/mods is deliberately absent, and was exempted here in an earlier
+		// version on the grounds that no form lists its categories. True, and beside
+		// the point: ArmorMod resolves them at clsEquipment.cs:107 and :281 into
+		// _strAltCategory, which DisplayCategory (:416) prints. Its contract is the
+		// same translation-only one that keeps vehicles.xml/mods in scope, so
+		// exempting one and keeping the other was an inconsistency rather than a
+		// judgement. The coincidence worth naming is narrower than it first looks:
+		// three of armor.xml/mods' eight values also appear in armor.xml's
+		// <categories>, and programs.xml/options' "Hacking" likewise. Overlap is
+		// evidence of nothing either way - only the consuming code decides.
 		private static readonly IReadOnlyDictionary<string, string> CategoryDeclarationBlockOverrides =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				{ "vehicles.xml/mods", "modcategories" },
-				{ "armor.xml/mods", NotCategoryKeyed },
 				{ "weapons.xml/mods", NotCategoryKeyed },
 				{ "programs.xml/options", NotCategoryKeyed },
 			};
@@ -366,8 +390,11 @@ namespace Chummer.Tests
 
 			public IReadOnlyList<CategoryUsage> Usages { get; }
 
-			// Distinct undeclared values, each with one example item to name in a
-			// failure message and a count of how many entries are affected.
+			// Every usage whose value the block does not declare - one per affected
+			// entry, not per distinct value, so a caller can count the entries or
+			// name one of them. Grouping is left to the caller because the two here
+			// want different things: the failure message groups by value, while the
+			// allowlist guard needs the raw values.
 			public IEnumerable<CategoryUsage> UndeclaredUsages()
 			{
 				return Usages.Where(usage => !DeclaredCategories.Contains(usage.Category));
@@ -592,9 +619,9 @@ namespace Chummer.Tests
 		{
 			for (XmlNode ancestor = node.ParentNode; ancestor != null; ancestor = ancestor.ParentNode)
 			{
-				XmlElement element = ancestor as XmlElement;
-				if (element?["name"] != null)
-					return element["name"].InnerText;
+				XmlElement name = (ancestor as XmlElement)?["name"];
+				if (name != null)
+					return name.InnerText;
 			}
 
 			return "(unnamed)";

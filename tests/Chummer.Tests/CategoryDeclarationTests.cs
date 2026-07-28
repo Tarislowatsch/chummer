@@ -2,31 +2,39 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Chummer.Tests
 {
-	// A picker builds its category dropdown from the file's <categories> block and
-	// then browses items by the selected value - frmSelectWeapon.cs:47 fills the
-	// combo box, frmSelectWeapon.cs:82 queries
-	// /chummer/weapons/weapon[category = "..."]. The two halves are joined by
-	// nothing but the string. An item whose <category> is missing from that block
-	// therefore has no dropdown entry that would ever select it: it is in the data,
-	// it is valid, and it is unreachable in the user interface. Silently.
+	// A declaration block is what a category value has to exist in for anything to
+	// resolve it, and the two things that resolve categories both fail silently
+	// when it does not.
 	//
-	// Which collections are answerable to which block, and which are not answerable
-	// to any, is decided in DataPaths.CategoryDeclarationBlockOverrides - read off
-	// the consuming forms rather than off the shape of the data, because the shapes
-	// overlap by coincidence in several files.
+	// A picker builds its dropdown from the block and then browses items by the
+	// selected value - frmSelectWeapon.cs:47 fills the combo box, :82 queries
+	// /chummer/weapons/weapon[category = "..."]. The halves are joined by nothing
+	// but the string, so an undeclared value has no dropdown entry that would ever
+	// select it: the item is in the data, it is valid, and it is unreachable.
+	//
+	// Translation attaches to the same block and nowhere else. clsXmlManager.cs:226
+	// overlays a language file by matching its category text onto an existing node
+	// in the base file, so an undeclared value can never receive a translation -
+	// and the untranslated string is what lands on the printed sheet
+	// (clsEquipment.cs:304). That consequence is milder than unreachability but no
+	// less permanent, and it is why a collection nothing lists can still be
+	// governed.
+	//
+	// Which collections answer to which block, and which answer to none, is decided
+	// in DataPaths.CategoryDeclarationBlockOverrides - read off the consuming code
+	// rather than off the shape of the data, whose blocks overlap by coincidence in
+	// several files.
 	public class CategoryDeclarationTests
 	{
-		private const int MaxUndeclaredInMessage = 20;
-
 		// Categories the data already uses without declaring them. Fixing these is
-		// a separate job with a visible consequence: every one of them makes items
-		// appear in a dropdown that players have never seen there, so it is a
-		// behaviour change to be made deliberately and noted, not a tidy-up to
+		// a separate job with a visible consequence: declaring one either makes
+		// items appear in a dropdown that players have never seen there, or starts
+		// translating a label that has always printed in English. Either way it is
+		// a behaviour change to be made deliberately and noted, not a tidy-up to
 		// slip in beside the test that found it. Two of the entries are plain
 		// typos on the declaration side of the same word ("Periphirals" for
 		// Peripherals, "Paranroaml" for Paranormal); the rest are declarations
@@ -36,6 +44,11 @@ namespace Chummer.Tests
 		// resolved case is removed by deleting one line.
 		private static readonly HashSet<string> KnownUndeclaredCategories = new HashSet<string>(StringComparer.Ordinal)
 		{
+			"armor.xml/mods/Chemical Seal",
+			"armor.xml/mods/Full Body Armor",
+			"armor.xml/mods/General",
+			"armor.xml/mods/Second Skin Polymer",
+			"armor.xml/mods/Victory Liners",
 			"critterpowers.xml/powers/Dracoforms",
 			"critterpowers.xml/powers/Paranroaml",
 			"gear.xml/gears/Mook",
@@ -75,21 +88,13 @@ namespace Chummer.Tests
 
 			if (unexpected.Length > 0)
 			{
-				StringBuilder message = new StringBuilder();
-				message.Append(Path.GetFileName(xmlPath)).Append(" uses ").Append(unexpected.Length)
-					.Append(" category value(s) in <").Append(collectionName)
-					.Append("> that <").Append(contract.DeclarationBlock).Append("> does not declare:");
-				foreach (var group in unexpected.Take(MaxUndeclaredInMessage))
-				{
-					message.Append("\n  '").Append(group.Key).Append("' on ").Append(group.Count())
-						.Append(" entries, e.g. '").Append(group.First().ItemName).Append("'");
-				}
-				if (unexpected.Length > MaxUndeclaredInMessage)
-				{
-					message.Append("\n  ... and ").Append(unexpected.Length - MaxUndeclaredInMessage)
-						.Append(" more");
-				}
-				Assert.Fail(message.ToString());
+				Assert.Fail(FailureReport.Build(
+					Path.GetFileName(xmlPath) + " uses " + unexpected.Length
+						+ " category value(s) in <" + collectionName + "> that <"
+						+ contract.DeclarationBlock + "> does not declare",
+					unexpected,
+					group => "'" + group.Key + "' on " + group.Count()
+						+ " entries, e.g. '" + group.First().ItemName + "'"));
 			}
 		}
 
