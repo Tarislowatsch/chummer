@@ -1,11 +1,11 @@
 name: CI
 
 on:
-  # No push trigger: master is branch-protected (PR required, these jobs
+  # No push trigger: main is branch-protected (PR required, these jobs
   # required as status checks, branch must be up to date before merging), so
-  # the pull_request run already tested exactly what lands on master. Adding
+  # the pull_request run already tested exactly what lands on main. Adding
   # push back would rebuild that same tree a second time on every merge.
-  # enforce_admins is off, so a direct push from an admin still reaches master
+  # enforce_admins is off, so a direct push from an admin still reaches main
   # unbuilt - accepted trade-off for keeping that escape hatch.
   pull_request:
   workflow_dispatch:

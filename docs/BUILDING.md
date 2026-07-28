@@ -244,7 +244,7 @@ added the `CopyToOutputDirectory` entries.
 CI proves clone, build, and output completeness on every push, but not the one
 thing a contributor actually does with the result: start it, create a
 character, save it, and print it. That walk-through was run by hand against a
-clean clone of `master` (built with the minimal-Build-Tools workaround above) —
+clean clone of `main` (built with the minimal-Build-Tools workaround above) —
 start, create a character, save to a `.chum` file, open the character sheet.
 No crashes, no missing content.
 
