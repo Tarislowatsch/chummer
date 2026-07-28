@@ -45,6 +45,7 @@ jobs:
           $out = 'Chummer/bin/${{ matrix.configuration }}'
           $required = @{
             'Chummer.exe'                = 'the application itself'
+            'Chummer.exe.config'         = 'the supportedRuntime declaration from app.config'
             'data/gear.xml'              = 'game data'
             'data/custom content'        = 'bundled custom content packages'
             'lang/de_data.xml'           = 'translations'
@@ -66,3 +67,22 @@ jobs:
             $n = (Get-ChildItem (Join-Path $out $d) -Recurse -File).Count
             Write-Host ("  {0,-10} {1} files" -f $d, $n)
           }
+
+  # P0-12 converted the project to SDK-style, and the point of doing so was that
+  # the .NET SDK can drive the build at all - it cannot drive the old format.
+  # Checked here rather than claimed in the documentation: a single construct
+  # that only the legacy targets understand would take it away again, and with
+  # MSBuild as the only build in CI nobody would find out until they tried.
+  # Content is not re-checked; that is the same project file and the same rules.
+  dotnet-build:
+    name: dotnet build
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      # The runner image ships a .NET SDK and the .NET Framework 4.8 targeting
+      # pack, and this repository has no NuGet dependencies, so there is nothing
+      # to install or restore.
+      - name: Build
+        run: dotnet build ChummerCS.sln --configuration Debug -p:Platform=x86 --nologo --verbosity minimal
