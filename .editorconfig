@@ -1,0 +1,21 @@
+# P0-16. This file records the conventions this repository already uses -
+# tabs, CRLF, Allman braces, Hungarian notation (_strName, objXmlNode) - so an
+# editor's default (spaces, LF) does not silently reformat any of the 1,373
+# tracked files. Nothing here is a style change; see docs/BACKLOG.md P0-16.
+
+root = true
+
+[*]
+end_of_line = crlf
+indent_style = tab
+trim_trailing_whitespace = false
+insert_final_newline = false
+
+[*.{cs,resx,csproj,sln}]
+charset = utf-8-bom
+
+[Chummer/data/*.xml]
+charset = utf-8
+
+[Chummer/lang/*.xml]
+charset = utf-8-bom
