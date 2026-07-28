@@ -79,13 +79,17 @@ namespace Chummer.Tests
 		}
 
 		// Which collections carry a composite lookup key instead of <name> alone.
-		// The running application decides this, not taste: every kit lookup in
-		// frmSelectPACKSKit.cs (:111 when a kit is picked, :715 when a custom kit
-		// is deleted) selects by name AND category, so two packs sharing a name
+		// The running application decides this, not taste: every keyed pack lookup
+		// in the repo selects by name AND category, so two packs sharing a name
 		// only collide when their categories match too. That is deliberate in the
 		// data - a kit like "Brawler" is split into an Attribute Kit part and a
-		// Gear Kit part carrying one display name. If those lookups ever change,
-		// this entry has to follow them.
+		// Gear Kit part carrying one display name.
+		// All four sites, because this comment is the sole justification for the
+		// one exception in this design and a future change has to find every one
+		// of them: frmSelectPACKSKit.cs:111 (a kit is picked) and :715 (a custom
+		// kit is deleted), frmCreatePACKSKit.cs:51 (a custom kit is saved), and
+		// frmCreate.cs:20300 - the path that actually applies a kit to a
+		// character. If those lookups ever change, this entry has to follow them.
 		// The map describes key composition and nothing else: no exclusions, no
 		// expected counts, no other test knobs. Anything absent is keyed by <name>.
 		private static readonly IReadOnlyDictionary<string, string[]> CompositeKeyFields =
@@ -163,9 +167,49 @@ namespace Chummer.Tests
 
 		public static RuleCollection RuleCollectionFor(string xmlPath, string collectionName)
 		{
-			return CachedRuleCollections.Value.Single(collection =>
-				string.Equals(collection.FilePath, xmlPath, StringComparison.Ordinal)
-				&& string.Equals(collection.Name, collectionName, StringComparison.Ordinal));
+			return CachedRuleCollectionsByKey.Value[IndexKey(xmlPath, collectionName)];
+		}
+
+		// A dictionary rather than a scan per call: the allowlist guard asks for
+		// every collection in turn, which over a linear lookup is quadratic. It
+		// also gives file+collection identity a single place to be checked, which
+		// a scan cannot - see the throw below.
+		private static readonly Lazy<IReadOnlyDictionary<string, RuleCollection>> CachedRuleCollectionsByKey =
+			new Lazy<IReadOnlyDictionary<string, RuleCollection>>(IndexRuleCollections);
+
+		private static IReadOnlyDictionary<string, RuleCollection> IndexRuleCollections()
+		{
+			Dictionary<string, RuleCollection> index =
+				new Dictionary<string, RuleCollection>(StringComparer.Ordinal);
+
+			foreach (RuleCollection collection in CachedRuleCollections.Value)
+			{
+				string key = IndexKey(collection.FilePath, collection.Name);
+				if (index.ContainsKey(key))
+				{
+					// Nothing forbids a file from carrying two same-named collection
+					// wrappers, and if one ever did, the theory could not tell the
+					// two apart: its cases are identified by file and element name,
+					// and xUnit drops the second case as a colliding id (the same
+					// quirk noted on SheetXslFiles above). The theory would then look
+					// healthy while quietly checking only half the data. Failing here
+					// with the file named beats that silence.
+					throw new InvalidOperationException(
+						"Two <" + collection.Name + "> collections in "
+						+ Path.GetFileName(collection.FilePath)
+						+ ". The uniqueness check identifies a collection by file and element "
+						+ "name, so this needs an unambiguous identity before it can be checked.");
+				}
+
+				index.Add(key, collection);
+			}
+
+			return index;
+		}
+
+		private static string IndexKey(string xmlPath, string collectionName)
+		{
+			return xmlPath + "/" + collectionName;
 		}
 
 		private static IReadOnlyList<RuleCollection> LoadTopLevelRuleCollections()
@@ -176,7 +220,14 @@ namespace Chummer.Tests
 				.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
 				.OrderBy(path => path, StringComparer.Ordinal))
 			{
-				XmlDocument document = new XmlDocument();
+				XmlDocument document = new XmlDocument
+				{
+					// Matches what the XmlReader-based tests here already enforce by
+					// default: no external entity resolution, no DTD processing. The
+					// data is repo-controlled so nothing rides on it, but two loaders
+					// in one test project should not disagree about it.
+					XmlResolver = null
+				};
 				document.Load(xmlPath);
 
 				XmlElement root = document.DocumentElement;

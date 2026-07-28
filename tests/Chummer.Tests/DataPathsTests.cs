@@ -43,5 +43,19 @@ namespace Chummer.Tests
 		{
 			Assert.Equal(26, DataPaths.TopLevelRuleXmlWithSchemaFiles().Count());
 		}
+
+		// Exact for the same reason as the pair count above. The allowlist guard
+		// in NameUniquenessTests only half-covers this: it notices a dropped file
+		// that happened to hold an allowlisted duplicate, but only 8 of these 42
+		// collections do. Were discovery to quietly stop finding spells.xml or
+		// qualities.xml, that guard would stay green while those collections
+		// simply stopped being checked. Adding a collection wrapper to the data
+		// is the one case where bumping this number deliberately is the right
+		// fix rather than a workaround.
+		[Fact]
+		public void TopLevelRuleXmlCollectionsFindsEveryNamedCollection()
+		{
+			Assert.Equal(42, DataPaths.TopLevelRuleXmlCollections().Count());
+		}
 	}
 }

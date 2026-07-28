@@ -113,7 +113,7 @@ namespace Chummer.Tests
 
 			Assert.True(stale.Length == 0,
 				"These entries are no longer duplicates in the data and must be removed from "
-				+ nameof(KnownDuplicates) + ":\n  " + string.Join("\n  ", stale.Select(Display)));
+				+ nameof(KnownDuplicates) + ":\n  " + string.Join("\n  ", stale));
 		}
 
 		private static IEnumerable<KeyValuePair<string, int>> DuplicateKeyCounts(
@@ -125,9 +125,18 @@ namespace Chummer.Tests
 				.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
 		}
 
+		// Built from the printable form of the key, not the raw one. For a
+		// name-only collection the two are identical, but a composite key carries
+		// a U+001F separator that nobody can type: an entry would have to read
+		// "packs.xml/packs/BrawlerAttribute Kit" with an invisible character in
+		// the middle, while every failure message prints "Brawler + Attribute
+		// Kit". Someone deferring such a duplicate would copy what they were shown
+		// into the list, get no match, and see the test stay red with no hint why.
+		// Keeping both directions in the printable form means what the message
+		// shows is exactly what the allowlist takes.
 		private static string Entry(string xmlPath, string collectionName, string key)
 		{
-			return Path.GetFileName(xmlPath) + "/" + collectionName + "/" + key;
+			return Path.GetFileName(xmlPath) + "/" + collectionName + "/" + Display(key);
 		}
 
 		private static string Display(string value)
