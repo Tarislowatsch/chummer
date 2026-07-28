@@ -5,8 +5,8 @@ SR5. It builds and manages characters (attributes, skills, gear, cyberware,
 magic, vehicles, …), tracks career advancement, and prints character sheets.
 
 Chummer is unofficial and not endorsed by The Topps Company, Inc. or Catalyst
-Game Labs, who own Shadowrun. See [`Chummer/data/LICENSE.txt`](Chummer/data/LICENSE.txt)
-for the game-data disclaimer and [`Chummer/icons/LICENSE.txt`](Chummer/icons/LICENSE.txt)
+Game Labs, who own Shadowrun. See [`Chummer/data/NOTICE.txt`](Chummer/data/NOTICE.txt)
+for the game-data disclaimer and [`Chummer/icons/NOTICE.txt`](Chummer/icons/NOTICE.txt)
 for the icon set attribution.
 
 ## Relationship to Chummer5a
@@ -37,14 +37,9 @@ builds and runs today, per `docs/BUILDING.md`.
 
 The application code is licensed under the GNU General Public License v3.0 —
 see [`LICENSE`](LICENSE). This does not cover the transcribed Shadowrun rules
-data or the bundled icon set; see the license files linked above for those.
+data or the bundled icon set; see the notice files linked above for those.
 
-No `LICENSE` or `COPYING` file was ever committed to this repository. The
-license choice above is not a guess: the original project's Google Code page
-(`code.google.com/p/chummer`), archived by the
-[Wayback Machine snapshot from 2016-03-14](https://web.archive.org/web/20160314235832/https://code.google.com/p/chummer/),
-lists "Code license: GNU GPL v3" — a choice Google Code required project
-creators to actively make, with no pre-selected default. The page's "People"
-tab names the same account as the sole committer of this history, and its
-Google Code shutdown notice points to `github.com/Arkeas/chummer` as the
-export target, the confirmed root of this SR4 fork's history.
+No `LICENSE` or `COPYING` file was ever committed to this repository; the
+license choice above follows the original project's Google Code page,
+[archived by the Wayback Machine on 2016-03-14](https://web.archive.org/web/20160314235832/https://code.google.com/p/chummer/),
+which lists "Code license: GNU GPL v3".
