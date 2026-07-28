@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Xml;
 using Xunit;
 
 namespace Chummer.Tests
@@ -74,7 +73,8 @@ namespace Chummer.Tests
 				StringBuilder message = new StringBuilder();
 				message.Append(Path.GetFileName(xmlPath)).Append(" has ").Append(unexpected.Length)
 					.Append(" duplicate name(s) in <").Append(collectionName).Append(">")
-					.Append(" (key: ").Append(string.Join(" + ", KeyFieldsFor(xmlPath, collectionName)))
+					.Append(" (key: ")
+					.Append(string.Join(" + ", DataPaths.RuleCollectionFor(xmlPath, collectionName).KeyFields))
 					.Append("):");
 				foreach (KeyValuePair<string, int> pair in unexpected.Take(MaxDuplicatesInMessage))
 				{
@@ -119,44 +119,10 @@ namespace Chummer.Tests
 		private static IEnumerable<KeyValuePair<string, int>> DuplicateKeyCounts(
 			string xmlPath, string collectionName)
 		{
-			string[] keyFields = KeyFieldsFor(xmlPath, collectionName);
-
-			XmlDocument document = new XmlDocument();
-			document.Load(xmlPath);
-
-			// Matched by element name rather than an XPath step: collection names
-			// come from the data, and skills.xml has wrappers like <Animal
-			// Husbandry> whose names are not valid XPath at all.
-			XmlNode collection = document.DocumentElement?.ChildNodes.Cast<XmlNode>()
-				.FirstOrDefault(node => node.NodeType == XmlNodeType.Element
-					&& string.Equals(node.Name, collectionName, StringComparison.Ordinal));
-			if (collection == null)
-				return Enumerable.Empty<KeyValuePair<string, int>>();
-
-			return collection.ChildNodes.Cast<XmlNode>()
-				.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
-				.GroupBy(item => BuildKey(item, keyFields), StringComparer.Ordinal)
+			return DataPaths.RuleCollectionFor(xmlPath, collectionName).ItemKeys
+				.GroupBy(key => key, StringComparer.Ordinal)
 				.Where(group => group.Count() > 1)
 				.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
-		}
-
-		// Ordinal, untrimmed, case-sensitive - on purpose. This mirrors what the
-		// application itself does: a lookup like
-		// SelectSingleNode("/chummer/gears/gear[name = \"...\"]") compares the raw
-		// string codepoint for codepoint, so two entries differing only in case or
-		// in surrounding whitespace genuinely are two reachable entries, not a
-		// collision. Relaxing this to OrdinalIgnoreCase or adding Trim() would
-		// look like a tidy-up and would in fact make the test disagree with the
-		// behaviour it exists to describe.
-		private static string BuildKey(XmlNode item, string[] keyFields)
-		{
-			return string.Join(DataPaths.KeyFieldSeparator,
-				keyFields.Select(field => item[field]?.InnerText ?? string.Empty));
-		}
-
-		private static string[] KeyFieldsFor(string xmlPath, string collectionName)
-		{
-			return DataPaths.KeyFieldsFor(Path.GetFileName(xmlPath), collectionName);
 		}
 
 		private static string Entry(string xmlPath, string collectionName, string key)

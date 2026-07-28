@@ -101,13 +101,49 @@ namespace Chummer.Tests
 		// cannot forge a collision with a different field split.
 		public const string KeyFieldSeparator = "\u001F";
 
-		public static string[] KeyFieldsFor(string xmlFileName, string collectionName)
+		private static string[] KeyFieldsFor(string xmlFileName, string collectionName)
 		{
 			string[] fields;
 			return CompositeKeyFields.TryGetValue(xmlFileName + "/" + collectionName, out fields)
 				? fields
 				: NameOnlyKeyFields;
 		}
+
+		// One collection of catalogue entries, reduced to the lookup keys of its
+		// items - which is all the uniqueness check needs.
+		public sealed class RuleCollection
+		{
+			public RuleCollection(string filePath, string name, string[] keyFields,
+				IReadOnlyList<string> itemKeys)
+			{
+				FilePath = filePath;
+				Name = name;
+				KeyFields = keyFields;
+				ItemKeys = itemKeys;
+			}
+
+			public string FilePath { get; }
+
+			public string Name { get; }
+
+			public string[] KeyFields { get; }
+
+			public IReadOnlyList<string> ItemKeys { get; }
+		}
+
+		// Parsed once, then reused. Without this the same documents get reparsed
+		// roughly five times over - once to discover the collections, once per
+		// theory case, and once more per collection for the allowlist guard.
+		// Measured before caching: one pass over the 3.2 MB corpus costs ~60 ms,
+		// and the uniqueness tests accounted for ~70% of the whole suite's runtime
+		// re-doing it.
+		// Deliberately caching immutable string projections rather than the
+		// XmlDocument instances themselves: xUnit runs test classes in parallel and
+		// XmlDocument promises thread safety only for static members, so sharing
+		// live documents would be a trap waiting for the next test class that uses
+		// this helper. Strings cannot have that problem.
+		private static readonly Lazy<IReadOnlyList<RuleCollection>> CachedRuleCollections =
+			new Lazy<IReadOnlyList<RuleCollection>>(LoadTopLevelRuleCollections);
 
 		// Every (file, collection) pair whose entries are identified by <name>.
 		// Which collections those are is read off the data instead of being listed
@@ -121,6 +157,21 @@ namespace Chummer.Tests
 		// above: "custom content/<pack>/" is a separate concern.
 		public static IEnumerable<object[]> TopLevelRuleXmlCollections()
 		{
+			return CachedRuleCollections.Value
+				.Select(collection => new object[] { collection.FilePath, collection.Name });
+		}
+
+		public static RuleCollection RuleCollectionFor(string xmlPath, string collectionName)
+		{
+			return CachedRuleCollections.Value.Single(collection =>
+				string.Equals(collection.FilePath, xmlPath, StringComparison.Ordinal)
+				&& string.Equals(collection.Name, collectionName, StringComparison.Ordinal));
+		}
+
+		private static IReadOnlyList<RuleCollection> LoadTopLevelRuleCollections()
+		{
+			List<RuleCollection> collections = new List<RuleCollection>();
+
 			foreach (string xmlPath in Directory
 				.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
 				.OrderBy(path => path, StringComparer.Ordinal))
@@ -132,18 +183,40 @@ namespace Chummer.Tests
 				if (root == null)
 					continue;
 
+				string fileName = Path.GetFileName(xmlPath);
+
 				foreach (XmlNode collection in root.ChildNodes)
 				{
 					if (collection.NodeType != XmlNodeType.Element)
 						continue;
 
-					bool hasNamedItems = collection.ChildNodes.Cast<XmlNode>().Any(item =>
-						item.NodeType == XmlNodeType.Element && item["name"] != null);
+					XmlNode[] items = collection.ChildNodes.Cast<XmlNode>()
+						.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
+						.ToArray();
 
-					if (hasNamedItems)
-						yield return new object[] { xmlPath, collection.Name };
+					if (items.Length == 0)
+						continue;
+
+					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
+					collections.Add(new RuleCollection(xmlPath, collection.Name, keyFields,
+						items.Select(item => BuildKey(item, keyFields)).ToArray()));
 				}
 			}
+
+			return collections;
+		}
+
+		// Ordinal and verbatim - no trimming, no case folding - on purpose. This
+		// mirrors what the application does: a lookup like
+		// SelectSingleNode("/chummer/gears/gear[name = \"...\"]") compares the raw
+		// string codepoint for codepoint, so two entries differing only in case or
+		// in surrounding whitespace genuinely are two separately reachable entries,
+		// not a collision. Normalising here would look like a tidy-up and would in
+		// fact make the tests disagree with the behaviour they exist to describe.
+		private static string BuildKey(XmlNode item, string[] keyFields)
+		{
+			return string.Join(KeyFieldSeparator,
+				keyFields.Select(field => item[field]?.InnerText ?? string.Empty));
 		}
 
 		private static string FindRepoRoot()
