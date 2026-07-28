@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace Chummer.Tests
 {
@@ -75,6 +76,74 @@ namespace Chummer.Tests
 				.Select(path => new { XmlPath = path, XsdPath = Path.ChangeExtension(path, ".xsd") })
 				.Where(pair => File.Exists(pair.XsdPath))
 				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });
+		}
+
+		// Which collections carry a composite lookup key instead of <name> alone.
+		// The running application decides this, not taste: every kit lookup in
+		// frmSelectPACKSKit.cs (:111 when a kit is picked, :715 when a custom kit
+		// is deleted) selects by name AND category, so two packs sharing a name
+		// only collide when their categories match too. That is deliberate in the
+		// data - a kit like "Brawler" is split into an Attribute Kit part and a
+		// Gear Kit part carrying one display name. If those lookups ever change,
+		// this entry has to follow them.
+		// The map describes key composition and nothing else: no exclusions, no
+		// expected counts, no other test knobs. Anything absent is keyed by <name>.
+		private static readonly IReadOnlyDictionary<string, string[]> CompositeKeyFields =
+			new Dictionary<string, string[]>(StringComparer.Ordinal)
+			{
+				{ "packs.xml/packs", new[] { "name", "category" } },
+			};
+
+		private static readonly string[] NameOnlyKeyFields = { "name" };
+
+		// Separates the parts of a composite key. A control character rather than a
+		// printable separator, so a value that legitimately contains the separator
+		// cannot forge a collision with a different field split.
+		public const string KeyFieldSeparator = "\u001F";
+
+		public static string[] KeyFieldsFor(string xmlFileName, string collectionName)
+		{
+			string[] fields;
+			return CompositeKeyFields.TryGetValue(xmlFileName + "/" + collectionName, out fields)
+				? fields
+				: NameOnlyKeyFields;
+		}
+
+		// Every (file, collection) pair whose entries are identified by <name>.
+		// Which collections those are is read off the data instead of being listed
+		// here: a collection qualifies when its items have a direct <name> child.
+		// That rule on its own excludes <version> (no element children),
+		// <categories>, <costs>/<safehousecosts>, <limits> and <modcategories>
+		// (their items are <category>/<cost>/<limit> elements holding text, with no
+		// <name> inside), and the per-skill-group wrappers in skills.xml, where the
+		// items *are* <name> elements rather than elements *having* one.
+		// Deliberately top-level-only, in step with the schema-validation pairing
+		// above: "custom content/<pack>/" is a separate concern.
+		public static IEnumerable<object[]> TopLevelRuleXmlCollections()
+		{
+			foreach (string xmlPath in Directory
+				.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+				.OrderBy(path => path, StringComparer.Ordinal))
+			{
+				XmlDocument document = new XmlDocument();
+				document.Load(xmlPath);
+
+				XmlElement root = document.DocumentElement;
+				if (root == null)
+					continue;
+
+				foreach (XmlNode collection in root.ChildNodes)
+				{
+					if (collection.NodeType != XmlNodeType.Element)
+						continue;
+
+					bool hasNamedItems = collection.ChildNodes.Cast<XmlNode>().Any(item =>
+						item.NodeType == XmlNodeType.Element && item["name"] != null);
+
+					if (hasNamedItems)
+						yield return new object[] { xmlPath, collection.Name };
+				}
+			}
 		}
 
 		private static string FindRepoRoot()
