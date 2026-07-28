@@ -1,13 +1,12 @@
 name: CI
 
 on:
-  # Push is restricted to master rather than '**'. With push on every branch,
-  # a same-repo pull request builds twice, once per event. A concurrency group
-  # alone does not fix that: github.ref is refs/heads/<branch> for push and
-  # refs/pull/<n>/merge for pull_request, so the two runs land in different
-  # groups and neither cancels the other.
-  push:
-    branches: [master]
+  # No push trigger: main is branch-protected (PR required, these jobs
+  # required as status checks, branch must be up to date before merging), so
+  # the pull_request run already tested exactly what lands on main. Adding
+  # push back would rebuild that same tree a second time on every merge.
+  # enforce_admins is off, so a direct push from an admin still reaches main
+  # unbuilt - accepted trade-off for keeping that escape hatch.
   pull_request:
   workflow_dispatch:
 
