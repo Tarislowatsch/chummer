@@ -3,28 +3,54 @@
 ## Requirements
 
 - Windows
-- Either MSBuild, from Visual Studio (any edition, 2019 or newer) or the
-  standalone [Build Tools for Visual Studio][buildtools], or the
-  [.NET SDK](https://dotnet.microsoft.com/download) 6.0 or newer
+- MSBuild, from either Visual Studio (any edition, 2019 or newer) or the
+  standalone [Build Tools for Visual Studio][buildtools]
 - The .NET Framework 4.8 targeting pack (the "Developer Pack"), which the
   Visual Studio installer offers under *.NET desktop development*
 
 ```
-msbuild ChummerCS.sln /p:Configuration=Debug /p:Platform=x86
+msbuild ChummerCS.sln -restore /p:Configuration=Debug /p:Platform=x86
 ```
 
-Since P0-12 the project is SDK-style, so the .NET SDK can drive it as well:
+`-restore` is required since P0-12 even though there is not a single NuGet
+dependency: an SDK-style project fails with `NETSDK1004` until a restore pass
+has written `obj/project.assets.json`. Every assembly reference is a .NET
+Framework assembly from the targeting pack, so the restore has nothing to
+download — it just has to have happened once.
+
+### Why `dotnet build` still does not work
+
+P0-12 converted the project to SDK-style, and the backlog expected that to make
+`dotnet build` available. It does not, and the reason is worth writing down so
+nobody spends the afternoon on it a second time.
+
+`dotnet build` runs MSBuild on .NET, where the `GenerateResource` task cannot
+serialise non-string resources. Ten of the 78 `.resx` files contain some — the
+menu icons in `frmMain`, the window icons of the two character forms and a few
+dialogs, and the 56 famfamfam PNGs in `Properties\Resources.resx` — so the
+build stops with one pair of errors per affected file:
 
 ```
-dotnet build ChummerCS.sln --configuration Debug -p:Platform=x86
+error MSB3823: Non-string resources require the property
+               GenerateResourceUsePreserializedResources to be set to true.
+error MSB3822: Non-string resources require the System.Resources.Extensions
+               assembly at runtime, but it was not found in this project's
+               references.
 ```
 
-This still builds .NET Framework 4.8, not .NET 8 — `dotnet` is the build driver
-here, not the target. It therefore needs the same 4.8 targeting pack as MSBuild.
+The errors name their own fix, and taking it would be a bad trade: it means a
+`PackageReference` to `System.Resources.Extensions` — the first NuGet dependency
+this repository would ever have — and it changes the format of the compiled
+resources inside the shipped executable, which then need that assembly deployed
+beside them to be readable at run time. Phase 0 does not change what the build
+produces, so the project keeps the format full MSBuild writes, and full MSBuild
+stays the only supported driver.
 
-There are no NuGet dependencies. Every assembly reference is a .NET Framework
-assembly resolved from the targeting pack, so there is nothing to restore and no
-package cache to warm.
+This is specific to the combination of a .NET Framework target with MSBuild
+running on .NET. It is *not* an argument that would carry over to a `net8.0`
+port: there, `System.Resources.Extensions` is part of the shared framework and
+the SDK enables the preserialized format by default. The port stays out of
+scope for the reasons the backlog gives, but this is not one of them.
 
 [buildtools]: https://visualstudio.microsoft.com/downloads/#build-tools-for-visual-studio-2022
 
@@ -149,12 +175,12 @@ That belongs with P6-13.
   and a codebase with 715 empty `catch` blocks (P6-10) is exactly the kind that
   can behave differently under optimisation. Building only Debug would leave the
   configuration that ships unverified.
+- **MSBuild, not `dotnet build`**, for the reason given above. A `dotnet build`
+  job was added with P0-12 and removed again in the same pull request, once it
+  turned out that the resources — not the project format — are what rules that
+  driver out.
 - **`Platform` is passed explicitly**, so the build does not depend on how a
   given MSBuild version resolves a default.
-- **A separate `dotnet build` job** proves the claim P0-12 makes. It builds
-  Debug only and skips the content check — same project file, same copy rules.
-  Without it, the SDK-style conversion could be undone by one legacy-only
-  construct and nobody would notice until they typed `dotnet build`.
 
 ### The runtime content check
 

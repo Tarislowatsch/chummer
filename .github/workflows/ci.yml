@@ -33,8 +33,12 @@ jobs:
 
       # MSBuild rather than `dotnet build`, and an explicit Platform.
       # Rationale: docs/BUILDING.md
+      #
+      # -restore is not optional since P0-12, even though this repository has no
+      # NuGet dependencies at all: an SDK-style project fails with NETSDK1004
+      # until a restore pass has written obj/project.assets.json.
       - name: Build
-        run: msbuild ChummerCS.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
+        run: msbuild ChummerCS.sln -restore /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
 
       # Verifies the build output can actually start. Every entry is read from
       # Application.StartupPath at run time, so a missing one is a broken build
@@ -67,22 +71,3 @@ jobs:
             $n = (Get-ChildItem (Join-Path $out $d) -Recurse -File).Count
             Write-Host ("  {0,-10} {1} files" -f $d, $n)
           }
-
-  # P0-12 converted the project to SDK-style, and the point of doing so was that
-  # the .NET SDK can drive the build at all - it cannot drive the old format.
-  # Checked here rather than claimed in the documentation: a single construct
-  # that only the legacy targets understand would take it away again, and with
-  # MSBuild as the only build in CI nobody would find out until they tried.
-  # Content is not re-checked; that is the same project file and the same rules.
-  dotnet-build:
-    name: dotnet build
-    runs-on: windows-latest
-
-    steps:
-      - uses: actions/checkout@v5
-
-      # The runner image ships a .NET SDK and the .NET Framework 4.8 targeting
-      # pack, and this repository has no NuGet dependencies, so there is nothing
-      # to install or restore.
-      - name: Build
-        run: dotnet build ChummerCS.sln --configuration Debug -p:Platform=x86 --nologo --verbosity minimal
