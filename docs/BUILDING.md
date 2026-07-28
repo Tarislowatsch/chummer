@@ -238,3 +238,16 @@ been committed there by hand.
 The check warned instead of failing between P0-15 and P0-13, while there was
 nothing yet to find; P0-13 turned it into a hard failure in the same commit that
 added the `CopyToOutputDirectory` entries.
+
+## Fresh-clone verification (P0-14)
+
+CI proves clone, build, and output completeness on every push, but not the one
+thing a contributor actually does with the result: start it, create a
+character, save it, and print it. That walk-through was run by hand against a
+clean clone of `master` (built with the minimal-Build-Tools workaround above) —
+start, create a character, save to a `.chum` file, open the character sheet.
+No crashes, no missing content.
+
+This is a manual gate, not a repeatable one — driving the WinForms UI is out of
+scope for CI. Repeat it by hand after any change that touches startup,
+`Character.Save`, or `frmViewer`.
