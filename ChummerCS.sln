@@ -3,6 +3,10 @@ Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual C# Express 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer", "Chummer\Chummer.csproj", "{95279469-5A3E-42E6-993C-6A403586C86E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{9F466A07-3E74-4897-A8FB-5C60B2EEA8C3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Chummer.Tests", "tests\Chummer.Tests\Chummer.Tests.csproj", "{1D798B14-D6B4-4CED-B7C1-F88E89B30050}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -13,8 +17,15 @@ Global
 		{95279469-5A3E-42E6-993C-6A403586C86E}.Debug|x86.Build.0 = Debug|x86
 		{95279469-5A3E-42E6-993C-6A403586C86E}.Release|x86.ActiveCfg = Release|x86
 		{95279469-5A3E-42E6-993C-6A403586C86E}.Release|x86.Build.0 = Release|x86
+		{1D798B14-D6B4-4CED-B7C1-F88E89B30050}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{1D798B14-D6B4-4CED-B7C1-F88E89B30050}.Debug|x86.Build.0 = Debug|Any CPU
+		{1D798B14-D6B4-4CED-B7C1-F88E89B30050}.Release|x86.ActiveCfg = Release|Any CPU
+		{1D798B14-D6B4-4CED-B7C1-F88E89B30050}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1D798B14-D6B4-4CED-B7C1-F88E89B30050} = {9F466A07-3E74-4897-A8FB-5C60B2EEA8C3}
 	EndGlobalSection
 EndGlobal

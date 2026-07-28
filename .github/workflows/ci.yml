@@ -40,6 +40,13 @@ jobs:
       - name: Build
         run: msbuild ChummerCS.sln -restore /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
 
+      # tests/Chummer.Tests is already compiled by the Build step above - it's in
+      # ChummerCS.sln, msbuild just built it to tests/Chummer.Tests/bin/<config>/net48.
+      # --no-build/--no-restore tell dotnet test to run that output directly instead
+      # of redoing restore+build itself against the same path.
+      - name: Run tests
+        run: dotnet test tests/Chummer.Tests/Chummer.Tests.csproj --configuration ${{ matrix.configuration }} --no-build --no-restore
+
       # Verifies the build output can actually start. Every entry is read from
       # Application.StartupPath at run time, so a missing one is a broken build
       # even though the compiler is happy. See docs/BUILDING.md.
