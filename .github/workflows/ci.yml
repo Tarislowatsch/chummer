@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  # Push is restricted to master rather than '**'. With push on every branch,
+  # a same-repo pull request builds twice, once per event. A concurrency group
+  # alone does not fix that: github.ref is refs/heads/<branch> for push and
+  # refs/pull/<n>/merge for pull_request, so the two runs land in different
+  # groups and neither cancels the other.
+  push:
+    branches: [master]
+  pull_request:
+  workflow_dispatch:
+
+# Cancels superseded runs when a branch is pushed to repeatedly.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build (${{ matrix.configuration }})
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        configuration: [Debug, Release]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: microsoft/setup-msbuild@v2
+
+      # MSBuild rather than `dotnet build`, and an explicit Platform.
+      # Rationale: docs/BUILDING.md
+      #
+      # -restore is not optional since P0-12, even though this repository has no
+      # NuGet dependencies at all: an SDK-style project fails with NETSDK1004
+      # until a restore pass has written obj/project.assets.json.
+      - name: Build
+        run: msbuild ChummerCS.sln -restore /p:Configuration=${{ matrix.configuration }} /p:Platform=x86 /nologo /verbosity:minimal /consoleloggerparameters:Summary
+
+      # Verifies the build output can actually start. Every entry is read from
+      # Application.StartupPath at run time, so a missing one is a broken build
+      # even though the compiler is happy. See docs/BUILDING.md.
+      - name: Check that runtime content reached the output directory
+        shell: pwsh
+        run: |
+          $out = 'Chummer/bin/${{ matrix.configuration }}'
+          $required = @{
+            'Chummer.exe'                = 'the application itself'
+            'Chummer.exe.config'         = 'the supportedRuntime declaration from app.config'
+            'data/gear.xml'              = 'game data'
+            'data/custom content'        = 'bundled custom content packages'
+            'lang/de_data.xml'           = 'translations'
+            'sheets/Shadowrun 4.xsl'     = 'character sheets'
+            'sheets/de'                  = 'localised character sheets'
+            'export/Squad Manager.xsl'   = 'export templates'
+            'settings/default.xml'       = 'default settings profile'
+            'changelog.txt'              = 'revision history shown by frmHistory'
+          }
+          $missing = $required.Keys | Where-Object { -not (Test-Path (Join-Path $out $_)) } | Sort-Object
+          if ($missing) {
+            Write-Host "Missing from ${out}:"
+            $missing | ForEach-Object { Write-Host "  - $_  ($($required[$_]))" }
+            throw "Build output is incomplete - the application cannot start from it."
+          }
+          Write-Host "All required runtime content is present in $out."
+          Write-Host "Counts:"
+          foreach ($d in 'data', 'lang', 'sheets', 'export', 'settings') {
+            $n = (Get-ChildItem (Join-Path $out $d) -Recurse -File).Count
+            Write-Host ("  {0,-10} {1} files" -f $d, $n)
+          }
