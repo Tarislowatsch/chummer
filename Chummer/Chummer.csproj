@@ -36,9 +36,9 @@
   <PropertyGroup>
     <!-- x86 only, as decided in P0-11: the application hosts the Internet
          Explorer ActiveX WebBrowser control and is 32-bit in practice.
-         PlatformTarget is unconditional so that a plain `dotnet build`, which
-         defaults to Platform=AnyCPU, still produces a 32-bit executable rather
-         than a subtly different one. -->
+         PlatformTarget is unconditional so that a build invoked without an
+         explicit Platform, where the default is AnyCPU, still produces a 32-bit
+         executable rather than a subtly different one. -->
     <Platforms>x86</Platforms>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
