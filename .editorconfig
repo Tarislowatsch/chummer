@@ -9,13 +9,23 @@ root = true
 end_of_line = crlf
 indent_style = tab
 trim_trailing_whitespace = false
+# Measured, not guessed: sampling the tracked files shows 0/50 top-level data
+# XML, 0/7 lang XML and 0/78 .resx end in a newline, and only 17/175 .cs do
+# (no real sub-pattern there either). The absent trailing newline is this
+# codebase's actual convention, not an oversight to correct.
 insert_final_newline = false
 
 [*.{cs,resx,csproj,sln}]
 charset = utf-8-bom
 
-[Chummer/data/*.xml]
+[Chummer/data/**/*.xml]
 charset = utf-8
 
 [Chummer/lang/*.xml]
 charset = utf-8-bom
+
+# YAML forbids tabs for indentation; the [*] default above would otherwise
+# tell an EditorConfig-aware editor to insert one on the repo's one .yml file.
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
