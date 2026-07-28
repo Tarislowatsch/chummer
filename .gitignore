@@ -1,0 +1,63 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio user-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+.vs/
+_ReSharper*/
+*.DotSettings.user
+
+# Build intermediates that can appear outside bin/ and obj/.
+# Deliberately no blanket *.dll / *.exe / *.pdb here: bin/ and obj/ already
+# cover compiler output, and a blanket rule would silently swallow the first
+# third-party assembly someone checks in with a HintPath.
+*.tmp
+*.tmp_proj
+*.vspscc
+*.vssscc
+*.pidb
+*.svclog
+*.scc
+
+# NuGet
+packages/
+*.nupkg
+project.lock.json
+project.assets.json
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.trx
+*.coverage
+*.coveragexml
+
+# The rehabilitation backlog is a local working document, not part of the product.
+# Other files under docs/ are tracked.
+docs/BACKLOG.md
+
+# OS noise
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# Runtime output written next to the application.
+# The app writes into its own directory (see P6-14); these are user data, not source.
+mugshots/
+lang/results_*.xml
+
+# Residue of the legacy chummergen auto-updater (removed in P3-02).
+# data/*.zip are downloaded update payloads that get unpacked into the .xml
+# beside them, so they must never shadow the real rule data in Chummer/data.
+Chummer/data/*.zip
+manifestdata.xml
+manifestlang.xml

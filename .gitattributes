@@ -1,0 +1,46 @@
+# Encoding and diff handling.
+#
+# Read this before adding a rule: the encodings here are mixed, and a wrong
+# rule corrupts data rather than merely producing noise. Measured when this
+# file was added:
+#
+#   Chummer/data/*.xml            UTF-8, no BOM
+#   Chummer/lang/*.xml            UTF-8 with BOM
+#   Chummer/settings/default.xml  UTF-16 LE with BOM
+#   tests/fixtures/**/*.chum      UTF-16 LE with BOM
+#   *.cs, *.resx, *.csproj, *.sln UTF-8 (180 and 78 files checked, no UTF-16)
+#
+# Every text file in the repository is stored with CRLF.
+#
+# Note the deliberate absence of `* text=auto`. Any `text` attribute means
+# "store LF in the index", so switching it on renormalises all 382 text files
+# in one rewrite. That is a decision to take on purpose, with a
+# .git-blame-ignore-revs entry alongside it, not a side effect of adding this
+# file - especially with the Phase 4 to 6 refactoring still ahead, which leans
+# on git blame. Until then line endings stay exactly as they are.
+#
+# What is set below is only what protects data or improves diffs, with no
+# rewrite attached.
+
+# Saved characters are UTF-16 LE and are the regression corpus for the Phase 2
+# golden master, where byte stability is the whole point. Marked binary so no
+# future rule can capture them for normalisation - byte-level CRLF handling
+# applied to UTF-16 code units would destroy them - and so git does not attempt
+# a textual diff of UTF-16 that renders as mojibake.
+*.chum binary
+
+# Same encoding, same hazard, but small enough that a diff is still worth
+# having, so normalisation is disabled without marking it binary.
+Chummer/settings/default.xml -text
+
+*.png binary
+*.ico binary
+*.zip binary
+*.exe binary
+*.dll binary
+*.pdb binary
+*.suo binary
+
+# Diff driver only. This does not imply the `text` attribute and changes
+# nothing about how the files are stored.
+*.cs diff=csharp
