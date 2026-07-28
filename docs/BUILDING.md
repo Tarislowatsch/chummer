@@ -18,6 +18,43 @@ has written `obj/project.assets.json`. Every assembly reference is a .NET
 Framework assembly from the targeting pack, so the restore has nothing to
 download — it just has to have happened once.
 
+### Building with a minimal Build Tools install
+
+A plain "Build Tools for Visual Studio" install — just the *MSBuild tools*
+workload plus the 4.8 targeting pack, no full Visual Studio and no *.NET
+Desktop Build Tools*/*NetCoreBuildTools* workload — can build old-style
+projects but cannot resolve `Microsoft.NET.Sdk` on its own: it has no
+`Microsoft.DotNet.MSBuildSdkResolver` and no bundled `MSBuild\Sdks` folder.
+Installing a standalone [.NET SDK](https://dotnet.microsoft.com/download) and
+pointing at its `Sdks` folder gets past that:
+
+```
+$env:MSBuildSDKsPath = "C:\Program Files\dotnet\sdk\<version>\Sdks"
+```
+
+That is enough to resolve `Microsoft.NET.Sdk` itself, but not the nested
+`Microsoft.NET.SDK.WorkloadAutoImportPropsLocator` SDK that
+`Microsoft.NET.Sdk.ImportWorkloads.props` references — that one is resolved
+through the full VS workload-resolver mechanism, not plain directory probing,
+so it still fails with `MSB4236` even with `MSBuildSDKsPath` set. It exists to
+auto-import build logic for SDK-installed workloads (MAUI, Android, …), which
+this desktop WinForms project has none of, so it can simply be turned off:
+
+```
+/p:MSBuildEnableWorkloadResolver=false
+```
+
+Together:
+
+```
+$env:MSBuildSDKsPath = "C:\Program Files\dotnet\sdk\<version>\Sdks"
+msbuild ChummerCS.sln -restore /p:Configuration=Debug /p:Platform=x86 /p:MSBuildEnableWorkloadResolver=false
+```
+
+None of this is needed with a full Visual Studio install or the *.NET Desktop
+Build Tools* workload (both carry the SDK resolver already), and it is not
+needed in CI: `windows-latest` ships a complete installation.
+
 ### Why `dotnet build` still does not work
 
 P0-12 converted the project to SDK-style, and the backlog expected that to make
