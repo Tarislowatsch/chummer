@@ -62,6 +62,7 @@
 		  </xs:complexType>
 		</xs:element>
 		<xs:element name="cyberwareessmultiplier" minOccurs="0" maxOccurs="1" />
+		<xs:element name="cyborgessence" minOccurs="0" maxOccurs="1" />
 		<xs:element name="damageresistance" minOccurs="0" maxOccurs="1" />
 		<xs:element name="drainresist" type="xs:string" minOccurs="0" maxOccurs="1" />
 		<xs:element name="enabletab" minOccurs="0" maxOccurs="1">
