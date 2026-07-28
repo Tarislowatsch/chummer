@@ -119,10 +119,8 @@ namespace Chummer.Tests
 		private static IEnumerable<KeyValuePair<string, int>> DuplicateKeyCounts(
 			string xmlPath, string collectionName)
 		{
-			return DataPaths.RuleCollectionFor(xmlPath, collectionName).ItemKeys
-				.GroupBy(key => key, StringComparer.Ordinal)
-				.Where(group => group.Count() > 1)
-				.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
+			return DataPaths.DuplicateItemKeys(
+				DataPaths.RuleCollectionFor(xmlPath, collectionName).ItemKeys);
 		}
 
 		// Built from the printable form of the key, not the raw one. For a

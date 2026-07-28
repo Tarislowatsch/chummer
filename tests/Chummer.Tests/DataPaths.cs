@@ -241,20 +241,43 @@ namespace Chummer.Tests
 					if (collection.NodeType != XmlNodeType.Element)
 						continue;
 
-					XmlNode[] items = collection.ChildNodes.Cast<XmlNode>()
-						.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
-						.ToArray();
+					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
+					IReadOnlyList<string> itemKeys = ItemKeysIn(collection, keyFields);
 
-					if (items.Length == 0)
+					if (itemKeys.Count == 0)
 						continue;
 
-					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
-					collections.Add(new RuleCollection(xmlPath, collection.Name, keyFields,
-						items.Select(item => BuildKey(item, keyFields)).ToArray()));
+					collections.Add(new RuleCollection(xmlPath, collection.Name, keyFields, itemKeys));
 				}
 			}
 
 			return collections;
+		}
+
+		// The lookup key of every catalogue entry directly under a collection
+		// wrapper, in document order. Public so the uniqueness tests can drive it
+		// with hand-built XML: reading it off the real files only ever shows that
+		// today's data is clean, never that a duplicate would actually be caught,
+		// nor that the deliberate comparison rules below still hold.
+		public static IReadOnlyList<string> ItemKeysIn(XmlNode collection, string[] keyFields)
+		{
+			return collection.ChildNodes.Cast<XmlNode>()
+				.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
+				.Select(item => BuildKey(item, keyFields))
+				.ToArray();
+		}
+
+		// The duplicate-detection itself, in one place so that the theory over the
+		// real files and the hand-built cases that prove it works cannot drift
+		// apart into two implementations agreeing only by luck.
+		// Ordinal here for the same reason as in BuildKey below.
+		public static IEnumerable<KeyValuePair<string, int>> DuplicateItemKeys(
+			IReadOnlyList<string> itemKeys)
+		{
+			return itemKeys
+				.GroupBy(key => key, StringComparer.Ordinal)
+				.Where(group => group.Count() > 1)
+				.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
 		}
 
 		// Ordinal and verbatim - no trimming, no case folding - on purpose. This
