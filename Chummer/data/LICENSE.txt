@@ -1,0 +1,26 @@
+Game data
+=========
+
+The rule data in this directory (armor.xml, gear.xml, weapons.xml, and the
+other *.xml files, roughly 4.3 MB in total) transcribes statblocks and rules
+text from Shadowrun, Fourth Edition sourcebooks published by Catalyst Game
+Labs, a trademark of The Topps Company, Inc.
+
+This is not covered by the GPL-3.0 license in the repository root, which
+applies to Keith Rudolph's application code, not to Catalyst's game content.
+No license is granted here for the data itself; it is included so the
+application has rules content to operate on, on the same basis Chummer has
+always shipped it.
+
+The application already carries this disclaimer at runtime
+(Chummer/frmAbout.cs):
+
+    Chummer is completely unofficial and is in no way endorsed by The Topps
+    Company, Inc. or Catalyst Game Labs. The Topps Company, Inc. has sole
+    ownership of the names, logo, artwork, marks, photographs, sounds, audio,
+    video and/or any proprietary material used in connection with the game
+    Shadowrun.
+
+This file exists so the same disclaimer is visible next to the data itself,
+without requiring a running copy of the application to find it. See
+docs/BACKLOG.md P0-20.
