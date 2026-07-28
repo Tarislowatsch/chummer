@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 
 namespace Chummer.Tests
 {
@@ -75,6 +76,221 @@ namespace Chummer.Tests
 				.Select(path => new { XmlPath = path, XsdPath = Path.ChangeExtension(path, ".xsd") })
 				.Where(pair => File.Exists(pair.XsdPath))
 				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });
+		}
+
+		// Which collections carry a composite lookup key instead of <name> alone.
+		// The running application decides this, not taste: every keyed pack lookup
+		// in the repo selects by name AND category, so two packs sharing a name
+		// only collide when their categories match too. That is deliberate in the
+		// data - a kit like "Brawler" is split into an Attribute Kit part and a
+		// Gear Kit part carrying one display name.
+		// All four sites, because this comment is the sole justification for the
+		// one exception in this design and a future change has to find every one
+		// of them: frmSelectPACKSKit.cs:111 (a kit is picked) and :715 (a custom
+		// kit is deleted), frmCreatePACKSKit.cs:51 (a custom kit is saved), and
+		// frmCreate.cs:20300 - the path that actually applies a kit to a
+		// character. If those lookups ever change, this entry has to follow them.
+		// The map describes key composition and nothing else: no exclusions, no
+		// expected counts, no other test knobs. Anything absent is keyed by <name>.
+		private static readonly IReadOnlyDictionary<string, string[]> CompositeKeyFields =
+			new Dictionary<string, string[]>(StringComparer.Ordinal)
+			{
+				{ "packs.xml/packs", new[] { "name", "category" } },
+			};
+
+		private static readonly string[] NameOnlyKeyFields = { "name" };
+
+		// Separates the parts of a composite key. A control character rather than a
+		// printable separator, so a value that legitimately contains the separator
+		// cannot forge a collision with a different field split.
+		public const string KeyFieldSeparator = "\u001F";
+
+		private static string[] KeyFieldsFor(string xmlFileName, string collectionName)
+		{
+			string[] fields;
+			return CompositeKeyFields.TryGetValue(xmlFileName + "/" + collectionName, out fields)
+				? fields
+				: NameOnlyKeyFields;
+		}
+
+		// One collection of catalogue entries, reduced to the lookup keys of its
+		// items - which is all the uniqueness check needs.
+		public sealed class RuleCollection
+		{
+			public RuleCollection(string filePath, string name, string[] keyFields,
+				IReadOnlyList<string> itemKeys)
+			{
+				FilePath = filePath;
+				Name = name;
+				KeyFields = keyFields;
+				ItemKeys = itemKeys;
+			}
+
+			public string FilePath { get; }
+
+			public string Name { get; }
+
+			public string[] KeyFields { get; }
+
+			public IReadOnlyList<string> ItemKeys { get; }
+		}
+
+		// Parsed once, then reused. Without this the same documents get reparsed
+		// roughly five times over - once to discover the collections, once per
+		// theory case, and once more per collection for the allowlist guard.
+		// Measured before caching: one pass over the 3.2 MB corpus costs ~60 ms,
+		// and the uniqueness tests accounted for ~70% of the whole suite's runtime
+		// re-doing it.
+		// Deliberately caching immutable string projections rather than the
+		// XmlDocument instances themselves: xUnit runs test classes in parallel and
+		// XmlDocument promises thread safety only for static members, so sharing
+		// live documents would be a trap waiting for the next test class that uses
+		// this helper. Strings cannot have that problem.
+		private static readonly Lazy<IReadOnlyList<RuleCollection>> CachedRuleCollections =
+			new Lazy<IReadOnlyList<RuleCollection>>(LoadTopLevelRuleCollections);
+
+		// Every (file, collection) pair whose entries are identified by <name>.
+		// Which collections those are is read off the data instead of being listed
+		// here: a collection qualifies when its items have a direct <name> child.
+		// That rule on its own excludes <version> (no element children),
+		// <categories>, <costs>/<safehousecosts>, <limits> and <modcategories>
+		// (their items are <category>/<cost>/<limit> elements holding text, with no
+		// <name> inside), and the per-skill-group wrappers in skills.xml, where the
+		// items *are* <name> elements rather than elements *having* one.
+		// Deliberately top-level-only, in step with the schema-validation pairing
+		// above: "custom content/<pack>/" is a separate concern.
+		public static IEnumerable<object[]> TopLevelRuleXmlCollections()
+		{
+			return CachedRuleCollections.Value
+				.Select(collection => new object[] { collection.FilePath, collection.Name });
+		}
+
+		public static RuleCollection RuleCollectionFor(string xmlPath, string collectionName)
+		{
+			return CachedRuleCollectionsByKey.Value[IndexKey(xmlPath, collectionName)];
+		}
+
+		// A dictionary rather than a scan per call: the allowlist guard asks for
+		// every collection in turn, which over a linear lookup is quadratic. It
+		// also gives file+collection identity a single place to be checked, which
+		// a scan cannot - see the throw below.
+		private static readonly Lazy<IReadOnlyDictionary<string, RuleCollection>> CachedRuleCollectionsByKey =
+			new Lazy<IReadOnlyDictionary<string, RuleCollection>>(IndexRuleCollections);
+
+		private static IReadOnlyDictionary<string, RuleCollection> IndexRuleCollections()
+		{
+			Dictionary<string, RuleCollection> index =
+				new Dictionary<string, RuleCollection>(StringComparer.Ordinal);
+
+			foreach (RuleCollection collection in CachedRuleCollections.Value)
+			{
+				string key = IndexKey(collection.FilePath, collection.Name);
+				if (index.ContainsKey(key))
+				{
+					// Nothing forbids a file from carrying two same-named collection
+					// wrappers, and if one ever did, the theory could not tell the
+					// two apart: its cases are identified by file and element name,
+					// and xUnit drops the second case as a colliding id (the same
+					// quirk noted on SheetXslFiles above). The theory would then look
+					// healthy while quietly checking only half the data. Failing here
+					// with the file named beats that silence.
+					throw new InvalidOperationException(
+						"Two <" + collection.Name + "> collections in "
+						+ Path.GetFileName(collection.FilePath)
+						+ ". The uniqueness check identifies a collection by file and element "
+						+ "name, so this needs an unambiguous identity before it can be checked.");
+				}
+
+				index.Add(key, collection);
+			}
+
+			return index;
+		}
+
+		private static string IndexKey(string xmlPath, string collectionName)
+		{
+			return xmlPath + "/" + collectionName;
+		}
+
+		private static IReadOnlyList<RuleCollection> LoadTopLevelRuleCollections()
+		{
+			List<RuleCollection> collections = new List<RuleCollection>();
+
+			foreach (string xmlPath in Directory
+				.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+				.OrderBy(path => path, StringComparer.Ordinal))
+			{
+				XmlDocument document = new XmlDocument
+				{
+					// Matches what the XmlReader-based tests here already enforce by
+					// default: no external entity resolution, no DTD processing. The
+					// data is repo-controlled so nothing rides on it, but two loaders
+					// in one test project should not disagree about it.
+					XmlResolver = null
+				};
+				document.Load(xmlPath);
+
+				XmlElement root = document.DocumentElement;
+				if (root == null)
+					continue;
+
+				string fileName = Path.GetFileName(xmlPath);
+
+				foreach (XmlNode collection in root.ChildNodes)
+				{
+					if (collection.NodeType != XmlNodeType.Element)
+						continue;
+
+					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
+					IReadOnlyList<string> itemKeys = ItemKeysIn(collection, keyFields);
+
+					if (itemKeys.Count == 0)
+						continue;
+
+					collections.Add(new RuleCollection(xmlPath, collection.Name, keyFields, itemKeys));
+				}
+			}
+
+			return collections;
+		}
+
+		// The lookup key of every catalogue entry directly under a collection
+		// wrapper, in document order. Public so the uniqueness tests can drive it
+		// with hand-built XML: reading it off the real files only ever shows that
+		// today's data is clean, never that a duplicate would actually be caught,
+		// nor that the deliberate comparison rules below still hold.
+		public static IReadOnlyList<string> ItemKeysIn(XmlNode collection, string[] keyFields)
+		{
+			return collection.ChildNodes.Cast<XmlNode>()
+				.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
+				.Select(item => BuildKey(item, keyFields))
+				.ToArray();
+		}
+
+		// The duplicate-detection itself, in one place so that the theory over the
+		// real files and the hand-built cases that prove it works cannot drift
+		// apart into two implementations agreeing only by luck.
+		// Ordinal here for the same reason as in BuildKey below.
+		public static IEnumerable<KeyValuePair<string, int>> DuplicateItemKeys(
+			IReadOnlyList<string> itemKeys)
+		{
+			return itemKeys
+				.GroupBy(key => key, StringComparer.Ordinal)
+				.Where(group => group.Count() > 1)
+				.Select(group => new KeyValuePair<string, int>(group.Key, group.Count()));
+		}
+
+		// Ordinal and verbatim - no trimming, no case folding - on purpose. This
+		// mirrors what the application does: a lookup like
+		// SelectSingleNode("/chummer/gears/gear[name = \"...\"]") compares the raw
+		// string codepoint for codepoint, so two entries differing only in case or
+		// in surrounding whitespace genuinely are two separately reachable entries,
+		// not a collision. Normalising here would look like a tidy-up and would in
+		// fact make the tests disagree with the behaviour they exist to describe.
+		private static string BuildKey(XmlNode item, string[] keyFields)
+		{
+			return string.Join(KeyFieldSeparator,
+				keyFields.Select(field => item[field]?.InnerText ?? string.Empty));
 		}
 
 		private static string FindRepoRoot()
