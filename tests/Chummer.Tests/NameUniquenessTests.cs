@@ -6,31 +6,19 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// <name> is the de-facto primary key of the rule data - there are no ids and
-	// no guids anywhere in it. A duplicate name therefore makes the second entry
-	// permanently unreachable through a name-based XPath lookup, or hands back
-	// whichever entry happens to come first in document order, depending on the
-	// call site.
+	// - <name> is the de-facto primary key of the rule data - there are no ids and no guids anywhere in it
+	// - a duplicate name therefore makes the second entry permanently unreachable through a name-based XPath lookup, or hands back whichever entry happens to come first in document order, depending on the call site
 	//
-	// Anchoring matters: an unanchored //cyberware query reports 99 apparent
-	// duplicates in cyberware.xml, because that file nests <cyberware> nodes as
-	// references to built-in options ("Thermographic Vision" inside a cybereye)
-	// rather than only as catalogue entries. Only the top-level items directly
-	// under each collection wrapper are catalogue entries, which is what the
-	// per-collection cases below iterate over.
+	// - anchoring matters: an unanchored //cyberware query reports 99 apparent duplicates in cyberware.xml, because that file nests <cyberware> nodes as references to built-in options ("Thermographic Vision" inside a cybereye) rather than only as catalogue entries
+	// - only the top-level items directly under each collection wrapper are catalogue entries, which is what the per-collection cases below iterate over
 	public class NameUniquenessTests
 	{
-		// Duplicates that already exist in the data. Resolving them is a separate
-		// job: each one is either a real duplicate to delete or two different
-		// things that happen to share a name and need renaming plus a sweep of
-		// every cross-reference to them - and renaming is not free, because saved
-		// characters store these very strings, so a rename silently breaks every
-		// save that used the old name. That work waits for the regression net that
-		// can prove what it changed; until then this list keeps the check green
-		// while still failing on any *new* duplicate.
+		// - duplicates that already exist in the data - resolving them is a separate job: each one is either a real duplicate to delete, or two different things that happen to share a name and need renaming plus a sweep of every cross-reference to them
+		// - renaming is not free, because saved characters store these very strings, so a rename silently breaks every save that used the old name
+		// - that work waits for the regression net that can prove what it changed
+		// - until then this list keeps the check green while still failing on any *new* duplicate
 		//
-		// Entry format: <file>/<collection>/<key>. Kept as raw text rather than
-		// structured tuples so a resolved entry is deleted by removing one line.
+		// - entry format: <file>/<collection>/<key>, kept as raw text rather than structured tuples so a resolved entry is deleted by removing one line
 		private static readonly HashSet<string> KnownDuplicates = new HashSet<string>(StringComparer.Ordinal)
 		{
 			"armor.xml/mods/Transparent Ruthenium Polymer Coating",
@@ -75,11 +63,8 @@ namespace Chummer.Tests
 			}
 		}
 
-		// Without this the allowlist would rot in the one direction the theory
-		// above cannot see: an entry that stops being a duplicate (because the
-		// data was fixed, or an item renamed) would sit there forever, silently
-		// covering a future duplicate of that same name. Failing here forces the
-		// list to be pruned in the same change that fixed the data.
+		// - without this the allowlist would rot in the one direction the theory above cannot see: an entry that stops being a duplicate (data fixed, or an item renamed) would sit there forever, silently covering a future duplicate of that same name
+		// - failing here forces the list to be pruned in the same change that fixed the data
 		[Fact]
 		public void AllowlistedDuplicatesAllStillExist()
 		{
@@ -108,15 +93,10 @@ namespace Chummer.Tests
 				DataPaths.RuleCollectionFor(xmlPath, collectionName).ItemKeys);
 		}
 
-		// Built from the printable form of the key, not the raw one. For a
-		// name-only collection the two are identical, but a composite key carries
-		// a U+001F separator that nobody can type: an entry would have to read
-		// "packs.xml/packs/BrawlerAttribute Kit" with an invisible character in
-		// the middle, while every failure message prints "Brawler + Attribute
-		// Kit". Someone deferring such a duplicate would copy what they were shown
-		// into the list, get no match, and see the test stay red with no hint why.
-		// Keeping both directions in the printable form means what the message
-		// shows is exactly what the allowlist takes.
+		// - built from the printable form of the key, not the raw one: for a name-only collection the two are identical, but a composite key carries a U+001F separator that nobody can type
+		// - an entry would have to read "packs.xml/packs/BrawlerAttribute Kit" with an invisible character in the middle, while every failure message prints "Brawler + Attribute Kit"
+		// - someone deferring such a duplicate would copy what they were shown into the list, get no match, and see the test stay red with no hint why
+		// - keeping both directions in the printable form means what the message shows is exactly what the allowlist takes
 		private static string Entry(string xmlPath, string collectionName, string key)
 		{
 			return Path.GetFileName(xmlPath) + "/" + collectionName + "/" + Display(key);

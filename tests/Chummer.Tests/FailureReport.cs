@@ -5,19 +5,12 @@ using System.Text;
 
 namespace Chummer.Tests
 {
-	// Every data check here reports the same shape of failure: a headline naming
-	// the file and how many findings it has, then one line per finding, truncated
-	// so that a file with hundreds of them cannot bury the CI log. Three copies of
-	// that had accumulated, differing only in wording, and a fourth was due with
-	// the next check.
+	// - every data check here reports the same shape of failure: a headline naming the file and how many findings it has, then one line per finding, truncated so a file with hundreds of them cannot bury the CI log
+	// - three copies of that had accumulated, differing only in wording, with a fourth due with the next check
 	internal static class FailureReport
 	{
-		// Enough to print a whole collection's worth of a systematic mistake -
-		// today's worst case is 17 in one collection - without an unbounded
-		// message when a future file racks up hundreds.
-		// Internal rather than private so the tests can pin the boundary against
-		// this number instead of repeating a 20 that would silently disagree if
-		// the limit ever moved.
+		// - enough to print a whole collection's worth of a systematic mistake: today's worst case is 17 in one collection, without an unbounded message when a future file racks up hundreds
+		// - internal rather than private so the tests can pin the boundary against this number, instead of repeating a 20 that would silently disagree if the limit ever moved
 		internal const int MaxLines = 20;
 
 		public static string Build<T>(string headline, IReadOnlyList<T> findings, Func<T, string> describe)

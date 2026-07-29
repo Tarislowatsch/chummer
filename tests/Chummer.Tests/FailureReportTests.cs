@@ -3,12 +3,9 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// Three checks now format their failures through this, and a failure message
-	// is only ever read when something is already wrong - which is the worst
-	// moment to discover that the count is off by one or that the truncation
-	// notice appeared when nothing was truncated. The inline copies this replaced
-	// were untested too, so this is not a regression being fixed; extracting them
-	// was simply the first point where one test could cover all three.
+	// - three checks now format their failures through this
+	// - a failure message is only ever read when something is already wrong - the worst moment to discover the count is off by one, or that the truncation notice appeared when nothing was truncated
+	// - the inline copies this replaced were untested too, so this is not a regression being fixed - extracting them was simply the first point where one test could cover all three
 	public class FailureReportTests
 	{
 		[Fact]
