@@ -7,13 +7,12 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - the 27 schemas in Chummer/data are used by zero lines of application code (no XmlSchemaSet, no ValidationType anywhere in the repo)
-	// - well-formedness alone only proves the data is well-formed XML, not that it matches its own schema
-	// - each pair is its own test case, so a single bad pair does not hide the rest
-	// - this proves the real data validates against its schema, but it does not exercise synthetic invalid shapes to prove the schema still rejects garbage; that broader guarantee is a meaningfully bigger scope than "make the schema match the data" and is left for later if it turns out to matter
+	// - the application itself never validates: no XmlSchemaSet, no ValidationType anywhere
+	// - per-pair cases keep one bad pair from hiding the rest
+	// - proves the data matches the schema, not that the schema still rejects garbage
 	public class XsdSchemaValidationTests
 	{
-		// - long enough to show every error this repo has today (worst case is qualities.xml at 15), without an unbounded message if a future file somehow racks up hundreds
+		// Fits today's worst case (qualities.xml at 15) without an unbounded message.
 		private const int MaxErrorsInMessage = 20;
 
 		[Theory]

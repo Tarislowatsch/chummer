@@ -3,9 +3,8 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - three checks now format their failures through this
-	// - a failure message is only ever read when something is already wrong - the worst moment to discover the count is off by one, or that the truncation notice appeared when nothing was truncated
-	// - the inline copies this replaced were untested too, so this is not a regression being fixed - extracting them was simply the first point where one test could cover all three
+	// - a failure message is read only when something is already wrong
+	// - that is the worst moment to discover the count is off by one
 	public class FailureReportTests
 	{
 		[Fact]
@@ -26,8 +25,7 @@ namespace Chummer.Tests
 			Assert.DoesNotContain("more", message);
 		}
 
-		// The off-by-one that matters: one over the limit has to print the limit
-		// and say the count of what it left out, not the total.
+		// One over the limit must report the count left out, not the total.
 		[Fact]
 		public void OneOverTheLimitPrintsTheLimitAndNamesTheRemainder()
 		{
@@ -47,7 +45,7 @@ namespace Chummer.Tests
 			Assert.EndsWith("\n  ... and 37 more", message);
 		}
 
-		// Counts finding lines, so the truncation notice does not count as one.
+		// The truncation notice must not count as a finding line.
 		private static int CountLines(string message)
 		{
 			return message.Split('\n').Skip(1).Count(line => !line.StartsWith("  ... and "));
