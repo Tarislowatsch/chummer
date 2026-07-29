@@ -4,12 +4,9 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - the two theories next door only ever assert that today's files hold nothing unexpected - the book-code one finds nothing at all, so all 23 of its cases would pass unchanged if the detection underneath stopped detecting
-	// - the real data has no near-miss to notice the difference: no code differing only in case, no category differing only in padding
-	// - these drive the same code with hand-built XML instead, so the rules are pinned by something that fails when they change
-	//
-	// - the pair of axis decisions is the main thing being held down here: book references are gathered with the deep axis because <source> means the same thing at any depth, while category usages are gathered from direct children only because a nested <category> belongs to a reference no dropdown can select
-	// - two opposite calls, made in the same change, each correct for its own reason - exactly the pair that a later "let's make these consistent" tidy-up would break, and that no assertion over the real files would catch
+	// - the theories over the real files cannot pin these rules: the data has no near-miss cases
+	// - the axis pair matters most: deep for <source>, direct children only for <category>
+	// - each axis call is deliberate: a tidy-up making them consistent breaks one of them
 	public class ReferenceIntegrityDetectionTests
 	{
 		private static readonly string[] DeclaredCodes = { "SR4", "SM", "AR" };
@@ -26,8 +23,7 @@ namespace Chummer.Tests
 			Assert.Empty(UndeclaredCodesIn(Catalogue(Entry("Ares Predator", "SR4"))));
 		}
 
-		// - pins the ordinal comparison: Options.BookXPath() emits source = "SR4" and XPath equality is exact, so a lower-cased code really does fail to match there
-		// - reporting it as fine here would describe behaviour the application does not have
+		// Ordinal on purpose: Options.BookXPath() emits source = "SR4", XPath equality is exact.
 		[Fact]
 		public void CodeDifferingOnlyInCaseIsUndeclared()
 		{
@@ -40,7 +36,8 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { "SR4 " }, UndeclaredCodesIn(Catalogue(Entry("Ares Predator", "SR4 "))));
 		}
 
-		// - the deep axis, pinned: metatypes.xml and critters.xml put 127 of their <source> elements one level further down, on metavariants, so an item-anchored query would skip every one of them without failing
+		// - metatypes.xml and critters.xml put <source> on metavariants, one level further down
+		// - an item-anchored query would skip them all without failing
 		[Fact]
 		public void SourceBelowTheItemLevelIsStillFound()
 		{
@@ -49,8 +46,7 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { "XYZ" }, UndeclaredCodesIn(document));
 		}
 
-		// The failure message has to name the metavariant, not the metatype that
-		// contains it: "Dwarf cites XYZ" would send a reader to the wrong element.
+		// Naming the containing metatype would send a reader to the wrong element.
 		[Fact]
 		public void NestedSourceIsAttributedToTheNearestNamedElement()
 		{
@@ -76,8 +72,7 @@ namespace Chummer.Tests
 			Assert.Empty(UndeclaredCategoriesIn(new[] { "Bike", "Car" }, Entry("Dodge Scoot", category: "Bike")));
 		}
 
-		// Ordinal again, and for the same reason: the picker queries
-		// category = "Bike", so "bike" selects nothing.
+		// Ordinal again, for the same reason as the book codes.
 		[Fact]
 		public void CategoryDifferingOnlyInCaseIsUndeclared()
 		{
@@ -85,7 +80,7 @@ namespace Chummer.Tests
 				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "bike")));
 		}
 
-		// - symmetry with CodeWithSurroundingWhitespaceIsUndeclared: both sides build their own ordinal set, so neither inherits the other's guarantee, even though within one side case and padding do share a lookup
+		// Neither side inherits the other's guarantee: each builds its own ordinal set.
 		[Fact]
 		public void CategoryWithSurroundingWhitespaceIsUndeclared()
 		{
@@ -93,8 +88,8 @@ namespace Chummer.Tests
 				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "Bike ")));
 		}
 
-		// - the shallow axis, pinned - the mirror image of SourceBelowTheItemLevelIsStillFound above
-		// - a <category> on a nested reference is not a catalogue entry's category and must not be checked against the declaration block, or files like cyberware.xml would report the categories of their built-in options as undeclared
+		// - the shallow axis, the mirror of SourceBelowTheItemLevelIsStillFound
+		// - checking nested <category> would report cyberware.xml's built-in options as undeclared
 		[Fact]
 		public void CategoryBelowTheItemLevelIsNotAUsage()
 		{
@@ -118,8 +113,7 @@ namespace Chummer.Tests
 				.ToArray();
 		}
 
-		// Goes through the very same contract type the theory over the real files
-		// uses, rather than reimplementing the set difference here.
+		// Reimplementing the set difference here would let these facts drift from the real check.
 		private static string[] UndeclaredCategoriesIn(string[] declared, params XmlElement[] items)
 		{
 			DataPaths.CategoryContract contract = new DataPaths.CategoryContract(
@@ -153,8 +147,7 @@ namespace Chummer.Tests
 			return collection;
 		}
 
-		// item + <metavariants><metavariant><name/><source/></metavariant></...>,
-		// the shape metatypes.xml and critters.xml actually use.
+		// The metavariant shape metatypes.xml and critters.xml actually use.
 		private static XmlElement WithMetavariant(XmlElement item, string name, string source)
 		{
 			XmlDocument document = item.OwnerDocument;
@@ -165,8 +158,7 @@ namespace Chummer.Tests
 			return item;
 		}
 
-		// item + a nested catalogue-shaped child, the way cyberware.xml lists the
-		// options built into a piece of cyberware.
+		// The way cyberware.xml lists the options built into a piece of cyberware.
 		private static XmlElement WithNestedEntry(XmlElement item, string name, string category)
 		{
 			XmlDocument document = item.OwnerDocument;

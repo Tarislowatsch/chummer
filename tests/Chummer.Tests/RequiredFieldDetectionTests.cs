@@ -6,13 +6,9 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - the theory next door finds nothing: all 29 of its cases would pass unchanged if the detection underneath stopped detecting
-	// - and the real data holds no near-miss that would notice the difference - no entry with a <Name> instead of a <name>, none hiding a required element one level deeper
-	// - these drive the same code with hand-built XML instead, so each rule is pinned by something that fails when it changes
-	//
-	// - the boundary worth holding down hardest is presence against content
-	// - an empty element satisfies the contract on purpose, because that is what the code tolerates
-	// - tightening it to "non-empty" would look like a stricter check while reporting 274 entries the application handles perfectly well
+	// - a detection gone blind would leave all 29 data theory cases passing unchanged
+	// - the real data holds no near-miss that would notice the difference
+	// - hand-built XML pins each rule to something that fails when it changes
 	public class RequiredFieldDetectionTests
 	{
 		[Fact]
@@ -29,10 +25,8 @@ namespace Chummer.Tests
 				"name", "avail"));
 		}
 
-		// - the deliberate line between this check and a value check
-		// - 40 programs and 7 program options carry an empty <maxrating>
-		// - clsUnique.cs:5589 reads that element and tests its text for "" before converting, so empty is the data's way of saying "no maximum"
-		// - 33 spells likewise carry an empty <descriptor>
+		// - empty satisfies on purpose: clsUnique.cs:5589 tests the text for "" before converting
+		// - 47 program <maxrating> and 33 spell <descriptor> elements are empty in the real data
 		// - reporting those would make the test disagree with the behaviour it describes
 		[Fact]
 		public void PresentButEmptyElementSatisfiesTheContract()
@@ -41,7 +35,7 @@ namespace Chummer.Tests
 				"name", "maxrating"));
 		}
 
-		// - XmlNode's indexer matches the element name exactly, so a Create reading node["name"] genuinely does not see a <Name>
+		// - XmlNode's indexer is case-sensitive: a Create genuinely does not see a <Name>
 		// - accepting it here would describe a tolerance the application has not got
 		[Fact]
 		public void FieldNameIsMatchedCaseSensitively()
@@ -49,8 +43,8 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { "name" }, AbsentFieldsIn("<gear><Name>Commlink</Name></gear>", "name"));
 		}
 
-		// - the same indexer looks at direct children only, which is what separates a catalogue entry's own <name> from the <name> of a reference nested inside it
-		// - a gear entry whose only <name> sits under <gears> is exactly the shape this has to reject
+		// - the indexer reads direct children only: an entry's <name> is not its reference's
+		// - a gear entry whose only <name> sits under <gears> is exactly the shape to reject
 		[Fact]
 		public void FieldNestedInsideAWrapperDoesNotCount()
 		{
@@ -59,11 +53,8 @@ namespace Chummer.Tests
 					"name"));
 		}
 
-		// - gear.xml is split across three Create methods by category
-		// - the three rules have to cover the collection exactly once each
-		// - an overlap would double-report
-		// - a gap would leave a category unchecked, which is the likelier of the two
-		// - the third rule is written as "not the other two" precisely so a new category lands somewhere
+		// - an overlap would double-report an entry
+		// - a gap would leave a whole category unchecked
 		[Fact]
 		public void TheThreeGearRulesPartitionTheCollection()
 		{
@@ -77,12 +68,12 @@ namespace Chummer.Tests
 
 			Assert.Equal(new[] { "Meta Link" }, MatchedNames("Commlink", document));
 			Assert.Equal(new[] { "Iris Orb" }, MatchedNames("OperatingSystem", document));
-			// - an entry with no <category> at all falls to Gear rather than out of the check, which is the whole point of writing the third rule as a negation
+			// - "Nameless" falls to Gear rather than out of the check: the third rule is a negation
 			Assert.Equal(new[] { "Novacoke", "Nameless" }, MatchedNames("Gear", document));
 		}
 
-		// - CreateChildren recurses into its own result (clsEquipment.cs:9968), so a <usegear> is read the same way however deep it sits
-		// - anchoring the rule to one level would leave the deeper ones unchecked while the case still looked healthy
+		// - CreateChildren recurses into its own result (clsEquipment.cs:9968)
+		// - a rule anchored to one level would leave deeper <usegear> references unchecked
 		[Fact]
 		public void TheUsegearRuleReachesNestedChildren()
 		{
@@ -101,10 +92,9 @@ namespace Chummer.Tests
 				contract.MissingFields.Select(missing => missing.Field).ToArray());
 		}
 
-		// - the mirror image of the test above, and the reason both exist
-		// - clsEquipment.cs:9823 selects "gears/gear" on the catalogue entry and reads it in place, without recursing the way CreateChildren does two lines further down
-		// - so the two sibling rules carry opposite axis decisions on purpose
-		// - that is exactly the pair a later "let us make these consistent" pass would flatten, and only this test would notice
+		// - clsEquipment.cs:9823 selects "gears/gear" in place, without CreateChildren's recursion
+		// - the two sibling rules carry opposite axis decisions on purpose
+		// - a later "make these consistent" pass would flatten exactly this pair
 		[Fact]
 		public void TheChildGearRuleStopsAtTheFirstLevel()
 		{
@@ -118,14 +108,13 @@ namespace Chummer.Tests
 
 			DataPaths.RequiredFieldContract contract = Evaluate("Gear child <gear> reference", document);
 
-			// - the deeper <gear> is neither counted nor faulted for its absent <category>, because no Create ever reads it
+			// - the deeper <gear> is neither counted nor faulted: no Create ever reads it
 			Assert.Equal(2, contract.ItemCount);
 			Assert.Empty(contract.MissingFields);
 		}
 
-		// - <mount> is required of an accessory some weapon builds in and of no other, because clsEquipment.cs:4346 reads it only on that path
-		// - the rule is therefore a predicate over references rather than over the collection
-		// - its two halves have to be tested apart
+		// - clsEquipment.cs:4346 reads <mount> only for an accessory some weapon builds in
+		// - the rule is a predicate over references, not over the collection
 		[Fact]
 		public void AReferencedAccessoryWithoutMountIsReported()
 		{
@@ -173,8 +162,8 @@ namespace Chummer.Tests
 			Assert.Equal("Suite: Basic", contract.MissingFields.Single().ItemName);
 		}
 
-		// - a rule whose file is never scanned produces no contract, no theory case and no failure, so its entity type drops out of the suite in silence
-		// - the real table is correct, which is why this drives the check with a table of its own rather than waiting for a run to reach it
+		// - a rule whose file is never scanned drops its entity type out of the suite in silence
+		// - driven with a hand-built table: the real one holds no orphan to exercise this
 		[Fact]
 		public void ARuleNamingAFileThatWasNotScannedIsRejected()
 		{
@@ -202,9 +191,8 @@ namespace Chummer.Tests
 					new DataPaths.MissingField[0]) });
 		}
 
-		// - the entity name is the theory's case id, so a duplicate makes xUnit drop one case and one rule stops being checked
-		// - without this the only symptom is the entity lookup throwing ArgumentException, which on net48 does not even name the key
-		// - driven with a table of its own for the same reason as the orphan check above
+		// - the entity name is the theory's case id: xUnit silently drops a duplicated case
+		// - the only other symptom is an ArgumentException that on net48 does not even name the key
 		[Fact]
 		public void TwoRulesSharingAnEntityNameAreRejected()
 		{
@@ -235,7 +223,7 @@ namespace Chummer.Tests
 
 		// - the pinned hashes only prove what today's sources hash to, never what a change would do
 		// - these pin the sensitivity itself: what must move the hash, what must not
-		// - without them a rewrite of the extraction could lose a property, get re-pinned, and stay green
+		// - a rewrite of the extraction could otherwise lose a property and get re-pinned green
 		[Fact]
 		public void DeletingAReadChangesTheFingerprint()
 		{
@@ -272,7 +260,8 @@ namespace Chummer.Tests
 					"        _avail  =  objXmlSample[\"avail\"].InnerText;"));
 		}
 
-		// - the sites scan matches across the break, so this scan has to as well or the class drops out of the fingerprint table while the count stays right
+		// - the sites scan matches a signature broken across lines
+		// - a stricter scan here would drop the class while the count guard stayed right
 		[Fact]
 		public void ASignatureBrokenAfterTheParenIsStillFingerprinted()
 		{
@@ -293,7 +282,7 @@ namespace Chummer.Tests
 				DataPaths.FingerprintsIn(lines)["Sample"]);
 		}
 
-		// - the class name is the pinned table's key, so a second Create would silently shadow the first
+		// - a second Create in one class would silently shadow the first under the pinned table's key
 		[Fact]
 		public void TwoCreatesInOneClassAreRejected()
 		{
@@ -332,8 +321,7 @@ namespace Chummer.Tests
 			return DataPaths.FingerprintsIn(lines.ToArray())["Sample"];
 		}
 
-		// Runs the real rule, not a copy of it, so the XPath the suite uses is the
-		// one under test here.
+		// Runs the real rule, not a copy: the XPath under test is the one the suite uses.
 		private static DataPaths.RequiredFieldContract Evaluate(string entity, XmlDocument document)
 		{
 			DataPaths.RequiredFieldRule rule =
@@ -359,8 +347,7 @@ namespace Chummer.Tests
 				.ToArray();
 		}
 
-		// One catalogue accessory with no <mount>, referenced by a weapon under the
-		// name given - the shape weapons.xml uses for a built-in accessory.
+		// Mirrors the shape weapons.xml uses for a built-in accessory.
 		private static XmlDocument WeaponsDocument(string referencedAccessory)
 		{
 			return Document(

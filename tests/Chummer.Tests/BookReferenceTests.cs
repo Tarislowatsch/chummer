@@ -5,18 +5,16 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - every catalogue entry names the book it came out of in <source>
-	// - books.xml is the list of book codes that exist
-	// - the link matters because the application filters on it: Options.BookXPath() builds a predicate over the enabled books that every picker ANDs into its query (see frmSelectWeapon.cs:82, frmSelectArmorMod.cs:58, frmSelectProgramOption.cs:37), so an entry citing a code no book declares can never match an enabled book and is unbuyable no matter which books the character has switched on
-	//
-	// - the data is clean today: 6293 references, 42 declared codes, nothing dangling, so this has no allowlist and nothing to defer - it is here to keep it that way, which is the cheapest moment to add such a check
+	// - a code books.xml does not declare never matches an enabled book: the entry is unbuyable
+	// - filter sites: frmSelectWeapon.cs:82, frmSelectArmorMod.cs:58, frmSelectProgramOption.cs:37
+	// - deliberately no allowlist: the data is clean today
 	public class BookReferenceTests
 	{
 		[Theory]
 		[MemberData(nameof(DataPaths.TopLevelRuleXmlFilesCitingBooks), MemberType = typeof(DataPaths))]
 		public void EverySourceCitesADeclaredBook(string xmlPath)
 		{
-			// - grouped by code rather than listed per reference: a dropped book code takes every entry that cited it down at once, and listing each reference separately would produce hundreds of lines all saying the same thing, hiding how many distinct problems there actually are
+			// Grouped by code: one dropped book is one problem, not hundreds of identical lines.
 			var unknown = DataPaths
 				.ReferencesToUndeclaredBooks(DataPaths.BookReferencesFor(xmlPath), DataPaths.BookCodes)
 				.GroupBy(reference => reference.Code, StringComparer.Ordinal)

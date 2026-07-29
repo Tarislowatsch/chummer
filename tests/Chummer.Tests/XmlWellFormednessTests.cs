@@ -3,8 +3,8 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - nothing in the application catches a malformed file today: clsXmlManager.cs:145 throws XmlException unfiltered, and Program.cs installs neither Application.ThreadException nor AppDomain.UnhandledException, so one stray ampersand in gear.xml is a crash for a user, not a diagnostic here
-	// - each file is its own test case rather than one pass/fail verdict for the whole directory, so a single bad file does not hide the rest
+	// - a malformed file crashes the app: clsXmlManager.cs:145 throws XmlException unfiltered
+	// - per-file cases keep one bad file from hiding the rest
 	public class XmlWellFormednessTests
 	{
 		[Theory]

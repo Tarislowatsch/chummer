@@ -5,11 +5,9 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - the theory next door only ever asserts that today's files hold nothing unexpected: every one of its 42 cases would still pass if the detection underneath it stopped detecting anything at all, or if the comparison rules were quietly relaxed, because the real data has no near-miss pairs to notice the difference
-	// - these drive the same code with hand-built XML instead, so the rules are pinned by something that fails when they change
-	//
-	// - the comparison rules are a deliberate mirror of the application's own name-based XPath lookups, not a preference: entries differing only in case or in surrounding whitespace really are two separately reachable entries there
-	// - that is stated in a comment on BuildKey, but a comment cannot stop a well-meant switch to OrdinalIgnoreCase or Trim() - the two "distinct" facts below can
+	// - the theory over the real files cannot pin the rules: the data has no near-miss pairs
+	// - hand-built XML here fails when the rules change
+	// - case- and whitespace-sensitivity mirrors the application's XPath lookups, not a preference
 	public class NameUniquenessDetectionTests
 	{
 		private static readonly string[] NameOnly = { "name" };
@@ -67,9 +65,9 @@ namespace Chummer.Tests
 			Assert.Single(duplicates);
 		}
 
-		// - a composite key must not be forgeable by shifting the split between its parts: "Brawler" + "Attribute Kits + Gear Kits" and "Brawler + Attribute Kits" + "Gear Kits" both join to "Brawler + Attribute Kits + Gear Kits" if the separator is something a value can itself contain, and would be reported as a duplicate that does not exist
-		// - the U+001F separator is what rules that out, and nothing else in the suite would notice if it were replaced by a printable one
-		// - both entries must carry the separator inside a value: with a fixed two-field key, join always emits exactly one separator, so a construction leaving one field empty cannot collide either way and would pin nothing
+		// - a printable separator lets shifted field splits collide into a phantom duplicate
+		// - nothing else in the suite notices if U+001F is replaced by a printable character
+		// - both entries must embed the separator inside a value or the case pins nothing
 		[Fact]
 		public void CompositeKeyPartsCannotBeForgedByEmbeddingTheSeparator()
 		{
@@ -78,8 +76,8 @@ namespace Chummer.Tests
 				Item("Brawler + Attribute Kits", "Gear Kits")));
 		}
 
-		// - the rule that decides which elements are catalogue entries at all keeps <categories>, <costs> and the skills.xml group wrappers out of the check without a hand-maintained skip list, so it is worth pinning
-		// - were it to start accepting elements without a <name>, those wrappers would flood the theory with meaningless cases
+		// - the no-<name> rule keeps <categories>, <costs> and group wrappers out without a skip list
+		// - accepting nameless elements would flood the theory with wrapper cases
 		[Fact]
 		public void ElementsWithoutANameAreNotEntries()
 		{
@@ -94,15 +92,13 @@ namespace Chummer.Tests
 		[Fact]
 		public void MissingKeyFieldCountsAsEmptyRatherThanThrowing()
 		{
-			// Two entries sharing a name, neither carrying the category the key
-			// asks for, still collide - the absent field cannot make them distinct.
+			// The absent field must not make the two entries distinct.
 			Assert.Single(DuplicateKeysIn(NameAndCategory,
 				Item("Brawler"),
 				Item("Brawler")));
 		}
 
-		// - goes through the very same detection the theory over the real files uses
-		// - reimplementing the grouping here would let the two drift apart, leaving these facts passing while the check they describe had changed
+		// Reimplementing the grouping here would let these facts drift from the check they describe.
 		private static string[] DuplicateKeysIn(string[] keyFields, params XmlElement[] items)
 		{
 			return DataPaths.DuplicateItemKeys(DataPaths.ItemKeysIn(Collection(items), keyFields))

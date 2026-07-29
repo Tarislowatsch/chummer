@@ -6,23 +6,14 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - a declaration block is what a category value has to exist in for anything to resolve it
-	// - the two things that resolve categories both fail silently when it does not
-	//
-	// - a picker builds its dropdown from the block, then browses items by the selected value: frmSelectWeapon.cs:47 fills the combo box and frmSelectWeapon.cs:82 queries /chummer/weapons/weapon[category = "..."], with the two halves joined by nothing but the string
-	// - so an undeclared value has no dropdown entry that would ever select it - the item is in the data, valid, but unreachable
-	//
-	// - translation attaches to the same block and nowhere else: clsXmlManager.cs:226 overlays a language file by matching its category text onto an existing node in the base file, so an undeclared value can never receive a translation, and the untranslated string is what lands on the printed sheet (clsEquipment.cs:304)
-	// - that consequence is milder than unreachability but no less permanent, which is why a collection nothing lists can still be governed
-	//
-	// - which collections answer to which block, and which answer to none, is decided in DataPaths.CategoryDeclarationBlockOverrides - read that off the consuming code rather than off the shape of the data, since the data's blocks overlap by coincidence in several files
+	// - undeclared values are unreachable: dropdown frmSelectWeapon.cs:47, query frmSelectWeapon.cs:82
+	// - translation matches the block (clsXmlManager.cs:226): raw text prints (clsEquipment.cs:304)
+	// - scope is decided in DataPaths.CategoryDeclarationBlockOverrides, off the consuming code
 	public class CategoryDeclarationTests
 	{
-		// - categories the data already uses without declaring them
-		// - fixing these is a separate job with a visible consequence: declaring one either makes items appear in a dropdown that players have never seen there, or starts translating a label that has always printed in English - either way it is a behaviour change to be made deliberately and noted, not a tidy-up to slip in beside the test that found it
-		// - two of the entries are plain typos on the declaration side of the same word ("Periphirals" for Peripherals, "Paranroaml" for Paranormal); the rest are declarations that were simply never written
-		//
-		// - entry format: <file>/<collection>/<category>, one line each, so a resolved case is removed by deleting one line
+		// - declaring one of these is a visible behaviour change to make deliberately, not a tidy-up
+		// - "Periphirals" and "Paranroaml" mirror typos in the data, not typos in this list
+		// - format: <file>/<collection>/<category>, one line per entry
 		private static readonly HashSet<string> KnownUndeclaredCategories = new HashSet<string>(StringComparer.Ordinal)
 		{
 			"armor.xml/mods/Chemical Seal",
@@ -79,7 +70,7 @@ namespace Chummer.Tests
 			}
 		}
 
-		// - same reason the duplicate allowlist has one: an entry that stops being a problem (declaration added, or the last item using it removed) would otherwise sit here forever and cover the next accidental reintroduction of that exact value
+		// Same reason the duplicate allowlist has a staleness check: see NameUniquenessTests.
 		[Fact]
 		public void AllowlistedCategoriesAreAllStillUndeclared()
 		{
@@ -104,8 +95,7 @@ namespace Chummer.Tests
 				+ nameof(KnownUndeclaredCategories) + ":\n  " + string.Join("\n  ", stale));
 		}
 
-		// Matches exactly what a failure message prints, so a category somebody
-		// decides to defer can be copied straight from the output into the list.
+		// Deferred categories are copied verbatim from the failure output into the list.
 		private static string Entry(string xmlPath, string collectionName, string category)
 		{
 			return Path.GetFileName(xmlPath) + "/" + collectionName + "/" + category;
