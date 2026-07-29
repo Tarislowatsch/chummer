@@ -98,6 +98,16 @@ namespace Chummer.Tests
 				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "bike")));
 		}
 
+		// Symmetry with CodeWithSurroundingWhitespaceIsUndeclared. Both sides build
+		// their own ordinal set, so neither inherits the other's guarantee, even
+		// though within one side case and padding do share a lookup.
+		[Fact]
+		public void CategoryWithSurroundingWhitespaceIsUndeclared()
+		{
+			Assert.Equal(new[] { "Bike " },
+				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "Bike ")));
+		}
+
 		// The shallow axis, pinned - the mirror image of
 		// SourceBelowTheItemLevelIsStillFound above. A <category> on a nested
 		// reference is not a catalogue entry's category and must not be checked

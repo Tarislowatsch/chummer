@@ -446,43 +446,11 @@ namespace Chummer.Tests
 				foreach (IGrouping<string, CategoryUsage> collection in file.CategoryUsages
 					.GroupBy(usage => usage.CollectionName, StringComparer.Ordinal))
 				{
-					string key = OverrideKey(file.FileName, collection.Key);
-					if (CollectionsWithoutCategoryDeclarations.Contains(key))
-						continue;
-
 					string block;
-					bool redirected = CategoryDeclarationBlockOverrides.TryGetValue(key, out block);
-					if (!redirected)
-						block = DefaultCategoryDeclarationBlock;
-
 					IReadOnlyCollection<string> declared;
-					if (!file.CategoryDeclarations.TryGetValue(block, out declared))
+					if (!TryResolveDeclarationBlock(file.FileName, collection.Key,
+							file.CategoryDeclarations, out block, out declared))
 					{
-						// Two very different reasons to land here, and collapsing
-						// them into one skip is how a whole collection leaves the
-						// net without anything saying so.
-						//
-						// A file with no <categories> block at all simply has no
-						// local contract - lifestyles.xml and ranges.xml carry
-						// categories that nothing declares anywhere, and that is
-						// the data's shape, not a defect. Skip.
-						//
-						// A redirect naming a block the file does not have is a
-						// typo in a hand-maintained list. Misspell "modcategories"
-						// and vehicles.xml/mods - 321 entries - drops out of the
-						// check entirely, with the count guard left to report
-						// "19 instead of 20" and no hint as to which collection
-						// vanished or why. Same reasoning as the duplicate-wrapper
-						// throw in IndexRuleCollections below: a named failure
-						// beats a silence that still looks healthy.
-						if (redirected)
-						{
-							throw new InvalidOperationException(
-								key + " is redirected to <" + block + ">, which "
-								+ file.FileName + " does not contain. Its categories would go "
-								+ "unchecked. Fix the override or point it at a block that exists.");
-						}
-
 						continue;
 					}
 
@@ -492,6 +460,60 @@ namespace Chummer.Tests
 			}
 
 			return contracts;
+		}
+
+		// Which block a collection answers to, given what its file declares.
+		//
+		// Split out of BuildCategoryContracts and taking the declarations as an
+		// argument rather than reading the cached corpus, because the throw below
+		// is otherwise unreachable from a test: the real override is correct, so
+		// nothing in a run would ever execute it, and the only evidence it works
+		// would be a mutation somebody did once by hand. Passing declarations in
+		// makes both outcomes drivable.
+		//
+		// False means out of scope, for two reasons that are deliberately not the
+		// same as each other. A collection listed as answering to nothing is
+		// exempt. A file that carries no such block at all has no local contract -
+		// lifestyles.xml and ranges.xml hold categories nothing declares anywhere,
+		// which is the data's shape, not a defect.
+		//
+		// A redirect naming a block the file does not carry is neither: it is a
+		// typo in a hand-maintained list, and staying quiet about it takes the
+		// whole collection out of the check. Misspell "modcategories" and
+		// vehicles.xml/mods - 321 entries - stops being examined, leaving the count
+		// guard to report "19 instead of 20" with no hint which collection went
+		// missing. Same reasoning as the duplicate-wrapper throw in
+		// IndexRuleCollections: a named failure beats a silence that still looks
+		// healthy.
+		public static bool TryResolveDeclarationBlock(string xmlFileName, string collectionName,
+			IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations,
+			out string block, out IReadOnlyCollection<string> declared)
+		{
+			declared = null;
+
+			string key = OverrideKey(xmlFileName, collectionName);
+			if (CollectionsWithoutCategoryDeclarations.Contains(key))
+			{
+				block = null;
+				return false;
+			}
+
+			bool redirected = CategoryDeclarationBlockOverrides.TryGetValue(key, out block);
+			if (!redirected)
+				block = DefaultCategoryDeclarationBlock;
+
+			if (declarations.TryGetValue(block, out declared))
+				return true;
+
+			if (redirected)
+			{
+				throw new InvalidOperationException(
+					key + " is redirected to <" + block + ">, which " + xmlFileName
+					+ " does not contain. Its categories would go unchecked. Fix the override "
+					+ "or point it at a block that exists.");
+			}
+
+			return false;
 		}
 
 		// Keyed by file *name*, not full path - deliberately a different key space
@@ -601,10 +623,26 @@ namespace Chummer.Tests
 
 					if (DeclarationBlockNames.Contains(collection.Name))
 					{
-						declarations[collection.Name] = collection.ChildNodes.Cast<XmlNode>()
+						if (declarations.ContainsKey(collection.Name))
+						{
+							// Indexer assignment would have kept the last block and
+							// dropped the first without a word. The symptom is at
+							// least loud - every value declared only in the first
+							// block starts being reported as undeclared - but it
+							// points at the data rather than at the parse, which is
+							// a long way to walk back. Same call as the duplicate
+							// collection wrapper in IndexRuleCollections.
+							throw new InvalidOperationException(
+								"Two <" + collection.Name + "> blocks in " + fileName
+								+ ". The category check reads one declaration set per block, so "
+								+ "the second would replace the first and everything declared "
+								+ "only in the first would look undeclared.");
+						}
+
+						declarations.Add(collection.Name, collection.ChildNodes.Cast<XmlNode>()
 							.Where(entry => entry.NodeType == XmlNodeType.Element)
 							.Select(entry => entry.InnerText)
-							.ToArray();
+							.ToArray());
 						continue;
 					}
 

@@ -15,7 +15,10 @@ namespace Chummer.Tests
 		// Enough to print a whole collection's worth of a systematic mistake -
 		// today's worst case is 17 in one collection - without an unbounded
 		// message when a future file racks up hundreds.
-		private const int MaxLines = 20;
+		// Internal rather than private so the tests can pin the boundary against
+		// this number instead of repeating a 20 that would silently disagree if
+		// the limit ever moved.
+		internal const int MaxLines = 20;
 
 		public static string Build<T>(string headline, IReadOnlyList<T> findings, Func<T, string> describe)
 		{
