@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace Chummer.Tests
@@ -21,10 +20,6 @@ namespace Chummer.Tests
 	// per-collection cases below iterate over.
 	public class NameUniquenessTests
 	{
-		// Enough to print every duplicate this repo has in its worst collection
-		// today without an unbounded message if a future file racks up hundreds.
-		private const int MaxDuplicatesInMessage = 20;
-
 		// Duplicates that already exist in the data. Resolving them is a separate
 		// job: each one is either a real duplicate to delete or two different
 		// things that happen to share a name and need renaming plus a sweep of
@@ -70,23 +65,13 @@ namespace Chummer.Tests
 
 			if (unexpected.Length > 0)
 			{
-				StringBuilder message = new StringBuilder();
-				message.Append(Path.GetFileName(xmlPath)).Append(" has ").Append(unexpected.Length)
-					.Append(" duplicate name(s) in <").Append(collectionName).Append(">")
-					.Append(" (key: ")
-					.Append(string.Join(" + ", DataPaths.RuleCollectionFor(xmlPath, collectionName).KeyFields))
-					.Append("):");
-				foreach (KeyValuePair<string, int> pair in unexpected.Take(MaxDuplicatesInMessage))
-				{
-					message.Append("\n  '").Append(Display(pair.Key)).Append("' appears ")
-						.Append(pair.Value).Append(" times");
-				}
-				if (unexpected.Length > MaxDuplicatesInMessage)
-				{
-					message.Append("\n  ... and ").Append(unexpected.Length - MaxDuplicatesInMessage)
-						.Append(" more");
-				}
-				Assert.Fail(message.ToString());
+				Assert.Fail(FailureReport.Build(
+					Path.GetFileName(xmlPath) + " has " + unexpected.Length
+						+ " duplicate name(s) in <" + collectionName + "> (key: "
+						+ string.Join(" + ", DataPaths.RuleCollectionFor(xmlPath, collectionName).KeyFields)
+						+ ")",
+					unexpected,
+					pair => "'" + Display(pair.Key) + "' appears " + pair.Value + " times"));
 			}
 		}
 

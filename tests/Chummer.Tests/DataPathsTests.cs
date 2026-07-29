@@ -57,5 +57,61 @@ namespace Chummer.Tests
 		{
 			Assert.Equal(42, DataPaths.TopLevelRuleXmlCollections().Count());
 		}
+
+		// Exact for the same reason again, and here the number is derivable rather
+		// than merely observed: 27 top-level data files, of which four carry no
+		// <source> at all - books.xml (it is the declaration side), improvements.xml,
+		// packs.xml and ranges.xml. If a file ever stopped being scanned, its book
+		// references would go unchecked with nothing else to notice.
+		[Fact]
+		public void TopLevelRuleXmlFilesCitingBooksFindsEveryCitingFile()
+		{
+			Assert.Equal(23, DataPaths.TopLevelRuleXmlFilesCitingBooks().Count());
+		}
+
+		// Likewise derivable, and worth spelling out because three separate rules
+		// combine to produce it: 24 collections have items carrying <category>;
+		// two of them (weapons.xml/mods, programs.xml/options) are deliberately
+		// exempt because no code resolves their categories against any block; and
+		// two more (lifestyles.xml/qualities, ranges.xml/ranges) sit in files that
+		// declare no block at all, so there is no local contract to check.
+		// 24 - 2 - 2 = 20. Any of those three rules quietly changing scope shows up
+		// here as a number that no longer adds up.
+		[Fact]
+		public void CategoryKeyedCollectionsCoversEveryGovernedCollection()
+		{
+			Assert.Equal(20, DataPaths.CategoryKeyedCollections().Count());
+		}
+
+		// The scope exceptions are a hand-written list, and a stale entry fails
+		// quietly in a way the count above cannot separate from a legitimate
+		// change: rename a collection and its exemption stops applying to
+		// anything, so the collection silently starts being checked (or, for a
+		// redirect, throws somewhere unrelated). Both structures are covered
+		// together because a key belongs to exactly one of them and the failure
+		// mode is identical.
+		[Fact]
+		public void CategoryScopeExceptionsAllNameARealCollection()
+		{
+			string[] known = DataPaths.CollectionsUsingCategories().ToArray();
+
+			string[] stale = DataPaths.CategoryScopeExceptionKeys()
+				.Where(key => !known.Contains(key))
+				.ToArray();
+
+			Assert.True(stale.Length == 0,
+				"These category scope exceptions name a (file, collection) that carries no "
+				+ "<category> any more:\n  " + string.Join("\n  ", stale));
+		}
+
+		// The declaration side of the book-code check, guarded like the rest.
+		// The theory over the data would fail loudly if this came back empty, but
+		// it cannot notice books.xml quietly losing a code that no entry happens
+		// to cite - and the next entry to cite it would then look like the defect.
+		[Fact]
+		public void BookCodesFindsEveryDeclaredBook()
+		{
+			Assert.Equal(42, DataPaths.BookCodes.Count);
+		}
 	}
 }

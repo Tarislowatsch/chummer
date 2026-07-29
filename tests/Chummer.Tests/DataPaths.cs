@@ -113,6 +113,87 @@ namespace Chummer.Tests
 				: NameOnlyKeyFields;
 		}
 
+		// Which declaration block a collection's <category> values have to appear
+		// in. The default is the file's own <categories> block; the two structures
+		// below hold only the deviations, so a collection added to the data later
+		// is checked unless somebody deliberately exempts it. That direction
+		// matters: an inclusion list would leave new collections silently
+		// unchecked.
+		//
+		// The rule, applied uniformly: a collection is governed by a block when
+		// some code resolves its <category> against that block. What a failure
+		// costs varies, and deliberately does not decide membership - "no dropdown
+		// reads it" is not the same as "nothing reads it":
+		// - Reachability, where a picker builds its list from the block and then
+		//   browses by the selected value (frmSelectWeapon.cs:47 and :82). An
+		//   undeclared value is unreachable in the UI.
+		// - Translation, where the block is the only place a translated label can
+		//   attach. clsXmlManager.cs:226 overlays a language file by matching its
+		//   category text against an existing node in the base file, so undeclared
+		//   means no node means no translation, permanently - and the untranslated
+		//   category goes onto the printed sheet (ArmorMod.Print, clsEquipment.cs:304).
+		// Both are silent, and both are the failure mode this check exists for.
+		//
+		// Hence the deviations, each read off the consuming code:
+		// - vehicles.xml/mods answers to <modcategories>, via
+		//   frmSelectVehicleMod.cs:585. VehicleMod also resolves its category twice
+		//   more, at clsEquipment.cs:13453 and :13628, but against /chummer/categories
+		//   - the *vehicle* block ("Bike", "Car", ...), which no mod category can
+		//   ever match. Those two are a bug, not a second contract, and encoding
+		//   them here would pin a defect in place; they are tracked separately.
+		// - weapons.xml/mods answers to nothing. WeaponMod translates its name and
+		//   page (clsEquipment.cs:8021-8029) and stops there - no category lookup
+		//   anywhere - and every /chummer/mods/mod query in the codebase selects by
+		//   name. frmSelectWeaponAccessory browses by mount and book.
+		// - programs.xml/options answers to nothing either, and for a stronger
+		//   reason: TechProgramOption (clsUnique.cs:6144) has no category member at
+		//   all. frmSelectProgramOption.cs:37 groups by programtypes/programtype,
+		//   not by <category>. Note this is *not* explained by the broken lookup at
+		//   clsUnique.cs:5868 - that one is TechProgram.DisplayCategory, which
+		//   belongs to programs.xml/programs, a collection already checked here and
+		//   clean.
+		//
+		// armor.xml/mods is deliberately absent, and was exempted here in an earlier
+		// version on the grounds that no form lists its categories. True, and beside
+		// the point: ArmorMod resolves them at clsEquipment.cs:107 and :281 into
+		// _strAltCategory, which DisplayCategory (:416) prints. Its contract is the
+		// same translation-only one that keeps vehicles.xml/mods in scope, so
+		// exempting one and keeping the other was an inconsistency rather than a
+		// judgement. The coincidence worth naming is narrower than it first looks:
+		// three of armor.xml/mods' eight values also appear in armor.xml's
+		// <categories>, and programs.xml/options' "Hacking" likewise. Overlap is
+		// evidence of nothing either way - only the consuming code decides.
+		// Collections answering to a block other than the default one.
+		private static readonly IReadOnlyDictionary<string, string> CategoryDeclarationBlockOverrides =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "vehicles.xml/mods", "modcategories" },
+			};
+
+		// Collections answering to no block at all, and therefore not checked.
+		// Deliberately a second structure rather than a null value in the map
+		// above: "redirected somewhere else" and "governed by nothing" are
+		// different statements, they fail in different ways when they are wrong,
+		// and BuildCategoryContracts has to tell them apart. Spelling that as
+		// block == null made it a null check wearing the clothes of a comparison.
+		private static readonly HashSet<string> CollectionsWithoutCategoryDeclarations =
+			new HashSet<string>(StringComparer.Ordinal)
+			{
+				"weapons.xml/mods",
+				"programs.xml/options",
+			};
+
+		private const string DefaultCategoryDeclarationBlock = "categories";
+
+		// The block names worth collecting while parsing. Derived from the default
+		// plus whatever the override map points at, so adding an override cannot
+		// leave its target block ungathered. Anything else under the root is a
+		// catalogue collection, whose InnerText is meaningless as a declaration.
+		private static readonly HashSet<string> DeclarationBlockNames =
+			new HashSet<string>(
+				new[] { DefaultCategoryDeclarationBlock }.Concat(CategoryDeclarationBlockOverrides.Values),
+				StringComparer.Ordinal);
+
 		// One collection of catalogue entries, reduced to the lookup keys of its
 		// items - which is all the uniqueness check needs.
 		public sealed class RuleCollection
@@ -135,6 +216,72 @@ namespace Chummer.Tests
 			public IReadOnlyList<string> ItemKeys { get; }
 		}
 
+		// One <source> element: a reference to a book code declared in books.xml.
+		public sealed class BookReference
+		{
+			public BookReference(string code, string itemName)
+			{
+				Code = code;
+				ItemName = itemName;
+			}
+
+			public string Code { get; }
+
+			// Nearest enclosing element carrying a <name>, so a failure can say
+			// which entry holds the bad code instead of only which file.
+			public string ItemName { get; }
+		}
+
+		// One catalogue entry's <category> value, with enough context to name it
+		// in a failure message.
+		public sealed class CategoryUsage
+		{
+			public CategoryUsage(string collectionName, string category, string itemName)
+			{
+				CollectionName = collectionName;
+				Category = category;
+				ItemName = itemName;
+			}
+
+			public string CollectionName { get; }
+
+			public string Category { get; }
+
+			public string ItemName { get; }
+		}
+
+		// Everything the data tests need from one top-level rule file, so the file
+		// is opened and parsed exactly once for all of them.
+		public sealed class RuleFile
+		{
+			public RuleFile(string filePath, IReadOnlyList<RuleCollection> collections,
+				IReadOnlyList<BookReference> bookReferences,
+				IReadOnlyDictionary<string, IReadOnlyCollection<string>> categoryDeclarations,
+				IReadOnlyList<CategoryUsage> categoryUsages)
+			{
+				FilePath = filePath;
+				Collections = collections;
+				BookReferences = bookReferences;
+				CategoryDeclarations = categoryDeclarations;
+				CategoryUsages = categoryUsages;
+			}
+
+			public string FilePath { get; }
+
+			public string FileName => Path.GetFileName(FilePath);
+
+			public IReadOnlyList<RuleCollection> Collections { get; }
+
+			public IReadOnlyList<BookReference> BookReferences { get; }
+
+			// Declaration block name -> the values it declares. Only blocks named
+			// in DeclarationBlockNames are gathered; a file with none is simply
+			// absent from the category check.
+			public IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarations { get; }
+
+			public IReadOnlyList<CategoryUsage> CategoryUsages { get; }
+		}
+
 		// Parsed once, then reused. Without this the same documents get reparsed
 		// roughly five times over - once to discover the collections, once per
 		// theory case, and once more per collection for the allowlist guard.
@@ -146,8 +293,15 @@ namespace Chummer.Tests
 		// XmlDocument promises thread safety only for static members, so sharing
 		// live documents would be a trap waiting for the next test class that uses
 		// this helper. Strings cannot have that problem.
+		// Everything derived from these documents hangs off this one pass for the
+		// same reason - the book-code and category checks read from the RuleFile
+		// records below rather than opening the corpus again.
+		private static readonly Lazy<IReadOnlyList<RuleFile>> CachedRuleFiles =
+			new Lazy<IReadOnlyList<RuleFile>>(LoadTopLevelRuleFiles);
+
 		private static readonly Lazy<IReadOnlyList<RuleCollection>> CachedRuleCollections =
-			new Lazy<IReadOnlyList<RuleCollection>>(LoadTopLevelRuleCollections);
+			new Lazy<IReadOnlyList<RuleCollection>>(
+				() => CachedRuleFiles.Value.SelectMany(file => file.Collections).ToArray());
 
 		// Every (file, collection) pair whose entries are identified by <name>.
 		// Which collections those are is read off the data instead of being listed
@@ -168,6 +322,228 @@ namespace Chummer.Tests
 		public static RuleCollection RuleCollectionFor(string xmlPath, string collectionName)
 		{
 			return CachedRuleCollectionsByKey.Value[IndexKey(xmlPath, collectionName)];
+		}
+
+		// The 42 book codes books.xml declares - the set every <source> has to
+		// land in.
+		// Read on its own rather than folded into the per-file pass above: the
+		// declaration lives at /chummer/books/book/code, a shape no other file
+		// shares, and threading it through the generic loop would mean
+		// special-casing a filename in the middle of it. One small file parsed
+		// once is the cheaper trade.
+		public static IReadOnlyCollection<string> BookCodes => CachedBookCodes.Value;
+
+		private static readonly Lazy<IReadOnlyCollection<string>> CachedBookCodes =
+			new Lazy<IReadOnlyCollection<string>>(LoadBookCodes);
+
+		private static IReadOnlyCollection<string> LoadBookCodes()
+		{
+			XmlDocument document = new XmlDocument { XmlResolver = null };
+			document.Load(Path.Combine(ChummerDataDir, "books.xml"));
+
+			return new HashSet<string>(
+				document.SelectNodes("/chummer/books/book/code").Cast<XmlNode>()
+					.Select(node => node.InnerText),
+				StringComparer.Ordinal);
+		}
+
+		// One case per top-level file that actually cites a book. Files with no
+		// <source> at all (books.xml itself, and the handful of lookup tables)
+		// are left out rather than contributing empty, always-green cases; the
+		// exact-count guard in DataPathsTests is what keeps that omission from
+		// quietly growing.
+		public static IEnumerable<object[]> TopLevelRuleXmlFilesCitingBooks()
+		{
+			return CachedRuleFiles.Value
+				.Where(file => file.BookReferences.Count > 0)
+				.Select(file => new object[] { file.FilePath });
+		}
+
+		public static IReadOnlyList<BookReference> BookReferencesFor(string xmlPath)
+		{
+			return CachedRuleFilesByPath.Value[xmlPath].BookReferences;
+		}
+
+		private static readonly Lazy<IReadOnlyDictionary<string, RuleFile>> CachedRuleFilesByPath =
+			new Lazy<IReadOnlyDictionary<string, RuleFile>>(
+				() => CachedRuleFiles.Value.ToDictionary(file => file.FilePath, StringComparer.Ordinal));
+
+		// What a single collection owes its declaration block: the values its items
+		// use, and the values that block declares.
+		public sealed class CategoryContract
+		{
+			public CategoryContract(string filePath, string collectionName, string declarationBlock,
+				IEnumerable<string> declaredCategories, IReadOnlyList<CategoryUsage> usages)
+			{
+				FilePath = filePath;
+				CollectionName = collectionName;
+				DeclarationBlock = declarationBlock;
+				// Ordinal, and built here rather than taken as given, for the same
+				// reason as ReferencesToUndeclaredBooks: the picker matches
+				// category = "..." in XPath, which is exact, and the comparison rule
+				// belongs with the check that documents it.
+				DeclaredCategories = new HashSet<string>(declaredCategories, StringComparer.Ordinal);
+				Usages = usages;
+			}
+
+			public string FilePath { get; }
+
+			public string CollectionName { get; }
+
+			// Which block governs - "categories" for almost everything,
+			// "modcategories" for vehicle mods.
+			public string DeclarationBlock { get; }
+
+			public IReadOnlyCollection<string> DeclaredCategories { get; }
+
+			public IReadOnlyList<CategoryUsage> Usages { get; }
+
+			// Every usage whose value the block does not declare - one per affected
+			// entry, not per distinct value, so a caller can count the entries or
+			// name one of them. Grouping is left to the caller because the two here
+			// want different things: the failure message groups by value, while the
+			// allowlist guard needs the raw values.
+			public IEnumerable<CategoryUsage> UndeclaredUsages()
+			{
+				return Usages.Where(usage => !DeclaredCategories.Contains(usage.Category));
+			}
+		}
+
+		// Every (file, collection) whose <category> is answerable to a declaration
+		// block. Three conditions have to hold, and each rules out a real case in
+		// today's data:
+		// - the collection's items carry <category> at all (weapons.xml/accessories
+		//   has none);
+		// - the file declares the governing block (lifestyles.xml and ranges.xml
+		//   have items with categories but no <categories> block anywhere, so there
+		//   is no local contract to check - and no code reads one for them);
+		// - the collection is not exempted by the override map above.
+		public static IEnumerable<object[]> CategoryKeyedCollections()
+		{
+			return CachedCategoryContracts.Value
+				.Select(contract => new object[] { contract.FilePath, contract.CollectionName });
+		}
+
+		public static CategoryContract CategoryContractFor(string xmlPath, string collectionName)
+		{
+			return CachedCategoryContractsByKey.Value[IndexKey(xmlPath, collectionName)];
+		}
+
+		private static readonly Lazy<IReadOnlyList<CategoryContract>> CachedCategoryContracts =
+			new Lazy<IReadOnlyList<CategoryContract>>(BuildCategoryContracts);
+
+		private static readonly Lazy<IReadOnlyDictionary<string, CategoryContract>> CachedCategoryContractsByKey =
+			new Lazy<IReadOnlyDictionary<string, CategoryContract>>(
+				() => CachedCategoryContracts.Value.ToDictionary(
+					contract => IndexKey(contract.FilePath, contract.CollectionName), StringComparer.Ordinal));
+
+		private static IReadOnlyList<CategoryContract> BuildCategoryContracts()
+		{
+			List<CategoryContract> contracts = new List<CategoryContract>();
+
+			foreach (RuleFile file in CachedRuleFiles.Value)
+			{
+				foreach (IGrouping<string, CategoryUsage> collection in file.CategoryUsages
+					.GroupBy(usage => usage.CollectionName, StringComparer.Ordinal))
+				{
+					string block;
+					IReadOnlyCollection<string> declared;
+					if (!TryResolveDeclarationBlock(file.FileName, collection.Key,
+							file.CategoryDeclarations, out block, out declared))
+					{
+						continue;
+					}
+
+					contracts.Add(new CategoryContract(file.FilePath, collection.Key, block,
+						declared, collection.ToArray()));
+				}
+			}
+
+			return contracts;
+		}
+
+		// Which block a collection answers to, given what its file declares.
+		//
+		// Split out of BuildCategoryContracts and taking the declarations as an
+		// argument rather than reading the cached corpus, because the throw below
+		// is otherwise unreachable from a test: the real override is correct, so
+		// nothing in a run would ever execute it, and the only evidence it works
+		// would be a mutation somebody did once by hand. Passing declarations in
+		// makes both outcomes drivable.
+		//
+		// False means out of scope, for two reasons that are deliberately not the
+		// same as each other. A collection listed as answering to nothing is
+		// exempt. A file that carries no such block at all has no local contract -
+		// lifestyles.xml and ranges.xml hold categories nothing declares anywhere,
+		// which is the data's shape, not a defect.
+		//
+		// A redirect naming a block the file does not carry is neither: it is a
+		// typo in a hand-maintained list, and staying quiet about it takes the
+		// whole collection out of the check. Misspell "modcategories" and
+		// vehicles.xml/mods - 321 entries - stops being examined, leaving the count
+		// guard to report "19 instead of 20" with no hint which collection went
+		// missing. Same reasoning as the duplicate-wrapper throw in
+		// IndexRuleCollections: a named failure beats a silence that still looks
+		// healthy.
+		public static bool TryResolveDeclarationBlock(string xmlFileName, string collectionName,
+			IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations,
+			out string block, out IReadOnlyCollection<string> declared)
+		{
+			declared = null;
+
+			string key = OverrideKey(xmlFileName, collectionName);
+			if (CollectionsWithoutCategoryDeclarations.Contains(key))
+			{
+				block = null;
+				return false;
+			}
+
+			bool redirected = CategoryDeclarationBlockOverrides.TryGetValue(key, out block);
+			if (!redirected)
+				block = DefaultCategoryDeclarationBlock;
+
+			if (declarations.TryGetValue(block, out declared))
+				return true;
+
+			if (redirected)
+			{
+				throw new InvalidOperationException(
+					key + " is redirected to <" + block + ">, which " + xmlFileName
+					+ " does not contain. Its categories would go unchecked. Fix the override "
+					+ "or point it at a block that exists.");
+			}
+
+			return false;
+		}
+
+		// Keyed by file *name*, not full path - deliberately a different key space
+		// from IndexKey's, which identifies a cached collection by path. The two
+		// must not be conflated: these entries are written by hand and have to stay
+		// readable in a source listing.
+		private static string OverrideKey(string xmlFileName, string collectionName)
+		{
+			return xmlFileName + "/" + collectionName;
+		}
+
+		// Every hand-written scope exception, for the guard that checks none of
+		// them has gone stale. A redirect pointing at a missing block throws while
+		// contracts are built; this covers the other direction, where the *key*
+		// names a collection that no longer exists and the entry silently stops
+		// meaning anything.
+		public static IEnumerable<string> CategoryScopeExceptionKeys()
+		{
+			return CategoryDeclarationBlockOverrides.Keys.Concat(CollectionsWithoutCategoryDeclarations)
+				.OrderBy(key => key, StringComparer.Ordinal);
+		}
+
+		// Which (file, collection) pairs carry <category> at all - the universe the
+		// exception keys above have to name a member of.
+		public static IEnumerable<string> CollectionsUsingCategories()
+		{
+			return CachedRuleFiles.Value
+				.SelectMany(file => file.CategoryUsages
+					.Select(usage => OverrideKey(file.FileName, usage.CollectionName)))
+				.Distinct(StringComparer.Ordinal);
 		}
 
 		// A dictionary rather than a scan per call: the allowlist guard asks for
@@ -212,9 +588,9 @@ namespace Chummer.Tests
 			return xmlPath + "/" + collectionName;
 		}
 
-		private static IReadOnlyList<RuleCollection> LoadTopLevelRuleCollections()
+		private static IReadOnlyList<RuleFile> LoadTopLevelRuleFiles()
 		{
-			List<RuleCollection> collections = new List<RuleCollection>();
+			List<RuleFile> files = new List<RuleFile>();
 
 			foreach (string xmlPath in Directory
 				.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
@@ -235,11 +611,42 @@ namespace Chummer.Tests
 					continue;
 
 				string fileName = Path.GetFileName(xmlPath);
+				List<RuleCollection> collections = new List<RuleCollection>();
+				List<CategoryUsage> categoryUsages = new List<CategoryUsage>();
+				Dictionary<string, IReadOnlyCollection<string>> declarations =
+					new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.Ordinal);
 
 				foreach (XmlNode collection in root.ChildNodes)
 				{
 					if (collection.NodeType != XmlNodeType.Element)
 						continue;
+
+					if (DeclarationBlockNames.Contains(collection.Name))
+					{
+						if (declarations.ContainsKey(collection.Name))
+						{
+							// Indexer assignment would have kept the last block and
+							// dropped the first without a word. The symptom is at
+							// least loud - every value declared only in the first
+							// block starts being reported as undeclared - but it
+							// points at the data rather than at the parse, which is
+							// a long way to walk back. Same call as the duplicate
+							// collection wrapper in IndexRuleCollections.
+							throw new InvalidOperationException(
+								"Two <" + collection.Name + "> blocks in " + fileName
+								+ ". The category check reads one declaration set per block, so "
+								+ "the second would replace the first and everything declared "
+								+ "only in the first would look undeclared.");
+						}
+
+						declarations.Add(collection.Name, collection.ChildNodes.Cast<XmlNode>()
+							.Where(entry => entry.NodeType == XmlNodeType.Element)
+							.Select(entry => entry.InnerText)
+							.ToArray());
+						continue;
+					}
+
+					categoryUsages.AddRange(CategoryUsagesIn(collection));
 
 					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
 					IReadOnlyList<string> itemKeys = ItemKeysIn(collection, keyFields);
@@ -249,9 +656,91 @@ namespace Chummer.Tests
 
 					collections.Add(new RuleCollection(xmlPath, collection.Name, keyFields, itemKeys));
 				}
+
+				files.Add(new RuleFile(xmlPath, collections, BookReferencesIn(document),
+					declarations, categoryUsages));
 			}
 
-			return collections;
+			return files;
+		}
+
+		// Every <source> in a document, wherever it sits.
+		//
+		// The unanchored axis is deliberate, and it is the opposite call from the
+		// anchored one the uniqueness check makes above - which is exactly why it
+		// needs stating rather than assuming. <name> has a definition/reference
+		// duality (a nested <cyberware> inside a cybereye is a reference to an
+		// option, not a catalogue entry) and an unanchored query conflates the two.
+		// <source> has no such duality: every occurrence names the book an entry
+		// came out of, at whatever depth it sits.
+		// Measured rather than asserted: over the top-level corpus //source finds
+		// 6293 elements, and they fall into exactly two shapes with nothing left
+		// over - 6166 at /chummer/<collection>/<item>/source, and 127 at
+		// /chummer/metatypes/metatype/metavariants/metavariant/source in
+		// metatypes.xml and critters.xml. Anchoring to collection items the way the
+		// name check does would drop those 127 metavariant references silently,
+		// which is the failure mode this project has already been bitten by in the
+		// other direction.
+		// Public so the detection tests can drive it with hand-built XML: reading it
+		// off the real files only ever shows that today's data is clean, never that
+		// a dangling code would in fact be caught, nor that the axis above is still
+		// the deep one.
+		public static IReadOnlyList<BookReference> BookReferencesIn(XmlDocument document)
+		{
+			return document.SelectNodes("//source").Cast<XmlNode>()
+				.Select(node => new BookReference(node.InnerText, NearestItemName(node)))
+				.ToArray();
+		}
+
+		// The comparison itself, in one place so the theory over the real files and
+		// the hand-built cases that prove it works cannot drift into two
+		// implementations that agree only by luck.
+		// Ordinal and verbatim, for the same reason BuildKey is: Options.BookXPath()
+		// (clsOptions.cs:2086-2090) emits source = "SR4" predicates, and XPath string
+		// equality is exact - no case folding, no trimming. A code differing in case
+		// or padding genuinely does not match there, so treating it as a match here
+		// would make the test disagree with the behaviour it describes.
+		// The ordinal set is rebuilt here rather than trusting whatever comparer the
+		// caller's collection happens to carry: otherwise the rule this method
+		// documents would be decided somewhere else, and the case-sensitivity test
+		// next door could be defeated by passing a differently-compared set.
+		public static IEnumerable<BookReference> ReferencesToUndeclaredBooks(
+			IEnumerable<BookReference> references, IEnumerable<string> declaredCodes)
+		{
+			HashSet<string> declared = new HashSet<string>(declaredCodes, StringComparer.Ordinal);
+
+			return references.Where(reference => !declared.Contains(reference.Code));
+		}
+
+		// Walks up to the closest ancestor that has a <name>, which for a
+		// metavariant <source> is the metavariant itself rather than its metatype -
+		// the more specific of the two, and the one a reader would go looking for.
+		private static string NearestItemName(XmlNode node)
+		{
+			for (XmlNode ancestor = node.ParentNode; ancestor != null; ancestor = ancestor.ParentNode)
+			{
+				XmlElement name = (ancestor as XmlElement)?["name"];
+				if (name != null)
+					return name.InnerText;
+			}
+
+			return "(unnamed)";
+		}
+
+		// Public for the same reason BookReferencesIn is - and this one carries the
+		// opposite axis decision of the two, which makes pinning it by hand the
+		// only way to keep the pair from quietly converging.
+		public static IEnumerable<CategoryUsage> CategoryUsagesIn(XmlNode collection)
+		{
+			// Direct children only, matching how the pickers browse: a form lists
+			// /chummer/weapons/weapon[category = "..."], so only that top level of
+			// items is reachable-by-category in the first place. Deliberately not
+			// the deep axis BookReferencesIn uses: a <category> further down belongs
+			// to a nested reference, which no dropdown ever selects.
+			return collection.ChildNodes.Cast<XmlNode>()
+				.Where(item => item.NodeType == XmlNodeType.Element && item["category"] != null)
+				.Select(item => new CategoryUsage(collection.Name, item["category"].InnerText,
+					item["name"]?.InnerText ?? "(unnamed)"));
 		}
 
 		// The lookup key of every catalogue entry directly under a collection
