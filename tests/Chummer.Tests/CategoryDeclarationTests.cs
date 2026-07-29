@@ -6,42 +6,23 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// A declaration block is what a category value has to exist in for anything to
-	// resolve it, and the two things that resolve categories both fail silently
-	// when it does not.
+	// - a declaration block is what a category value has to exist in for anything to resolve it
+	// - the two things that resolve categories both fail silently when it does not
 	//
-	// A picker builds its dropdown from the block and then browses items by the
-	// selected value - frmSelectWeapon.cs:47 fills the combo box, :82 queries
-	// /chummer/weapons/weapon[category = "..."]. The halves are joined by nothing
-	// but the string, so an undeclared value has no dropdown entry that would ever
-	// select it: the item is in the data, it is valid, and it is unreachable.
+	// - a picker builds its dropdown from the block, then browses items by the selected value: frmSelectWeapon.cs:47 fills the combo box and frmSelectWeapon.cs:82 queries /chummer/weapons/weapon[category = "..."], with the two halves joined by nothing but the string
+	// - so an undeclared value has no dropdown entry that would ever select it - the item is in the data, valid, but unreachable
 	//
-	// Translation attaches to the same block and nowhere else. clsXmlManager.cs:226
-	// overlays a language file by matching its category text onto an existing node
-	// in the base file, so an undeclared value can never receive a translation -
-	// and the untranslated string is what lands on the printed sheet
-	// (clsEquipment.cs:304). That consequence is milder than unreachability but no
-	// less permanent, and it is why a collection nothing lists can still be
-	// governed.
+	// - translation attaches to the same block and nowhere else: clsXmlManager.cs:226 overlays a language file by matching its category text onto an existing node in the base file, so an undeclared value can never receive a translation, and the untranslated string is what lands on the printed sheet (clsEquipment.cs:304)
+	// - that consequence is milder than unreachability but no less permanent, which is why a collection nothing lists can still be governed
 	//
-	// Which collections answer to which block, and which answer to none, is decided
-	// in DataPaths.CategoryDeclarationBlockOverrides - read off the consuming code
-	// rather than off the shape of the data, whose blocks overlap by coincidence in
-	// several files.
+	// - which collections answer to which block, and which answer to none, is decided in DataPaths.CategoryDeclarationBlockOverrides - read that off the consuming code rather than off the shape of the data, since the data's blocks overlap by coincidence in several files
 	public class CategoryDeclarationTests
 	{
-		// Categories the data already uses without declaring them. Fixing these is
-		// a separate job with a visible consequence: declaring one either makes
-		// items appear in a dropdown that players have never seen there, or starts
-		// translating a label that has always printed in English. Either way it is
-		// a behaviour change to be made deliberately and noted, not a tidy-up to
-		// slip in beside the test that found it. Two of the entries are plain
-		// typos on the declaration side of the same word ("Periphirals" for
-		// Peripherals, "Paranroaml" for Paranormal); the rest are declarations
-		// that were simply never written.
+		// - categories the data already uses without declaring them
+		// - fixing these is a separate job with a visible consequence: declaring one either makes items appear in a dropdown that players have never seen there, or starts translating a label that has always printed in English - either way it is a behaviour change to be made deliberately and noted, not a tidy-up to slip in beside the test that found it
+		// - two of the entries are plain typos on the declaration side of the same word ("Periphirals" for Peripherals, "Paranroaml" for Paranormal); the rest are declarations that were simply never written
 		//
-		// Entry format: <file>/<collection>/<category>, one line each so a
-		// resolved case is removed by deleting one line.
+		// - entry format: <file>/<collection>/<category>, one line each, so a resolved case is removed by deleting one line
 		private static readonly HashSet<string> KnownUndeclaredCategories = new HashSet<string>(StringComparer.Ordinal)
 		{
 			"armor.xml/mods/Chemical Seal",
@@ -98,10 +79,7 @@ namespace Chummer.Tests
 			}
 		}
 
-		// Same reason the duplicate allowlist has one: an entry that stops being a
-		// problem - because the declaration was added, or the last item using it
-		// was removed - would otherwise sit here forever and cover the next
-		// accidental reintroduction of that exact value.
+		// - same reason the duplicate allowlist has one: an entry that stops being a problem (declaration added, or the last item using it removed) would otherwise sit here forever and cover the next accidental reintroduction of that exact value
 		[Fact]
 		public void AllowlistedCategoriesAreAllStillUndeclared()
 		{

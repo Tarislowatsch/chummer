@@ -4,21 +4,12 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// The two theories next door only ever assert that today's files hold nothing
-	// unexpected - and the book-code one finds nothing at all, so all 23 of its
-	// cases would pass unchanged if the detection underneath stopped detecting.
-	// The real data has no near-miss to notice the difference: no code differing
-	// only in case, no category differing only in padding. These drive the same
-	// code with hand-built XML instead, so the rules are pinned by something that
-	// fails when they change.
+	// - the two theories next door only ever assert that today's files hold nothing unexpected - the book-code one finds nothing at all, so all 23 of its cases would pass unchanged if the detection underneath stopped detecting
+	// - the real data has no near-miss to notice the difference: no code differing only in case, no category differing only in padding
+	// - these drive the same code with hand-built XML instead, so the rules are pinned by something that fails when they change
 	//
-	// The pair of axis decisions is the main thing being held down here. Book
-	// references are gathered with the deep axis because <source> means the same
-	// thing at any depth; category usages are gathered from direct children only
-	// because a nested <category> belongs to a reference no dropdown can select.
-	// Two opposite calls, made in the same change, each correct for its own
-	// reason - exactly the pair that a later "let's make these consistent" tidy-up
-	// would break, and that no assertion over the real files would catch.
+	// - the pair of axis decisions is the main thing being held down here: book references are gathered with the deep axis because <source> means the same thing at any depth, while category usages are gathered from direct children only because a nested <category> belongs to a reference no dropdown can select
+	// - two opposite calls, made in the same change, each correct for its own reason - exactly the pair that a later "let's make these consistent" tidy-up would break, and that no assertion over the real files would catch
 	public class ReferenceIntegrityDetectionTests
 	{
 		private static readonly string[] DeclaredCodes = { "SR4", "SM", "AR" };
@@ -35,10 +26,8 @@ namespace Chummer.Tests
 			Assert.Empty(UndeclaredCodesIn(Catalogue(Entry("Ares Predator", "SR4"))));
 		}
 
-		// Pins the ordinal comparison. Options.BookXPath() emits source = "SR4",
-		// and XPath equality is exact, so a lower-cased code really does fail to
-		// match there - reporting it as fine here would describe behaviour the
-		// application does not have.
+		// - pins the ordinal comparison: Options.BookXPath() emits source = "SR4" and XPath equality is exact, so a lower-cased code really does fail to match there
+		// - reporting it as fine here would describe behaviour the application does not have
 		[Fact]
 		public void CodeDifferingOnlyInCaseIsUndeclared()
 		{
@@ -51,9 +40,7 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { "SR4 " }, UndeclaredCodesIn(Catalogue(Entry("Ares Predator", "SR4 "))));
 		}
 
-		// The deep axis, pinned. metatypes.xml and critters.xml put 127 of their
-		// <source> elements one level further down, on metavariants, and an
-		// item-anchored query would skip every one of them without failing.
+		// - the deep axis, pinned: metatypes.xml and critters.xml put 127 of their <source> elements one level further down, on metavariants, so an item-anchored query would skip every one of them without failing
 		[Fact]
 		public void SourceBelowTheItemLevelIsStillFound()
 		{
@@ -98,9 +85,7 @@ namespace Chummer.Tests
 				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "bike")));
 		}
 
-		// Symmetry with CodeWithSurroundingWhitespaceIsUndeclared. Both sides build
-		// their own ordinal set, so neither inherits the other's guarantee, even
-		// though within one side case and padding do share a lookup.
+		// - symmetry with CodeWithSurroundingWhitespaceIsUndeclared: both sides build their own ordinal set, so neither inherits the other's guarantee, even though within one side case and padding do share a lookup
 		[Fact]
 		public void CategoryWithSurroundingWhitespaceIsUndeclared()
 		{
@@ -108,11 +93,8 @@ namespace Chummer.Tests
 				UndeclaredCategoriesIn(new[] { "Bike" }, Entry("Dodge Scoot", category: "Bike ")));
 		}
 
-		// The shallow axis, pinned - the mirror image of
-		// SourceBelowTheItemLevelIsStillFound above. A <category> on a nested
-		// reference is not a catalogue entry's category and must not be checked
-		// against the declaration block, or files like cyberware.xml would report
-		// the categories of their built-in options as undeclared.
+		// - the shallow axis, pinned - the mirror image of SourceBelowTheItemLevelIsStillFound above
+		// - a <category> on a nested reference is not a catalogue entry's category and must not be checked against the declaration block, or files like cyberware.xml would report the categories of their built-in options as undeclared
 		[Fact]
 		public void CategoryBelowTheItemLevelIsNotAUsage()
 		{
