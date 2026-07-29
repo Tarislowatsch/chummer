@@ -724,34 +724,57 @@ namespace Chummer.Tests
 
 			foreach (string path in ApplicationSourceFiles())
 			{
-				string[] lines = File.ReadAllLines(path);
-				string className = "(unknown)";
-
-				for (int i = 0; i < lines.Length; i++)
-				{
-					Match declaration = ClassDeclaration.Match(lines[i]);
-					if (declaration.Success)
-						className = declaration.Groups[1].Value;
-
-					Match signature = EntityCreateSignature.Match(lines[i]);
-					if (!signature.Success)
-						continue;
-
-					if (fingerprints.ContainsKey(className))
-					{
-						// - the class name is the key a pinned fingerprint is looked up by, so two Creates in one class would silently keep only the last
-						// - same call as the duplicate collection wrapper in IndexRuleCollections
-						throw new InvalidOperationException(
-							className + " declares more than one Create(XmlNode ...). The "
-							+ "fingerprint is keyed by class, so one of them would go unwatched.");
-					}
-
-					fingerprints.Add(className,
-						Fingerprint(NodeReadsIn(lines, i, signature.Groups[1].Value)));
-				}
+				foreach (KeyValuePair<string, string> entry in FingerprintsIn(File.ReadAllLines(path)))
+					AddFingerprint(fingerprints, entry.Key, entry.Value);
 			}
 
 			return fingerprints;
+		}
+
+		// - one file's worth of fingerprints, public so the detection tests can drive it with hand-built source
+		// - the real methods only ever show today's hashes, never that a deleted read would change one
+		public static IReadOnlyDictionary<string, string> FingerprintsIn(string[] lines)
+		{
+			Dictionary<string, string> fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
+
+			// - matched on the joined text so a signature broken after the paren is found, as in the sites scan
+			string source = string.Join("\n", lines);
+
+			foreach (Match signature in EntityCreateSignature.Matches(source))
+			{
+				int signatureLine = source.Take(signature.Index).Count(character => character == '\n');
+
+				AddFingerprint(fingerprints, ClassNameAbove(lines, signatureLine),
+					Fingerprint(NodeReadsIn(lines, signatureLine, signature.Groups[1].Value)));
+			}
+
+			return fingerprints;
+		}
+
+		// - the class name is the pinned table's key, so a second Create would silently shadow the first
+		private static void AddFingerprint(Dictionary<string, string> fingerprints, string className,
+			string fingerprint)
+		{
+			if (fingerprints.ContainsKey(className))
+			{
+				throw new InvalidOperationException(
+					className + " declares more than one Create(XmlNode ...). The "
+					+ "fingerprint is keyed by class, so one of them would go unwatched.");
+			}
+
+			fingerprints.Add(className, fingerprint);
+		}
+
+		private static string ClassNameAbove(string[] lines, int signatureLine)
+		{
+			for (int i = signatureLine; i >= 0; i--)
+			{
+				Match declaration = ClassDeclaration.Match(lines[i]);
+				if (declaration.Success)
+					return declaration.Groups[1].Value;
+			}
+
+			return "(unknown)";
 		}
 
 		// - the lines inside one Create that its required-field rule was read off

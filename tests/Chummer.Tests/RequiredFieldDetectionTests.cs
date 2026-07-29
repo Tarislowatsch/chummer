@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Xunit;
@@ -145,6 +146,17 @@ namespace Chummer.Tests
 			Assert.Empty(contract.MissingFields);
 		}
 
+		// - the one label branch with no ancestor to borrow a name from
+		[Fact]
+		public void ATopLevelEntryWithoutANameIsReportedAsUnnamed()
+		{
+			DataPaths.MissingField missing = DataPaths.MissingRequiredFieldsIn(
+					Document("<gear><avail>4</avail></gear>").DocumentElement, new[] { "name" })
+				.Single();
+
+			Assert.Equal("(unnamed)", missing.ItemName);
+		}
+
 		// - a nested reference missing its <name> has no name of its own to report
 		// - "(unnamed)" would send a reader hunting through the file
 		// - the catalogue entry holding it is the thing to open
@@ -219,6 +231,105 @@ namespace Chummer.Tests
 		private static DataPaths.RequiredFieldRule RuleNamed(string entity, string fileName)
 		{
 			return new DataPaths.RequiredFieldRule(entity, fileName, "/chummer", new[] { "name" });
+		}
+
+		// - the pinned hashes only prove what today's sources hash to, never what a change would do
+		// - these pin the sensitivity itself: what must move the hash, what must not
+		// - without them a rewrite of the extraction could lose a property, get re-pinned, and stay green
+		[Fact]
+		public void DeletingAReadChangesTheFingerprint()
+		{
+			Assert.NotEqual(
+				FingerprintOf(
+					"_name = objXmlSample[\"name\"].InnerText;",
+					"_avail = objXmlSample[\"avail\"].InnerText;"),
+				FingerprintOf(
+					"_name = objXmlSample[\"name\"].InnerText;"));
+		}
+
+		// - a read moved into a try relaxes the contract without touching the read itself
+		[Fact]
+		public void WrappingAReadInTryChangesTheFingerprint()
+		{
+			Assert.NotEqual(
+				FingerprintOf("_avail = objXmlSample[\"avail\"].InnerText;"),
+				FingerprintOf(
+					"try",
+					"{",
+					"_avail = objXmlSample[\"avail\"].InnerText;",
+					"}",
+					"catch { }"));
+		}
+
+		// - the false-alarm side of the claim: cosmetic edits must not demand a re-pin
+		[Fact]
+		public void CommentsAndReindentationDoNotChangeTheFingerprint()
+		{
+			Assert.Equal(
+				FingerprintOf("_avail = objXmlSample[\"avail\"].InnerText;"),
+				FingerprintOf(
+					"// a comment the hash must not see",
+					"        _avail  =  objXmlSample[\"avail\"].InnerText;"));
+		}
+
+		// - the sites scan matches across the break, so this scan has to as well or the class drops out of the fingerprint table while the count stays right
+		[Fact]
+		public void ASignatureBrokenAfterTheParenIsStillFingerprinted()
+		{
+			string[] lines =
+			{
+				"public class Sample",
+				"{",
+				"	public void Create(",
+				"		XmlNode objXmlSample)",
+				"	{",
+				"		_name = objXmlSample[\"name\"].InnerText;",
+				"	}",
+				"}",
+			};
+
+			Assert.Equal(
+				FingerprintOf("_name = objXmlSample[\"name\"].InnerText;"),
+				DataPaths.FingerprintsIn(lines)["Sample"]);
+		}
+
+		// - the class name is the pinned table's key, so a second Create would silently shadow the first
+		[Fact]
+		public void TwoCreatesInOneClassAreRejected()
+		{
+			string[] lines =
+			{
+				"public class Sample",
+				"{",
+				"	public void Create(XmlNode objXmlSample)",
+				"	{",
+				"	}",
+				"	public void Create(XmlNode objXmlSample, bool blnExtra)",
+				"	{",
+				"	}",
+				"}",
+			};
+
+			InvalidOperationException error = Assert.Throws<InvalidOperationException>(
+				() => DataPaths.FingerprintsIn(lines));
+
+			Assert.Contains("Sample", error.Message);
+		}
+
+		private static string FingerprintOf(params string[] createBody)
+		{
+			List<string> lines = new List<string>
+			{
+				"public class Sample",
+				"{",
+				"	public void Create(XmlNode objXmlSample)",
+				"	{",
+			};
+			lines.AddRange(createBody);
+			lines.Add("	}");
+			lines.Add("}");
+
+			return DataPaths.FingerprintsIn(lines.ToArray())["Sample"];
 		}
 
 		// Runs the real rule, not a copy of it, so the XPath the suite uses is the

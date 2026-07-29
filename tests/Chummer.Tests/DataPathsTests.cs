@@ -167,6 +167,21 @@ namespace Chummer.Tests
 				+ string.Join("\n  ", drifted));
 		}
 
+		// - the drift check above walks the pinned table, so a pin deleted by hand leaves its class unwatched
+		// - the count guard cannot see that either: it counts Create methods, not pins
+		[Fact]
+		public void EveryCreateMethodHasAPinnedFingerprint()
+		{
+			string[] unpinned = DataPaths.EntityCreateFingerprints().Keys
+				.Where(className => !CreateMethodFingerprints.ContainsKey(className))
+				.OrderBy(className => className, StringComparer.Ordinal)
+				.ToArray();
+
+			Assert.True(unpinned.Length == 0,
+				"These Create methods have no pinned fingerprint, so the drift check does not "
+				+ "watch them:\n  " + string.Join("\n  ", unpinned));
+		}
+
 		// - the three gear.xml rules have to cover the collection exactly once each, or an entry is checked against the wrong Create's contract or against none
 		// - the partition is written as a negation so a category nobody anticipated lands in Gear rather than nowhere
 		// - this proves it holds over the real file, where the detection test proves it over a hand-built one
