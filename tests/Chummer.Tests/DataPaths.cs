@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -463,9 +465,9 @@ namespace Chummer.Tests
 		//
 		// - the field lists themselves drift in one direction only, which was measured rather than assumed
 		// - naming a field the code does not read turns red against the data, so an invented requirement cannot survive
-		// - dropping one the code does read stays green, because a requirement nobody checks can never be violated - deleting <response>/<signal> from the Commlink rule leaves all 278 tests passing
-		// - no test over this data can close that half; only the code citation on each rule and a reader following it can
-		// - the standing fix is to move the contract onto the entity itself, where it cannot be copied wrong - a backlog item of its own, gated on the golden master
+		// - dropping one the code does read stays green, because a requirement nobody checks can never be violated
+		// - no assertion over the XML can see that, which is why EntityCreateFingerprints below watches the source instead: when a Create stops reading a field, its rule is flagged for re-deriving
+		// - what remains is the table being edited by hand while the method stays put - only moving the contract onto the entity removes that, which is a backlog item of its own, gated on the golden master
 		//
 		// - top-level files only, in step with the schema and uniqueness checks
 		private static readonly IReadOnlyList<RequiredFieldRule> DeclaredRequiredFieldRules = new[]
@@ -663,8 +665,12 @@ namespace Chummer.Tests
 
 		// - matches the declaration of an entity Create, never a call site: only a declaration names the parameter type
 		// - tolerates a line break after the paren, the one formatting variant that would otherwise read as "no such method"
+		// - captures the parameter name, which is what the fingerprint below looks for inside the body
 		private static readonly Regex EntityCreateSignature =
-			new Regex(@"public\s+void\s+Create\(\s*XmlNode", RegexOptions.Compiled);
+			new Regex(@"public\s+void\s+Create\(\s*XmlNode\s+(\w+)", RegexOptions.Compiled);
+
+		private static readonly Regex ClassDeclaration =
+			new Regex(@"^\s*public\s+(?:sealed\s+)?class\s+(\w+)", RegexOptions.Compiled);
 
 		// - the production side of the rule table: file:line of every entity Create in the application sources
 		// - the table above is hand-written, and every other guard compares it against the data or against itself - none of them can see a Create method the table has never heard of
@@ -674,12 +680,8 @@ namespace Chummer.Tests
 		public static IReadOnlyList<string> EntityCreateMethodSites()
 		{
 			List<string> sites = new List<string>();
-			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
 
-			foreach (string path in Directory
-				.EnumerateFiles(Path.Combine(RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
-				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
-				.OrderBy(path => path, StringComparer.Ordinal))
+			foreach (string path in ApplicationSourceFiles())
 			{
 				string source = File.ReadAllText(path);
 
@@ -691,6 +693,99 @@ namespace Chummer.Tests
 			}
 
 			return sites;
+		}
+
+		// - obj/ is generated and absent from a fresh clone, which would otherwise make results differ between here and CI
+		private static IEnumerable<string> ApplicationSourceFiles()
+		{
+			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
+
+			return Directory
+				.EnumerateFiles(Path.Combine(RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
+				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
+				.OrderBy(path => path, StringComparer.Ordinal);
+		}
+
+		// - the other half of the rule table's defence, and the one that closes its blind side
+		//
+		// - a rule naming a field the code does not read turns red against the data, so an invented requirement cannot survive
+		// - a rule that *drops* a field the code does read stays green forever, because a requirement nobody checks can never be violated
+		// - so the table drifts silently in the permissive direction, and no assertion over the XML can see it
+		//
+		// - this watches the source instead: per entity class, a hash over exactly the lines a rule was derived from - every read of the Create parameter, plus the try/catch structure around them, whitespace-normalised
+		// - deriving the field list mechanically would need judgement this cannot have; noticing that the lines behind it moved needs none
+		// - measured on the real methods: deleting a required read changes the hash, wrapping one in try/catch changes it, an unrelated comment or a reindentation does not
+		// - the try/catch tokens are in there because moving a read into a try relaxes the contract without touching the read itself
+		//
+		// - false alarms are near-free here for as long as the production code is frozen, and an edit to a Create method is exactly when its rule wants re-deriving
+		public static IReadOnlyDictionary<string, string> EntityCreateFingerprints()
+		{
+			Dictionary<string, string> fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
+
+			foreach (string path in ApplicationSourceFiles())
+			{
+				string[] lines = File.ReadAllLines(path);
+				string className = "(unknown)";
+
+				for (int i = 0; i < lines.Length; i++)
+				{
+					Match declaration = ClassDeclaration.Match(lines[i]);
+					if (declaration.Success)
+						className = declaration.Groups[1].Value;
+
+					Match signature = EntityCreateSignature.Match(lines[i]);
+					if (!signature.Success)
+						continue;
+
+					if (fingerprints.ContainsKey(className))
+					{
+						// - the class name is the key a pinned fingerprint is looked up by, so two Creates in one class would silently keep only the last
+						// - same call as the duplicate collection wrapper in IndexRuleCollections
+						throw new InvalidOperationException(
+							className + " declares more than one Create(XmlNode ...). The "
+							+ "fingerprint is keyed by class, so one of them would go unwatched.");
+					}
+
+					fingerprints.Add(className,
+						Fingerprint(NodeReadsIn(lines, i, signature.Groups[1].Value)));
+				}
+			}
+
+			return fingerprints;
+		}
+
+		// - the lines inside one Create that its required-field rule was read off
+		// - the method's extent is found by brace depth rather than by the next signature, so a nested type or lambda cannot end it early
+		private static IEnumerable<string> NodeReadsIn(string[] lines, int signatureLine, string parameter)
+		{
+			Regex read = new Regex(@"\b" + Regex.Escape(parameter) + @"\s*\[");
+			int depth = 0;
+			bool opened = false;
+
+			for (int i = signatureLine; i < lines.Length; i++)
+			{
+				depth += lines[i].Count(character => character == '{')
+					- lines[i].Count(character => character == '}');
+				opened |= lines[i].IndexOf('{') >= 0;
+
+				string line = lines[i].Trim();
+				if (read.IsMatch(line) || line == "try" || line.StartsWith("catch", StringComparison.Ordinal))
+					yield return Regex.Replace(line, @"\s+", " ");
+
+				if (opened && depth <= 0)
+					yield break;
+			}
+		}
+
+		private static string Fingerprint(IEnumerable<string> lines)
+		{
+			using (SHA256 sha = SHA256.Create())
+			{
+				byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+
+				// - 16 hex characters: plenty against accidental collision, short enough that the pinned table stays readable
+				return BitConverter.ToString(hash).Replace("-", string.Empty).Substring(0, 16);
+			}
 		}
 
 		public static IReadOnlyList<RequiredFieldContract> RequiredFieldContracts =>

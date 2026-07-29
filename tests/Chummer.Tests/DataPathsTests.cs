@@ -109,6 +109,64 @@ namespace Chummer.Tests
 				+ nameof(DataPaths.RequiredFieldRules) + ":\n  " + string.Join("\n  ", sites));
 		}
 
+		// - the reads each required-field rule was derived from, pinned per entity class
+		//
+		// - the count guard above notices a Create method arriving or leaving; this notices one changing underneath its rule
+		// - that is the drift the rule table cannot see for itself: a field dropped from a Create stays green forever, because the rule still demands something the data still has
+		// - a hash rather than the lines themselves, because the point is that somebody re-derives the rule, not that this file keeps a second copy of the method
+		//
+		// - what it covers, measured on the real methods rather than assumed: deleting a required read fires, wrapping one in try/catch fires, an unrelated comment or a reindentation does not
+		// - what it does not cover: a field deleted from the rule table by hand while the method stays put - that one no test can see, and only moving the contract onto the entity removes it
+		//
+		// - updating a hash is correct exactly once: after re-reading the changed method and bringing its rule back in line
+		private static readonly IReadOnlyDictionary<string, string> CreateMethodFingerprints =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "Armor", "D96CF8F104A09DD6" },
+				{ "ArmorMod", "CAEF435D72900464" },
+				{ "Commlink", "A1968D0ED944DAA3" },
+				{ "CritterPower", "444EA2340702DA75" },
+				{ "Cyberware", "30EDD3E06D401001" },
+				{ "Gear", "77775E141D4BED8A" },
+				{ "Lifestyle", "90F0A62C8144D083" },
+				{ "MartialArt", "E7ED6B22668C57DB" },
+				{ "MartialArtAdvantage", "F038A04C8F8A8744" },
+				{ "MartialArtManeuver", "0D12F627CC8677C6" },
+				{ "Metamagic", "154D9A4FF2846718" },
+				{ "OperatingSystem", "440470AB030489A4" },
+				{ "Quality", "E3D95D0FA0790BF6" },
+				{ "Spell", "13587537E7E1BBB5" },
+				{ "TechProgram", "64569AC7FA73760D" },
+				{ "TechProgramOption", "193418AE5B625714" },
+				{ "Vehicle", "6B30C63B55C25B15" },
+				{ "VehicleMod", "35B6C11AE894E486" },
+				{ "Weapon", "58E362E9ED32246B" },
+				{ "WeaponAccessory", "89F9C6C81F3E5E81" },
+				{ "WeaponMod", "5EF93E211D92C838" },
+			};
+
+		[Fact]
+		public void NoCreateMethodChangedSinceItsRuleWasRead()
+		{
+			IReadOnlyDictionary<string, string> actual = DataPaths.EntityCreateFingerprints();
+
+			string[] drifted = CreateMethodFingerprints
+				.Where(pinned => !actual.ContainsKey(pinned.Key)
+					|| !string.Equals(actual[pinned.Key], pinned.Value, StringComparison.Ordinal))
+				.Select(pinned => actual.ContainsKey(pinned.Key)
+					? pinned.Key + ".Create now reads " + actual[pinned.Key]
+						+ ", pinned as " + pinned.Value
+					: pinned.Key + ".Create is gone")
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
+
+			Assert.True(drifted.Length == 0,
+				"These Create methods changed the elements they read, so the rules derived from "
+				+ "them in " + nameof(DataPaths.RequiredFieldRules) + " may no longer describe "
+				+ "them. Re-read each one, fix its rule, then update the hash:\n  "
+				+ string.Join("\n  ", drifted));
+		}
+
 		// - the three gear.xml rules have to cover the collection exactly once each, or an entry is checked against the wrong Create's contract or against none
 		// - the partition is written as a negation so a category nobody anticipated lands in Gear rather than nowhere
 		// - this proves it holds over the real file, where the detection test proves it over a hand-built one
