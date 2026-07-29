@@ -83,6 +83,27 @@ namespace Chummer.Tests
 			Assert.Equal(20, DataPaths.CategoryKeyedCollections().Count());
 		}
 
+		// The scope exceptions are a hand-written list, and a stale entry fails
+		// quietly in a way the count above cannot separate from a legitimate
+		// change: rename a collection and its exemption stops applying to
+		// anything, so the collection silently starts being checked (or, for a
+		// redirect, throws somewhere unrelated). Both structures are covered
+		// together because a key belongs to exactly one of them and the failure
+		// mode is identical.
+		[Fact]
+		public void CategoryScopeExceptionsAllNameARealCollection()
+		{
+			string[] known = DataPaths.CollectionsUsingCategories().ToArray();
+
+			string[] stale = DataPaths.CategoryScopeExceptionKeys()
+				.Where(key => !known.Contains(key))
+				.ToArray();
+
+			Assert.True(stale.Length == 0,
+				"These category scope exceptions name a (file, collection) that carries no "
+				+ "<category> any more:\n  " + string.Join("\n  ", stale));
+		}
+
 		// The declaration side of the book-code check, guarded like the rest.
 		// The theory over the data would fail loudly if this came back empty, but
 		// it cannot notice books.xml quietly losing a code that no entry happens

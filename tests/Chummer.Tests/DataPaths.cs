@@ -114,10 +114,11 @@ namespace Chummer.Tests
 		}
 
 		// Which declaration block a collection's <category> values have to appear
-		// in. The default is the file's own <categories> block; this map holds only
-		// the deviations, so a collection added to the data later is checked unless
-		// somebody deliberately exempts it here. That direction matters: an
-		// inclusion list would leave new collections silently unchecked.
+		// in. The default is the file's own <categories> block; the two structures
+		// below hold only the deviations, so a collection added to the data later
+		// is checked unless somebody deliberately exempts it. That direction
+		// matters: an inclusion list would leave new collections silently
+		// unchecked.
 		//
 		// The rule, applied uniformly: a collection is governed by a block when
 		// some code resolves its <category> against that block. What a failure
@@ -162,17 +163,25 @@ namespace Chummer.Tests
 		// three of armor.xml/mods' eight values also appear in armor.xml's
 		// <categories>, and programs.xml/options' "Hacking" likewise. Overlap is
 		// evidence of nothing either way - only the consuming code decides.
+		// Collections answering to a block other than the default one.
 		private static readonly IReadOnlyDictionary<string, string> CategoryDeclarationBlockOverrides =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				{ "vehicles.xml/mods", "modcategories" },
-				{ "weapons.xml/mods", NotCategoryKeyed },
-				{ "programs.xml/options", NotCategoryKeyed },
 			};
 
-		// Sentinel for the map above: this collection's <category> is not a lookup
-		// key, so no block is expected to declare it and it is left unchecked.
-		private const string NotCategoryKeyed = null;
+		// Collections answering to no block at all, and therefore not checked.
+		// Deliberately a second structure rather than a null value in the map
+		// above: "redirected somewhere else" and "governed by nothing" are
+		// different statements, they fail in different ways when they are wrong,
+		// and BuildCategoryContracts has to tell them apart. Spelling that as
+		// block == null made it a null check wearing the clothes of a comparison.
+		private static readonly HashSet<string> CollectionsWithoutCategoryDeclarations =
+			new HashSet<string>(StringComparer.Ordinal)
+			{
+				"weapons.xml/mods",
+				"programs.xml/options",
+			};
 
 		private const string DefaultCategoryDeclarationBlock = "categories";
 
@@ -182,8 +191,7 @@ namespace Chummer.Tests
 		// catalogue collection, whose InnerText is meaningless as a declaration.
 		private static readonly HashSet<string> DeclarationBlockNames =
 			new HashSet<string>(
-				new[] { DefaultCategoryDeclarationBlock }
-					.Concat(CategoryDeclarationBlockOverrides.Values.Where(block => block != NotCategoryKeyed)),
+				new[] { DefaultCategoryDeclarationBlock }.Concat(CategoryDeclarationBlockOverrides.Values),
 				StringComparer.Ordinal);
 
 		// One collection of catalogue entries, reduced to the lookup keys of its
@@ -438,13 +446,45 @@ namespace Chummer.Tests
 				foreach (IGrouping<string, CategoryUsage> collection in file.CategoryUsages
 					.GroupBy(usage => usage.CollectionName, StringComparer.Ordinal))
 				{
-					string block = DeclarationBlockFor(file.FileName, collection.Key);
-					if (block == NotCategoryKeyed)
+					string key = OverrideKey(file.FileName, collection.Key);
+					if (CollectionsWithoutCategoryDeclarations.Contains(key))
 						continue;
+
+					string block;
+					bool redirected = CategoryDeclarationBlockOverrides.TryGetValue(key, out block);
+					if (!redirected)
+						block = DefaultCategoryDeclarationBlock;
 
 					IReadOnlyCollection<string> declared;
 					if (!file.CategoryDeclarations.TryGetValue(block, out declared))
+					{
+						// Two very different reasons to land here, and collapsing
+						// them into one skip is how a whole collection leaves the
+						// net without anything saying so.
+						//
+						// A file with no <categories> block at all simply has no
+						// local contract - lifestyles.xml and ranges.xml carry
+						// categories that nothing declares anywhere, and that is
+						// the data's shape, not a defect. Skip.
+						//
+						// A redirect naming a block the file does not have is a
+						// typo in a hand-maintained list. Misspell "modcategories"
+						// and vehicles.xml/mods - 321 entries - drops out of the
+						// check entirely, with the count guard left to report
+						// "19 instead of 20" and no hint as to which collection
+						// vanished or why. Same reasoning as the duplicate-wrapper
+						// throw in IndexRuleCollections below: a named failure
+						// beats a silence that still looks healthy.
+						if (redirected)
+						{
+							throw new InvalidOperationException(
+								key + " is redirected to <" + block + ">, which "
+								+ file.FileName + " does not contain. Its categories would go "
+								+ "unchecked. Fix the override or point it at a block that exists.");
+						}
+
 						continue;
+					}
 
 					contracts.Add(new CategoryContract(file.FilePath, collection.Key, block,
 						declared, collection.ToArray()));
@@ -454,12 +494,34 @@ namespace Chummer.Tests
 			return contracts;
 		}
 
-		private static string DeclarationBlockFor(string xmlFileName, string collectionName)
+		// Keyed by file *name*, not full path - deliberately a different key space
+		// from IndexKey's, which identifies a cached collection by path. The two
+		// must not be conflated: these entries are written by hand and have to stay
+		// readable in a source listing.
+		private static string OverrideKey(string xmlFileName, string collectionName)
 		{
-			string block;
-			return CategoryDeclarationBlockOverrides.TryGetValue(xmlFileName + "/" + collectionName, out block)
-				? block
-				: DefaultCategoryDeclarationBlock;
+			return xmlFileName + "/" + collectionName;
+		}
+
+		// Every hand-written scope exception, for the guard that checks none of
+		// them has gone stale. A redirect pointing at a missing block throws while
+		// contracts are built; this covers the other direction, where the *key*
+		// names a collection that no longer exists and the entry silently stops
+		// meaning anything.
+		public static IEnumerable<string> CategoryScopeExceptionKeys()
+		{
+			return CategoryDeclarationBlockOverrides.Keys.Concat(CollectionsWithoutCategoryDeclarations)
+				.OrderBy(key => key, StringComparer.Ordinal);
+		}
+
+		// Which (file, collection) pairs carry <category> at all - the universe the
+		// exception keys above have to name a member of.
+		public static IEnumerable<string> CollectionsUsingCategories()
+		{
+			return CachedRuleFiles.Value
+				.SelectMany(file => file.CategoryUsages
+					.Select(usage => OverrideKey(file.FileName, usage.CollectionName)))
+				.Distinct(StringComparer.Ordinal);
 		}
 
 		// A dictionary rather than a scan per call: the allowlist guard asks for
