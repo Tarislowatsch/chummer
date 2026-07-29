@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 
 namespace Chummer.Tests
@@ -193,13 +194,15 @@ namespace Chummer.Tests
 			public RuleFile(string filePath, IReadOnlyList<RuleCollection> collections,
 				IReadOnlyList<BookReference> bookReferences,
 				IReadOnlyDictionary<string, IReadOnlyCollection<string>> categoryDeclarations,
-				IReadOnlyList<CategoryUsage> categoryUsages)
+				IReadOnlyList<CategoryUsage> categoryUsages,
+				IReadOnlyList<RequiredFieldContract> requiredFieldContracts)
 			{
 				FilePath = filePath;
 				Collections = collections;
 				BookReferences = bookReferences;
 				CategoryDeclarations = categoryDeclarations;
 				CategoryUsages = categoryUsages;
+				RequiredFieldContracts = requiredFieldContracts;
 			}
 
 			public string FilePath { get; }
@@ -215,6 +218,9 @@ namespace Chummer.Tests
 			public IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarations { get; }
 
 			public IReadOnlyList<CategoryUsage> CategoryUsages { get; }
+
+			// - one per required-field rule declared against this file, already evaluated
+			public IReadOnlyList<RequiredFieldContract> RequiredFieldContracts { get; }
 		}
 
 		// - parsed once, then reused: without this the same documents get reparsed roughly five times over - once to discover the collections, once per theory case, once more per collection for the allowlist guard
@@ -426,6 +432,380 @@ namespace Chummer.Tests
 				.Distinct(StringComparer.Ordinal);
 		}
 
+		// - the gear.xml categories that decide which of three classes a catalogue entry is built into (frmCreate.cs:9287-9298)
+		// - each of the three has its own Create with its own set of unprotected reads
+		// - one contract over all of gear.xml would therefore be three contracts averaged into one
+		// - XPath fragments rather than a name list, because the three rules below have to partition the same collection
+		// - the third is written as "not the other two" so a new category cannot fall out of the check
+		private const string CommlinkCategories =
+			"category = 'Commlink' or category = 'Commlink Upgrade'";
+
+		private const string OperatingSystemCategories =
+			"category = 'Commlink Operating System' or category = 'Commlink Operating System Upgrade'";
+
+		// - the required-field contract: for each entity type, the elements its Create reads without a guard
+		//
+		// - the empty catch *is* the optionality marker, the only one the code has
+		// - Gear.Create (clsEquipment.cs:9552-9665) reads six elements straight off the node and wraps roughly twenty others
+		// - an absent <avail> is therefore a NullReferenceException, while an absent <capacity> is silently fine
+		//
+		// - three shapes of unprotected read, all reduced to one rule shape here (an XPath naming the nodes, plus the fields they must carry):
+		// - the entity's own catalogue node, which is most of the table
+		// - a nested reference node the same Create walks, e.g. the <gears>/<usegear> children CreateChildren (clsEquipment.cs:9935) recurses through
+		// - a catalogue node reached only via a reference, which is the weapons.xml <mount> rule at the end
+		//
+		// - each rule cites the line it was read off, because nothing else keeps the claim and the code together
+		//
+		// - the field lists are deliberately not derived by parsing the C#
+		// - telling `if (node["x"] != null)` from `if (node["x"].InnerText != "")` takes judgement, and the second of those is an unguarded read that looks like a guard
+		// - a mechanism getting that wrong would be worse than a list somebody can review
+		// - the *surface* is guarded mechanically all the same: EntityCreateMethodSites below counts the Create declarations, so a new entity type cannot appear without this table noticing
+		//
+		// - the field lists themselves drift in one direction only, which was measured rather than assumed
+		// - naming a field the code does not read turns red against the data, so an invented requirement cannot survive
+		// - dropping one the code does read stays green, because a requirement nobody checks can never be violated - deleting <response>/<signal> from the Commlink rule leaves all 278 tests passing
+		// - no test over this data can close that half; only the code citation on each rule and a reader following it can
+		// - the standing fix is to move the contract onto the entity itself, where it cannot be copied wrong - a backlog item of its own, gated on the golden master
+		//
+		// - top-level files only, in step with the schema and uniqueness checks
+		private static readonly IReadOnlyList<RequiredFieldRule> DeclaredRequiredFieldRules = new[]
+		{
+			// clsUnique.cs:1036-1051
+			Rule("Quality", "qualities.xml", "/chummer/qualities/quality",
+				"name", "bp", "category", "source", "page"),
+			// clsUnique.cs:3565-3576
+			Rule("Spell", "spells.xml", "/chummer/spells/spell",
+				"name", "descriptor", "category", "type", "range", "damage", "duration", "dv",
+				"source", "page"),
+			// clsUnique.cs:4732-4734, reached with a metamagic.xml node when MAG is enabled (frmCreate.cs:7379)
+			Rule("Metamagic", "metamagic.xml", "/chummer/metamagics/metamagic",
+				"name", "source", "page"),
+			// - the same Create, reached with an echoes.xml node when it is not (frmCreate.cs:7385)
+			Rule("Echo", "echoes.xml", "/chummer/echoes/echo",
+				"name", "source", "page"),
+			// - clsUnique.cs:5582-5589; <maxrating> must be present but may be empty, since :5589 tests its text for ""
+			Rule("TechProgram", "programs.xml", "/chummer/programs/program",
+				"name", "category", "source", "page", "capacity", "skill", "maxrating"),
+			// clsUnique.cs:6172-6176, same empty-but-present <maxrating> as above
+			Rule("TechProgramOption", "programs.xml", "/chummer/options/option",
+				"name", "source", "page", "maxrating"),
+			// clsUnique.cs:6535-6537
+			Rule("MartialArt", "martialarts.xml", "/chummer/martialarts/martialart",
+				"name", "source", "page"),
+			// - clsUnique.cs:6781; nested under its art rather than in a collection of its own (frmCreate.cs:9222 selects it through the art)
+			Rule("MartialArtAdvantage", "martialarts.xml",
+				"/chummer/martialarts/martialart/advantages/advantage",
+				"name"),
+			// clsUnique.cs:6932-6934
+			Rule("MartialArtManeuver", "martialarts.xml", "/chummer/maneuvers/maneuver",
+				"name", "source", "page"),
+			// clsUnique.cs:7539-7546
+			Rule("CritterPower", "critterpowers.xml", "/chummer/powers/power",
+				"name", "category", "type", "action", "range", "duration", "source", "page"),
+			// clsEquipment.cs:82-92
+			Rule("ArmorMod", "armor.xml", "/chummer/mods/mod",
+				"name", "category", "armorcapacity", "b", "i", "maxrating", "avail", "cost",
+				"source", "page"),
+			// - clsEquipment.cs:946-953, plus :977 reading <cost> unguarded to test it for a variable price
+			Rule("Armor", "armor.xml", "/chummer/armors/armor",
+				"name", "category", "b", "i", "armorcapacity", "avail", "cost", "source", "page"),
+			// clsEquipment.cs:2364-2375, plus :2450 reading <cost> unguarded
+			Rule("Cyberware", "cyberware.xml", "/chummer/cyberwares/cyberware",
+				"name", "category", "ess", "capacity", "avail", "cost", "source", "page"),
+			// - the same Create, reached with a bioware.xml node (it picks its own XPath at clsEquipment.cs:2413)
+			Rule("Bioware", "bioware.xml", "/chummer/biowares/bioware",
+				"name", "category", "ess", "capacity", "avail", "cost", "source", "page"),
+			// clsEquipment.cs:4235-4261
+			Rule("Weapon", "weapons.xml", "/chummer/weapons/weapon",
+				"name", "category", "type", "reach", "damage", "ap", "mode", "ammo", "rc",
+				"avail", "cost", "source", "page"),
+			// clsEquipment.cs:7246-7257
+			Rule("WeaponAccessory", "weapons.xml", "/chummer/accessories/accessory",
+				"name", "avail", "cost", "source", "page"),
+			// clsEquipment.cs:7927-7938
+			Rule("WeaponMod", "weapons.xml", "/chummer/mods/mod",
+				"name", "slots", "avail", "cost", "source", "page"),
+			// clsEquipment.cs:8863-8868
+			Rule("Lifestyle", "lifestyles.xml", "/chummer/lifestyles/lifestyle",
+				"name", "cost", "dice", "multiplier", "source", "page"),
+			// - clsEquipment.cs:9552-9665, on everything gear.xml holds except the two commlink classes below
+			Rule("Gear", "gear.xml",
+				"/chummer/gears/gear[not(" + CommlinkCategories + " or " + OperatingSystemCategories + ")]",
+				"name", "category", "avail", "rating", "source", "page"),
+			// - clsEquipment.cs:11952-11996; the same six fields as Gear, plus <response>/<signal>
+			// - those two are read inside a try by the base class and unguarded by this override
+			Rule("Commlink", "gear.xml", "/chummer/gears/gear[" + CommlinkCategories + "]",
+				"name", "category", "avail", "rating", "source", "page", "response", "signal"),
+			// - clsEquipment.cs:12819-12856; likewise, with <firewall>/<system> as the pair it hardens
+			Rule("OperatingSystem", "gear.xml", "/chummer/gears/gear[" + OperatingSystemCategories + "]",
+				"name", "category", "avail", "rating", "source", "page", "firewall", "system"),
+			// clsEquipment.cs:13336-13437
+			Rule("VehicleMod", "vehicles.xml", "/chummer/mods/mod",
+				"name", "category", "slots", "avail", "source", "page"),
+			// clsEquipment.cs:14406-14425
+			Rule("Vehicle", "vehicles.xml", "/chummer/vehicles/vehicle",
+				"name", "category", "handling", "accel", "speed", "pilot", "body", "armor",
+				"sensor", "avail", "cost", "source", "page"),
+
+			// - the nested reference nodes a Create walks, held to the fields it reads off them
+			//
+			// - clsEquipment.cs:9935 resolves a child by name AND category
+			// - CreateChildren then recurses into its own result at :9968
+			// - hence the descendant axis: anchoring to one depth would leave the deeper <usegear> nodes unchecked
+			Rule("Gear child <usegear> reference", "gear.xml",
+				"/chummer/gears/gear//gears/usegear",
+				"name", "category"),
+			// - clsEquipment.cs:9827-9828, a second child shape read directly rather than resolved against the catalogue
+			Rule("Gear child <gear> reference", "gear.xml",
+				"/chummer/gears/gear/gears/gear",
+				"name", "category"),
+			// clsEquipment.cs:14540
+			Rule("Vehicle built-in weapon reference", "vehicles.xml",
+				"/chummer/vehicles/vehicle/weapons/weapon",
+				"name"),
+			// - clsEquipment.cs:14595 and :14617; both guard on the wrapper being present but not on the <name> inside
+			// - no vehicle uses either today, so both rules match nothing
+			// - declared anyway, because the first entry to use the live code path would otherwise arrive unchecked
+			// - the vacancy is pinned in DataPathsTests, so a rule going quiet the other way round cannot hide here
+			Rule("Vehicle built-in weapon accessory reference", "vehicles.xml",
+				"/chummer/vehicles/vehicle/weapons/weapon/accessories/accessory",
+				"name"),
+			Rule("Vehicle built-in weapon mod reference", "vehicles.xml",
+				"/chummer/vehicles/vehicle/weapons/weapon/mods/mod",
+				"name"),
+
+			// - clsEquipment.cs:4346 reads <mount> off the catalogue accessory only while a weapon builds it in
+			// - <mount> is therefore required of a referenced accessory and of no other - 12 of the 83 today
+			// - the predicate compares <name> against a node-set, which XPath makes true when any one of them matches
+			Rule("WeaponAccessory built into a weapon", "weapons.xml",
+				"/chummer/accessories/accessory[name = /chummer/weapons/weapon/accessories/accessory]",
+				"mount"),
+		};
+
+		private static RequiredFieldRule Rule(string entity, string fileName, string itemXPath,
+			params string[] requiredFields)
+		{
+			return new RequiredFieldRule(entity, fileName, itemXPath, requiredFields);
+		}
+
+		// One entity type's required-field rule, as read off the Create method that
+		// builds it from a catalogue node.
+		public sealed class RequiredFieldRule
+		{
+			public RequiredFieldRule(string entity, string fileName, string itemXPath,
+				IReadOnlyList<string> requiredFields)
+			{
+				Entity = entity;
+				FileName = fileName;
+				ItemXPath = itemXPath;
+				RequiredFields = requiredFields;
+			}
+
+			// - the theory's case identity, so a failure names the class whose Create is the reason
+			// - unique across the table on purpose: entities sharing a file (Gear and Commlink, Cyberware and Bioware) would otherwise collide on a case id and xUnit would drop one
+			public string Entity { get; }
+
+			public string FileName { get; }
+
+			public string ItemXPath { get; }
+
+			public IReadOnlyList<string> RequiredFields { get; }
+		}
+
+		// One entry that is missing a field its Create would dereference.
+		public sealed class MissingField
+		{
+			public MissingField(string itemName, string field)
+			{
+				ItemName = itemName;
+				Field = field;
+			}
+
+			public string ItemName { get; }
+
+			public string Field { get; }
+		}
+
+		public sealed class RequiredFieldContract
+		{
+			public RequiredFieldContract(RequiredFieldRule rule, string filePath, int itemCount,
+				IReadOnlyList<MissingField> missingFields)
+			{
+				Rule = rule;
+				FilePath = filePath;
+				ItemCount = itemCount;
+				MissingFields = missingFields;
+			}
+
+			public RequiredFieldRule Rule { get; }
+
+			public string FilePath { get; }
+
+			// - how many nodes the rule's XPath matched, kept so a rule that stops matching anything is visible without reparsing
+			public int ItemCount { get; }
+
+			public IReadOnlyList<MissingField> MissingFields { get; }
+		}
+
+		public static IEnumerable<object[]> EntitiesWithRequiredFields()
+		{
+			return CachedRequiredFieldContracts.Value
+				.Select(contract => new object[] { contract.Rule.Entity });
+		}
+
+		public static RequiredFieldContract RequiredFieldContractFor(string entity)
+		{
+			return CachedRequiredFieldContractsByEntity.Value[entity];
+		}
+
+		// - every declared rule, whether or not it matched anything, for the guards that watch the table itself
+		public static IReadOnlyList<RequiredFieldRule> RequiredFieldRules => DeclaredRequiredFieldRules;
+
+		// - matches the declaration of an entity Create, never a call site: only a declaration names the parameter type
+		// - tolerates a line break after the paren, the one formatting variant that would otherwise read as "no such method"
+		private static readonly Regex EntityCreateSignature =
+			new Regex(@"public\s+void\s+Create\(\s*XmlNode", RegexOptions.Compiled);
+
+		// - the production side of the rule table: file:line of every entity Create in the application sources
+		// - the table above is hand-written, and every other guard compares it against the data or against itself - none of them can see a Create method the table has never heard of
+		// - that gap drops a whole entity type out of the suite in silence, which is the failure this closes
+		// - the whole source tree rather than the two files holding them today, so a new entity class in a new file is caught too
+		// - obj/ is excluded because it is generated and absent from a fresh clone, which would make the count differ between here and CI
+		public static IReadOnlyList<string> EntityCreateMethodSites()
+		{
+			List<string> sites = new List<string>();
+			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
+
+			foreach (string path in Directory
+				.EnumerateFiles(Path.Combine(RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
+				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
+				.OrderBy(path => path, StringComparer.Ordinal))
+			{
+				string source = File.ReadAllText(path);
+
+				foreach (Match match in EntityCreateSignature.Matches(source))
+				{
+					int line = 1 + source.Take(match.Index).Count(character => character == '\n');
+					sites.Add(Path.GetFileName(path) + ":" + line);
+				}
+			}
+
+			return sites;
+		}
+
+		public static IReadOnlyList<RequiredFieldContract> RequiredFieldContracts =>
+			CachedRequiredFieldContracts.Value;
+
+		private static readonly Lazy<IReadOnlyList<RequiredFieldContract>> CachedRequiredFieldContracts =
+			new Lazy<IReadOnlyList<RequiredFieldContract>>(BuildRequiredFieldContracts);
+
+		private static readonly Lazy<IReadOnlyDictionary<string, RequiredFieldContract>>
+			CachedRequiredFieldContractsByEntity =
+				new Lazy<IReadOnlyDictionary<string, RequiredFieldContract>>(
+					() => CachedRequiredFieldContracts.Value.ToDictionary(
+						contract => contract.Rule.Entity, StringComparer.Ordinal));
+
+		private static IReadOnlyList<RequiredFieldContract> BuildRequiredFieldContracts()
+		{
+			EnsureEntityNamesAreUnique(DeclaredRequiredFieldRules);
+
+			RequiredFieldContract[] contracts = CachedRuleFiles.Value
+				.SelectMany(file => file.RequiredFieldContracts)
+				.ToArray();
+
+			EnsureEveryRuleWasEvaluated(DeclaredRequiredFieldRules, contracts);
+
+			return contracts;
+		}
+
+		// - the entity name is the theory's case id and the key of the lookup below, so it has to be unique - and until this check existed, nothing said so on purpose
+		// - measured on a table with the name deliberately doubled: xUnit drops the colliding case, so one rule stops being checked while the count guard still reports 29
+		// - the lookup below then throws ArgumentException, which on net48 carries no key in its message, out of a Lazy, into 29 unrelated-looking failures
+		// - a reader gets "an item with the same key has already been added" and no hint that the cause is a duplicated name two hundred lines up
+		// - same call as the duplicate collection wrapper in IndexRuleCollections: a named failure beats a technical one that points nowhere
+		//
+		// - checked against the declarations rather than the evaluated contracts, because the declaration is where the mistake is made
+		// - runs before the corpus is touched, so the failure arrives while the theory is still being discovered
+		public static void EnsureEntityNamesAreUnique(IEnumerable<RequiredFieldRule> declared)
+		{
+			string[] duplicated = declared
+				.GroupBy(rule => rule.Entity, StringComparer.Ordinal)
+				.Where(group => group.Count() > 1)
+				.Select(group => "'" + group.Key + "' declared " + group.Count() + " times")
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
+
+			if (duplicated.Length > 0)
+			{
+				throw new InvalidOperationException(
+					"These required-field rules share an entity name. It identifies a theory case, "
+					+ "so xUnit would drop the collision and one rule would silently stop being "
+					+ "checked:\n  " + string.Join("\n  ", duplicated));
+			}
+		}
+
+		// - a rule is matched to its file by name, so a renamed or mistyped file produces no contract, no theory case and no failure
+		// - one entity type's whole contract then stops being checked while the run stays green
+		// - split out and public for the same reason TryResolveDeclarationBlock is: the real table is correct, so a run never reaches the throw
+		// - a test has to be able to drive it with a table of its own
+		public static void EnsureEveryRuleWasEvaluated(IEnumerable<RequiredFieldRule> declared,
+			IEnumerable<RequiredFieldContract> evaluated)
+		{
+			HashSet<string> covered = new HashSet<string>(
+				evaluated.Select(contract => contract.Rule.Entity), StringComparer.Ordinal);
+
+			string[] orphaned = declared
+				.Where(rule => !covered.Contains(rule.Entity))
+				.Select(rule => rule.Entity + " -> " + rule.FileName)
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
+
+			if (orphaned.Length > 0)
+			{
+				throw new InvalidOperationException(
+					"These required-field rules name a file that was not scanned, so their entity "
+					+ "types are going unchecked:\n  " + string.Join("\n  ", orphaned));
+			}
+		}
+
+		// - runs one rule over one document
+		// - public so the detection tests can drive it with hand-built XML
+		// - the real files only ever show that today's data is complete, never that an absent element would in fact be reported
+		public static RequiredFieldContract EvaluateRequiredFields(RequiredFieldRule rule,
+			string filePath, XmlDocument document)
+		{
+			List<MissingField> missing = new List<MissingField>();
+			XmlNodeList items = document.SelectNodes(rule.ItemXPath);
+
+			foreach (XmlNode item in items)
+				missing.AddRange(MissingRequiredFieldsIn(item, rule.RequiredFields));
+
+			return new RequiredFieldContract(rule, filePath, items.Count, missing);
+		}
+
+		// - presence, not content: an element that is there but empty satisfies this, because that is what the code tolerates
+		// - clsUnique.cs:5589 tests <maxrating>'s text for "" before converting, so empty is a value the data uses on purpose
+		// - 40 programs, 7 program options and 33 spells with no <descriptor> rely on that
+		//
+		// - the lookup is XmlNode's own indexer, the same call Create makes: direct children only, exact ordinal name match
+		// - a <name> nested inside a wrapper does not answer a Create reading node["name"]
+		// - neither does a <Name>
+		public static IEnumerable<MissingField> MissingRequiredFieldsIn(XmlNode item,
+			IReadOnlyList<string> requiredFields)
+		{
+			return requiredFields
+				.Where(field => item[field] == null)
+				.Select(field => new MissingField(ItemLabel(item), field));
+		}
+
+		// - the entry's own <name> where it has one, otherwise the nearest ancestor's
+		// - a nested reference missing its <name> is then reported under the catalogue entry holding it, which is what somebody would go looking for
+		// - a top-level entry missing its own falls through to "(unnamed)"
+		private static string ItemLabel(XmlNode item)
+		{
+			return item["name"]?.InnerText ?? NearestItemName(item);
+		}
+
 		// - a dictionary rather than a scan per call: the allowlist guard asks for every collection in turn, which over a linear lookup is quadratic; also gives file+collection identity a single place to be checked, which a scan cannot - see the throw below
 		private static readonly Lazy<IReadOnlyDictionary<string, RuleCollection>> CachedRuleCollectionsByKey =
 			new Lazy<IReadOnlyDictionary<string, RuleCollection>>(IndexRuleCollections);
@@ -522,10 +902,21 @@ namespace Chummer.Tests
 				}
 
 				files.Add(new RuleFile(xmlPath, collections, BookReferencesIn(document),
-					declarations, categoryUsages));
+					declarations, categoryUsages,
+					RequiredFieldContractsFor(fileName, xmlPath, document)));
 			}
 
 			return files;
+		}
+
+		// - evaluated here, inside the single parse, for the reason given on CachedRuleFiles: these rules would otherwise reopen a third of the corpus a second time
+		private static IReadOnlyList<RequiredFieldContract> RequiredFieldContractsFor(string fileName,
+			string xmlPath, XmlDocument document)
+		{
+			return DeclaredRequiredFieldRules
+				.Where(rule => string.Equals(rule.FileName, fileName, StringComparison.Ordinal))
+				.Select(rule => EvaluateRequiredFields(rule, xmlPath, document))
+				.ToArray();
 		}
 
 		// - every <source> in a document, wherever it sits
