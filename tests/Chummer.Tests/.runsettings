@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- - a run that discovers no tests must fail: a broken adapter otherwise exits 0 -->
+<!-- - wired in through the csproj: CI, the CLI and VS all read it -->
+<RunSettings>
+  <RunConfiguration>
+    <TreatNoTestsAsError>true</TreatNoTestsAsError>
+  </RunConfiguration>
+</RunSettings>
