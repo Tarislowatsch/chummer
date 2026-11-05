@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	// - every shipped include has the same shape, so only hand-built input exercises the rest
+	// - hand-built input: every shipped include has the same shape
 	public class StylesheetIncludeDetectionTests
 	{
 		private const string Sheet = @"C:\sheets\Main.xsl";
