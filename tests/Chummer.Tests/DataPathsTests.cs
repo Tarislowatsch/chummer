@@ -28,6 +28,14 @@ namespace Chummer.Tests
 			Assert.True(DataPaths.SheetXslFiles().Count() > 1);
 		}
 
+		// - derivable: 16 sheets (8 top-level, 7 de, 1 fr) plus the one export template
+		// - the four .xslt are left out on purpose: they compile through their includes
+		[Fact]
+		public void LoadableStylesheetsFindsEverySheetAndExport()
+		{
+			Assert.Equal(17, DataPaths.LoadableStylesheets().Count());
+		}
+
 		// - exact count, not ">N": this file set is small and enumerable
 		// - a dropped pair must fail immediately, not slip under a threshold
 		// - bumping the number is only correct for a deliberate new data file plus schema

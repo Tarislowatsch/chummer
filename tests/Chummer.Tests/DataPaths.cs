@@ -52,6 +52,19 @@ namespace Chummer.Tests
 				.Select(path => new object[] { path });
 		}
 
+		public static string ChummerExportDir => Path.Combine(RepoRoot, "Chummer", "export");
+
+		// - what the two pickers offer: frmViewer.cs:36 for sheets, frmExport.cs:69 for exports
+		// - case-sensitive ".xsl" like the app: a .xslt is only ever reached through xsl:include
+		public static IEnumerable<object[]> LoadableStylesheets()
+		{
+			return new[] { ChummerSheetsDir, ChummerExportDir }
+				.SelectMany(dir => Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories))
+				.Where(path => path.EndsWith(".xsl", StringComparison.Ordinal))
+				.OrderBy(path => path, StringComparer.Ordinal)
+				.Select(path => new object[] { path });
+		}
+
 		// - File.Exists pairing lets character.xsd and improvements.xml drop out on their own
 		// - top-level only: pack files pair with their base file's schema, see CustomContent
 		// - the exact-count guard in DataPathsTests makes a silently dropped pair fail loudly
