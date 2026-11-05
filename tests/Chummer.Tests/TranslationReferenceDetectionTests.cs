@@ -111,15 +111,104 @@ namespace Chummer.Tests
 				.Where(entry => entry.Kind == TranslationReferences.Kind.Metavariant));
 		}
 
+		// - one dropped block, not one finding per translation inside it
 		[Fact]
-		public void BlockForAFileTheDataLacksIsDropped()
+		public void BlockForAFileTheDataLacksIsDroppedOnce()
 		{
 			TranslationReferences.Entry block = TranslationReferences.EntriesIn("de",
-				Document("<chummer><chummer file=\"gone.xml\"><gears /></chummer></chummer>"), fileName => null)
+				Document("<chummer><chummer file=\"gone.xml\"><gears><gear><name>X</name><translate>Y</translate>"
+					+ "</gear></gears></chummer></chummer>"), fileName => null)
 				.Single();
 
+			Assert.Equal(TranslationReferences.Kind.File, block.Kind);
 			Assert.Equal(TranslationReferences.Outcome.Dropped, block.Outcome);
 		}
+
+		[Fact]
+		public void FileNameMustMatchInCase()
+		{
+			Assert.True(TranslationReferences.IsDataFile("gear.xml"));
+			Assert.False(TranslationReferences.IsDataFile("Gear.xml"));
+		}
+
+		[Theory]
+		[InlineData("code")]
+		[InlineData("advantage")]
+		[InlineData("disadvantage")]
+		public void EachItemFieldAloneTriggersTheLookup(string field)
+		{
+			Assert.Equal(new[] { "Dropped" }, Outcomes("gear.xml", Gear,
+				"<gears><gear><name>Metalink</name><" + field + ">x</" + field + "></gear></gears>"));
+		}
+
+		[Fact]
+		public void MetavariantIsMatchedUnderItsMetatype()
+		{
+			Assert.Equal(new[] { "Applied", "Dropped" }, Outcomes("metatypes.xml", Metatypes,
+				"<metatypes><metatype><name>Elf</name><metavariants>"
+				+ "<metavariant><name>Night One</name><translate>Nachtelf</translate></metavariant>"
+				+ "<metavariant><name>Gnome</name><translate>Gnom</translate></metavariant>"
+				+ "</metavariants></metatype></metatypes>"));
+		}
+
+		[Fact]
+		public void AltpageWithoutPageCrashesOnAHit()
+		{
+			Assert.Equal(new[] { "Crashes", "Applied" }, Outcomes("metatypes.xml", Metatypes,
+				"<metatypes><metatype><name>Elf</name><metavariants>"
+				+ "<metavariant><name>Night One</name><altpage>9</altpage></metavariant>"
+				+ "</metavariants></metatype><metatype><name>Dwarf</name><metavariants>"
+				+ "<metavariant><name>Gnome</name><altpage>9</altpage><page>9</page></metavariant>"
+				+ "</metavariants></metatype></metatypes>"));
+		}
+
+		[Fact]
+		public void NestedEntryWithoutAnOwnerNameCrashes()
+		{
+			Assert.Equal(new[] { "Crashes" }, Outcomes("martialarts.xml", "<chummer><martialarts /></chummer>",
+				"<martialarts><martialart><advantages><advantage translate=\"x\">Disarm</advantage></advantages>"
+				+ "</martialart></martialarts>"));
+		}
+
+		[Fact]
+		public void NestedLookupDoesNotDecodeTheAmpersand()
+		{
+			string skills = "<chummer><skills><skill><name>Pilot</name><specs><spec>Cars &amp; Bikes</spec></specs>"
+				+ "</skill></skills></chummer>";
+
+			Assert.Equal(new[] { "Dropped" }, Outcomes("skills.xml", skills,
+				"<skills><skill><name>Pilot</name><specs><spec translate=\"x\">Cars &amp; Bikes</spec></specs>"
+				+ "</skill></skills>"));
+		}
+
+		// - the shape of the misplaced <specs> block
+		[Fact]
+		public void TranslationOutsideEveryLookupIsUnreached()
+		{
+			string skills = "<chummer><skills><skill><name>Pistols</name><specs><spec>Holdouts</spec></specs>"
+				+ "</skill></skills></chummer>";
+
+			TranslationReferences.Entry entry = Entries("skills.xml", skills,
+				"<skills><skill><name>Pistols</name><translate>Pistolen</translate></skill>"
+				+ "<specs><spec translate=\"Holdouts\">Hold-Outs</spec></specs></skills>")
+				.Single(candidate => candidate.Kind == TranslationReferences.Kind.Unreached);
+
+			Assert.Equal("de skills.xml unreached: skills/specs/spec: Hold-Outs", entry.Display);
+		}
+
+		[Fact]
+		public void TranslatedMentorChoiceIsUnreached()
+		{
+			Assert.Contains(Entries("mentors.xml", "<chummer><mentors /></chummer>",
+					"<mentors><mentor><name>Bear</name><choices><choice><name>A</name><translate>B</translate></choice>"
+					+ "</choices></mentor></mentors>"),
+				entry => entry.Kind == TranslationReferences.Kind.Unreached);
+		}
+
+		private const string Metatypes = "<chummer><metatypes><metatype><name>Elf</name><metavariants>"
+			+ "<metavariant><name>Night One</name></metavariant></metavariants></metatype>"
+			+ "<metatype><name>Dwarf</name><metavariants><metavariant><name>Gnome</name></metavariant>"
+			+ "</metavariants></metatype></metatypes></chummer>";
 
 		private static string[] Outcomes(string fileName, string englishXml, string blockXml)
 		{

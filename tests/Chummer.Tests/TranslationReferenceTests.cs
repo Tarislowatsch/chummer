@@ -122,6 +122,17 @@ namespace Chummer.Tests
 			"jp skills.xml spec: Shadow Community: Signs",
 			"jp skills.xml spec: Spellcasting: Spell Type",
 			"jp skills.xml spec: Syndicates: Tir Tairngaire",
+
+			// - a <specs> block outside its <skill>, where no lookup looks
+			"de skills.xml unreached: skills/specs/spec: Assault Rifles",
+			"de skills.xml unreached: skills/specs/spec: Battle Rifles",
+			"de skills.xml unreached: skills/specs/spec: Carbines",
+			"de skills.xml unreached: skills/specs/spec: Hold-Outs",
+			"de skills.xml unreached: skills/specs/spec: Machine Pistols",
+			"de skills.xml unreached: skills/specs/spec: Revolvers",
+			"de skills.xml unreached: skills/specs/spec: Semi-Automatics",
+			"de skills.xml unreached: skills/specs/spec: Submachine Guns",
+			"de skills.xml unreached: skills/specs/spec: Tasers",
 		};
 
 		public static IEnumerable<object[]> Languages()
@@ -202,6 +213,7 @@ namespace Chummer.Tests
 				{ "de metavariant", 62 },
 				{ "de spec", 961 },
 				{ "de text", 291 },
+				{ "de unreached", 9 },
 				{ "fr advantage", 147 },
 				{ "fr file", 25 },
 				{ "fr item", 4232 },

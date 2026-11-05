@@ -19,6 +19,7 @@ namespace Chummer.Tests
 			Spec,
 			Metavariant,
 			Advantage,
+			Unreached,
 		}
 
 		public enum Outcome
@@ -71,6 +72,16 @@ namespace Chummer.Tests
 		private static readonly Lazy<IReadOnlyDictionary<string, IReadOnlyList<Entry>>> CachedEntries =
 			new Lazy<IReadOnlyDictionary<string, IReadOnlyList<Entry>>>(LoadEntries);
 
+		// - Load matches @file exactly, unlike File.Exists on Windows
+		public static bool IsDataFile(string fileName)
+		{
+			return DataFileNames.Value.Contains(fileName);
+		}
+
+		private static readonly Lazy<HashSet<string>> DataFileNames = new Lazy<HashSet<string>>(() =>
+			new HashSet<string>(Directory.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml").Select(Path.GetFileName),
+				StringComparer.Ordinal));
+
 		private static IReadOnlyDictionary<string, IReadOnlyList<Entry>> LoadEntries()
 		{
 			Dictionary<string, XmlDocument> english = new Dictionary<string, XmlDocument>(StringComparer.Ordinal);
@@ -78,8 +89,9 @@ namespace Chummer.Tests
 			{
 				if (!english.ContainsKey(fileName))
 				{
-					string path = Path.Combine(DataPaths.ChummerDataDir, fileName);
-					english[fileName] = File.Exists(path) ? Load(path) : null;
+					english[fileName] = IsDataFile(fileName)
+						? Load(Path.Combine(DataPaths.ChummerDataDir, fileName))
+						: null;
 				}
 
 				return english[fileName];
@@ -102,6 +114,7 @@ namespace Chummer.Tests
 			Func<string, XmlDocument> englishFor)
 		{
 			List<Entry> entries = new List<Entry>();
+			HashSet<XmlNode> read = new HashSet<XmlNode>();
 
 			foreach (XmlElement block in languageDoc.SelectNodes("/chummer/chummer[@file]").OfType<XmlElement>())
 			{
@@ -112,33 +125,71 @@ namespace Chummer.Tests
 				entries.Add(new Entry(language, fileName, Kind.File, fileName,
 					englishDoc == null ? Outcome.Dropped : Outcome.Applied));
 				if (englishDoc == null)
+				{
+					read.UnionWith(TranslationsUnder(block));
 					continue;
+				}
 
 				foreach (XmlElement type in block.ChildNodes.OfType<XmlElement>())
 				{
 					foreach (XmlElement child in type.ChildNodes.OfType<XmlElement>())
-						entries.AddRange(EntriesOf(language, fileName, englishDoc, type, child));
+						entries.AddRange(EntriesOf(language, fileName, englishDoc, type, child, read));
 				}
 			}
+
+			// - a translation outside every lookup is lost as surely as one whose lookup misses
+			entries.AddRange(TranslationsUnder(languageDoc.DocumentElement)
+				.Where(node => !read.Contains(node))
+				.Select(node => new Entry(language, BlockFileOf(node), Kind.Unreached, PathOf(node), Outcome.Dropped)));
 
 			return entries;
 		}
 
+		// - a <translate> element or an element carrying translate="…"
+		private static IEnumerable<XmlNode> TranslationsUnder(XmlNode root)
+		{
+			return root.SelectNodes(".//translate | .//*[@translate]").Cast<XmlNode>();
+		}
+
+		private static string BlockFileOf(XmlNode node)
+		{
+			return (node.SelectSingleNode("ancestor::chummer[@file][1]") as XmlElement)?.GetAttribute("file") ?? "(no block)";
+		}
+
+		// - element path below the block, then the text a reader would search for
+		private static string PathOf(XmlNode node)
+		{
+			XmlNode owner = node.Name == "translate" ? node.ParentNode : node;
+			List<string> path = new List<string>();
+			for (XmlNode step = owner; step != null && !(step is XmlElement element && element.HasAttribute("file"))
+				&& step.ParentNode is XmlElement; step = step.ParentNode)
+			{
+				path.Insert(0, step.Name);
+			}
+
+			string text = owner["name"]?.InnerText ?? owner.InnerText;
+			return string.Join("/", path) + ": " + text;
+		}
+
 		private static readonly string[] ItemFields = { "translate", "page", "code", "advantage", "disadvantage" };
 
-		// - mentor and paragon choices are left out: no language file translates one
+		// - mentor and paragon choices are left out: a translated one would show up as unreached
 		private static IEnumerable<Entry> EntriesOf(string language, string fileName, XmlDocument english,
-			XmlElement type, XmlElement child)
+			XmlElement type, XmlElement child, HashSet<XmlNode> read)
 		{
 			Func<Kind, string, string, Entry> entry = (kind, key, xPath) =>
 				new Entry(language, fileName, kind, key, Resolve(english, xPath, key));
+			Func<Kind, string, Entry> crash = (kind, key) =>
+				new Entry(language, fileName, kind, key + " (no name)", Outcome.Crashes);
+
+			if (child["translate"] != null)
+				read.Add(child["translate"]);
 
 			if (ItemFields.Any(field => child[field] != null))
 			{
 				// - Load reads the name unguarded for each of these fields
 				if (child["name"] == null)
-					yield return new Entry(language, fileName, Kind.Item, type.Name + "/" + child.Name + " (no name)",
-						Outcome.Crashes);
+					yield return crash(Kind.Item, type.Name + "/" + child.Name);
 				else
 				{
 					string name = Decoded(child["name"]);
@@ -149,6 +200,7 @@ namespace Chummer.Tests
 
 			if (child.Attributes["translate"] != null)
 			{
+				read.Add(child);
 				string text = child.InnerXml.Replace("&amp;", "&");
 				yield return entry(Kind.Text, text, "/chummer/" + type.Name + "/" + child.Name + "[. = \"" + text + "\"]");
 			}
@@ -158,25 +210,41 @@ namespace Chummer.Tests
 			{
 				foreach (XmlElement spec in child.SelectNodes("specs/spec[@translate]").OfType<XmlElement>())
 				{
+					read.Add(spec);
 					string skill = child["name"]?.InnerXml;
 					yield return skill == null
-						? new Entry(language, fileName, Kind.Spec, spec.InnerXml + " (no skill name)", Outcome.Crashes)
+						? crash(Kind.Spec, spec.InnerXml)
 						: entry(Kind.Spec, skill + ": " + spec.InnerXml, "/chummer/" + type.Name + "/skill[name = \""
 							+ skill + "\"]/specs/spec[. = \"" + spec.InnerXml + "\"]");
 				}
 			}
 
-			// - Load reads a metavariant page only under <altpage>: no language file has one
 			if (fileName == "metatypes.xml" && child["metavariants"] != null)
 			{
-				foreach (XmlElement metavariant in child.SelectNodes("metavariants/metavariant[translate]")
-					.OfType<XmlElement>())
+				foreach (XmlElement metavariant in child.SelectNodes("metavariants/metavariant").OfType<XmlElement>())
 				{
-					string metatype = child["name"].InnerXml;
-					string name = metavariant["name"].InnerXml;
-					yield return entry(Kind.Metavariant, metatype + "/" + name,
-						"/chummer/metatypes/metatype[name = \"" + metatype + "\"]/metavariants/metavariant[name = \""
-						+ name + "\"]");
+					if (metavariant["translate"] != null)
+						read.Add(metavariant["translate"]);
+					if (metavariant["translate"] == null && metavariant["altpage"] == null)
+						continue;
+
+					string metatype = child["name"]?.InnerXml;
+					string name = metavariant["name"]?.InnerXml;
+					if (metatype == null || name == null)
+					{
+						yield return crash(Kind.Metavariant, (metatype ?? "?") + "/" + (name ?? "?"));
+						continue;
+					}
+
+					string key = metatype + "/" + name;
+					Entry found = entry(Kind.Metavariant, key, "/chummer/metatypes/metatype[name = \"" + metatype
+						+ "\"]/metavariants/metavariant[name = \"" + name + "\"]");
+
+					// - clsXmlManager.cs:268 tests <altpage> but reads <page>: a hit without <page> throws
+					bool pageCrashes = metavariant["altpage"] != null && metavariant["page"] == null
+						&& found.Outcome == Outcome.Applied;
+					yield return pageCrashes ? new Entry(language, fileName, Kind.Metavariant, key + " (altpage, no page)",
+						Outcome.Crashes) : found;
 				}
 			}
 
@@ -185,10 +253,13 @@ namespace Chummer.Tests
 				foreach (XmlElement advantage in child.SelectNodes("advantages/advantage[@translate]")
 					.OfType<XmlElement>())
 				{
-					string art = child["name"].InnerXml;
-					yield return entry(Kind.Advantage, art + ": " + advantage.InnerXml,
-						"/chummer/martialarts/martialart[name = \"" + art + "\"]/advantages/advantage[. = \""
-						+ advantage.InnerXml + "\"]");
+					read.Add(advantage);
+					string art = child["name"]?.InnerXml;
+					yield return art == null
+						? crash(Kind.Advantage, advantage.InnerXml)
+						: entry(Kind.Advantage, art + ": " + advantage.InnerXml,
+							"/chummer/martialarts/martialart[name = \"" + art + "\"]/advantages/advantage[. = \""
+							+ advantage.InnerXml + "\"]");
 				}
 			}
 		}
