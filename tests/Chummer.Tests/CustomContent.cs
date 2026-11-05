@@ -7,7 +7,7 @@ using System.Xml;
 namespace Chummer.Tests
 {
 	// - the shipped packs under data/custom content/, checked as XmlManager.Load would merge them
-	// - Load never reaches the subfolders today: these checks guard the day it does
+	// - Load reads data/ itself only: a pack takes effect once its files are copied there
 	public static class CustomContent
 	{
 		public const string CustomPrefix = "custom";
@@ -115,7 +115,7 @@ namespace Chummer.Tests
 			return PackFiles.Single(file => string.Equals(file.FilePath, path, StringComparison.Ordinal));
 		}
 
-		// - per pack, not across packs: users install packs one at a time
+		// - per pack, not across packs: a user copies in only the packs they want
 		public static IReadOnlyCollection<string> BookCodesVisibleTo(PackFile file)
 		{
 			IEnumerable<string> packCodes = PairedPackFiles()
@@ -131,10 +131,11 @@ namespace Chummer.Tests
 		// One named entry in a pack file, keyed the way Load looks it up.
 		public sealed class PackItem
 		{
-			public PackItem(string collection, string element, string name)
+			public PackItem(string collection, string element, string name, string content)
 			{
 				Collection = collection;
 				Element = element;
+				Content = content;
 				Name = name;
 			}
 
@@ -143,6 +144,9 @@ namespace Chummer.Tests
 			public string Element { get; }
 
 			public string Name { get; }
+
+			// - the InnerXml an override writes over the base entry (clsXmlManager.cs:170)
+			public string Content { get; }
 
 			// - the exact query Load builds to find this entry's twin (clsXmlManager.cs:168, :353)
 			public string XPath => "/chummer/" + Collection + "/" + Element + "[name = \"" + Name + "\"]";
@@ -155,7 +159,39 @@ namespace Chummer.Tests
 				.Where(collection => collection.NodeType == XmlNodeType.Element)
 				.SelectMany(collection => collection.ChildNodes.Cast<XmlNode>()
 					.Where(item => item.NodeType == XmlNodeType.Element && item["name"] != null)
-					.Select(item => new PackItem(collection.Name, item.Name, item["name"].InnerText)));
+					.Select(item => new PackItem(collection.Name, item.Name, item["name"].InnerText, item.InnerXml)));
+		}
+
+		// - base file + lookup -> the distinct contents the given overrides would write there
+		// - one content is harmless however many files carry it, two make load order decide
+		public static IEnumerable<KeyValuePair<string, string[]>> ConflictingOverrides(
+			IEnumerable<KeyValuePair<PackFile, XmlDocument>> overrides)
+		{
+			return overrides
+				.SelectMany(pair => NamedItemsIn(pair.Value)
+					.Select(item => new { Key = pair.Key.BaseFileNames[0] + item.XPath, item.Content, pair.Key.FileName }))
+				.GroupBy(entry => entry.Key, StringComparer.Ordinal)
+				.Where(group => group.Select(entry => entry.Content).Distinct(StringComparer.Ordinal).Count() > 1)
+				.Select(group => new KeyValuePair<string, string[]>(group.Key,
+					group.Select(entry => entry.FileName).OrderBy(name => name, StringComparer.Ordinal).ToArray()))
+				.OrderBy(entry => entry.Key, StringComparer.Ordinal);
+		}
+
+		// - frmSelectWeapon.cs:47-62 lists every <category> node without deduplicating
+		// - the pack's copy lacks the translation: Load applies it before merging packs
+		// - override files are exempt: their blocks are never merged
+		public static IEnumerable<string> RedeclaredCategories(PackFile file, XmlDocument pack)
+		{
+			if (file.IsOverride)
+				return Enumerable.Empty<string>();
+
+			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
+				DataPaths.CategoryDeclarationsFor(file.BaseFilePath);
+
+			return DataPaths.DeclarationBlocksIn(pack.DocumentElement, file.FileName)
+				.SelectMany(block => block.Value
+					.Where(value => Values(baseBlocks, block.Key).Contains(value, StringComparer.Ordinal))
+					.Select(value => block.Key + "/" + value));
 		}
 
 		// - custom entries the base already names: Load drops them (clsXmlManager.cs:354-357)

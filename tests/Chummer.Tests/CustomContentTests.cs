@@ -112,6 +112,35 @@ namespace Chummer.Tests
 				"These custom entries are defined more than once:\n  " + string.Join("\n  ", duplicated));
 		}
 
+		// - the audio/vision pack ships alternatives that overlap on 3 entries, with equal content
+		[Fact]
+		public void OverridesOfOneBaseEntryAgreeOnItsContent()
+		{
+			string[] conflicting = CustomContent.ConflictingOverrides(CustomContent.PairedPackFiles()
+					.Where(file => file.IsOverride)
+					.Select(file => new KeyValuePair<CustomContent.PackFile, XmlDocument>(
+						file, CustomContent.Load(file.FilePath))))
+				.Select(entry => entry.Key + " in " + string.Join(", ", entry.Value))
+				.ToArray();
+
+			Assert.True(conflicting.Length == 0,
+				"These base entries get different content from different override files, "
+				+ "so load order decides:\n  " + string.Join("\n  ", conflicting));
+		}
+
+		[Fact]
+		public void NoCustomFileRedeclaresABaseCategory()
+		{
+			string[] redeclared = CustomContent.PairedPackFiles()
+				.SelectMany(file => CustomContent.RedeclaredCategories(file, CustomContent.Load(file.FilePath))
+					.Select(entry => file.PackName + "/" + file.FileName + ": " + entry))
+				.ToArray();
+
+			Assert.True(redeclared.Length == 0,
+				"These pack categories are already declared by the base file and would be listed "
+				+ "twice:\n  " + string.Join("\n  ", redeclared));
+		}
+
 		[Theory]
 		[MemberData(nameof(CustomContent.PairedPackFileCases), MemberType = typeof(CustomContent))]
 		public void EveryCategoryUsedIsDeclared(string packPath)

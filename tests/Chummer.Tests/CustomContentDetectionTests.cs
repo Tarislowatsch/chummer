@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using Xunit;
 
@@ -75,6 +76,49 @@ namespace Chummer.Tests
 		public void AnOverrideFileCannotDeclareCategories()
 		{
 			Assert.Equal(new[] { "Made Up", "Made Up" }, UndeclaredCategories("override"));
+		}
+
+		[Fact]
+		public void ConflictingOverridesIgnoresTwinsWithEqualContent()
+		{
+			Assert.Empty(CustomContent.ConflictingOverrides(new[]
+			{
+				Override("override_a_gear.xml", "<name>Taken</name><cost>1</cost>"),
+				Override("override_b_gear.xml", "<name>Taken</name><cost>1</cost>"),
+			}));
+		}
+
+		[Fact]
+		public void ConflictingOverridesFindsTwinsWithDifferentContent()
+		{
+			var conflict = CustomContent.ConflictingOverrides(new[]
+			{
+				Override("override_a_gear.xml", "<name>Taken</name><cost>1</cost>"),
+				Override("override_b_gear.xml", "<name>Taken</name><cost>2</cost>"),
+			}).Single();
+
+			Assert.Equal("gear.xml/chummer/gears/gear[name = \"Taken\"]", conflict.Key);
+			Assert.Equal(new[] { "override_a_gear.xml", "override_b_gear.xml" }, conflict.Value);
+		}
+
+		// - "Ammunition" is declared by the real gear.xml, "Made Up" is not
+		[Fact]
+		public void RedeclaredCategoriesFindsOnlyValuesTheBaseDeclares()
+		{
+			XmlDocument pack = Xml(
+				"<chummer><categories><category>Ammunition</category><category>Made Up</category></categories></chummer>");
+
+			Assert.Equal(new[] { "categories/Ammunition" },
+				CustomContent.RedeclaredCategories(PackFile("custom"), pack));
+			Assert.Empty(CustomContent.RedeclaredCategories(PackFile("override"), pack));
+		}
+
+		private static KeyValuePair<CustomContent.PackFile, XmlDocument> Override(
+			string fileName, string item)
+		{
+			return new KeyValuePair<CustomContent.PackFile, XmlDocument>(
+				new CustomContent.PackFile(@"C:\pack\" + fileName, "override", new[] { "gear.xml" }),
+				Xml("<chummer><gears><gear>" + item + "</gear></gears></chummer>"));
 		}
 
 		private static string[] DiscardedNames(string prefix)
