@@ -27,6 +27,16 @@ namespace Chummer.Tests
 			"critter skills: Infilatration",
 			"critter skills: Intimidatino",
 			"critter skills: shadowing",
+			"weapon range by category: Clubs",
+			"weapon range by category: Crossbows",
+			"weapon range by category: Cyberware Exotic Ranged Weapons",
+			"weapon range by category: Cyberware Throwing Weapons",
+			"weapon range by category: Exotic Ranged Weapons",
+			// - 154 rockets, missiles, rounds, mines: no code hands them the launcher's range
+			// - 21 launcher grenades carry one themselves: the data can
+			"weapon range by category: Gear",
+			"weapon range by category: Special Weapons",
+			"weapon range by category: Vehicle Weapons",
 		};
 
 		[Theory]
@@ -196,6 +206,8 @@ namespace Chummer.Tests
 				{ "vessel powers", 7 },
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
+				{ "weapon range", 162 },
+				{ "weapon range by category", 466 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};
