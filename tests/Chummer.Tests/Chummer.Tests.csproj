@@ -8,6 +8,7 @@
     <TargetFramework>net48</TargetFramework>
     <IsPackable>false</IsPackable>
     <RootNamespace>Chummer.Tests</RootNamespace>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)\.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <ItemGroup>
