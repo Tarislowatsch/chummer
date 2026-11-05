@@ -54,6 +54,14 @@ namespace Chummer.Tests
 			Assert.Equal(23, DataPaths.TopLevelRuleXmlFilesCitingBooks().Count());
 		}
 
+		// - derivable: 18 files carry a <bonus>, plus improvements.xml through <internal>
+		// - a file dropped from the scan would leave its bonus tags unchecked
+		[Fact]
+		public void TopLevelRuleXmlFilesWithBonusesFindsEveryBonusFile()
+		{
+			Assert.Equal(19, DataPaths.TopLevelRuleXmlFilesWithBonuses().Count());
+		}
+
 		// - derivable: 24 collections carry <category>, 2 are exempt, 2 sit in files with no block
 		// - any of the three rules quietly changing scope makes the number stop adding up
 		[Fact]
