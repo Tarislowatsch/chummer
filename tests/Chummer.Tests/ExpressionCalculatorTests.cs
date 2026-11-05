@@ -35,6 +35,7 @@ namespace Chummer.Tests
 				{ "WeaponAccessory.TotalCost", "86FCBC198480E0DF" },
 				{ "WeaponMod.TotalCost", "2ED9CDCE8F3C2C40" },
 				{ "Cyberware.CalculatedESS", "A036BBB612C578D5" },
+				{ "frmSelectCyberware.UpdateCyberwareInfo", "EDFA0E780E9A1F41" },
 			};
 
 		[Fact]
