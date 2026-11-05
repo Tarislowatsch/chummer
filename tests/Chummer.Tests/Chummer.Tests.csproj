@@ -17,4 +17,9 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Only for the control type hierarchy: tag lookups read controls via OfType<T>. -->
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
 </Project>
