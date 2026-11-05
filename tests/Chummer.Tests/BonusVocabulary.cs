@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -172,7 +171,7 @@ namespace Chummer.Tests
 				return new HashSet<string>(StringComparer.Ordinal);
 
 			return new HashSet<string>(
-				label.Matches(string.Join("\n", BlockFrom(body, start).Code)).Cast<Match>()
+				label.Matches(string.Join("\n", body.BlockFrom(start).Code)).Cast<Match>()
 					.Select(match => match.Groups[1].Value),
 				StringComparer.Ordinal);
 		}
@@ -198,142 +197,7 @@ namespace Chummer.Tests
 			}
 
 			parameter = CreateImprovementsSignature.Match(source.Code[signatures[0]]).Groups[1].Value;
-			return BlockFrom(source, signatures[0]);
-		}
-
-		// - extent by brace depth from the first line, like the Create fingerprints in DataPaths
-		private static SourceLines BlockFrom(SourceLines source, int start)
-		{
-			int depth = 0;
-			bool opened = false;
-			int end = start;
-
-			for (; end < source.Bare.Length; end++)
-			{
-				string bare = source.Bare[end];
-				depth += bare.Count(character => character == '{') - bare.Count(character => character == '}');
-				opened |= bare.IndexOf('{') >= 0;
-
-				if (opened && depth <= 0)
-					break;
-			}
-
-			int count = Math.Min(end, source.Bare.Length - 1) - start + 1;
-			return new SourceLines(
-				source.Code.Skip(start).Take(count).ToArray(),
-				source.Bare.Skip(start).Take(count).ToArray());
-		}
-
-		// - a commented-out check must not count as handled: that would hide an unhandled tag
-		// - Bare also drops literals: a "{0}" placeholder must not move the brace depth
-		private sealed class SourceLines
-		{
-			public SourceLines(string[] code, string[] bare)
-			{
-				Code = code;
-				Bare = bare;
-			}
-
-			// Comments removed, literals kept: the tag names are literals.
-			public string[] Code { get; }
-
-			public string[] Bare { get; }
-
-			// - a lexer, not a regex: "//" inside a string literal is no comment
-			public static SourceLines Of(string[] lines)
-			{
-				string[] code = new string[lines.Length];
-				string[] bare = new string[lines.Length];
-				bool inBlockComment = false;
-				bool inVerbatim = false;
-
-				for (int i = 0; i < lines.Length; i++)
-				{
-					string line = lines[i];
-					StringBuilder kept = new StringBuilder();
-					StringBuilder stripped = new StringBuilder();
-					char quote = '\0';
-
-					for (int j = 0; j < line.Length; j++)
-					{
-						char current = line[j];
-						char next = j + 1 < line.Length ? line[j + 1] : '\0';
-
-						if (inBlockComment)
-						{
-							if (current == '*' && next == '/')
-							{
-								inBlockComment = false;
-								j++;
-							}
-							continue;
-						}
-
-						if (inVerbatim)
-						{
-							kept.Append(current);
-							if (current == '"' && next == '"')
-							{
-								kept.Append(next);
-								j++;
-							}
-							else if (current == '"')
-							{
-								inVerbatim = false;
-							}
-							continue;
-						}
-
-						if (quote != '\0')
-						{
-							kept.Append(current);
-							if (current == '\\' && next != '\0')
-							{
-								kept.Append(next);
-								j++;
-							}
-							else if (current == quote)
-							{
-								quote = '\0';
-							}
-							continue;
-						}
-
-						if (current == '/' && next == '/')
-							break;
-
-						if (current == '/' && next == '*')
-						{
-							inBlockComment = true;
-							j++;
-							continue;
-						}
-
-						if (current == '@' && next == '"')
-						{
-							kept.Append(current).Append(next);
-							inVerbatim = true;
-							j++;
-							continue;
-						}
-
-						if (current == '"' || current == '\'')
-						{
-							kept.Append(current);
-							quote = current;
-							continue;
-						}
-
-						kept.Append(current);
-						stripped.Append(current);
-					}
-
-					code[i] = kept.ToString();
-					bare[i] = stripped.ToString();
-				}
-
-				return new SourceLines(code, bare);
-			}
+			return source.BlockFrom(signatures[0]);
 		}
 
 		// - blind spot: matches any .Bonus read, not one on a vehicle mod specifically
