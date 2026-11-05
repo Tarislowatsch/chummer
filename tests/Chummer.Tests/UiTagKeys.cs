@@ -1,4 +1,4 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,13 +15,20 @@ namespace Chummer.Tests
 		// One string literal written to a Tag, in a designer file or at run time.
 		public sealed class Assignment
 		{
-			public Assignment(string site, string receiver, string declaredType, string value)
+			public Assignment(string site, string receiver, string declaredType, string expression, string value)
 			{
 				Site = site;
 				Receiver = receiver;
 				DeclaredType = declaredType;
+				Expression = expression;
 				Value = value;
 			}
+
+			// - the right-hand side as written
+			public string Expression { get; }
+
+			// - a computed value that starts with a literal is a key built at run time
+			public bool IsComposed => Value == null && Expression.StartsWith("\"", StringComparison.Ordinal);
 
 			public string Site { get; }
 
@@ -124,9 +131,10 @@ namespace Chummer.Tests
 					string declared = receiver == "this"
 						? className
 						: DeclaredType(receiver, i, here, there);
-					Match literal = Literal.Match(match.Groups[2].Value.Trim());
+					string expression = match.Groups[2].Value.Trim();
+					Match literal = Literal.Match(expression);
 
-					yield return new Assignment(fileName + ":" + (i + 1), receiver, declared,
+					yield return new Assignment(fileName + ":" + (i + 1), receiver, declared, expression,
 						literal.Success ? literal.Groups[1].Value : null);
 				}
 			}

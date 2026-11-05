@@ -87,6 +87,17 @@ namespace Chummer.Tests
 				new[] { "objNode.Tag = objGear.InternalId;" }, None).Single();
 
 			Assert.Null(assignment.Value);
+			Assert.False(assignment.IsComposed);
+		}
+
+		[Fact]
+		public void FlagsATagComposedFromALiteral()
+		{
+			UiTagKeys.Assignment assignment = UiTagKeys.AssignmentsIn("frmX.cs",
+				new[] { "lblA.Tag = \"Label_\" + strName;" }, None).Single();
+
+			Assert.Null(assignment.Value);
+			Assert.True(assignment.IsComposed);
 		}
 
 		[Fact]

@@ -55,6 +55,20 @@ namespace Chummer.Tests
 				"These designer tags are not string literals:\n  " + string.Join("\n  ", computed));
 		}
 
+		// - run-time ids and objects stay allowed, a key built from a literal does not
+		[Fact]
+		public void NoTagIsComposedFromALiteral()
+		{
+			string[] composed = UiTagKeys.AllAssignments
+				.Where(assignment => assignment.IsComposed)
+				.Select(assignment => assignment.Site + " " + assignment.Receiver + " = " + assignment.Expression)
+				.ToArray();
+
+			Assert.True(composed.Length == 0,
+				"These tags build a key the check cannot read. Write it as one literal:\n  "
+				+ string.Join("\n  ", composed));
+		}
+
 		// - exact counts: a tag that newly escapes every lookup must be a deliberate choice
 		// - CheckBox: 82 condition-monitor numbers, 36 spell-designer modifiers set at run time
 		// - ContextMenuStrip: cmsImprovementLocation's empty tag, no lookup reads a strip
@@ -90,10 +104,13 @@ namespace Chummer.Tests
 		}
 
 		// - an empty extraction would make every check above vacuous
+		// - a lower bound, not exact: it counts code, which later phases change
 		[Fact]
 		public void FindsTheDesignerTags()
 		{
-			Assert.Equal(1732, UiTagKeys.AllAssignments.Count(assignment => UiTagKeys.IsDesignerFile(assignment.Site)));
+			int found = UiTagKeys.AllAssignments.Count(assignment => UiTagKeys.IsDesignerFile(assignment.Site));
+
+			Assert.True(found >= 1500, "Only " + found + " designer tags found, expected at least 1500.");
 		}
 	}
 }
