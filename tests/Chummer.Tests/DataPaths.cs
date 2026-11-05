@@ -180,7 +180,8 @@ namespace Chummer.Tests
 				IReadOnlyList<BookReference> bookReferences,
 				IReadOnlyDictionary<string, IReadOnlyCollection<string>> categoryDeclarations,
 				IReadOnlyList<CategoryUsage> categoryUsages,
-				IReadOnlyList<RequiredFieldContract> requiredFieldContracts)
+				IReadOnlyList<RequiredFieldContract> requiredFieldContracts,
+				IReadOnlyList<BonusVocabulary.BonusTag> bonusTags)
 			{
 				FilePath = filePath;
 				Collections = collections;
@@ -188,6 +189,7 @@ namespace Chummer.Tests
 				CategoryDeclarations = categoryDeclarations;
 				CategoryUsages = categoryUsages;
 				RequiredFieldContracts = requiredFieldContracts;
+				BonusTags = bonusTags;
 			}
 
 			public string FilePath { get; }
@@ -206,6 +208,8 @@ namespace Chummer.Tests
 
 			// - one per required-field rule declared against this file, already evaluated
 			public IReadOnlyList<RequiredFieldContract> RequiredFieldContracts { get; }
+
+			public IReadOnlyList<BonusVocabulary.BonusTag> BonusTags { get; }
 		}
 
 		// - parsed once: the suite was reparsing the same documents roughly five times over
@@ -262,6 +266,19 @@ namespace Chummer.Tests
 		public static IReadOnlyList<BookReference> BookReferencesFor(string xmlPath)
 		{
 			return CachedRuleFilesByPath.Value[xmlPath].BookReferences;
+		}
+
+		// - only files with a bonus tag: the rest would contribute empty, always-green cases
+		public static IEnumerable<object[]> TopLevelRuleXmlFilesWithBonuses()
+		{
+			return CachedRuleFiles.Value
+				.Where(file => file.BonusTags.Count > 0)
+				.Select(file => new object[] { file.FilePath });
+		}
+
+		public static IReadOnlyList<BonusVocabulary.BonusTag> BonusTagsFor(string xmlPath)
+		{
+			return CachedRuleFilesByPath.Value[xmlPath].BonusTags;
 		}
 
 		private static readonly Lazy<IReadOnlyDictionary<string, RuleFile>> CachedRuleFilesByPath =
@@ -637,7 +654,7 @@ namespace Chummer.Tests
 		}
 
 		// - obj/ is generated and absent from a fresh clone: results would differ between here and CI
-		private static IEnumerable<string> ApplicationSourceFiles()
+		internal static IEnumerable<string> ApplicationSourceFiles()
 		{
 			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
 
@@ -839,7 +856,7 @@ namespace Chummer.Tests
 
 		// - the entry's own <name>, else the nearest ancestor's, else "(unnamed)"
 		// - a nameless nested reference is reported under the entry a reader would open
-		private static string ItemLabel(XmlNode item)
+		internal static string ItemLabel(XmlNode item)
 		{
 			return item["name"]?.InnerText ?? NearestItemName(item);
 		}
@@ -942,7 +959,8 @@ namespace Chummer.Tests
 
 				files.Add(new RuleFile(xmlPath, collections, BookReferencesIn(document),
 					declarations, categoryUsages,
-					RequiredFieldContractsFor(fileName, xmlPath, document)));
+					RequiredFieldContractsFor(fileName, xmlPath, document),
+					BonusVocabulary.BonusTagsIn(fileName, document)));
 			}
 
 			return files;
