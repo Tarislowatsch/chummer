@@ -9,6 +9,7 @@ namespace Chummer.Tests
 	// - parent cost, Body, Speed and Accel are runtime state, replaced by a round stand-in
 	public static class CostExpressions
 	{
+		// - the selection dialogs parse the raw XML on their own and are not replayed here
 		public static readonly IReadOnlyList<ExpressionChecks.ExpressionRule> Rules = new[]
 		{
 			// clsEquipment.cs:852
@@ -23,6 +24,7 @@ namespace Chummer.Tests
 			// clsEquipment.cs:8745
 			Rule("WeaponMod", WeaponMod),
 			// - Create at clsEquipment.cs:9706, then TotalCost :11515 and OwnCost :11611
+			// - not CalculatedCost (:11440): it only runs on the parent of a "Gear Cost" child
 			Rule("Gear", (item, rating) => Gear(item, rating, true)),
 			// - the commlink Creates (:11957, :12824) take <cost> as is, without the Variable step
 			Rule("Commlink", (item, rating) => Gear(item, rating, false)),

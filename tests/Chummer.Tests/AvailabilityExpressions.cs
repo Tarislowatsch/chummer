@@ -9,6 +9,7 @@ namespace Chummer.Tests
 	// - English run: the translated suffix GetAvailInt strips is then R or F
 	public static class AvailabilityExpressions
 	{
+		// - the selection dialogs parse the raw XML on their own and are not replayed here
 		public static readonly IReadOnlyList<ExpressionChecks.ExpressionRule> Rules = new[]
 		{
 			// clsEquipment.cs:697

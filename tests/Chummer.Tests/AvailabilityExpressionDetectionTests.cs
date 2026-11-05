@@ -107,6 +107,17 @@ namespace Chummer.Tests
 			Assert.Equal(1000000, ratings[ratings.Count - 1]);
 		}
 
+		// - XPath divides by zero into Infinity, Convert.ToInt32 then throws: only at rating 5
+		[Fact]
+		public void DivisionByZeroAtAnInnerRatingIsFound()
+		{
+			ExpressionChecks.ExpressionFailure failure = FailuresFor("Gear",
+				"<gear><rating>10</rating><minrating>2</minrating><avail>100 div (Rating - 5)</avail></gear>").Single();
+
+			Assert.Equal(5, failure.Rating);
+			Assert.Equal("OverflowException", failure.Error);
+		}
+
 		// - a failure that only appears at an odd rating must not slip between samples
 		[Fact]
 		public void FailureAtAnIntermediateRatingIsFound()
