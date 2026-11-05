@@ -286,6 +286,7 @@ namespace Chummer.Tests
 		private static readonly Target[] Spells = In("spells.xml", "/chummer/spells/spell");
 		private static readonly Target[] Metamagics = In("metamagic.xml", "/chummer/metamagics/metamagic");
 		private static readonly Target[] Echoes = In("echoes.xml", "/chummer/echoes/echo");
+		private static readonly Target[] RangeCategories = In("ranges.xml", "/chummer/ranges/range/category");
 
 		// - the consumers query metatypes.xml first and fall back to critters.xml
 		private static readonly Target[] Metatypes =
@@ -398,6 +399,17 @@ namespace Chummer.Tests
 			Rule("weapon useskill", "clsEquipment.cs:6917",
 				"strSkill = _strUseSkill",
 				"weapons.xml", "/chummer/weapons/weapon/useskill", Skills),
+			// - a miss returns -1 and the range shows empty (clsEquipment.cs:6581, :6664)
+			// - an explicit range is a claim on any weapon, melee included
+			Rule("weapon range", "clsEquipment.cs:6572",
+				"strRangeCategory = _strRange",
+				"weapons.xml", "/chummer/weapons/weapon/range[. != '']", RangeCategories, ByTextToText),
+			// - an empty range falls back as well: Create copies it verbatim (clsEquipment.cs:4287)
+			// - melee weapons have no range by design, the empty display is correct for them
+			Rule("weapon range by category", "clsEquipment.cs:6570",
+				"string strRangeCategory = _strCategory",
+				"weapons.xml", "/chummer/weapons/weapon[type != 'Melee' and string(range) = '']/category",
+				RangeCategories, ByTextToText),
 
 			// - a missed grade falls back to "Standard" without a word (clsEquipment.cs:2327)
 			Rule("bioware forcegrade", "frmSelectCyberware.cs:262",
