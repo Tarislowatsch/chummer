@@ -19,24 +19,34 @@ namespace Chummer.Tests
 			Double,
 		}
 
-		// One element, or an attribute on it, that a Create hands to Convert.
+		// One element or attribute, on the entry or a node nested in it, that a Create converts.
 		public sealed class ConvertedField
 		{
 			public ConvertedField(string element, string attribute, Conversion conversion)
+				: this(null, element, attribute, conversion)
 			{
+			}
+
+			public ConvertedField(string scope, string element, string attribute, Conversion conversion)
+			{
+				Scope = scope;
 				Element = element;
 				Attribute = attribute;
 				Conversion = conversion;
 			}
 
+			// - the SelectNodes path a Create loops over, null for the entry itself
+			public string Scope { get; }
+
+			// - null when the attribute sits on the scoped node itself
 			public string Element { get; }
 
-			// - null for the element's own text
 			public string Attribute { get; }
 
 			public Conversion Conversion { get; }
 
-			public string Path => Attribute == null ? Element : Element + "/@" + Attribute;
+			public string Path => string.Join("/", new[] { Scope, Element, Attribute == null ? null : "@" + Attribute }
+				.Where(part => part != null));
 		}
 
 		public sealed class UnconvertibleValue
@@ -166,32 +176,85 @@ namespace Chummer.Tests
 			return fields;
 		}
 
+		// - a string-keyed indexer, .Attributes or .InnerText marks the operand as an XmlNode
+		// - a numeric indexer like strValues[0] is a string array, not a node read
+		private static readonly Regex AnyNodeConversion = new Regex(
+			@"(?:\bConvert\.To\w+|\.(?:Try)?Parse)\(\s*\w+\s*(?:\[\s*""|\.\s*Attributes\b|\.\s*InnerText\b)");
+
 		private static IReadOnlyList<ConvertedField> ConvertedFieldsInBody(string className, string body,
 			string parameter)
 		{
-			string node = Regex.Escape(parameter) + @"\s*\[\s*""(\w+)""\s*\]";
-			Regex understood = new Regex(@"\bConvert\.To(Int32|Boolean|Double)\(\s*" + node
-				+ @"(?:\s*\.\s*Attributes\s*\[\s*""(\w+)""\s*\])?\s*\.\s*InnerText\b");
-			Regex anyConversion = new Regex(@"(?:\bConvert\.To\w+|\.(?:Try)?Parse)\(\s*" + node);
+			List<ConvertedField> fields = new List<ConvertedField>();
+			int understood = 0;
 
-			MatchCollection matches = understood.Matches(body);
+			foreach (KeyValuePair<string, string> node in NodeVariablesIn(className, body, parameter))
+			{
+				Regex conversion = new Regex(@"\bConvert\.To(Int32|Boolean|Double)\(\s*" + Regex.Escape(node.Key)
+					+ @"(?:\s*\[\s*""(\w+)""\s*\])?(?:\s*\.\s*Attributes\s*\[\s*""(\w+)""\s*\])?"
+					+ @"\s*\.\s*InnerText\b");
 
-			// - a conversion of an unknown shape would drop out of the list without a word
-			if (anyConversion.Matches(body).Count != matches.Count)
+				foreach (Match match in conversion.Matches(body))
+				{
+					understood++;
+					fields.Add(new ConvertedField(node.Value,
+						match.Groups[2].Success ? match.Groups[2].Value : null,
+						match.Groups[3].Success ? match.Groups[3].Value : null,
+						(Conversion)Enum.Parse(typeof(Conversion), match.Groups[1].Value)));
+				}
+			}
+
+			// - a conversion of an unknown shape or node would drop out of the list without a word
+			if (AnyNodeConversion.Matches(body).Count != understood)
 			{
 				throw new InvalidOperationException(
 					className + ".Create converts a node read in a shape this scan does not "
 					+ "understand. Extend the pattern rather than lose that field from the check.");
 			}
 
-			return matches.Cast<Match>()
-				.Select(match => new ConvertedField(match.Groups[2].Value,
-					match.Groups[3].Success ? match.Groups[3].Value : null,
-					(Conversion)Enum.Parse(typeof(Conversion), match.Groups[1].Value)))
+			return fields
 				.GroupBy(field => field.Path + ":" + field.Conversion, StringComparer.Ordinal)
 				.Select(group => group.First())
 				.OrderBy(field => field.Path, StringComparer.Ordinal)
 				.ToArray();
+		}
+
+		// - variable name -> SelectNodes path, null for the parameter itself
+		// - only loops directly over the parameter: a deeper loop surfaces as an unknown node
+		private static IReadOnlyDictionary<string, string> NodeVariablesIn(string className, string body,
+			string parameter)
+		{
+			string select = Regex.Escape(parameter) + @"\s*\.\s*SelectNodes\(\s*""([^""]+)""\s*\)";
+			Dictionary<string, string> lists = new Dictionary<string, string>(StringComparer.Ordinal);
+			foreach (Match list in new Regex(@"\bXmlNodeList\s+(\w+)\s*=\s*" + select).Matches(body))
+				lists[list.Groups[1].Value] = list.Groups[2].Value;
+
+			Dictionary<string, string> nodes = new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ parameter, null },
+			};
+
+			foreach (Match loop in new Regex(@"\bforeach\s*\(\s*XmlNode\s+(\w+)\s+in\s+(?:"
+				+ select + @"|(\w+))\s*\)").Matches(body))
+			{
+				string path;
+				if (loop.Groups[2].Success)
+					path = loop.Groups[2].Value;
+				else if (!lists.TryGetValue(loop.Groups[3].Value, out path))
+					continue;
+
+				string variable = loop.Groups[1].Value;
+				string known;
+				if (nodes.TryGetValue(variable, out known) && !string.Equals(known, path, StringComparison.Ordinal))
+				{
+					throw new InvalidOperationException(
+						className + ".Create reuses '" + variable + "' for two node paths, so its "
+						+ "conversions cannot be attributed to one of them.");
+				}
+
+				nodes[variable] = path;
+			}
+
+			return nodes;
 		}
 
 		// - inside the single parse, like the required-field contracts it borrows its XPaths from
@@ -217,7 +280,7 @@ namespace Chummer.Tests
 		}
 
 		// - public so the detection tests can drive it with hand-built XML
-		// - an absent field is skipped: presence is the required-field contract's job
+		// - absent is skipped: the Create guards that read or the required-field contract pins it
 		public static IReadOnlyList<UnconvertibleValue> UnconvertibleValuesIn(IEnumerable<XmlNode> items,
 			string className, IReadOnlyList<ConvertedField> fields)
 		{
@@ -227,14 +290,13 @@ namespace Chummer.Tests
 			{
 				foreach (ConvertedField field in fields)
 				{
-					string value = ValueOf(item, field);
-					if (value == null || IsDiverted(className, field, value)
-						|| Converts(field.Conversion, value))
+					foreach (string value in ValuesOf(item, field))
 					{
-						continue;
-					}
+						if (IsDiverted(className, field, value) || Converts(field.Conversion, value))
+							continue;
 
-					unconvertible.Add(new UnconvertibleValue(DataPaths.ItemLabel(item), field, value));
+						unconvertible.Add(new UnconvertibleValue(DataPaths.ItemLabel(item), field, value));
+					}
 				}
 			}
 
@@ -242,16 +304,25 @@ namespace Chummer.Tests
 		}
 
 		// - XmlNode's indexer, the call Create makes: first direct child, exact ordinal match
-		private static string ValueOf(XmlNode item, ConvertedField field)
+		private static IEnumerable<string> ValuesOf(XmlNode item, ConvertedField field)
 		{
-			XmlElement element = item[field.Element];
-			if (element == null)
-				return null;
+			IEnumerable<XmlNode> nodes = field.Scope == null
+				? new[] { item }
+				: item.SelectNodes(field.Scope).Cast<XmlNode>();
 
-			if (field.Attribute == null)
-				return element.InnerText;
+			foreach (XmlNode node in nodes)
+			{
+				XmlNode holder = field.Element == null ? node : node[field.Element];
+				if (holder == null)
+					continue;
 
-			return element.Attributes[field.Attribute]?.Value;
+				string value = field.Attribute == null
+					? holder.InnerText
+					: holder.Attributes?[field.Attribute]?.Value;
+
+				if (value != null)
+					yield return value;
+			}
 		}
 
 		private static bool IsDiverted(string className, ConvertedField field, string value)

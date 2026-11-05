@@ -7,7 +7,7 @@ namespace Chummer.Tests
 {
 	// - an unguarded Convert on a bad value closes the app, nothing upstream catches it
 	// - inside a Create's empty catch the same value turns into 0 without a word
-	// - the .xsd files type these fields as plain strings
+	// - the .xsd files type most of these fields as plain strings
 	public class NumericFieldTests
 	{
 		[Theory]
@@ -38,7 +38,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void CreateMethodsConvertTheMeasuredFieldCount()
 		{
-			Assert.Equal(59, NumericFields.ConvertedFields.Values.Sum(fields => fields.Count));		}
+			Assert.Equal(65, NumericFields.ConvertedFields.Values.Sum(fields => fields.Count));		}
 
 		[Fact]
 		public void EveryDivertedValueStillNamesAConvertedField()

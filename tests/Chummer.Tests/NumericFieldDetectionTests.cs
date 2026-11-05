@@ -111,9 +111,9 @@ namespace Chummer.Tests
 		}
 
 		// - a commented-out read would add a field the code no longer converts
-		// - another variable's read belongs to another node, not to this entry
+		// - strValues[0] indexes a string array, not a node: no field and no throw
 		[Fact]
-		public void CommentsAndOtherVariablesAreIgnored()
+		public void CommentsAndStringArraysAreIgnored()
 		{
 			Assert.Equal(new[] { "rating:Int32" },
 				FieldsOf("Gear", ConvertedFieldsIn(
@@ -123,9 +123,68 @@ namespace Chummer.Tests
 					"	{",
 					"		_intMaxRating = Convert.ToInt32(objXmlGear[\"rating\"].InnerText);",
 					"		// _intSignal = Convert.ToInt32(objXmlGear[\"signal\"].InnerText);",
-					"		_intQty = Convert.ToInt32(objXmlOther[\"qty\"].InnerText);",
+					"		intMin = Convert.ToInt32(strValues[0]);",
 					"	}",
 					"}")));
+		}
+
+		// - armor, weapon and vehicle Creates convert attributes on the nested nodes they loop over
+		// - both loop shapes occur: SelectNodes inline and through an XmlNodeList variable
+		[Fact]
+		public void ConversionsOnLoopedNodesAreReadWithTheirPath()
+		{
+			Assert.Equal(new[] { "gears/gear/@qty:Int32", "mods/name/@rating:Int32" },
+				FieldsOf("Vehicle", ConvertedFieldsIn(
+					"public class Vehicle",
+					"{",
+					"	public void Create(XmlNode objXmlVehicle)",
+					"	{",
+					"		foreach (XmlNode objXmlMod in objXmlVehicle.SelectNodes(\"mods/name\"))",
+					"		{",
+					"			if (objXmlMod.Attributes[\"rating\"] != null)",
+					"				intRating = Convert.ToInt32(objXmlMod.Attributes[\"rating\"].InnerText);",
+					"		}",
+					"		XmlNodeList objXmlGearList = objXmlVehicle.SelectNodes(\"gears/gear\");",
+					"		foreach (XmlNode objXmlGear in objXmlGearList)",
+					"			intQty = Convert.ToInt32(objXmlGear.Attributes[\"qty\"].InnerText);",
+					"	}",
+					"}")));
+		}
+
+		// - a node the scan cannot place would drop its conversions out of the check
+		[Fact]
+		public void ConversionOnAnUnresolvedNodeThrows()
+		{
+			Assert.Throws<InvalidOperationException>(() => ConvertedFieldsIn(
+				"public class Gear",
+				"{",
+				"	public void Create(XmlNode objXmlGear)",
+				"	{",
+				"		XmlNode objChild = objXmlGear.SelectSingleNode(\"gears/gear\");",
+				"		_intQty = Convert.ToInt32(objChild[\"qty\"].InnerText);",
+				"	}",
+				"}"));
+		}
+
+		[Fact]
+		public void BadValueOnALoopedNodeIsReported()
+		{
+			NumericFields.ConvertedField rating = new NumericFields.ConvertedField(
+				"mods/name", null, "rating", NumericFields.Conversion.Int32);
+
+			Assert.Equal(new[] { "x" }, UnconvertibleIn("Vehicle",
+				"<vehicle><mods><name rating=\"2\">A</name><name rating=\"x\">B</name></mods></vehicle>", rating));
+		}
+
+		// - each attribute conversion in a Create is guarded by != null (clsEquipment.cs:4288)
+		// - reporting the absence would describe a crash the application does not have
+		[Fact]
+		public void AbsentAttributeIsNotReported()
+		{
+			NumericFields.ConvertedField multiply =
+				new NumericFields.ConvertedField("range", "multiply", NumericFields.Conversion.Double);
+
+			Assert.Empty(UnconvertibleIn("Weapon", "<weapon><range>x</range></weapon>", multiply));
 		}
 
 		// - reads after the method's closing brace belong to some other member
