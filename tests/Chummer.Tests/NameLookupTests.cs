@@ -6,7 +6,7 @@ using Xunit;
 namespace Chummer.Tests
 {
 	// - deliberately no allowlist: every name lookup is anchored today
-	// - the collisions themselves stay: renaming them would break saves for nothing
+	// - covers XPath lookups only, in-memory name comparisons are not surveyed
 	public class NameLookupTests
 	{
 		[Fact]
@@ -14,7 +14,7 @@ namespace Chummer.Tests
 		{
 			string[] unanchored = NameLookups.All
 				.Where(lookup => lookup.IsUnanchored)
-				.Select(lookup => lookup.Site + " \"" + lookup.Path + "[name ...\"")
+				.Select(lookup => lookup.Site + " " + lookup.Path)
 				.ToArray();
 
 			Assert.True(unanchored.Length == 0,
@@ -22,28 +22,45 @@ namespace Chummer.Tests
 				+ string.Join("\n  ", unanchored));
 		}
 
+		// - exact per file: a generic variable name like strXPath must not admit a new path elsewhere
 		[Fact]
-		public void EveryComputedPathIsTraced()
+		public void ComputedPathsMatchTheTracedTable()
 		{
-			string[] untraced = NameLookups.All
-				.Where(lookup => lookup.DynamicPrefix != null
-					&& !NameLookups.KnownDynamicPrefixes.ContainsKey(lookup.DynamicPrefix))
-				.Select(lookup => lookup.Site + " " + lookup.DynamicPrefix)
+			string[] actual = NameLookups.All
+				.Where(lookup => lookup.IsComputed)
+				.GroupBy(lookup => lookup.File + " " + lookup.Path, StringComparer.Ordinal)
+				.Select(group => group.Key + " x" + group.Count())
+				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(untraced.Length == 0,
-				"These lookups build their path in code. Trace it to one collection and add it to "
-				+ nameof(NameLookups.KnownDynamicPrefixes) + ":\n  " + string.Join("\n  ", untraced));
+			AssertTable(NameLookups.ComputedPaths, actual, nameof(NameLookups.ComputedPaths));
 		}
 
+		// - catches a variable assigned "//gear" far from the lookup that reads it
 		[Fact]
-		public void EveryTracedPrefixIsStillUsed()
+		public void NoLiteralHoldsAnUnanchoredStep()
 		{
-			HashSet<string> used = new HashSet<string>(
-				NameLookups.All.Select(lookup => lookup.DynamicPrefix).Where(prefix => prefix != null),
-				StringComparer.Ordinal);
+			string[] actual = NameLookups.AllLiterals
+				.Where(literal => NameLookups.IsUnanchoredLiteral(literal.Text))
+				.GroupBy(literal => literal.File + " " + literal.Text, StringComparer.Ordinal)
+				.Select(group => group.Key + " x" + group.Count())
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
 
-			Assert.Empty(NameLookups.KnownDynamicPrefixes.Keys.Where(prefix => !used.Contains(prefix)));
+			AssertTable(NameLookups.KnownWildcardLiterals, actual, nameof(NameLookups.KnownWildcardLiterals));
+		}
+
+		// - the whole list on failure: the table is copied back from it after a re-trace
+		private static void AssertTable(IReadOnlyDictionary<string, int> table, string[] actual, string name)
+		{
+			string[] expected = table
+				.Select(entry => entry.Key + " x" + entry.Value)
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
+
+			Assert.True(expected.SequenceEqual(actual, StringComparer.Ordinal),
+				name + " no longer matches the code. Found:\n  " + string.Join("\n  ", actual)
+				+ "\nMissing from the code:\n  " + string.Join("\n  ", expected.Except(actual, StringComparer.Ordinal)));
 		}
 
 		// - an empty extraction would make the checks above vacuous
@@ -55,4 +72,4 @@ namespace Chummer.Tests
 				"Only " + NameLookups.All.Count + " name lookups found, expected at least 500.");
 		}
 	}
-}
+}
