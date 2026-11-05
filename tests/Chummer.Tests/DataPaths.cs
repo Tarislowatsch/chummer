@@ -183,7 +183,9 @@ namespace Chummer.Tests
 				IReadOnlyList<RequiredFieldContract> requiredFieldContracts,
 				IReadOnlyList<BonusVocabulary.BonusTag> bonusTags,
 				IReadOnlyList<NumericFields.NumericFieldCheck> numericFieldChecks,
-				IReadOnlyList<ExpressionChecks.ExpressionCheck> expressionChecks)
+				IReadOnlyList<ExpressionChecks.ExpressionCheck> expressionChecks,
+				IReadOnlyList<CrossFileReferences.Reference> crossFileReferences,
+				IReadOnlyList<CrossFileReferences.TargetKeys> crossFileTargetKeys)
 			{
 				FilePath = filePath;
 				Collections = collections;
@@ -194,6 +196,8 @@ namespace Chummer.Tests
 				BonusTags = bonusTags;
 				NumericFieldChecks = numericFieldChecks;
 				ExpressionChecks = expressionChecks;
+				CrossFileReferences = crossFileReferences;
+				CrossFileTargetKeys = crossFileTargetKeys;
 			}
 
 			public string FilePath { get; }
@@ -218,6 +222,11 @@ namespace Chummer.Tests
 			public IReadOnlyList<NumericFields.NumericFieldCheck> NumericFieldChecks { get; }
 
 			public IReadOnlyList<ExpressionChecks.ExpressionCheck> ExpressionChecks { get; }
+
+			// - two halves: a rule's references and its definitions usually live in different files
+			public IReadOnlyList<CrossFileReferences.Reference> CrossFileReferences { get; }
+
+			public IReadOnlyList<CrossFileReferences.TargetKeys> CrossFileTargetKeys { get; }
 		}
 
 		// - parsed once: the suite was reparsing the same documents roughly five times over
@@ -329,6 +338,55 @@ namespace Chummer.Tests
 				new Lazy<IReadOnlyDictionary<string, ExpressionChecks.ExpressionCheck>>(
 					() => CachedRuleFiles.Value.SelectMany(file => file.ExpressionChecks)
 						.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
+
+		public static IEnumerable<object[]> CrossFileReferenceRuleIds()
+		{
+			return CrossFileReferences.Rules.Select(rule => new object[] { rule.Id });
+		}
+
+		public static CrossFileReferences.ReferenceCheck CrossFileReferenceCheckFor(string id)
+		{
+			return CachedCrossFileReferenceChecksById.Value[id];
+		}
+
+		public static IReadOnlyList<CrossFileReferences.ReferenceCheck> CrossFileReferenceChecks =>
+			CachedCrossFileReferenceChecksById.Value.Values.ToArray();
+
+		private static readonly Lazy<IReadOnlyDictionary<string, CrossFileReferences.ReferenceCheck>>
+			CachedCrossFileReferenceChecksById =
+				new Lazy<IReadOnlyDictionary<string, CrossFileReferences.ReferenceCheck>>(CheckCrossFileReferences);
+
+		// - joined after the single parse: both halves of a rule are known only once every file is read
+		private static IReadOnlyDictionary<string, CrossFileReferences.ReferenceCheck> CheckCrossFileReferences()
+		{
+			ILookup<string, CrossFileReferences.Reference> references = CachedRuleFiles.Value
+				.SelectMany(file => file.CrossFileReferences)
+				.ToLookup(reference => reference.RuleId, StringComparer.Ordinal);
+			ILookup<string, CrossFileReferences.TargetKeys> targetKeys = CachedRuleFiles.Value
+				.SelectMany(file => file.CrossFileTargetKeys)
+				.ToLookup(keys => keys.RuleId, StringComparer.Ordinal);
+
+			Dictionary<string, CrossFileReferences.ReferenceCheck> checks =
+				new Dictionary<string, CrossFileReferences.ReferenceCheck>(StringComparer.Ordinal);
+
+			foreach (CrossFileReferences.ReferenceRule rule in CrossFileReferences.Rules)
+			{
+				CrossFileReferences.Reference[] ruleReferences = references[rule.Id].ToArray();
+				IReadOnlyList<IReadOnlyList<string>> definitions =
+					targetKeys[rule.Id].SelectMany(keys => keys.Keys).ToArray();
+				int[] definitionCounts = Enumerable.Range(0, rule.Targets.Count)
+					.Select(index => targetKeys[rule.Id]
+						.Where(keys => keys.TargetIndex == index)
+						.Sum(keys => keys.Keys.Count))
+					.ToArray();
+
+				// - Add, not the indexer: a repeated id would replace the first rule's check
+				checks.Add(rule.Id, new CrossFileReferences.ReferenceCheck(rule, ruleReferences.Length,
+					definitionCounts, CrossFileReferences.Unresolved(rule, ruleReferences, definitions)));
+			}
+
+			return checks;
+		}
 
 		private static readonly Lazy<IReadOnlyDictionary<string, RuleFile>> CachedRuleFilesByPath =
 			new Lazy<IReadOnlyDictionary<string, RuleFile>>(
@@ -1011,7 +1069,9 @@ namespace Chummer.Tests
 					RequiredFieldContractsFor(fileName, xmlPath, document),
 					BonusVocabulary.BonusTagsIn(fileName, document),
 					NumericFields.ChecksIn(xmlPath, document),
-					ExpressionChecks.ChecksIn(xmlPath, document, ExpressionChecks.AllRules)));
+					ExpressionChecks.ChecksIn(xmlPath, document, ExpressionChecks.AllRules),
+					CrossFileReferences.ReferencesIn(fileName, document, CrossFileReferences.Rules),
+					CrossFileReferences.TargetKeysIn(fileName, document, CrossFileReferences.Rules)));
 			}
 
 			return files;
