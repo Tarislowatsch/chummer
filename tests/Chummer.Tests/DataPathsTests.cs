@@ -44,6 +44,34 @@ namespace Chummer.Tests
 			Assert.Equal(4, DataPaths.PartialStylesheets().Count);
 		}
 
+		// - a broken extraction finds no calls: an empty set has no missing keys
+		// - exact on purpose: bump it with every GetString call a change adds or removes
+		[Fact]
+		public void UiStringCallsFindsEveryLiteralCall()
+		{
+			Assert.Equal(2798, UiStringKeys.AllCalls.Count(call => UiStringKeys.LiteralKey(call.Argument) != null));
+		}
+
+		// - 28 calls in the 8 forms of UiStringKeys.ComposedForms
+		[Fact]
+		public void UiStringCallsFindsEveryComposedCall()
+		{
+			Assert.Equal(28, UiStringKeys.AllCalls.Count(call => UiStringKeys.LiteralKey(call.Argument) == null
+				&& !UiStringKeys.IsTagLookup(call.Argument)));
+		}
+
+		[Fact]
+		public void UiStringCallsFindsEveryTagLookup()
+		{
+			Assert.Equal(25, UiStringKeys.AllCalls.Count(call => UiStringKeys.IsTagLookup(call.Argument)));
+		}
+
+		[Fact]
+		public void EnglishKeysFindsEveryKey()
+		{
+			Assert.Equal(1627, UiStringKeys.EnglishKeys.Count);
+		}
+
 		// - exact count, not ">N": this file set is small and enumerable
 		// - a dropped pair must fail immediately, not slip under a threshold
 		// - bumping the number is only correct for a deliberate new data file plus schema
