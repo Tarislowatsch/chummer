@@ -92,7 +92,8 @@ namespace Chummer.Tests
 			public IReadOnlyList<ExpressionFailure> Failures { get; }
 		}
 
-		public static IEnumerable<ExpressionRule> AllRules => AvailabilityExpressions.Rules.Concat(CostExpressions.Rules);
+		public static IEnumerable<ExpressionRule> AllRules =>
+			AvailabilityExpressions.Rules.Concat(CostExpressions.Rules).Concat(EssExpressions.Rules);
 
 		// - stand-in for runtime state the data cannot supply: parent cost, Body, Speed, Accel
 		// - a round integer keeps a multiplier like ".1" from inventing a fractional crash
