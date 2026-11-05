@@ -219,5 +219,27 @@ namespace Chummer.Tests
 		{
 			Assert.Equal(42, DataPaths.BookCodes.Count);
 		}
+
+		// - 23 files in 6 packs: a discovery gap would drop a whole pack from every pack check
+		// - also pins PairedPackFileCases: the pairing guard makes every file a paired one
+		[Fact]
+		public void PackFilesFindsEveryShippedPackFile()
+		{
+			Assert.Equal(23, CustomContent.PackFiles.Count);
+		}
+
+		// - derivable: every pack file, since each base file it pairs with has a schema
+		[Fact]
+		public void PackXmlWithSchemaFilesFindsEveryPair()
+		{
+			Assert.Equal(23, CustomContent.PackXmlWithSchemaFiles().Count());
+		}
+
+		// - derivable: 23 pack files minus the five books files, which cite nothing
+		[Fact]
+		public void PackFilesCitingBooksFindsEveryCitingFile()
+		{
+			Assert.Equal(18, CustomContent.PackFilesCitingBooks().Count());
+		}
 	}
 }

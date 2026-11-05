@@ -1,0 +1,107 @@
+﻿using System.Linq;
+using System.Xml;
+using Xunit;
+
+namespace Chummer.Tests
+{
+	// - hand-built input: the shipped packs are too clean to show each check can fail
+	public class CustomContentDetectionTests
+	{
+		private static readonly string[] BaseFiles = { "gear.xml", "powers.xml", "critterpowers.xml", "improvements.xml" };
+
+		[Theory]
+		[InlineData("custom_mypack_gear.xml", "custom", "gear.xml")]
+		[InlineData("override_mypack_gear.xml", "override", "gear.xml")]
+		[InlineData("CUSTOM_MyPack_Gear.xml", "custom", "gear.xml")]
+		[InlineData("custom_gear.xml", "custom", "gear.xml")]
+		[InlineData("custom_rigger_critterpowers.xml", "custom", "critterpowers.xml")]
+		public void ClassifyPairsAFileTheWayLoadsGlobDoes(string fileName, string prefix, string baseFile)
+		{
+			CustomContent.PackFile file = CustomContent.Classify(@"C:\pack\" + fileName, BaseFiles);
+
+			Assert.Equal(prefix, file.Prefix);
+			Assert.Equal(new[] { baseFile }, file.BaseFileNames);
+		}
+
+		[Fact]
+		public void ClassifyLeavesAFileWithoutPrefixUnpaired()
+		{
+			Assert.Null(CustomContent.Classify(@"C:\pack\mypack_gear.xml", BaseFiles).Prefix);
+		}
+
+		[Fact]
+		public void ClassifyNeverPairsWithImprovements()
+		{
+			Assert.Empty(CustomContent.Classify(@"C:\pack\custom_mypack_improvements.xml", BaseFiles).BaseFileNames);
+		}
+
+		[Fact]
+		public void ClassifyReportsEveryBaseAnAmbiguousNameMatches()
+		{
+			CustomContent.PackFile file = CustomContent.Classify(
+				@"C:\pack\custom_extra_gear.xml", new[] { "gear.xml", "extra_gear.xml" });
+
+			Assert.Equal(new[] { "extra_gear.xml", "gear.xml" }, file.BaseFileNames);
+		}
+
+		private const string Base =
+			"<chummer><gears><gear><name>Taken</name></gear></gears></chummer>";
+
+		private const string Pack =
+			"<chummer><categories><category>Made Up</category></categories>"
+			+ "<gears><gear><name>Taken</name><category>Made Up</category></gear>"
+			+ "<gear><name>Fresh</name><category>Made Up</category></gear></gears></chummer>";
+
+		[Fact]
+		public void ItemsLoadDiscardsFindsACustomEntryTheBaseAlreadyHas()
+		{
+			Assert.Equal(new[] { "Taken" }, DiscardedNames("custom"));
+		}
+
+		[Fact]
+		public void ItemsLoadDiscardsFindsAnOverrideWithoutABaseEntry()
+		{
+			Assert.Equal(new[] { "Fresh" }, DiscardedNames("override"));
+		}
+
+		// - gear.xml declares no "Made Up": only the pack's own block can satisfy it
+		[Fact]
+		public void ACustomFileMayDeclareItsOwnCategories()
+		{
+			Assert.Empty(UndeclaredCategories("custom"));
+		}
+
+		[Fact]
+		public void AnOverrideFileCannotDeclareCategories()
+		{
+			Assert.Equal(new[] { "Made Up", "Made Up" }, UndeclaredCategories("override"));
+		}
+
+		private static string[] DiscardedNames(string prefix)
+		{
+			return CustomContent.ItemsLoadDiscards(PackFile(prefix), Xml(Pack), Xml(Base))
+				.Select(item => item.Name)
+				.ToArray();
+		}
+
+		private static string[] UndeclaredCategories(string prefix)
+		{
+			return CustomContent.UndeclaredCategoryUsages(PackFile(prefix), Xml(Pack))
+				.Select(usage => usage.Category)
+				.ToArray();
+		}
+
+		// - paired with the real gear.xml: the declarations come from the cached base parse
+		private static CustomContent.PackFile PackFile(string prefix)
+		{
+			return new CustomContent.PackFile(@"C:\pack\" + prefix + "_test_gear.xml", prefix, new[] { "gear.xml" });
+		}
+
+		private static XmlDocument Xml(string text)
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(text);
+			return document;
+		}
+	}
+}

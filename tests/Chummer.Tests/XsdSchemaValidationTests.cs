@@ -17,6 +17,7 @@ namespace Chummer.Tests
 
 		[Theory]
 		[MemberData(nameof(DataPaths.TopLevelRuleXmlWithSchemaFiles), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(CustomContent.PackXmlWithSchemaFiles), MemberType = typeof(CustomContent))]
 		public void RuleXmlMatchesItsSchema(string xmlPath, string xsdPath)
 		{
 			List<string> errors = new List<string>();

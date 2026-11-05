@@ -53,7 +53,7 @@ namespace Chummer.Tests
 		}
 
 		// - File.Exists pairing lets character.xsd and improvements.xml drop out on their own
-		// - top-level only: "custom content/<pack>/" pairs names to schemas inconsistently
+		// - top-level only: pack files pair with their base file's schema, see CustomContent
 		// - the exact-count guard in DataPathsTests makes a silently dropped pair fail loudly
 		public static IEnumerable<object[]> TopLevelRuleXmlWithSchemaFiles()
 		{
@@ -1025,34 +1025,11 @@ namespace Chummer.Tests
 				string fileName = Path.GetFileName(xmlPath);
 				List<RuleCollection> collections = new List<RuleCollection>();
 				List<CategoryUsage> categoryUsages = new List<CategoryUsage>();
-				Dictionary<string, IReadOnlyCollection<string>> declarations =
-					new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.Ordinal);
+				IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations =
+					DeclarationBlocksIn(root, fileName);
 
-				foreach (XmlNode collection in root.ChildNodes)
+				foreach (XmlNode collection in CatalogueCollectionsIn(root))
 				{
-					if (collection.NodeType != XmlNodeType.Element)
-						continue;
-
-					if (DeclarationBlockNames.Contains(collection.Name))
-					{
-						if (declarations.ContainsKey(collection.Name))
-						{
-							// - indexer assignment would keep the last block and drop the first
-							// - the symptom then blames the data, a long way from the parse
-							throw new InvalidOperationException(
-								"Two <" + collection.Name + "> blocks in " + fileName
-								+ ". The category check reads one declaration set per block, so "
-								+ "the second would replace the first and everything declared "
-								+ "only in the first would look undeclared.");
-						}
-
-						declarations.Add(collection.Name, collection.ChildNodes.Cast<XmlNode>()
-							.Where(entry => entry.NodeType == XmlNodeType.Element)
-							.Select(entry => entry.InnerText)
-							.ToArray());
-						continue;
-					}
-
 					categoryUsages.AddRange(CategoryUsagesIn(collection));
 
 					string[] keyFields = KeyFieldsFor(fileName, collection.Name);
@@ -1075,6 +1052,52 @@ namespace Chummer.Tests
 			}
 
 			return files;
+		}
+
+		// - declaration block name -> declared values, for the blocks in DeclarationBlockNames only
+		// - shared with the pack checks: base and pack must read their blocks the same way
+		public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> DeclarationBlocksIn(
+			XmlElement root, string fileName)
+		{
+			Dictionary<string, IReadOnlyCollection<string>> declarations =
+				new Dictionary<string, IReadOnlyCollection<string>>(StringComparer.Ordinal);
+
+			foreach (XmlNode block in root.ChildNodes)
+			{
+				if (block.NodeType != XmlNodeType.Element || !DeclarationBlockNames.Contains(block.Name))
+					continue;
+
+				if (declarations.ContainsKey(block.Name))
+				{
+					// - indexer assignment would keep the last block and drop the first
+					// - the symptom then blames the data, a long way from the parse
+					throw new InvalidOperationException(
+						"Two <" + block.Name + "> blocks in " + fileName
+						+ ". The category check reads one declaration set per block, so "
+						+ "the second would replace the first and everything declared "
+						+ "only in the first would look undeclared.");
+				}
+
+				declarations.Add(block.Name, block.ChildNodes.Cast<XmlNode>()
+					.Where(entry => entry.NodeType == XmlNodeType.Element)
+					.Select(entry => entry.InnerText)
+					.ToArray());
+			}
+
+			return declarations;
+		}
+
+		// - every top-level element that is not a declaration block
+		public static IEnumerable<XmlNode> CatalogueCollectionsIn(XmlElement root)
+		{
+			return root.ChildNodes.Cast<XmlNode>()
+				.Where(node => node.NodeType == XmlNodeType.Element && !DeclarationBlockNames.Contains(node.Name));
+		}
+
+		public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarationsFor(
+			string xmlPath)
+		{
+			return CachedRuleFilesByPath.Value[xmlPath].CategoryDeclarations;
 		}
 
 		// - inside the single parse: these rules would otherwise reopen a third of the corpus
