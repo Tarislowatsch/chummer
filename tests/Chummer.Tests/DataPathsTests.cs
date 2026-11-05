@@ -156,8 +156,9 @@ namespace Chummer.Tests
 
 			Assert.True(drifted.Length == 0,
 				"These Create methods changed the elements they read, so the rules derived from "
-				+ "them in " + nameof(DataPaths.RequiredFieldRules) + " may no longer describe "
-				+ "them. Re-read each one, fix its rule, then update the hash:\n  "
+				+ "them in " + nameof(DataPaths.RequiredFieldRules) + " and the diverted values in "
+				+ nameof(NumericFields) + " may no longer describe them. Re-read each one, fix "
+				+ "its rule and diversions, then update the hash:\n  "
 				+ string.Join("\n  ", drifted));
 		}
 

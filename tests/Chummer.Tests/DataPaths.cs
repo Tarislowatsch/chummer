@@ -181,7 +181,8 @@ namespace Chummer.Tests
 				IReadOnlyDictionary<string, IReadOnlyCollection<string>> categoryDeclarations,
 				IReadOnlyList<CategoryUsage> categoryUsages,
 				IReadOnlyList<RequiredFieldContract> requiredFieldContracts,
-				IReadOnlyList<BonusVocabulary.BonusTag> bonusTags)
+				IReadOnlyList<BonusVocabulary.BonusTag> bonusTags,
+				IReadOnlyList<NumericFields.NumericFieldCheck> numericFieldChecks)
 			{
 				FilePath = filePath;
 				Collections = collections;
@@ -190,6 +191,7 @@ namespace Chummer.Tests
 				CategoryUsages = categoryUsages;
 				RequiredFieldContracts = requiredFieldContracts;
 				BonusTags = bonusTags;
+				NumericFieldChecks = numericFieldChecks;
 			}
 
 			public string FilePath { get; }
@@ -210,6 +212,8 @@ namespace Chummer.Tests
 			public IReadOnlyList<RequiredFieldContract> RequiredFieldContracts { get; }
 
 			public IReadOnlyList<BonusVocabulary.BonusTag> BonusTags { get; }
+
+			public IReadOnlyList<NumericFields.NumericFieldCheck> NumericFieldChecks { get; }
 		}
 
 		// - parsed once: the suite was reparsing the same documents roughly five times over
@@ -280,6 +284,24 @@ namespace Chummer.Tests
 		{
 			return CachedRuleFilesByPath.Value[xmlPath].BonusTags;
 		}
+
+		public static IEnumerable<object[]> EntitiesWithNumericFields()
+		{
+			return CachedNumericFieldChecksByEntity.Value.Keys
+				.OrderBy(entity => entity, StringComparer.Ordinal)
+				.Select(entity => new object[] { entity });
+		}
+
+		public static NumericFields.NumericFieldCheck NumericFieldCheckFor(string entity)
+		{
+			return CachedNumericFieldChecksByEntity.Value[entity];
+		}
+
+		private static readonly Lazy<IReadOnlyDictionary<string, NumericFields.NumericFieldCheck>>
+			CachedNumericFieldChecksByEntity =
+				new Lazy<IReadOnlyDictionary<string, NumericFields.NumericFieldCheck>>(
+					() => CachedRuleFiles.Value.SelectMany(file => file.NumericFieldChecks)
+						.ToDictionary(check => check.Entity, StringComparer.Ordinal));
 
 		private static readonly Lazy<IReadOnlyDictionary<string, RuleFile>> CachedRuleFilesByPath =
 			new Lazy<IReadOnlyDictionary<string, RuleFile>>(
@@ -626,7 +648,7 @@ namespace Chummer.Tests
 		// - matches only a declaration: a call site never names the parameter type
 		// - tolerates a line break after the paren
 		// - captures the parameter name the fingerprint looks for inside the body
-		private static readonly Regex EntityCreateSignature =
+		internal static readonly Regex EntityCreateSignature =
 			new Regex(@"public\s+void\s+Create\(\s*XmlNode\s+(\w+)", RegexOptions.Compiled);
 
 		private static readonly Regex ClassDeclaration =
@@ -714,7 +736,7 @@ namespace Chummer.Tests
 			fingerprints.Add(className, fingerprint);
 		}
 
-		private static string ClassNameAbove(string[] lines, int signatureLine)
+		internal static string ClassNameAbove(string[] lines, int signatureLine)
 		{
 			for (int i = signatureLine; i >= 0; i--)
 			{
@@ -960,7 +982,8 @@ namespace Chummer.Tests
 				files.Add(new RuleFile(xmlPath, collections, BookReferencesIn(document),
 					declarations, categoryUsages,
 					RequiredFieldContractsFor(fileName, xmlPath, document),
-					BonusVocabulary.BonusTagsIn(fileName, document)));
+					BonusVocabulary.BonusTagsIn(fileName, document),
+					NumericFields.ChecksIn(xmlPath, document)));
 			}
 
 			return files;
