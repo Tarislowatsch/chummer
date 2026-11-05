@@ -22,6 +22,18 @@ namespace Chummer.Tests
 				{ "WeaponAccessory.TotalAvail", "92E0764828135116" },
 				{ "WeaponMod.TotalAvail", "92E0764828135116" },
 				{ "frmCreate.GetAvailInt", "5FBAB326C1072FD0" },
+				{ "ArmorMod.TotalCost", "DC7B82685AA907EF" },
+				{ "Cyberware.OwnCost", "E701F41021BAA841" },
+				{ "Cyberware.TotalCost", "E35C70252BE4A26C" },
+				{ "Gear.OwnCost", "E94D0D5FE3BD36BA" },
+				{ "Gear.TotalCost", "A0ECC92BDBA85AA1" },
+				{ "Vehicle.OwnCost", "80DC6B9BB909D09A" },
+				{ "Vehicle.TotalCost", "783760ED2244C048" },
+				{ "VehicleMod.OwnCost", "D11C4DC31D0A753B" },
+				{ "VehicleMod.TotalCost", "C04283733432E648" },
+				{ "WeaponAccessory.OwnCost", "9B313DA93EB23449" },
+				{ "WeaponAccessory.TotalCost", "86FCBC198480E0DF" },
+				{ "WeaponMod.TotalCost", "2ED9CDCE8F3C2C40" },
 			};
 
 		[Fact]
@@ -69,9 +81,23 @@ namespace Chummer.Tests
 			Assert.Empty(empty);
 		}
 
+		// - Weapon and Lifestyle are left to NumericFields: it must convert their <cost>
+		[Fact]
+		public void EveryEntityThatRequiresCostHasAPortOrAConversion()
+		{
+			string[] ported = CostExpressions.Rules.Select(rule => rule.Entity).ToArray();
+			string[] uncovered = EntitiesRequiring("cost")
+				.Where(entity => !ported.Contains(entity))
+				.Where(entity => !NumericFields.ConvertedFields.ContainsKey(entity)
+					|| !NumericFields.ConvertedFields[entity].Any(field => field.Path == "cost"))
+				.ToArray();
+
+			Assert.Empty(uncovered);
+		}
+
 		private static IEnumerable<string> PortedCalculators()
 		{
-			return AvailabilityExpressions.Calculators;
+			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators);
 		}
 
 		private static IEnumerable<string> EntitiesRequiring(string field)
