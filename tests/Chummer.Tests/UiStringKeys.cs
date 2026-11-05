@@ -26,6 +26,24 @@ namespace Chummer.Tests
 					.ToArray();
 			});
 
+		// - RefreshStrings reads objNode["key"] and objNode["text"] unguarded (clsLanguageManager.cs:139-140)
+		// - public so the detection tests can drive it with hand-built XML
+		public static IEnumerable<string> EntriesMissingKeyOrText(XmlDocument language)
+		{
+			return language.SelectNodes("/chummer/strings/string").Cast<XmlNode>()
+				.Select((entry, index) => new { entry, index })
+				.Where(item => item.entry["key"] == null || item.entry["text"] == null)
+				.Select(item => "string #" + (item.index + 1) + " (key '"
+					+ (item.entry["key"]?.InnerText ?? "(none)") + "')");
+		}
+
+		public static XmlDocument LoadEnglish()
+		{
+			XmlDocument document = new XmlDocument { XmlResolver = null };
+			document.Load(EnglishFile);
+			return document;
+		}
+
 		// One GetString call, with its argument as written.
 		public sealed class Call
 		{
@@ -151,20 +169,23 @@ namespace Chummer.Tests
 		public static readonly IReadOnlyList<ComposedForm> ComposedForms = new[]
 		{
 			// - frmSelectWeaponAccessory.cs:91 and six copies in frmCreate/frmCareer, split on '/'
+			// - every file: PACKS kits copy packs.xml's <mount> too (frmCreate.cs:21063, :21429)
 			Form("\"String_Mount\" + strCurrentMount", "String_Mount", "",
-				"weapons.xml //mount", () => DataValues("weapons.xml", "//mount").SelectMany(MountParts)),
+				"every top-level data file //mount",
+				() => TopLevelDataValues("//mount").SelectMany(MountParts)),
 			// SkillControl.cs:649 and :653
 			Form("\"String_Attribute\" + _objSkill.Attribute + \"Short\"", "String_Attribute", "Short",
 				"skills.xml //skill/attribute", () => DataValues("skills.xml", "//skill/attribute")),
 			// Skill.DisplayAttribute, clsUnique.cs:3138
 			Form("\"String_Attribute\" + Attribute + \"Short\"", "String_Attribute", "Short",
 				"skills.xml //skill/attribute", () => DataValues("skills.xml", "//skill/attribute")),
-			// - frmSelectAttribute.cs:193, fed by CreateImprovements (clsImprovement.cs:1416, :1502)
+			// - Skill.Print (clsUnique.cs:1871) passes the skill's attribute
+			// - frmSelectAttribute.cs:193 gets bonus lists (clsImprovement.cs:1416, :1502)
+			// - frmCreateImprovement only adds and removes fixed attributes in code
 			Form("\"String_Attribute\" + strAttribute + \"Short\"", "String_Attribute", "Short",
-				"every top-level data file //bonus/selectattribute/attribute, //bonus/swapskillattribute/attribute",
-				() => Directory.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-					.SelectMany(path => DataValues(Path.GetFileName(path),
-						"//bonus/selectattribute/attribute | //bonus/swapskillattribute/attribute"))),
+				"skills.xml //skill/attribute and every top-level data file's selectattribute/swapskillattribute",
+				() => DataValues("skills.xml", "//skill/attribute").Concat(TopLevelDataValues(
+					"//bonus/selectattribute/attribute | //bonus/swapskillattribute/attribute"))),
 			// frmSelectPACKSKit.cs:127, element names upper-cased
 			Form("\"String_Attribute\" + objXmlAttribute.Name.ToUpper() + \"Short\"", "String_Attribute", "Short",
 				"packs.xml //attributes/* element names",
@@ -192,6 +213,13 @@ namespace Chummer.Tests
 		private static IEnumerable<string> MountParts(string mount)
 		{
 			return mount.Split('/').Where(part => part != "");
+		}
+
+		// - top-level only: the pack follow-up ticket covers custom content
+		private static IEnumerable<string> TopLevelDataValues(string xpath)
+		{
+			return Directory.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+				.SelectMany(path => DataValues(Path.GetFileName(path), xpath));
 		}
 
 		private static IEnumerable<string> DataValues(string fileName, string xpath)

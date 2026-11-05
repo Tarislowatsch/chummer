@@ -23,6 +23,16 @@ namespace Chummer.Tests
 				"en-us.xml declares these keys more than once:\n  " + string.Join("\n  ", repeated));
 		}
 
+		// - the same catch exits the application when an entry lacks <key> or <text>
+		[Fact]
+		public void EveryEnglishEntryHasKeyAndText()
+		{
+			string[] incomplete = UiStringKeys.EntriesMissingKeyOrText(UiStringKeys.LoadEnglish()).ToArray();
+
+			Assert.True(incomplete.Length == 0,
+				"These en-us.xml entries lack <key> or <text>:\n  " + string.Join("\n  ", incomplete));
+		}
+
 		[Fact]
 		public void EveryLiteralKeyExists()
 		{

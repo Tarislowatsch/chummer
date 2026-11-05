@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Xml;
 using Xunit;
 
 namespace Chummer.Tests
@@ -6,6 +7,20 @@ namespace Chummer.Tests
 	// - hand-built source: the real code shows today's calls, never that a bad one is caught
 	public class UiStringKeyDetectionTests
 	{
+		[Fact]
+		public void EntriesMissingKeyOrTextFindsBothGaps()
+		{
+			XmlDocument language = new XmlDocument();
+			language.LoadXml("<chummer><strings>"
+				+ "<string><key>A</key><text>a</text></string>"
+				+ "<string><key>B</key></string>"
+				+ "<string><text>c</text></string>"
+				+ "</strings></chummer>");
+
+			Assert.Equal(new[] { "string #2 (key 'B')", "string #3 (key '(none)')" },
+				UiStringKeys.EntriesMissingKeyOrText(language));
+		}
+
 		private static string[] Arguments(string fileName, params string[] lines)
 		{
 			return UiStringKeys.CallsIn(fileName, lines).Select(call => call.Argument).ToArray();
