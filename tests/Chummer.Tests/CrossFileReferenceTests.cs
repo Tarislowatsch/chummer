@@ -15,6 +15,10 @@ namespace Chummer.Tests
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
+			"bonus selectskill excludecategory: Vechicle Active",
+			"bonus selectskillgroup excludecategory: Vechicle Active",
+			"bonus specificskill: Conjuring",
+			"bonus specificskill: Sorcery",
 			"critter optional complex forms: Databomb",
 			"critter optional complex forms: Shielding",
 			"critter skill groups: Conjuration",
@@ -41,7 +45,7 @@ namespace Chummer.Tests
 			if (unexpected.Length > 0)
 			{
 				Assert.Fail(FailureReport.Build(
-					check.Rule.SourceFile + " has " + unexpected.Length + " " + id
+					check.Rule.SourceLabel + " has " + unexpected.Length + " " + id
 						+ " value(s) that " + check.Rule.Consumer + " cannot find",
 					unexpected,
 					group => Entry(group.First()) + "  (" + group.Count() + "x, e.g. '"
@@ -103,6 +107,19 @@ namespace Chummer.Tests
 				{ "armor usegear", 48 },
 				{ "bioware addweapon", 1 },
 				{ "bioware forcegrade", 26 },
+				{ "bonus selectskill excludecategory", 17 },
+				{ "bonus selectskill skillcategory", 2 },
+				{ "bonus selectskill skillgroup", 2 },
+				{ "bonus selectskillgroup excludecategory", 10 },
+				{ "bonus selectspell category", 5 },
+				{ "bonus skillattribute", 15 },
+				{ "bonus skillattribute exclude", 1 },
+				{ "bonus skillcategory", 24 },
+				{ "bonus skillcategory exclude", 2 },
+				{ "bonus skillgroup", 14 },
+				{ "bonus specificskill", 135 },
+				{ "bonus spellcategory", 48 },
+				{ "bonus weaponcategorydv", 26 },
 				{ "critter complex forms", 242 },
 				{ "critter gears", 64 },
 				{ "critter metavariant powers", 66 },

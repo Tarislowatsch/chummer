@@ -181,6 +181,56 @@ namespace Chummer.Tests
 				Document("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
 		}
 
+		// - the shape of the bonus rules
+		[Fact]
+		public void AnyFileRuleReadsReferencesFromEveryFile()
+		{
+			CrossFileReferences.ReferenceRule rule = new CrossFileReferences.ReferenceRule("test", "x.cs:1", "",
+				CrossFileReferences.AnyFile, "//addweapon", ByText(), new[] { Target("weapons.xml", "/x") });
+
+			Assert.Single(CrossFileReferences.ReferencesIn("other.xml",
+				Document("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
+		}
+
+		// - the shape of the excludecategory rules
+		[Fact]
+		public void ListItemsAreSplitTrimmedAndCheckedOneByOne()
+		{
+			string skills = "<chummer><skills><skill><category>Magical Active</category></skill>"
+				+ "<skill><category>Vehicle Active</category></skill></skills></chummer>";
+
+			Assert.Equal(new[] { "Vechicle Active" }, UnresolvedKeys(
+				ListRule(Target("skills.xml", "/chummer/skills/skill/category")),
+				Source("<bioware><name>Reflex Recorder</name><bonus>"
+					+ "<selectskill excludecategory=\"Vechicle Active, Magical Active\" /></bonus></bioware>",
+					"//selectskill/@excludecategory"),
+				skills, "skills.xml"));
+		}
+
+		[Fact]
+		public void ListSeparatorOnACompositeKeyIsRejected()
+		{
+			Assert.Throws<System.ArgumentException>(() => new CrossFileReferences.ReferenceRule("test", "x.cs:1", "",
+				"source.xml", "//none", NameAndCategory(optionalCategory: false),
+				new[] { Target("gear.xml", "/chummer/gears/gear") }, ','));
+		}
+
+		// - the shape of the exclude rules
+		[Fact]
+		public void BonusReferenceIsAttributedToTheItemCarryingTheBonus()
+		{
+			CrossFileReferences.ReferenceRule rule = Rule(Target("skills.xml", "/chummer/skills/skill"));
+			XmlDocument qualities = Document("<chummer><qualities><quality><name>First Impression</name><bonus>"
+				+ "<skillcategory><name>Social Active</name><exclude>Intimidation</exclude></skillcategory>"
+				+ "</bonus></quality></qualities></chummer>");
+
+			CrossFileReferences.Reference reference = CrossFileReferences
+				.ReferencesIn("source.xml", qualities, new[] { WithSource(rule, "//bonus/skillcategory/exclude") })
+				.Single();
+
+			Assert.Equal("First Impression", reference.ItemName);
+		}
+
 		[Fact]
 		public void DefinitionsAreReadOnlyFromTheTargetFile()
 		{
@@ -234,11 +284,17 @@ namespace Chummer.Tests
 				keyFields ?? ByText(), new[] { target });
 		}
 
+		private static CrossFileReferences.ReferenceRule ListRule(CrossFileReferences.Target target)
+		{
+			return new CrossFileReferences.ReferenceRule("test", "x.cs:1", "", "source.xml", "//none",
+				new[] { new CrossFileReferences.KeyField(".", ".", false) }, new[] { target }, ',');
+		}
+
 		private static CrossFileReferences.ReferenceRule WithSource(CrossFileReferences.ReferenceRule rule,
 			string sourceXPath)
 		{
 			return new CrossFileReferences.ReferenceRule(rule.Id, rule.Consumer, rule.Reads, rule.SourceFile,
-				sourceXPath, rule.KeyFields, rule.Targets);
+				sourceXPath, rule.KeyFields, rule.Targets, rule.ListSeparator);
 		}
 
 		private static CrossFileReferences.Target Target(string fileName, string itemXPath)

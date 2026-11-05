@@ -41,11 +41,18 @@ namespace Chummer.Tests
 			public string ItemXPath { get; }
 		}
 
+		// - bonus targets live in every file that carries a bonus
+		public const string AnyFile = "*";
+
 		public sealed class ReferenceRule
 		{
 			public ReferenceRule(string id, string consumer, string reads, string sourceFile,
-				string sourceXPath, IReadOnlyList<KeyField> keyFields, IReadOnlyList<Target> targets)
+				string sourceXPath, IReadOnlyList<KeyField> keyFields, IReadOnlyList<Target> targets,
+				char? listSeparator = null)
 			{
+				if (listSeparator != null && keyFields.Count != 1)
+					throw new ArgumentException("A list rule splits one value, not a composite key: " + id);
+
 				Id = id;
 				Consumer = consumer;
 				Reads = reads;
@@ -53,6 +60,7 @@ namespace Chummer.Tests
 				SourceXPath = sourceXPath;
 				KeyFields = keyFields;
 				Targets = targets;
+				ListSeparator = listSeparator;
 			}
 
 			public string Id { get; }
@@ -69,12 +77,17 @@ namespace Chummer.Tests
 
 			public string SourceFile { get; }
 
+			public string SourceLabel => SourceFile == AnyFile ? "the data" : SourceFile;
+
 			public string SourceXPath { get; }
 
 			public IReadOnlyList<KeyField> KeyFields { get; }
 
 			// - several targets are tried in order, as the consumer falls back
 			public IReadOnlyList<Target> Targets { get; }
+
+			// - the consumer splits the value and trims each item: every item is a reference
+			public char? ListSeparator { get; }
 		}
 
 		public sealed class Reference
@@ -140,16 +153,25 @@ namespace Chummer.Tests
 		{
 			List<Reference> references = new List<Reference>();
 
-			foreach (ReferenceRule rule in rules.Where(rule => IsFile(rule.SourceFile, fileName)))
+			foreach (ReferenceRule rule in rules.Where(rule => rule.SourceFile == AnyFile || IsFile(rule.SourceFile, fileName)))
 			{
 				foreach (XmlNode node in document.SelectNodes(rule.SourceXPath))
 				{
-					references.Add(new Reference(rule.Id, OwnerLabel(node),
-						rule.KeyFields.Select(field => ValueOf(node, field.Source)).ToArray()));
+					string[] values = rule.KeyFields.Select(field => ValueOf(node, field.Source)).ToArray();
+					references.AddRange(ItemsOf(rule, values)
+						.Select(item => new Reference(rule.Id, OwnerLabel(node), item)));
 				}
 			}
 
 			return references;
+		}
+
+		private static IEnumerable<string[]> ItemsOf(ReferenceRule rule, string[] values)
+		{
+			if (rule.ListSeparator == null || values[0] == null)
+				return new[] { values };
+
+			return values[0].Split(rule.ListSeparator.Value).Select(item => new[] { item.Trim() });
 		}
 
 		public static IReadOnlyList<TargetKeys> TargetKeysIn(string fileName, XmlDocument document,
@@ -212,8 +234,13 @@ namespace Chummer.Tests
 
 		// - the nearest named element above the reference, as for book references
 		// - in <mods><name>, the parent's own <name> is the reference itself
+		// - inside a bonus, the nearest <name> is a target like the reference: name the item instead
 		private static string OwnerLabel(XmlNode reference)
 		{
+			XmlNode bonus = reference.SelectSingleNode("ancestor::bonus[last()]");
+			if (bonus != null)
+				return DataPaths.ItemLabel(bonus.ParentNode);
+
 			return DataPaths.ItemLabel(reference.Name == "name" ? reference.ParentNode.ParentNode : reference.ParentNode);
 		}
 
@@ -228,6 +255,8 @@ namespace Chummer.Tests
 
 		// - for targets that are bare text elements: categories, skill groups
 		private static readonly KeyField[] ByTextToText = { new KeyField(".", ".", false) };
+
+		private static readonly KeyField[] ByNameChildToText = { new KeyField("name", ".", false) };
 
 		private static Target[] In(string fileName, string itemXPath)
 		{
@@ -279,10 +308,35 @@ namespace Chummer.Tests
 		// - the character holds cyberware and bioware in one list and compares by name alone
 		private static readonly Target[] AnyImplant = Cyberware.Concat(Bioware).ToArray();
 
-		private static ReferenceRule Rule(string id, string consumer, string reads, string sourceFile,
-			string sourceXPath, Target[] targets, KeyField[] keyFields = null)
+		// - bonus targets are compared with a field of the skill, spell or weapon, not with a name list
+		private static readonly Target[] GroupOfSkill = In("skills.xml", "/chummer/skills/skill/skillgroup");
+		private static readonly Target[] CategoryOfSkill = In("skills.xml", "/chummer/skills/skill/category");
+		private static readonly Target[] AttributeOfSkill = In("skills.xml", "/chummer/skills/skill/attribute");
+		private static readonly Target[] CategoryOfSpell = In("spells.xml", "/chummer/spells/spell/category");
+
+		// - a knowledge skill takes its category from the declared list (SkillControl.cs:364)
+		private static readonly Target[] CategoryOfAnySkill =
 		{
-			return new ReferenceRule(id, consumer, reads, sourceFile, sourceXPath, keyFields ?? ByText, targets);
+			new Target("skills.xml", "/chummer/skills/skill/category"),
+			new Target("skills.xml", "/chummer/categories/category[@type = 'knowledge']"),
+		};
+
+		private static readonly Target[] CategoryOrSkillOfWeapon =
+		{
+			new Target("weapons.xml", "/chummer/weapons/weapon/category"),
+			new Target("weapons.xml", "/chummer/weapons/weapon/useskill"),
+		};
+
+		private static string Bonus(string path)
+		{
+			return BonusVocabulary.BonusRootXPath + "/" + path;
+		}
+
+		private static ReferenceRule Rule(string id, string consumer, string reads, string sourceFile,
+			string sourceXPath, Target[] targets, KeyField[] keyFields = null, char? listSeparator = null)
+		{
+			return new ReferenceRule(id, consumer, reads, sourceFile, sourceXPath, keyFields ?? ByText, targets,
+				listSeparator);
 		}
 
 		public static readonly IReadOnlyList<ReferenceRule> Rules = new[]
@@ -568,6 +622,52 @@ namespace Chummer.Tests
 				"objXmlWeapon.SelectNodes(\"accessories/accessory\")",
 				"packs.xml", "/chummer/packs/pack/vehicles/vehicle/weapons/weapon/accessories/accessory", Accessories,
 				ByNameChild),
+
+			// - the handlers store the name as is: the consumer is where the improvement is summed
+			// - a miss there is a bonus or penalty that never applies, without a word
+			Rule("bonus specificskill", "clsUnique.cs:2430",
+				"ImprovementType.Skill && objImprovement.ImprovedName == _strName",
+				AnyFile, Bonus("specificskill"), Skills, ByNameChild),
+			Rule("bonus skillgroup", "clsUnique.cs:2440",
+				"ImprovementType.SkillGroup && objImprovement.ImprovedName == _strSkillGroup",
+				AnyFile, Bonus("skillgroup"), GroupOfSkill, ByNameChildToText),
+			Rule("bonus skillcategory", "clsUnique.cs:2446",
+				"ImprovementType.SkillCategory && objImprovement.ImprovedName == _strSkillCategory",
+				AnyFile, Bonus("skillcategory"), CategoryOfAnySkill, ByNameChildToText),
+			// - the consumer's substring test also accepts an exact name: the rule is the stricter one
+			Rule("bonus skillcategory exclude", "clsUnique.cs:2448",
+				"!objImprovement.Exclude.Contains(_strName)",
+				AnyFile, Bonus("skillcategory/exclude"), Skills),
+			Rule("bonus skillattribute", "clsUnique.cs:2452",
+				"ImprovementType.SkillAttribute && objImprovement.ImprovedName == _strAttribute",
+				AnyFile, Bonus("skillattribute"), AttributeOfSkill, ByNameChildToText),
+			Rule("bonus skillattribute exclude", "clsUnique.cs:2454",
+				"!objImprovement.Exclude.Contains(_strName)",
+				AnyFile, Bonus("skillattribute/exclude"), Skills),
+			// - the "Cyberware " + name form is left out: no value needs it
+			Rule("bonus weaponcategorydv", "clsEquipment.cs:5692",
+				"ImprovementType.WeaponCategoryDV && objImprovement.Enabled && (objImprovement.ImprovedName == _strCategory",
+				AnyFile, Bonus("weaponcategorydv"), CategoryOrSkillOfWeapon, ByNameChildToText),
+			Rule("bonus spellcategory", "clsUnique.cs:4337",
+				"ValueOf(Improvement.ImprovementType.SpellCategory, false, _strCategory)",
+				AnyFile, Bonus("spellcategory"), CategoryOfSpell, ByNameChildToText),
+
+			// - the pickers filter skills.xml and spells.xml: a miss empties the list or filters nothing
+			Rule("bonus selectskill skillgroup", "frmSelectSkill.cs:59",
+				"+ _strIncludeSkillGroup +",
+				AnyFile, Bonus("selectskill/@skillgroup"), GroupOfSkill, ByTextToText),
+			Rule("bonus selectskill skillcategory", "frmSelectSkill.cs:47",
+				"+ _strIncludeCategory +",
+				AnyFile, Bonus("selectskill/@skillcategory"), CategoryOfSkill, ByTextToText),
+			Rule("bonus selectskill excludecategory", "frmSelectSkill.cs:50",
+				"_strExcludeCategory.Split(',')",
+				AnyFile, Bonus("selectskill/@excludecategory"), CategoryOfSkill, ByTextToText, ','),
+			Rule("bonus selectskillgroup excludecategory", "frmSelectSkillGroup.cs:38",
+				"_strExcludeCategory.Split(',')",
+				AnyFile, Bonus("selectskillgroup/@excludecategory"), CategoryOfSkill, ByTextToText, ','),
+			Rule("bonus selectspell category", "frmSelectSpell.cs:76",
+				"+ _strLimitCategory +",
+				AnyFile, Bonus("selectspell/@category"), CategoryOfSpell, ByTextToText),
 		};
 	}
 }
