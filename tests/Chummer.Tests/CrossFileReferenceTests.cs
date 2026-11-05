@@ -80,7 +80,7 @@ namespace Chummer.Tests
 				"These rules check nothing:\n  " + string.Join("\n  ", vacant));
 		}
 
-		// - a consumer rewritten or removed leaves its rule describing code that no longer exists
+		// - catches a consumer removed or renamed, not a lookup condition changed around the snippet
 		[Fact]
 		public void EveryRuleStillHasItsConsumer()
 		{
@@ -93,12 +93,113 @@ namespace Chummer.Tests
 				"Re-read these consumers and fix or drop their rules:\n  " + string.Join("\n  ", missing));
 		}
 
-		// - a rule narrowed by a data or path change shows up here, not as a pass
-		// - bumping the number is only correct for a deliberate data or rule change
+		// - per rule: a total would hide one rule losing what another gains
+		// - bumping a number is only correct for a deliberate data or rule change
+		private static readonly IReadOnlyDictionary<string, int> PinnedReferenceCounts =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "armor mod addweapon", 15 },
+				{ "armor mods", 59 },
+				{ "armor usegear", 48 },
+				{ "bioware addweapon", 1 },
+				{ "bioware forcegrade", 26 },
+				{ "critter complex forms", 242 },
+				{ "critter gears", 64 },
+				{ "critter metavariant powers", 66 },
+				{ "critter negative qualities", 34 },
+				{ "critter optional complex forms", 65 },
+				{ "critter optional powers", 246 },
+				{ "critter positive qualities", 116 },
+				{ "critter powers", 2265 },
+				{ "critter skill groups", 60 },
+				{ "critter skills", 2214 },
+				{ "cyberware addweapon", 49 },
+				{ "cyberware suite grade", 44 },
+				{ "cyberware suite items", 426 },
+				{ "echo requires all echoes", 9 },
+				{ "gear addweapon", 203 },
+				{ "gear usegear", 83 },
+				{ "metamagic requires all metamagics", 13 },
+				{ "metamagic requires all metatypes", 1 },
+				{ "metamagic requires all qualities", 1 },
+				{ "metatype negative qualities", 21 },
+				{ "metatype negative quality restriction", 28 },
+				{ "metatype optional powers", 29 },
+				{ "metatype positive qualities", 5 },
+				{ "metatype positive quality restriction", 27 },
+				{ "metatype powers", 93 },
+				{ "metavariant negative qualities", 80 },
+				{ "metavariant positive qualities", 38 },
+				{ "metavariant powers", 50 },
+				{ "pack armor", 22 },
+				{ "pack armor mods", 6 },
+				{ "pack bioware", 22 },
+				{ "pack bioware grade", 22 },
+				{ "pack cyberware", 24 },
+				{ "pack cyberware children", 23 },
+				{ "pack cyberware grade", 24 },
+				{ "pack gear", 283 },
+				{ "pack positive qualities", 32 },
+				{ "pack powers", 40 },
+				{ "pack programs", 35 },
+				{ "pack skill groups", 13 },
+				{ "pack skills", 149 },
+				{ "pack spells", 82 },
+				{ "pack vehicle gear", 6 },
+				{ "pack vehicle mods", 34 },
+				{ "pack vehicle weapon accessories", 1 },
+				{ "pack vehicle weapons", 9 },
+				{ "pack vehicles", 19 },
+				{ "pack weapon accessories", 2 },
+				{ "pack weapons", 86 },
+				{ "power requires all qualities", 2 },
+				{ "power requires one quality", 7 },
+				{ "quality addqualities", 31 },
+				{ "quality addweapon", 6 },
+				{ "quality forbidden metatype", 123 },
+				{ "quality forbidden metatype category", 38 },
+				{ "quality forbidden quality", 1043 },
+				{ "quality latentsource", 8 },
+				{ "quality powers", 164 },
+				{ "quality requires all bioware", 1 },
+				{ "quality requires all cyberware", 3 },
+				{ "quality requires all cyberware plugins", 1 },
+				{ "quality requires all metatypes", 15 },
+				{ "quality requires all qualities", 2 },
+				{ "quality requires all skills", 3 },
+				{ "quality requires one metatype", 37 },
+				{ "quality requires one metatype category", 115 },
+				{ "quality requires one metavariant", 1513 },
+				{ "quality requires one quality", 354 },
+				{ "stream sprites", 45 },
+				{ "tradition spirits", 130 },
+				{ "vehicle gears", 568 },
+				{ "vehicle mods", 1795 },
+				{ "vehicle weapons", 53 },
+				{ "vessel powers", 7 },
+				{ "weapon accessories", 152 },
+				{ "weapon mods", 357 },
+				{ "weapon underbarrel", 14 },
+				{ "weapon useskill", 90 },
+			};
+
 		[Fact]
-		public void TheRulesCheckTheMeasuredReferenceCount()
+		public void EveryRuleChecksItsMeasuredReferenceCount()
 		{
-			Assert.Equal(14332, DataPaths.CrossFileReferenceChecks.Sum(check => check.ReferenceCount));
+			Dictionary<string, int> actual = DataPaths.CrossFileReferenceChecks
+				.ToDictionary(check => check.Rule.Id, check => check.ReferenceCount, StringComparer.Ordinal);
+
+			// - unbounded on purpose: after a deliberate change the whole list is copied back
+			string[] drifted = actual.Keys.Union(PinnedReferenceCounts.Keys)
+				.Where(id => !actual.ContainsKey(id) || !PinnedReferenceCounts.ContainsKey(id)
+					|| actual[id] != PinnedReferenceCounts[id])
+				.OrderBy(id => id, StringComparer.Ordinal)
+				.Select(id => "{ \"" + id + "\", " + (actual.ContainsKey(id) ? actual[id].ToString() : "gone")
+					+ " }, // pinned " + (PinnedReferenceCounts.ContainsKey(id) ? PinnedReferenceCounts[id].ToString() : "none"))
+				.ToArray();
+
+			Assert.True(drifted.Length == 0,
+				"These rules check a different number of references than pinned:\n  " + string.Join("\n  ", drifted));
 		}
 
 		// - every consumer sits directly in Chummer/, where several subfolders reuse file names

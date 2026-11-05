@@ -61,6 +61,8 @@ namespace Chummer.Tests
 			public string Consumer { get; }
 
 			// - code that must still be in that file, comments excluded
+			// - proves the consumer exists, not that its lookup still matches the rule
+			// - a consumer change needs the rule re-read by hand, as the line reference says
 			public string Reads { get; }
 
 			public string ConsumerFile => Consumer.Substring(0, Consumer.IndexOf(':'));
