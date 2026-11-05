@@ -54,15 +54,44 @@ namespace Chummer.Tests
 
 		public static string ChummerExportDir => Path.Combine(RepoRoot, "Chummer", "export");
 
-		// - what the two pickers offer: frmViewer.cs:36 for sheets, frmExport.cs:69 for exports
-		// - case-sensitive ".xsl" like the app: a .xslt is only ever reached through xsl:include
+		// - the pickers' filter, frmViewer.cs:36 and frmExport.cs:27: case-sensitive ".xsl"
+		// - a .xslt is only ever reached through xsl:include
 		public static IEnumerable<object[]> LoadableStylesheets()
+		{
+			return StylesheetFiles()
+				.Where(path => path.EndsWith(".xsl", StringComparison.Ordinal))
+				.Select(path => new object[] { path });
+		}
+
+		public static IReadOnlyList<string> PartialStylesheets()
+		{
+			return StylesheetFiles().Where(path => path.EndsWith(".xslt", StringComparison.Ordinal)).ToArray();
+		}
+
+		// - both picker folders: an include may cross from export/ into sheets/
+		public static IEnumerable<string> StylesheetFiles()
 		{
 			return new[] { ChummerSheetsDir, ChummerExportDir }
 				.SelectMany(dir => Directory.EnumerateFiles(dir, "*", SearchOption.AllDirectories))
-				.Where(path => path.EndsWith(".xsl", StringComparison.Ordinal))
-				.OrderBy(path => path, StringComparer.Ordinal)
-				.Select(path => new object[] { path });
+				.Where(path => path.EndsWith(".xsl", StringComparison.Ordinal)
+					|| path.EndsWith(".xslt", StringComparison.Ordinal))
+				.OrderBy(path => path, StringComparer.Ordinal);
+		}
+
+		private const string XsltNamespace = "http://www.w3.org/1999/XSL/Transform";
+
+		// - parsed, not grepped: a commented-out include must not count as one
+		// - xsl:import too: the compiler pulls both in
+		// - public so the detection tests can drive it with hand-built stylesheets
+		public static IEnumerable<string> IncludedStylesheetPaths(string stylesheetPath, XmlDocument stylesheet)
+		{
+			XmlNamespaceManager namespaces = new XmlNamespaceManager(stylesheet.NameTable);
+			namespaces.AddNamespace("xsl", XsltNamespace);
+
+			return stylesheet.SelectNodes("/xsl:stylesheet/xsl:include/@href | /xsl:stylesheet/xsl:import/@href"
+					+ " | /xsl:transform/xsl:include/@href | /xsl:transform/xsl:import/@href", namespaces)
+				.Cast<XmlNode>()
+				.Select(href => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stylesheetPath), href.Value)));
 		}
 
 		// - File.Exists pairing lets character.xsd and improvements.xml drop out on their own

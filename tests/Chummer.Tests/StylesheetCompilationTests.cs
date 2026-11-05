@@ -1,7 +1,6 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Xsl;
 using Xunit;
 
@@ -19,30 +18,28 @@ namespace Chummer.Tests
 			new XslCompiledTransform().Load(path);
 		}
 
-		private static readonly Regex Include = new Regex(@"<xsl:include\s+href=""([^""]+)""");
-
 		// - a .xslt nobody includes is never compiled by the theory above
 		[Fact]
 		public void EveryPartialSheetIsIncludedBySomeSheet()
 		{
-			string[] partials = Directory
-				.EnumerateFiles(DataPaths.ChummerSheetsDir, "*", SearchOption.AllDirectories)
-				.Where(path => path.EndsWith(".xslt", StringComparison.Ordinal))
+			string[] included = DataPaths.StylesheetFiles()
+				.SelectMany(path => DataPaths.IncludedStylesheetPaths(path, Load(path)))
 				.ToArray();
 
-			string[] included = Directory
-				.EnumerateFiles(DataPaths.ChummerSheetsDir, "*", SearchOption.AllDirectories)
-				.SelectMany(path => Include.Matches(File.ReadAllText(path)).Cast<Match>()
-					.Select(match => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), match.Groups[1].Value))))
-				.ToArray();
-
-			string[] orphaned = partials
-				.Where(partial => !included.Contains(Path.GetFullPath(partial), StringComparer.OrdinalIgnoreCase))
+			string[] orphaned = DataPaths.PartialStylesheets()
+				.Where(partial => !included.Contains(partial, StringComparer.OrdinalIgnoreCase))
 				.ToArray();
 
 			Assert.True(orphaned.Length == 0,
 				"These partial sheets are included by no sheet, so nothing compiles them:\n  "
 				+ string.Join("\n  ", orphaned));
+		}
+
+		private static XmlDocument Load(string path)
+		{
+			XmlDocument document = new XmlDocument { XmlResolver = null };
+			document.Load(path);
+			return document;
 		}
 	}
 }

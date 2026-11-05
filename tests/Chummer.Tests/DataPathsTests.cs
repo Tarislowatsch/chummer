@@ -36,6 +36,14 @@ namespace Chummer.Tests
 			Assert.Equal(17, DataPaths.LoadableStylesheets().Count());
 		}
 
+		// - the orphan guard is green on zero partials, so the selector needs its own pin
+		// - Shadowrun 4 Base.xslt and ConditionMonitor.xslt, once at the top level and once in de
+		[Fact]
+		public void PartialStylesheetsFindsEveryPartial()
+		{
+			Assert.Equal(4, DataPaths.PartialStylesheets().Count);
+		}
+
 		// - exact count, not ">N": this file set is small and enumerable
 		// - a dropped pair must fail immediately, not slip under a threshold
 		// - bumping the number is only correct for a deliberate new data file plus schema
