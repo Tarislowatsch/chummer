@@ -69,6 +69,19 @@ namespace Chummer.Tests
 				"These ranges.xml formulas throw in Weapon.Range:\n  " + string.Join("\n  ", failures));
 		}
 
+		// - updating the hash is only correct after re-reading Range and fixing the port
+		private const string PinnedRangeFingerprint = "81CBE7F9C79C38C9";
+
+		[Fact]
+		public void RangeUnchangedSinceItsPortWasWritten()
+		{
+			string actual = ExpressionChecks.CalculatorFingerprints(new[] { "Weapon.Range" })["Weapon.Range"];
+
+			Assert.True(actual == PinnedRangeFingerprint,
+				"Weapon.Range now hashes to " + actual + ", pinned as " + PinnedRangeFingerprint
+				+ ". Re-read it, fix WeaponRanges, then update the hash.");
+		}
+
 		[Fact]
 		public void EverySetRangeLiteralIsACategory()
 		{
