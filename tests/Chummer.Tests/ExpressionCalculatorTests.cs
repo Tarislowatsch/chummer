@@ -34,6 +34,8 @@ namespace Chummer.Tests
 				{ "WeaponAccessory.OwnCost", "9B313DA93EB23449" },
 				{ "WeaponAccessory.TotalCost", "86FCBC198480E0DF" },
 				{ "WeaponMod.TotalCost", "2ED9CDCE8F3C2C40" },
+				{ "Cyberware.CalculatedESS", "A036BBB612C578D5" },
+				{ "frmSelectCyberware.UpdateCyberwareInfo", "EDFA0E780E9A1F41" },
 			};
 
 		[Fact]
@@ -119,7 +121,7 @@ namespace Chummer.Tests
 
 		private static IEnumerable<string> PortedCalculators()
 		{
-			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators);
+			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators).Concat(EssExpressions.Calculators);
 		}
 
 		private static IEnumerable<string> EntitiesRequiring(string field)
