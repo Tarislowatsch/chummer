@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 
@@ -146,14 +147,15 @@ namespace Chummer.Tests
 			@"\bbool\s+CreateImprovements\s*\([^)]*\bXmlNode\s+(\w+)", RegexOptions.Compiled);
 
 		// - public so the detection tests can drive it with hand-built source
+		// - matched over the joined body: a call broken across lines still counts
 		public static IReadOnlyCollection<string> HandledTagsIn(string[] lines)
 		{
 			string parameter;
-			IReadOnlyList<string> body = CreateImprovementsBody(lines, out parameter);
+			SourceLines body = CreateImprovementsBody(lines, out parameter);
 			Regex check = NodeExistsCheck(parameter, @"([^""]+)");
 
 			return new HashSet<string>(
-				body.SelectMany(line => check.Matches(line).Cast<Match>()).Select(match => match.Groups[1].Value),
+				check.Matches(string.Join("\n", body.Code)).Cast<Match>().Select(match => match.Groups[1].Value),
 				StringComparer.Ordinal);
 		}
 
@@ -161,16 +163,16 @@ namespace Chummer.Tests
 		public static IReadOnlyCollection<string> EnabledTabsIn(string[] lines)
 		{
 			string parameter;
-			string[] body = CreateImprovementsBody(lines, out parameter).ToArray();
+			SourceLines body = CreateImprovementsBody(lines, out parameter);
 			Regex check = NodeExistsCheck(parameter, "enabletab");
 			Regex label = new Regex(@"\bcase\s+""([^""]+)""\s*:");
 
-			int start = Array.FindIndex(body, line => check.IsMatch(line));
+			int start = Array.FindIndex(body.Code, line => check.IsMatch(line));
 			if (start < 0)
 				return new HashSet<string>(StringComparer.Ordinal);
 
 			return new HashSet<string>(
-				BlockFrom(body, start).SelectMany(line => label.Matches(line).Cast<Match>())
+				label.Matches(string.Join("\n", BlockFrom(body, start).Code)).Cast<Match>()
 					.Select(match => match.Groups[1].Value),
 				StringComparer.Ordinal);
 		}
@@ -181,10 +183,11 @@ namespace Chummer.Tests
 		}
 
 		// - throws rather than returns empty: no method would make every data tag look unhandled
-		private static IReadOnlyList<string> CreateImprovementsBody(string[] lines, out string parameter)
+		private static SourceLines CreateImprovementsBody(string[] lines, out string parameter)
 		{
-			int[] signatures = Enumerable.Range(0, lines.Length)
-				.Where(i => CreateImprovementsSignature.IsMatch(lines[i]))
+			SourceLines source = SourceLines.Of(lines);
+			int[] signatures = Enumerable.Range(0, source.Code.Length)
+				.Where(i => CreateImprovementsSignature.IsMatch(source.Code[i]))
 				.ToArray();
 
 			if (signatures.Length != 1)
@@ -194,30 +197,142 @@ namespace Chummer.Tests
 					+ signatures.Length + ". The handled-tag list is read off that one method.");
 			}
 
-			parameter = CreateImprovementsSignature.Match(lines[signatures[0]]).Groups[1].Value;
-			return BlockFrom(lines, signatures[0]).ToArray();
+			parameter = CreateImprovementsSignature.Match(source.Code[signatures[0]]).Groups[1].Value;
+			return BlockFrom(source, signatures[0]);
 		}
 
-		// - string and char literals stripped first: "{0}" placeholders sit inside this method
-		private static readonly Regex Literal =
-			new Regex(@"""(?:\\.|[^""\\])*""|'(?:\\.|[^'\\])'", RegexOptions.Compiled);
-
 		// - extent by brace depth from the first line, like the Create fingerprints in DataPaths
-		private static IEnumerable<string> BlockFrom(IReadOnlyList<string> lines, int start)
+		private static SourceLines BlockFrom(SourceLines source, int start)
 		{
 			int depth = 0;
 			bool opened = false;
+			int end = start;
 
-			for (int i = start; i < lines.Count; i++)
+			for (; end < source.Bare.Length; end++)
 			{
-				string code = Literal.Replace(lines[i], string.Empty);
-				depth += code.Count(character => character == '{') - code.Count(character => character == '}');
-				opened |= code.IndexOf('{') >= 0;
-
-				yield return lines[i];
+				string bare = source.Bare[end];
+				depth += bare.Count(character => character == '{') - bare.Count(character => character == '}');
+				opened |= bare.IndexOf('{') >= 0;
 
 				if (opened && depth <= 0)
-					yield break;
+					break;
+			}
+
+			int count = Math.Min(end, source.Bare.Length - 1) - start + 1;
+			return new SourceLines(
+				source.Code.Skip(start).Take(count).ToArray(),
+				source.Bare.Skip(start).Take(count).ToArray());
+		}
+
+		// - a commented-out check must not count as handled: that would hide an unhandled tag
+		// - Bare also drops literals: a "{0}" placeholder must not move the brace depth
+		private sealed class SourceLines
+		{
+			public SourceLines(string[] code, string[] bare)
+			{
+				Code = code;
+				Bare = bare;
+			}
+
+			// Comments removed, literals kept: the tag names are literals.
+			public string[] Code { get; }
+
+			public string[] Bare { get; }
+
+			// - a lexer, not a regex: "//" inside a string literal is no comment
+			public static SourceLines Of(string[] lines)
+			{
+				string[] code = new string[lines.Length];
+				string[] bare = new string[lines.Length];
+				bool inBlockComment = false;
+				bool inVerbatim = false;
+
+				for (int i = 0; i < lines.Length; i++)
+				{
+					string line = lines[i];
+					StringBuilder kept = new StringBuilder();
+					StringBuilder stripped = new StringBuilder();
+					char quote = '\0';
+
+					for (int j = 0; j < line.Length; j++)
+					{
+						char current = line[j];
+						char next = j + 1 < line.Length ? line[j + 1] : '\0';
+
+						if (inBlockComment)
+						{
+							if (current == '*' && next == '/')
+							{
+								inBlockComment = false;
+								j++;
+							}
+							continue;
+						}
+
+						if (inVerbatim)
+						{
+							kept.Append(current);
+							if (current == '"' && next == '"')
+							{
+								kept.Append(next);
+								j++;
+							}
+							else if (current == '"')
+							{
+								inVerbatim = false;
+							}
+							continue;
+						}
+
+						if (quote != '\0')
+						{
+							kept.Append(current);
+							if (current == '\\' && next != '\0')
+							{
+								kept.Append(next);
+								j++;
+							}
+							else if (current == quote)
+							{
+								quote = '\0';
+							}
+							continue;
+						}
+
+						if (current == '/' && next == '/')
+							break;
+
+						if (current == '/' && next == '*')
+						{
+							inBlockComment = true;
+							j++;
+							continue;
+						}
+
+						if (current == '@' && next == '"')
+						{
+							kept.Append(current).Append(next);
+							inVerbatim = true;
+							j++;
+							continue;
+						}
+
+						if (current == '"' || current == '\'')
+						{
+							kept.Append(current);
+							quote = current;
+							continue;
+						}
+
+						kept.Append(current);
+						stripped.Append(current);
+					}
+
+					code[i] = kept.ToString();
+					bare[i] = stripped.ToString();
+				}
+
+				return new SourceLines(code, bare);
 			}
 		}
 

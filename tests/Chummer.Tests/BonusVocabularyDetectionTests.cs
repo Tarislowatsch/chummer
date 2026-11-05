@@ -140,6 +140,66 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
 		}
 
+		// A disabled check would otherwise mark its tag handled while nothing reads it.
+		[Fact]
+		public void CommentedOutCheckDoesNotCountAsHandled()
+		{
+			string[] source = Source(
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, XmlNode nodBonus)",
+				"{",
+				"    // if (NodeExists(nodBonus, \"lineComment\")) { }",
+				"    /* if (NodeExists(nodBonus, \"blockComment\")) { }",
+				"       if (NodeExists(nodBonus, \"secondLine\")) { } */",
+				"    if (NodeExists(nodBonus, \"specificskill\")) { }",
+				"}");
+
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+		}
+
+		[Fact]
+		public void BraceInsideACommentDoesNotEndTheMethod()
+		{
+			string[] source = Source(
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, XmlNode nodBonus)",
+				"{",
+				"    // }",
+				"    /* }",
+				"       } */",
+				"    if (NodeExists(nodBonus, \"specificskill\")) { }",
+				"}");
+
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+		}
+
+		// A "//" inside a string literal must not cut the rest of the line off as a comment.
+		[Fact]
+		public void CommentMarkerInsideALiteralIsNotAComment()
+		{
+			string[] source = Source(
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, XmlNode nodBonus)",
+				"{",
+				"    string strUrl = \"http://x\"; if (NodeExists(nodBonus, \"specificskill\")) { }",
+				"    string strPath = @\"C:\\\"; if (NodeExists(nodBonus, \"selectskill\")) { }",
+				"}");
+
+			Assert.Equal(new[] { "selectskill", "specificskill" },
+				BonusVocabulary.HandledTagsIn(source).OrderBy(tag => tag, StringComparer.Ordinal));
+		}
+
+		[Fact]
+		public void CheckBrokenAcrossLinesIsFound()
+		{
+			string[] source = Source(
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, XmlNode nodBonus)",
+				"{",
+				"    if (NodeExists(nodBonus,",
+				"            \"specificskill\"))",
+				"    { }",
+				"}");
+
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+		}
+
 		[Fact]
 		public void EnabledTabsComeOnlyFromTheEnableTabBranch()
 		{
