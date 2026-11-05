@@ -42,6 +42,7 @@ namespace Chummer.Tests
 		}
 
 		// - bonus targets live in every file that carries a bonus
+		// - every file the suite loads: top-level data only, not "custom content/"
 		public const string AnyFile = "*";
 
 		public sealed class ReferenceRule
