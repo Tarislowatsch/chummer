@@ -95,6 +95,28 @@ namespace Chummer.Tests
 			Assert.Empty(uncovered);
 		}
 
+		// - only these are replayed at 1..limit plus their top end, not over their whole range
+		// - all use plain Rating arithmetic today: a new one is a cue to check it rates alike
+		[Fact]
+		public void OnlyTheKnownEntriesExceedTheExhaustiveRatingLimit()
+		{
+			Assert.Equal(
+				new[]
+				{
+					"Bioware: Essence Hole (600)",
+					"Cyberware: Essence Hole (600)",
+					"Gear: Certified Credstick, Ebony (1000000)",
+					"Gear: Certified Credstick, Gold (100000)",
+					"Gear: Certified Credstick, Platinum (500000)",
+					"Gear: Certified Credstick, Silver (20000)",
+					"Gear: Certified Credstick, Standard (5000)",
+				},
+				ExpressionChecks.AllRules
+					.SelectMany(rule => DataPaths.ExpressionCheckFor(rule.Id).CutShort)
+					.Distinct(StringComparer.Ordinal)
+					.OrderBy(entry => entry, StringComparer.Ordinal));
+		}
+
 		private static IEnumerable<string> PortedCalculators()
 		{
 			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators);

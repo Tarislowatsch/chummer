@@ -73,11 +73,22 @@ namespace Chummer.Tests
 			Assert.Single(FailuresFor("Cyberware", "<cyberware><cost>*x</cost></cyberware>"));
 		}
 
-		// - the empty catch turns this into a silent 0: reported all the same
+		// - the empty catch turns this into a silent 0: reported as data loss, as in NumericFields
+		// - labelled as such: the report must not claim a crash the application never has
 		[Fact]
-		public void SwallowedCyberwareCostIsReported()
+		public void SwallowedCyberwareCostIsReportedAsSilentZero()
 		{
-			Assert.Single(FailuresFor("Cyberware", "<cyberware><cost>12O0</cost></cyberware>"));
+			ExpressionChecks.ExpressionFailure failure =
+				FailuresFor("Cyberware", "<cyberware><cost>12O0</cost></cyberware>").Single();
+
+			Assert.Equal("silently 0 (FormatException)", failure.Error);
+		}
+
+		[Fact]
+		public void UncaughtFailureKeepsItsExceptionName()
+		{
+			Assert.Equal("FormatException",
+				FailuresFor("Vehicle", "<vehicle><cost>12O0</cost></vehicle>").Single().Error);
 		}
 
 		// - Accel(Running) goes before Accel, or it would become "1000(Running)"

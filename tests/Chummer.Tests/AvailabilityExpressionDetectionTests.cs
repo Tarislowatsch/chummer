@@ -88,11 +88,33 @@ namespace Chummer.Tests
 		}
 
 		[Fact]
-		public void RatingsCoverTheRangeEndsAndGearSwitchPoints()
+		public void EveryRatingInTheRangeIsReplayed()
 		{
-			Assert.Equal(new[] { 2, 3, 4, 6, 7, 10 },
+			Assert.Equal(new[] { 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>10</rating><minrating>2</minrating></gear>")));
-			Assert.Equal(new[] { 1, 3, 4 }, ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>4</rating></gear>")));
+			Assert.Equal(new[] { 1, 2, 3, 4 }, ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>4</rating></gear>")));
+		}
+
+		// - above the limit the sweep stops, the top end is still replayed
+		[Fact]
+		public void RatingsAboveTheLimitKeepOnlyTheTopEnd()
+		{
+			IReadOnlyList<int> ratings =
+				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>1000000</rating></gear>"));
+
+			Assert.Equal(ExpressionChecks.ExhaustiveRatingLimit + 1, ratings.Count);
+			Assert.Equal(ExpressionChecks.ExhaustiveRatingLimit, ratings[ratings.Count - 2]);
+			Assert.Equal(1000000, ratings[ratings.Count - 1]);
+		}
+
+		// - a failure that only appears at an odd rating must not slip between samples
+		[Fact]
+		public void FailureAtAnIntermediateRatingIsFound()
+		{
+			ExpressionChecks.ExpressionFailure failure = FailuresFor("Cyberware",
+				"<cyberware><rating>6</rating><avail>FixedValues(1,2,3,4,x,6)</avail></cyberware>").Single();
+
+			Assert.Equal(5, failure.Rating);
 		}
 
 		// - an unrated class, an absent rating and a rating of 0 all leave the entry at 0

@@ -74,8 +74,8 @@ namespace Chummer.Tests
 			ResolveVariable(ExpressionChecks.FieldOf(item, "cost"));
 		}
 
-		// - the plain branch sits in an empty catch: a bad value silently costs 0
-		// - a "*1.5" plugin multiplier lands there by design, its parent reads it (:3744)
+		// - the plain branch sits in an empty catch: the port labels that as SilentlyDiscarded
+		// - a "*1.5" plugin multiplier skips it: its parent reads it as a factor (:3744)
 		private static void Cyberware(XmlNode item, int rating)
 		{
 			string cost = ResolveVariable(ExpressionChecks.FieldOf(item, "cost"));
@@ -95,7 +95,14 @@ namespace Chummer.Tests
 			}
 			else
 			{
-				Convert.ToInt32(cost);
+				try
+				{
+					Convert.ToInt32(cost);
+				}
+				catch (Exception swallowed)
+				{
+					throw new ExpressionChecks.SilentlyDiscarded(swallowed);
+				}
 			}
 		}
 

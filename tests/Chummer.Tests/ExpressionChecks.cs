@@ -11,11 +11,21 @@ namespace Chummer.Tests
 {
 	// - avail and cost are tiny programs: each calculator substitutes, then runs them as XPath
 	// - the ports in AvailabilityExpressions/CostExpressions replay one calculator each
-	// - a port throws exactly where the application would
+	// - a value fails where the application throws or silently discards it, nowhere else
 	public static class ExpressionChecks
 	{
 		// - one calculator replayed against one entry at one rating, throwing as the code would
 		public delegate void Replay(XmlNode item, int rating);
+
+		// - thrown by a port where the application catches the same failure and carries on with 0
+		// - reported like a crash, but labelled as a silent 0
+		public sealed class SilentlyDiscarded : Exception
+		{
+			public SilentlyDiscarded(Exception swallowed)
+				: base("the application swallows this and uses 0", swallowed)
+			{
+			}
+		}
 
 		public sealed class ExpressionRule
 		{
@@ -61,13 +71,17 @@ namespace Chummer.Tests
 		public sealed class ExpressionCheck
 		{
 			public ExpressionCheck(ExpressionRule rule, string filePath, int itemCount,
-				IReadOnlyList<ExpressionFailure> failures)
+				IReadOnlyList<ExpressionFailure> failures, IReadOnlyList<string> cutShort)
 			{
 				Rule = rule;
 				FilePath = filePath;
 				ItemCount = itemCount;
 				Failures = failures;
+				CutShort = cutShort;
 			}
+
+			// - entries rated above ExhaustiveRatingLimit, replayed at the top end only
+			public IReadOnlyList<string> CutShort { get; }
 
 			public ExpressionRule Rule { get; }
 
@@ -101,8 +115,11 @@ namespace Chummer.Tests
 				{ "WeaponMod", new[] { "rating", null } },
 			};
 
-		// - the ends of the range plus Gear's avail3/6/10 and cost3/6/10 switch points
-		// - every value between behaves like its nearest candidate in these grammars
+		// - every rating up to here is replayed, no assumption about the expressions needed
+		// - above it only the top end: credsticks reach 1000000, a full sweep would take minutes
+		public const int ExhaustiveRatingLimit = 100;
+
+		// - min..max, cut at the limit, plus max itself
 		public static IReadOnlyList<int> RatingsOf(string entity, XmlNode item)
 		{
 			string[] fields;
@@ -130,11 +147,20 @@ namespace Chummer.Tests
 				min = declaredMin;
 			}
 
-			return new[] { min, 3, 4, 6, 7, max }
-				.Where(rating => rating >= min && rating <= max)
+			return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExhaustiveRatingLimit) - min + 1))
+				.Concat(new[] { max })
 				.Distinct()
-				.OrderBy(rating => rating)
 				.ToArray();
+		}
+
+		// - "entity: name (rating)" for every entry whose range the sweep cuts short
+		public static IEnumerable<string> EntriesAboveTheRatingLimit(string entity, IEnumerable<XmlNode> items)
+		{
+			return items
+				.Select(item => new { Item = item, Ratings = RatingsOf(entity, item) })
+				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > ExhaustiveRatingLimit)
+				.Select(entry => entity + ": " + DataPaths.ItemLabel(entry.Item) + " ("
+					+ entry.Ratings[entry.Ratings.Count - 1] + ")");
 		}
 
 		private static readonly Regex AnyClass =
@@ -220,8 +246,12 @@ namespace Chummer.Tests
 					}
 					catch (Exception exception)
 					{
+						string error = exception is SilentlyDiscarded
+							? "silently 0 (" + exception.InnerException.GetType().Name + ")"
+							: exception.GetType().Name;
+
 						failures.Add(new ExpressionFailure(DataPaths.ItemLabel(item), rating,
-							FieldOf(item, rule.Field), exception.GetType().Name));
+							FieldOf(item, rule.Field), error));
 
 						// - one failing rating per entry is enough to name the defect
 						break;
@@ -248,7 +278,8 @@ namespace Chummer.Tests
 					continue;
 
 				XmlNode[] items = document.SelectNodes(entity.ItemXPath).Cast<XmlNode>().ToArray();
-				checks.Add(new ExpressionCheck(rule, xmlPath, items.Length, FailuresIn(rule, items)));
+				checks.Add(new ExpressionCheck(rule, xmlPath, items.Length, FailuresIn(rule, items),
+					EntriesAboveTheRatingLimit(rule.Entity, items).ToArray()));
 			}
 
 			return checks;
