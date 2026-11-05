@@ -62,7 +62,7 @@ namespace Chummer.Tests
 		private const string CustomImprovementTagXPath = "/chummer/improvements/improvement/internal";
 
 		// - not //bonus: specificskill and friends carry a <bonus> value field of their own
-		private const string BonusRootXPath = "//bonus[not(ancestor::bonus)]";
+		public const string BonusRootXPath = "//bonus[not(ancestor::bonus)]";
 
 		private static readonly string ImprovementManagerSource =
 			Path.Combine(DataPaths.RepoRoot, "Chummer", "clsImprovement.cs");
