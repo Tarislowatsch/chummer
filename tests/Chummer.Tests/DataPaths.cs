@@ -182,7 +182,8 @@ namespace Chummer.Tests
 				IReadOnlyList<CategoryUsage> categoryUsages,
 				IReadOnlyList<RequiredFieldContract> requiredFieldContracts,
 				IReadOnlyList<BonusVocabulary.BonusTag> bonusTags,
-				IReadOnlyList<NumericFields.NumericFieldCheck> numericFieldChecks)
+				IReadOnlyList<NumericFields.NumericFieldCheck> numericFieldChecks,
+				IReadOnlyList<ExpressionChecks.ExpressionCheck> expressionChecks)
 			{
 				FilePath = filePath;
 				Collections = collections;
@@ -192,6 +193,7 @@ namespace Chummer.Tests
 				RequiredFieldContracts = requiredFieldContracts;
 				BonusTags = bonusTags;
 				NumericFieldChecks = numericFieldChecks;
+				ExpressionChecks = expressionChecks;
 			}
 
 			public string FilePath { get; }
@@ -214,6 +216,8 @@ namespace Chummer.Tests
 			public IReadOnlyList<BonusVocabulary.BonusTag> BonusTags { get; }
 
 			public IReadOnlyList<NumericFields.NumericFieldCheck> NumericFieldChecks { get; }
+
+			public IReadOnlyList<ExpressionChecks.ExpressionCheck> ExpressionChecks { get; }
 		}
 
 		// - parsed once: the suite was reparsing the same documents roughly five times over
@@ -302,6 +306,29 @@ namespace Chummer.Tests
 				new Lazy<IReadOnlyDictionary<string, NumericFields.NumericFieldCheck>>(
 					() => CachedRuleFiles.Value.SelectMany(file => file.NumericFieldChecks)
 						.ToDictionary(check => check.Entity, StringComparer.Ordinal));
+
+		public static IEnumerable<object[]> ExpressionRuleIds(string field)
+		{
+			return ExpressionChecks.AllRules
+				.Where(rule => string.Equals(rule.Field, field, StringComparison.Ordinal))
+				.Select(rule => new object[] { rule.Id });
+		}
+
+		// - throws for a declared rule no file produced: its entity's file was never scanned
+		public static ExpressionChecks.ExpressionCheck ExpressionCheckFor(string id)
+		{
+			ExpressionChecks.ExpressionCheck check;
+			if (!CachedExpressionChecksById.Value.TryGetValue(id, out check))
+				throw new InvalidOperationException(id + " names an entity whose file was not scanned.");
+
+			return check;
+		}
+
+		private static readonly Lazy<IReadOnlyDictionary<string, ExpressionChecks.ExpressionCheck>>
+			CachedExpressionChecksById =
+				new Lazy<IReadOnlyDictionary<string, ExpressionChecks.ExpressionCheck>>(
+					() => CachedRuleFiles.Value.SelectMany(file => file.ExpressionChecks)
+						.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
 
 		private static readonly Lazy<IReadOnlyDictionary<string, RuleFile>> CachedRuleFilesByPath =
 			new Lazy<IReadOnlyDictionary<string, RuleFile>>(
@@ -771,7 +798,7 @@ namespace Chummer.Tests
 			}
 		}
 
-		private static string Fingerprint(IEnumerable<string> lines)
+		internal static string Fingerprint(IEnumerable<string> lines)
 		{
 			using (SHA256 sha = SHA256.Create())
 			{
@@ -983,7 +1010,8 @@ namespace Chummer.Tests
 					declarations, categoryUsages,
 					RequiredFieldContractsFor(fileName, xmlPath, document),
 					BonusVocabulary.BonusTagsIn(fileName, document),
-					NumericFields.ChecksIn(xmlPath, document)));
+					NumericFields.ChecksIn(xmlPath, document),
+					ExpressionChecks.ChecksIn(xmlPath, document, ExpressionChecks.AllRules)));
 			}
 
 			return files;
