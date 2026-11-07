@@ -93,7 +93,8 @@ namespace Chummer.Tests
 		}
 
 		public static IEnumerable<ExpressionRule> AllRules =>
-			AvailabilityExpressions.Rules.Concat(CostExpressions.Rules).Concat(EssExpressions.Rules);
+			AvailabilityExpressions.Rules.Concat(CostExpressions.Rules).Concat(EssExpressions.Rules)
+				.Concat(CapacityExpressions.Rules);
 
 		// - stand-in for runtime state the data cannot supply: parent cost, Body, Speed, Accel
 		// - a round integer keeps a multiplier like ".1" from inventing a fractional crash
@@ -114,6 +115,7 @@ namespace Chummer.Tests
 				{ "OperatingSystem", new[] { "rating", "minrating" } },
 				{ "VehicleMod", new[] { "rating", null } },
 				{ "WeaponMod", new[] { "rating", null } },
+				{ "TechProgram", new[] { "maxrating", null } },
 			};
 
 		// - every rating up to here is replayed, no assumption about the expressions needed
@@ -209,8 +211,36 @@ namespace Chummer.Tests
 			return fingerprints;
 		}
 
+		// - "Class.Member" of the last declaration above each line, null before the first
+		// - a constructor matches no declaration: its lines count to the member above
+		public static string[] EnclosingMembers(string[] lines)
+		{
+			SourceLines source = SourceLines.Of(lines);
+			string[] members = new string[lines.Length];
+			string className = null;
+			string member = null;
+
+			for (int i = 0; i < source.Code.Length; i++)
+			{
+				Match declaration = AnyClass.Match(source.Code[i]);
+				if (declaration.Success)
+				{
+					className = declaration.Groups[1].Value;
+					member = null;
+				}
+				else if (MemberDeclaration.Match(source.Code[i]) is Match match && match.Success && className != null)
+				{
+					member = className + "." + match.Groups[1].Value;
+				}
+
+				members[i] = member;
+			}
+
+			return members;
+		}
+
 		private static readonly Regex MemberDeclaration = new Regex(
-			@"^\s*(?:public|private|protected|internal)\s+(?:(?:static|virtual|override)\s+)*[\w<>\[\]]+\s+(\w+)\s*(?:\(|$)",
+			@"^\s*(?:public|private|protected|internal)\s+(?:(?:static|virtual|override|new)\s+)*[\w<>\[\]]+\s+(\w+)\s*(?:\(|$)",
 			RegexOptions.Compiled);
 
 		// - the same two calls every calculator makes on a throwaway document
