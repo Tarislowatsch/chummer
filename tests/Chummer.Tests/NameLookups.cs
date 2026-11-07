@@ -353,4 +353,4 @@ namespace Chummer.Tests
 				.SelectMany(path => LiteralsIn(System.IO.Path.GetFileName(path), File.ReadAllLines(path)))
 				.ToArray());
 	}
-}
+}

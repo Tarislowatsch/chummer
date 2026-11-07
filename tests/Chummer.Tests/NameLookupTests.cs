@@ -72,4 +72,4 @@ namespace Chummer.Tests
 				"Only " + NameLookups.All.Count + " name lookups found, expected at least 500.");
 		}
 	}
-}
+}
