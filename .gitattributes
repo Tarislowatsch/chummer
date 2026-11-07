@@ -15,7 +15,7 @@
 # - the one-off renormalize commit is listed in .git-blame-ignore-revs
 * text=auto eol=crlf
 
-# Every rule below overrides the line above.
+# Later lines win, so the -text and binary rules below override text=auto.
 
 # Saved characters are UTF-16 LE and are the regression corpus for the Phase 2
 # golden master, where byte stability is the whole point. Marked binary so no
