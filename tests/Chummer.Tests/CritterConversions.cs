@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace Chummer.Tests
 {
-	// - fields the critter loaders convert directly, outside ExpressionToString
+	// - fields a critter, vessel or quality loader converts directly, outside ExpressionToString
 	// - a non-number or a missing unguarded attribute throws into the UI
 	public static class CritterConversions
 	{
@@ -20,20 +20,119 @@ namespace Chummer.Tests
 			DigitBeforeD6,
 		}
 
-		// One direct conversion in a loader, with the data it reads relative to the metatype.
+		// One loader's data: base files, their packs, the item a root variable stands for.
+		public sealed class Corpus
+		{
+			public Corpus(string name, string[] baseFiles, string itemXPath)
+			{
+				Name = name;
+				BaseFiles = baseFiles;
+				ItemXPath = itemXPath;
+			}
+
+			public string Name { get; }
+
+			public IReadOnlyList<string> BaseFiles { get; }
+
+			public string ItemXPath { get; }
+
+			public IEnumerable<string> Files()
+			{
+				return BaseFiles.Select(file => System.IO.Path.Combine(DataPaths.ChummerDataDir, file))
+					.Concat(CustomContent.PackFiles
+						.Where(pack => pack.BaseFileNames.Intersect(BaseFiles, StringComparer.Ordinal).Any())
+						.Select(pack => pack.FilePath));
+			}
+		}
+
+		public static readonly Corpus Critters =
+			new Corpus("critters", new[] { "metatypes.xml", "critters.xml" }, "/chummer/metatypes/metatype");
+
+		public static readonly Corpus Vessels = new Corpus("vessels", new[] { "vessels.xml" }, "/chummer/metatypes/metatype");
+
+		public static readonly Corpus Qualities = new Corpus("qualities", new[] { "qualities.xml" }, "/chummer/qualities/quality");
+
+		public static IReadOnlyList<Corpus> Corpora => new[] { Critters, Vessels, Qualities };
+
+		// A root variable: an item of its corpus, or a node at a fixed path below one.
+		public sealed class Root
+		{
+			public Root(Corpus corpus, string prefix, string loopPath = null)
+			{
+				Corpus = corpus;
+				Prefix = prefix;
+				LoopPath = loopPath;
+			}
+
+			public Corpus Corpus { get; }
+
+			public string Prefix { get; }
+
+			// - the SelectNodes path of the loop that bound it, null for a root itself
+			public string LoopPath { get; }
+		}
+
+		// Code that loads such an item: a whole file, or one method of a larger form.
+		public sealed class Scope
+		{
+			public Scope(string file, string method, IReadOnlyDictionary<string, Root> roots)
+			{
+				File = file;
+				Method = method;
+				Roots = roots;
+			}
+
+			public string File { get; }
+
+			// - null for the whole file
+			public string Method { get; }
+
+			public IReadOnlyDictionary<string, Root> Roots { get; }
+		}
+
+		public static readonly IReadOnlyDictionary<string, Root> CritterRoots =
+			new Dictionary<string, Root>(StringComparer.Ordinal)
+			{
+				{ "objXmlCritter", new Root(Critters, "") },
+				{ "objXmlMetatype", new Root(Critters, "") },
+				{ "objXmlMetavariant", new Root(Critters, "metavariants/metavariant") },
+			};
+
+		private static readonly IReadOnlyDictionary<string, Root> QualityRoots =
+			new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlQuality", new Root(Qualities, "") } };
+
+		// - read off the code by hand: EveryLoopOverAConvertedPathIsScanned reports a missing one
+		public static readonly IReadOnlyList<Scope> Scopes = new[]
+		{
+			new Scope("SpiritControl.cs", null, CritterRoots),
+			new Scope("frmMetatype.cs", null, CritterRoots),
+			new Scope("frmTest.cs", null, CritterRoots),
+			new Scope("frmCareer.cs", "mnuSpecialPossessInanimate_Click",
+				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objSelected", new Root(Vessels, "") } }),
+			new Scope("frmCareer.cs", "cmdAddQuality_Click", QualityRoots),
+			new Scope("frmCreate.cs", "cmdAddQuality_Click", QualityRoots),
+		};
+
+		// One direct conversion, with the data it reads relative to an item of its corpus.
 		public sealed class Conversion
 		{
-			public Conversion(string site, string path, Form form, bool guarded)
+			public Conversion(string site, Corpus corpus, string path, Form form, bool guarded, string loopPath = null)
 			{
 				Site = site;
+				Corpus = corpus;
 				Path = path;
 				Form = form;
 				Guarded = guarded;
+				LoopPath = loopPath;
 			}
+
+			public string LoopPath { get; }
 
 			public string Site { get; }
 
 			public string File => Site.Substring(0, Site.LastIndexOf(':'));
+
+			public Corpus Corpus { get; }
 
 			// - e.g. "skills/knowledge/@rating" or "essmax"
 			public string Path { get; }
@@ -43,32 +142,22 @@ namespace Chummer.Tests
 			// - checked for null first: a missing attribute is skipped, not converted
 			public bool Guarded { get; }
 
-			public string Description => Path + (Form == Form.DigitBeforeD6 ? " (digit before D6)" : "")
-				+ (Guarded ? " (if present)" : "");
-		}
-
-		// - node variable -> its path below the metatype, for the names the loaders use
-		public static readonly IReadOnlyDictionary<string, string> Parents =
-			new Dictionary<string, string>(StringComparer.Ordinal)
-			{
-				{ "objXmlCritter", "" },
-				{ "objXmlMetatype", "" },
-				{ "objXmlMetavariant", "metavariants/metavariant" },
-			};
-
-		// - the files that load a critter are the ones carrying an ExpressionToString copy
-		public static IEnumerable<string> LoaderFiles()
-		{
-			return CritterExpressions.Calculators.Select(calculator => calculator.Substring(0, calculator.IndexOf('.')) + ".cs");
+			public string Description => Corpus.Name + ": " + Path
+				+ (Form == Form.DigitBeforeD6 ? " (digit before D6)" : "") + (Guarded ? " (if present)" : "");
 		}
 
 		public static IReadOnlyList<Conversion> ApplicationConversions => CachedConversions.Value;
 
 		private static readonly Lazy<IReadOnlyList<Conversion>> CachedConversions =
-			new Lazy<IReadOnlyList<Conversion>>(() => LoaderFiles()
-				.SelectMany(file => ConversionsIn(file, File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-					.Single(path => string.Equals(System.IO.Path.GetFileName(path), file, StringComparison.Ordinal)))))
+			new Lazy<IReadOnlyList<Conversion>>(() => Scopes
+				.SelectMany(scope => ConversionsIn(scope, SourceOf(scope.File)))
 				.ToArray());
+
+		private static string[] SourceOf(string fileName)
+		{
+			return File.ReadAllLines(DataPaths.ApplicationSourceFiles()
+				.Single(path => string.Equals(System.IO.Path.GetFileName(path), fileName, StringComparison.Ordinal)));
+		}
 
 		private static readonly Regex Start = new Regex(@"\bConvert\.To\w+\(|\b\w+\.(?:Try)?Parse\(", RegexOptions.Compiled);
 
@@ -77,32 +166,52 @@ namespace Chummer.Tests
 
 		// - as in NumericFields: an indexer, .Attributes or .InnerText marks a node operand
 		// - an ExpressionToString argument is CritterExpressions' business
-		private static readonly Regex NodeRead = new Regex(@"^\w+(?:\[""|\.Attributes\b|\.InnerText\b)", RegexOptions.Compiled);
+		private static readonly Regex NodeRead = new Regex(@"^(\w+)(?:\[""|\.Attributes\b|\.InnerText\b)", RegexOptions.Compiled);
 
-		private static readonly Regex AttributeRead =new Regex(@"^(\w+)\.Attributes\[""(\w+)""\]\.InnerText$", RegexOptions.Compiled);
+		private static readonly Regex AttributeRead = new Regex(@"^(\w+)\.Attributes\[""(\w+)""\]\.InnerText$", RegexOptions.Compiled);
 
 		private static readonly Regex FieldRead = new Regex(
-			@"^(\w+)\[""(\w+)""\]\.InnerText(\.Substring\(\s*\w+\s*,\s*1\s*\))?$", RegexOptions.Compiled);
+			@"^(\w+)\[""(\w+)""\]\.InnerText(?:\.Substring\((\w+),1\))?$", RegexOptions.Compiled);
+
+		// - the scope's lines and the index of its first line in the file
+		private static (string[] Code, int Offset) Extent(Scope scope, string[] lines)
+		{
+			SourceLines source = SourceLines.Of(lines);
+			if (scope.Method == null)
+				return (source.Code, 0);
+
+			Regex declaration = new Regex(@"^\s*(?:(?:private|public|protected|internal|static|override|async)\s+)+[\w<>\[\],\s]+\s"
+				+ Regex.Escape(scope.Method) + @"\s*\(");
+			int start = Array.FindIndex(source.Code, line => declaration.IsMatch(line));
+			if (start < 0)
+				throw new InvalidOperationException(scope.File + " has no method " + scope.Method + ": update Scopes.");
+
+			return (source.BlockFrom(start).Code, start);
+		}
 
 		// - public so the detection tests can drive it with hand-built source
 		// - a node read in a shape this scan does not know throws instead of dropping out
-		public static IReadOnlyList<Conversion> ConversionsIn(string fileName, string[] lines)
+		public static IReadOnlyList<Conversion> ConversionsIn(Scope scope, string[] lines)
 		{
-			string[] code = SourceLines.Of(lines).Code;
-			Dictionary<string, string> bound = new Dictionary<string, string>(StringComparer.Ordinal);
+			(string[] code, int offset) = Extent(scope, lines);
+			Dictionary<string, Root> bound = new Dictionary<string, Root>(StringComparer.Ordinal);
 			List<Conversion> conversions = new List<Conversion>();
 
 			for (int i = 0; i < code.Length; i++)
 			{
 				foreach (Match loop in Loop.Matches(code[i]))
 				{
-					if (Parents.TryGetValue(loop.Groups[2].Value, out string parent))
-						bound[loop.Groups[1].Value] = Join(parent, loop.Groups[3].Value);
+					string variable = loop.Groups[1].Value;
+					Root parent;
+					if (scope.Roots.TryGetValue(loop.Groups[2].Value, out parent) || bound.TryGetValue(loop.Groups[2].Value, out parent))
+						bound[variable] = new Root(parent.Corpus, Join(parent.Prefix, loop.Groups[3].Value), loop.Groups[3].Value);
+					else
+						bound.Remove(variable);
 				}
 
 				foreach (Match start in Start.Matches(code[i]))
 				{
-					string site = fileName + ":" + (i + 1);
+					string site = scope.File + ":" + (offset + i + 1);
 					string rest = string.Join(" ", code.Skip(i).Take(MaxCallLines)).Substring(start.Index + start.Length);
 					string argument = ArgumentAt(rest);
 					if (argument == null)
@@ -112,35 +221,42 @@ namespace Chummer.Tests
 					if (!NodeRead.IsMatch(argument))
 						continue;
 
-					conversions.Add(Understand(site, argument, bound, code, i));
+					conversions.Add(Understand(site, argument, scope.Roots, bound, code, i));
 				}
 			}
 
 			return conversions;
 		}
 
-		private static Conversion Understand(string site, string argument, IReadOnlyDictionary<string, string> bound,
-			string[] code, int line)
+		private static Conversion Understand(string site, string argument, IReadOnlyDictionary<string, Root> roots,
+			IReadOnlyDictionary<string, Root> bound, string[] code, int line)
 		{
+			Root holder;
 			Match attribute = AttributeRead.Match(argument);
-			if (attribute.Success && bound.TryGetValue(attribute.Groups[1].Value, out string element))
+			if (attribute.Success && bound.TryGetValue(attribute.Groups[1].Value, out holder))
 			{
-				string guard = Regex.Escape(attribute.Groups[1].Value) + @"\.Attributes\[""" + attribute.Groups[2].Value
-					+ @"""\]\s*!=\s*null";
-				bool guarded = Regex.IsMatch(code[line], guard) || (line > 0 && Regex.IsMatch(code[line - 1], guard));
-				return new Conversion(site, element + "/@" + attribute.Groups[2].Value, Form.Whole, guarded);
+				// - a null check ending in another statement guards nothing
+				string guard = @"\bif\s*\(\s*" + Regex.Escape(attribute.Groups[1].Value) + @"\.Attributes\[""" + attribute.Groups[2].Value
+					+ @"""\]\s*!=\s*null\s*\)";
+				bool guarded = Regex.IsMatch(code[line], guard + @"\s*\w")
+					|| (line > 0 && Regex.IsMatch(code[line - 1], "^\\s*" + guard + "\\s*$"));
+				return new Conversion(site, holder.Corpus, Join(holder.Prefix, "@" + attribute.Groups[2].Value), Form.Whole, guarded,
+					holder.LoopPath);
 			}
 
 			Match field = FieldRead.Match(argument);
-			if (field.Success)
+			if (field.Success && (roots.TryGetValue(field.Groups[1].Value, out holder) || bound.TryGetValue(field.Groups[1].Value, out holder)))
 			{
-				string variable = field.Groups[1].Value;
-				string holder;
-				if (Parents.TryGetValue(variable, out holder) || bound.TryGetValue(variable, out holder))
-				{
-					return new Conversion(site, Join(holder, field.Groups[2].Value),
-						field.Groups[3].Success ? Form.DigitBeforeD6 : Form.Whole, false);
-				}
+				if (!field.Groups[3].Success)
+					return new Conversion(site, holder.Corpus, Join(holder.Prefix, field.Groups[2].Value), Form.Whole, false,
+						holder.LoopPath);
+
+				// - the index must be the one frmMetatype computes, not any Substring(x, 1)
+				Regex index = new Regex(@"\b" + Regex.Escape(field.Groups[3].Value) + @"\s*=\s*" + Regex.Escape(field.Groups[1].Value)
+					+ @"\[""" + field.Groups[2].Value + @"""\]\.InnerText\.IndexOf\(\s*""D6""\s*\)\s*-\s*1\s*;");
+				if (code.Take(line).Any(earlier => index.IsMatch(earlier)))
+					return new Conversion(site, holder.Corpus, Join(holder.Prefix, field.Groups[2].Value), Form.DigitBeforeD6, false,
+						holder.LoopPath);
 			}
 
 			throw Unknown(site, argument);
@@ -175,17 +291,71 @@ namespace Chummer.Tests
 			return parent.Length == 0 ? child : parent + "/" + child;
 		}
 
+		// - "file:line path": a loop outside every scope whose body converts a read of its variable
+		// - a new loader of the same data shows up here instead of hiding
+		public static IEnumerable<string> UnscannedLoops(string fileName, string[] lines, IReadOnlyCollection<string> paths,
+			IEnumerable<(int First, int Last)> scanned)
+		{
+			SourceLines source = SourceLines.Of(lines);
+			(int First, int Last)[] ranges = scanned.ToArray();
+
+			for (int i = 0; i < source.Code.Length; i++)
+			{
+				foreach (Match loop in Loop.Matches(source.Code[i]))
+				{
+					if (!paths.Contains(loop.Groups[3].Value) || ranges.Any(range => i >= range.First && i <= range.Last))
+						continue;
+
+					string variable = loop.Groups[1].Value;
+					string[] body = source.BlockFrom(i).Code;
+					bool converts = body.Select((line, at) => (line, at)).Any(entry => Start.Matches(entry.line).Cast<Match>()
+						.Select(start => ArgumentAt(string.Join(" ", body.Skip(entry.at).Take(MaxCallLines))
+							.Substring(start.Index + start.Length)))
+						.Where(argument => argument != null)
+						.Select(argument => NodeRead.Match(Regex.Replace(argument, @"\s+", "")))
+						.Any(read => read.Success && read.Groups[1].Value == variable));
+					if (converts)
+						yield return fileName + ":" + (i + 1) + " " + loop.Groups[3].Value;
+				}
+			}
+		}
+
+		public static IReadOnlyList<string> ApplicationUnscannedLoops()
+		{
+			// - paths converted directly only: the rest goes through ExpressionToString
+			string[] paths = ApplicationConversions.Select(conversion => conversion.LoopPath).Where(path => path != null)
+				.Distinct(StringComparer.Ordinal).ToArray();
+
+			return DataPaths.ApplicationSourceFiles()
+				.SelectMany(path =>
+				{
+					string fileName = System.IO.Path.GetFileName(path);
+					string[] lines = File.ReadAllLines(path);
+					IEnumerable<(int, int)> scanned = Scopes
+						.Where(scope => string.Equals(scope.File, fileName, StringComparison.Ordinal))
+						.Select(scope => RangeOf(scope, lines));
+					return UnscannedLoops(fileName, lines, paths, scanned);
+				})
+				.ToArray();
+		}
+
+		private static (int First, int Last) RangeOf(Scope scope, string[] lines)
+		{
+			(string[] code, int offset) = Extent(scope, lines);
+			return (offset, offset + code.Length - 1);
+		}
+
 		// - a missing required attribute comes back with a null value
-		public static IEnumerable<(XmlNode Metatype, XmlElement Holder, string Value)> ValuesIn(XmlDocument document,
+		public static IEnumerable<(XmlNode Item, string Value)> ValuesIn(XmlDocument document, string itemXPath,
 			string path, Form form, bool required)
 		{
-			int at = path.IndexOf("/@", StringComparison.Ordinal);
-			string elementPath = at < 0 ? path : path.Substring(0, at);
-			string attribute = at < 0 ? null : path.Substring(at + 2);
+			int at = path.IndexOf("@", StringComparison.Ordinal);
+			string elementPath = at < 0 ? path : at == 0 ? "." : path.Substring(0, at - 1);
+			string attribute = at < 0 ? null : path.Substring(at + 1);
 
-			foreach (XmlNode metatype in document.SelectNodes("/chummer/metatypes/metatype").Cast<XmlNode>())
+			foreach (XmlNode item in document.SelectNodes(itemXPath).Cast<XmlNode>())
 			{
-				foreach (XmlElement holder in metatype.SelectNodes(elementPath).OfType<XmlElement>())
+				foreach (XmlElement holder in item.SelectNodes(elementPath).OfType<XmlElement>())
 				{
 					string value = attribute == null ? holder.InnerText : holder.GetAttributeNode(attribute)?.Value;
 					if (value == null && !required)
@@ -193,7 +363,7 @@ namespace Chummer.Tests
 					if (form == Form.DigitBeforeD6 && value != null && value.IndexOf("D6", StringComparison.Ordinal) < 0)
 						continue;
 
-					yield return (metatype, holder, value);
+					yield return (item, value);
 				}
 			}
 		}
@@ -215,18 +385,20 @@ namespace Chummer.Tests
 			return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out _) ? null : "FormatException";
 		}
 
-		// - "file: metatype path = value: error", over every distinct path the loaders convert
-		public static IEnumerable<string> FailuresIn(string fileName, XmlDocument document, IEnumerable<Conversion> conversions)
+		// - "file: item path = value: error", over every distinct path converted for this corpus
+		public static IEnumerable<string> FailuresIn(string fileName, XmlDocument document, Corpus corpus,
+			IEnumerable<Conversion> conversions)
 		{
-			foreach (var group in conversions.GroupBy(conversion => (conversion.Path, conversion.Form)))
+			foreach (var group in conversions.Where(conversion => conversion.Corpus == corpus)
+				.GroupBy(conversion => (conversion.Path, conversion.Form)))
 			{
 				bool required = group.Any(conversion => !conversion.Guarded);
-				foreach (var found in ValuesIn(document, group.Key.Path, group.Key.Form, required))
+				foreach (var found in ValuesIn(document, corpus.ItemXPath, group.Key.Path, group.Key.Form, required))
 				{
 					string error = ErrorOf(found.Value, group.Key.Form);
 					if (error != null)
 					{
-						yield return fileName + ": " + RuleCorpus.ItemLabel(found.Metatype) + " " + group.Key.Path
+						yield return fileName + ": " + RuleCorpus.ItemLabel(found.Item) + " " + group.Key.Path
 							+ " = " + (found.Value ?? "(none)") + ": " + error;
 					}
 				}
