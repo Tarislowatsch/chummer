@@ -7,8 +7,8 @@ using Xunit;
 namespace Chummer.Tests
 {
 	// - one line per differing key: Assert.Equal truncates a dictionary after a few entries
-	// - "nothing" marks a missing key, so a pinned 0 stays distinct from an absent one
-	internal static class CountReport
+	// - "nothing" marks a missing key: a pinned 0 or "" stays distinct from an absent one
+	internal static class PinReport
 	{
 		public static void AssertEqual<TValue>(string headline, IReadOnlyDictionary<string, TValue> expected,
 			IReadOnlyDictionary<string, TValue> actual)

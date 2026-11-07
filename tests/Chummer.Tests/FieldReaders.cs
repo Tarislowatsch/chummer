@@ -369,7 +369,7 @@ namespace Chummer.Tests
 
 		// - bonus handlers whose branch reads every field directly off its block, see BranchOf
 		// - the name level misses their dead fields: min, max and val are read by other handlers
-		// - the rest read through loop variables or carry only text
+		// - the rest read through variables or carry only text
 		public static readonly IReadOnlyList<string> IndexedHandlers = new[]
 		{
 			"addattribute", "conditionmonitor", "livingpersona", "selectattribute", "selectskill",

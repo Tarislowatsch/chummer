@@ -123,7 +123,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryValueToIntCallIsPinned()
 		{
-			CountReport.AssertEqual("ValueToInt calls per branch and argument", PinnedCalls,
+			PinReport.AssertEqual("ValueToInt calls per branch and argument", PinnedCalls,
 				BonusValues.ApplicationCalls.GroupBy(call => call.Key, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
@@ -268,7 +268,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachPathReachesTheMeasuredValues()
 		{
-			CountReport.AssertEqual("Bonus values per path", PinnedValueCounts,
+			PinReport.AssertEqual("Bonus values per path", PinnedValueCounts,
 				BonusValues.Corpus.Reached.GroupBy(value => value.Path, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}

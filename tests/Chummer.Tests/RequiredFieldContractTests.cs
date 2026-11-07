@@ -176,7 +176,7 @@ namespace Chummer.Tests
 				.ToDictionary(group => group.Key, group => group.Sum(contract => contract.ItemCount),
 					StringComparer.Ordinal);
 
-			CountReport.AssertEqual("Pack entries per entity", PinnedPackEntryCounts, actual);
+			PinReport.AssertEqual("Pack entries per entity", PinnedPackEntryCounts, actual);
 		}
 	}
 }

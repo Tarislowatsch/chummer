@@ -46,7 +46,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryElementNameIsSpelledBySomeCodeLiteral()
 		{
-			CountReport.AssertEqual("Element names no code literal spells", KnownUnreadNames,
+			PinReport.AssertEqual("Element names no code literal spells", KnownUnreadNames,
 				FieldReaders.UnreadNames(FieldReaders.AllElementNames, FieldReaders.LiteralIdentifiers)
 					.ToDictionary(name => name.Entry, name => name.Count, StringComparer.Ordinal));
 		}
@@ -54,7 +54,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryRequirementHasAConsumerThatReadsIt()
 		{
-			CountReport.AssertEqual("Requirements no consumer reads", KnownUnreadRequirements,
+			PinReport.AssertEqual("Requirements no consumer reads", KnownUnreadRequirements,
 				FieldReaders.UnreadRequirements(FieldReaders.AllRequirementUses, FieldReaders.Readers,
 						FieldReaders.TagsReadBy)
 					.GroupBy(use => use.Entry, StringComparer.Ordinal)
@@ -79,7 +79,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachReaderReadsTheMeasuredTags()
 		{
-			CountReport.AssertEqual("Tags read per consumer", PinnedTagCounts,
+			PinReport.AssertEqual("Tags read per consumer", PinnedTagCounts,
 				FieldReaders.Readers.ToDictionary(reader => reader.Key,
 					reader => FieldReaders.TagsReadBy(reader).Count, StringComparer.Ordinal));
 		}
@@ -158,14 +158,14 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryHandlerFieldIsReadByItsBranch()
 		{
-			CountReport.AssertEqual("Handler fields no branch reads", KnownUnreadHandlerFields,
+			PinReport.AssertEqual("Handler fields no branch reads", KnownUnreadHandlerFields,
 				FieldReaders.UnreadHandlerFields(FieldReaders.AllHandlerFields, FieldReaders.HandlerBranches)
 					.GroupBy(field => field.Entry, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
 
 		// - a missing field fails loudly, an over-reaching extractor would hide one
-		// - swapskillattribute has no rule data: only the custom improvement form writes it
+		// - swapskillattribute's one rule block is empty: only custom improvements fill it
 		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerFields =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
@@ -181,7 +181,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachIndexedHandlerReadsTheMeasuredFields()
 		{
-			CountReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
+			PinReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
 				FieldReaders.HandlerBranches.ToDictionary(branch => branch.Handler, branch => Sorted(branch.Fields),
 					StringComparer.Ordinal));
 		}
@@ -197,7 +197,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachIndexedHandlerDispatchesOnTheMeasuredValues()
 		{
-			CountReport.AssertEqual("Compared values per handler field", MeasuredHandlerDispatch,
+			PinReport.AssertEqual("Compared values per handler field", MeasuredHandlerDispatch,
 				FieldReaders.HandlerBranches
 					.SelectMany(branch => branch.Dispatch.Select(entry => (Key: branch.Handler + "/" + entry.Key, entry.Value)))
 					.ToDictionary(entry => entry.Key, entry => Sorted(entry.Value), StringComparer.Ordinal));
@@ -233,7 +233,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void NoLiteralOutsideItsBranchNamesAnIndexedHandler()
 		{
-			CountReport.AssertEqual("Handler literals outside their branch (extend the extraction?)",
+			PinReport.AssertEqual("Handler literals outside their branch (extend the extraction?)",
 				KnownForeignHandlerLiterals,
 				FieldReaders.HandlerBranches
 					.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
