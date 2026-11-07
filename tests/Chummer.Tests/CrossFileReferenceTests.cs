@@ -40,10 +40,10 @@ namespace Chummer.Tests
 		};
 
 		[Theory]
-		[MemberData(nameof(CrossFileReferences.CrossFileReferenceRuleIds), MemberType = typeof(CrossFileReferences))]
+		[MemberData(nameof(CrossFileReferences.RuleIds), MemberType = typeof(CrossFileReferences))]
 		public void EveryReferenceResolves(string id)
 		{
-			CrossFileReferences.ReferenceCheck check = CrossFileReferences.CrossFileReferenceCheckFor(id);
+			CrossFileReferences.ReferenceCheck check = CrossFileReferences.CheckFor(id);
 
 			// Grouped by key: one bad name repeated across critters is one problem.
 			var unexpected = check.Unresolved
@@ -68,7 +68,7 @@ namespace Chummer.Tests
 		public void AllowlistedReferencesAreAllStillUnresolved()
 		{
 			HashSet<string> actual = new HashSet<string>(
-				CrossFileReferences.CrossFileReferenceChecks.SelectMany(check => check.Unresolved).Select(Entry),
+				CrossFileReferences.Checks.SelectMany(check => check.Unresolved).Select(Entry),
 				StringComparer.Ordinal);
 
 			string[] stale = KnownUnresolvedReferences.Where(entry => !actual.Contains(entry))
@@ -85,7 +85,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryRuleSelectsReferencesAndEveryTargetDefinitions()
 		{
-			string[] vacant = CrossFileReferences.CrossFileReferenceChecks
+			string[] vacant = CrossFileReferences.Checks
 				.SelectMany(check => VacanciesOf(check))
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
@@ -215,7 +215,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryRuleChecksItsMeasuredReferenceCount()
 		{
-			Dictionary<string, int> actual = CrossFileReferences.CrossFileReferenceChecks
+			Dictionary<string, int> actual = CrossFileReferences.Checks
 				.ToDictionary(check => check.Rule.Id, check => check.ReferenceCount, StringComparer.Ordinal);
 
 			// - unbounded on purpose: after a deliberate change the whole list is copied back

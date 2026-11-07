@@ -9,10 +9,10 @@ namespace Chummer.Tests
 	public class AvailabilityExpressionTests
 	{
 		[Theory]
-		[MemberData(nameof(ExpressionChecks.ExpressionRuleIds), "avail", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.RuleIds), "avail", MemberType = typeof(ExpressionChecks))]
 		public void EveryAvailabilityParsesInItsCalculator(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.ExpressionCheckFor(id);
+			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
 
 			if (check.Failures.Count > 0)
 			{

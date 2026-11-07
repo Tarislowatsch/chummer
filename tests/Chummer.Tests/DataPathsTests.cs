@@ -120,7 +120,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void RequiredFieldRulesCoverEveryEntityType()
 		{
-			Assert.Equal(29, RequiredFields.RequiredFieldRules.Count);
+			Assert.Equal(29, RequiredFields.Rules.Count);
 		}
 
 		// - the only guard that looks at the production code rather than at the table or the data
@@ -134,7 +134,7 @@ namespace Chummer.Tests
 			Assert.True(sites.Count == 21,
 				"The rule table was read off 21 Create(XmlNode ...) methods, but the sources now "
 				+ "hold " + sites.Count + ". Every one of them needs an entry in "
-				+ nameof(RequiredFields.RequiredFieldRules) + ":\n  " + string.Join("\n  ", sites));
+				+ nameof(RequiredFields) + "." + nameof(RequiredFields.Rules) + ":\n  " + string.Join("\n  ", sites));
 		}
 
 		// - the data-side theory cannot notice books.xml quietly losing a code no entry cites

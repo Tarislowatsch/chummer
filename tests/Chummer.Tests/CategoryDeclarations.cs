@@ -10,7 +10,7 @@ namespace Chummer.Tests
 	{
 		// - override map, not inclusion list: a new collection is checked unless deliberately exempted
 		// - a collection is governed by whichever block code resolves its <category> against
-		private static readonly IReadOnlyDictionary<string, string> CategoryDeclarationBlockOverrides =
+		private static readonly IReadOnlyDictionary<string, string> BlockOverrides =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				// - frmSelectVehicleMod.cs:585 resolves mod categories against <modcategories>
@@ -20,7 +20,7 @@ namespace Chummer.Tests
 
 		// - not null values in the map above: "redirected" and "governed by nothing" fail differently
 		// - armor.xml/mods stays in scope: ArmorMod translates its categories (clsEquipment.cs:107)
-		private static readonly HashSet<string> CollectionsWithoutCategoryDeclarations =
+		private static readonly HashSet<string> CollectionsWithoutDeclarations =
 			new HashSet<string>(StringComparer.Ordinal)
 			{
 				// - WeaponMod never resolves <category> (clsEquipment.cs:8021-8029)
@@ -34,13 +34,19 @@ namespace Chummer.Tests
 		// - pickers build their lists from the governing block (frmSelectWeapon.cs:47 and :82)
 		// - translations attach only to declared nodes (clsXmlManager.cs:226)
 		// - an untranslated category goes onto the printed sheet (clsEquipment.cs:304)
-		private const string DefaultCategoryDeclarationBlock = "categories";
+		private const string DefaultBlock = "categories";
 
 		// - built from the override map: a new override cannot leave its target block ungathered
-		internal static readonly HashSet<string> DeclarationBlockNames =
+		private static readonly HashSet<string> DeclarationBlockNames =
 			new HashSet<string>(
-				new[] { DefaultCategoryDeclarationBlock }.Concat(CategoryDeclarationBlockOverrides.Values),
+				new[] { DefaultBlock }.Concat(BlockOverrides.Values),
 				StringComparer.Ordinal);
+
+		// - a predicate, not the set: callers in other modules must not be able to edit it
+		internal static bool IsDeclarationBlock(string elementName)
+		{
+			return DeclarationBlockNames.Contains(elementName);
+		}
 
 		// One catalogue entry's <category> value, named for failure messages.
 		public sealed class CategoryUsage
@@ -68,7 +74,7 @@ namespace Chummer.Tests
 				FilePath = filePath;
 				CollectionName = collectionName;
 				DeclarationBlock = declarationBlock;
-				// - ordinal and rebuilt here, as in ReferencesToUndeclaredBooks: the XPath match is exact
+				// - ordinal, as in BookReferences.Undeclared: the XPath match is exact
 				DeclaredCategories = new HashSet<string>(declaredCategories, StringComparer.Ordinal);
 				Usages = usages;
 			}
@@ -101,9 +107,9 @@ namespace Chummer.Tests
 				.Select(contract => new object[] { contract.FilePath, contract.CollectionName });
 		}
 
-		public static CategoryContract CategoryContractFor(string xmlPath, string collectionName)
+		public static CategoryContract ContractFor(string xmlPath, string collectionName)
 		{
-			return CachedCategoryContractsByKey.Value[RuleCorpus.IndexKey(xmlPath, collectionName)];
+			return CachedCategoryContractsByKey.Value[RuleCorpus.CollectionKey(xmlPath, collectionName)];
 		}
 
 		private static readonly Lazy<IReadOnlyList<CategoryContract>> CachedCategoryContracts =
@@ -112,7 +118,7 @@ namespace Chummer.Tests
 		private static readonly Lazy<IReadOnlyDictionary<string, CategoryContract>> CachedCategoryContractsByKey =
 			new Lazy<IReadOnlyDictionary<string, CategoryContract>>(
 				() => CachedCategoryContracts.Value.ToDictionary(
-					contract => RuleCorpus.IndexKey(contract.FilePath, contract.CollectionName),
+					contract => RuleCorpus.CollectionKey(contract.FilePath, contract.CollectionName),
 					StringComparer.Ordinal));
 
 		private static IReadOnlyList<CategoryContract> BuildCategoryContracts()
@@ -149,16 +155,16 @@ namespace Chummer.Tests
 		{
 			declared = null;
 
-			string key = OverrideKey(xmlFileName, collectionName);
-			if (CollectionsWithoutCategoryDeclarations.Contains(key))
+			string key = RuleCorpus.CollectionKey(xmlFileName, collectionName);
+			if (CollectionsWithoutDeclarations.Contains(key))
 			{
 				block = null;
 				return false;
 			}
 
-			bool redirected = CategoryDeclarationBlockOverrides.TryGetValue(key, out block);
+			bool redirected = BlockOverrides.TryGetValue(key, out block);
 			if (!redirected)
-				block = DefaultCategoryDeclarationBlock;
+				block = DefaultBlock;
 
 			if (declarations.TryGetValue(block, out declared))
 				return true;
@@ -174,17 +180,11 @@ namespace Chummer.Tests
 			return false;
 		}
 
-		// - file *name*, not IndexKey's full path: hand-written entries have to stay readable
-		private static string OverrideKey(string xmlFileName, string collectionName)
-		{
-			return xmlFileName + "/" + collectionName;
-		}
-
 		// - every hand-written scope exception, for the staleness guard
 		// - covers what the redirect throw cannot: a key naming a collection that no longer exists
-		public static IEnumerable<string> CategoryScopeExceptionKeys()
+		public static IEnumerable<string> ScopeExceptionKeys()
 		{
-			return CategoryDeclarationBlockOverrides.Keys.Concat(CollectionsWithoutCategoryDeclarations)
+			return BlockOverrides.Keys.Concat(CollectionsWithoutDeclarations)
 				.OrderBy(key => key, StringComparer.Ordinal);
 		}
 
@@ -193,7 +193,7 @@ namespace Chummer.Tests
 		{
 			return RuleCorpus.Files
 				.SelectMany(file => file.CategoryUsages
-					.Select(usage => OverrideKey(file.FileName, usage.CollectionName)))
+					.Select(usage => RuleCorpus.CollectionKey(file.FileName, usage.CollectionName)))
 				.Distinct(StringComparer.Ordinal);
 		}
 
@@ -207,7 +207,7 @@ namespace Chummer.Tests
 
 			foreach (XmlNode block in root.ChildNodes)
 			{
-				if (block.NodeType != XmlNodeType.Element || !DeclarationBlockNames.Contains(block.Name))
+				if (block.NodeType != XmlNodeType.Element || !IsDeclarationBlock(block.Name))
 					continue;
 
 				if (declarations.ContainsKey(block.Name))
@@ -230,18 +230,17 @@ namespace Chummer.Tests
 			return declarations;
 		}
 
-		public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarationsFor(
-			string xmlPath)
+		public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> For(string xmlPath)
 		{
 			return RuleCorpus.FileAt(xmlPath).CategoryDeclarations;
 		}
 
-		// - public like BookReferencesIn, carrying the opposite axis decision of the pair
+		// - public like BookReferences.In, carrying the opposite axis decision of the pair
 		// - only a hand-built case keeps the two from quietly converging
-		public static IEnumerable<CategoryUsage> CategoryUsagesIn(XmlNode collection)
+		public static IEnumerable<CategoryUsage> UsagesIn(XmlNode collection)
 		{
 			// - direct children only: a picker lists weapon[category = "..."] at that level alone
-			// - not BookReferencesIn's deep axis: a deeper <category> is on a reference no dropdown selects
+			// - not the deep axis of BookReferences.In: a deeper <category> belongs to a reference
 			return collection.ChildNodes.Cast<XmlNode>()
 				.Where(item => item.NodeType == XmlNodeType.Element && item["category"] != null)
 				.Select(item => new CategoryUsage(collection.Name, item["category"].InnerText,

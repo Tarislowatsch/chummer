@@ -11,10 +11,10 @@ namespace Chummer.Tests
 	public class NumericFieldTests
 	{
 		[Theory]
-		[MemberData(nameof(NumericFields.EntitiesWithNumericFields), MemberType = typeof(NumericFields))]
+		[MemberData(nameof(NumericFields.Entities), MemberType = typeof(NumericFields))]
 		public void EveryValueACreateConvertsParsesAsItsType(string entity)
 		{
-			NumericFields.NumericFieldCheck check = NumericFields.NumericFieldCheckFor(entity);
+			NumericFields.NumericFieldCheck check = NumericFields.CheckFor(entity);
 
 			// Grouped by field: one bad copy-paste tends to repeat across entries.
 			var unconvertible = check.Unconvertible

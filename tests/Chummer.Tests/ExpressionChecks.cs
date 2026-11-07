@@ -295,7 +295,7 @@ namespace Chummer.Tests
 			return failures;
 		}
 
-		public static IEnumerable<object[]> ExpressionRuleIds(string field)
+		public static IEnumerable<object[]> RuleIds(string field)
 		{
 			return AllRules
 				.Where(rule => string.Equals(rule.Field, field, StringComparison.Ordinal))
@@ -303,16 +303,16 @@ namespace Chummer.Tests
 		}
 
 		// - throws for a declared rule no file produced: its entity's file was never scanned
-		public static ExpressionCheck ExpressionCheckFor(string id)
+		public static ExpressionCheck CheckFor(string id)
 		{
 			ExpressionCheck check;
-			if (!CachedExpressionChecksById.Value.TryGetValue(id, out check))
+			if (!CachedChecksById.Value.TryGetValue(id, out check))
 				throw new InvalidOperationException(id + " names an entity whose file was not scanned.");
 
 			return check;
 		}
 
-		private static readonly Lazy<IReadOnlyDictionary<string, ExpressionCheck>> CachedExpressionChecksById =
+		private static readonly Lazy<IReadOnlyDictionary<string, ExpressionCheck>> CachedChecksById =
 			new Lazy<IReadOnlyDictionary<string, ExpressionCheck>>(
 				() => RuleCorpus.Files.SelectMany(file => file.ExpressionChecks)
 					.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
@@ -322,7 +322,7 @@ namespace Chummer.Tests
 			IEnumerable<ExpressionRule> rules)
 		{
 			string fileName = System.IO.Path.GetFileName(xmlPath);
-			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.RequiredFieldRules
+			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.Rules
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			List<ExpressionCheck> checks = new List<ExpressionCheck>();
 

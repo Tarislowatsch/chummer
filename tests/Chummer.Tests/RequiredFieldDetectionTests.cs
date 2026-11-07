@@ -139,7 +139,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void ATopLevelEntryWithoutANameIsReportedAsUnnamed()
 		{
-			RequiredFields.MissingField missing = RequiredFields.MissingRequiredFieldsIn(
+			RequiredFields.MissingField missing = RequiredFields.MissingFieldsIn(
 					Document("<gear><avail>4</avail></gear>").DocumentElement, new[] { "name" })
 				.Single();
 
@@ -325,15 +325,15 @@ namespace Chummer.Tests
 		private static RequiredFields.RequiredFieldContract Evaluate(string entity, XmlDocument document)
 		{
 			RequiredFields.RequiredFieldRule rule =
-				RequiredFields.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
+				RequiredFields.Rules.Single(candidate => candidate.Entity == entity);
 
-			return RequiredFields.EvaluateRequiredFields(rule, rule.FileName, document);
+			return RequiredFields.Evaluate(rule, rule.FileName, document);
 		}
 
 		private static string[] MatchedNames(string entity, XmlDocument document)
 		{
 			RequiredFields.RequiredFieldRule rule =
-				RequiredFields.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
+				RequiredFields.Rules.Single(candidate => candidate.Entity == entity);
 
 			return document.SelectNodes(rule.ItemXPath).Cast<XmlNode>()
 				.Select(node => node["name"].InnerText)
@@ -342,7 +342,7 @@ namespace Chummer.Tests
 
 		private static string[] AbsentFieldsIn(string itemXml, params string[] requiredFields)
 		{
-			return RequiredFields.MissingRequiredFieldsIn(Document(itemXml).DocumentElement, requiredFields)
+			return RequiredFields.MissingFieldsIn(Document(itemXml).DocumentElement, requiredFields)
 				.Select(missing => missing.Field)
 				.ToArray();
 		}

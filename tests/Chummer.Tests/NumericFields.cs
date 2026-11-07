@@ -257,20 +257,20 @@ namespace Chummer.Tests
 			return nodes;
 		}
 
-		public static IEnumerable<object[]> EntitiesWithNumericFields()
+		public static IEnumerable<object[]> Entities()
 		{
-			return CachedNumericFieldChecksByEntity.Value.Keys
+			return CachedChecksByEntity.Value.Keys
 				.OrderBy(entity => entity, StringComparer.Ordinal)
 				.Select(entity => new object[] { entity });
 		}
 
-		public static NumericFieldCheck NumericFieldCheckFor(string entity)
+		public static NumericFieldCheck CheckFor(string entity)
 		{
-			return CachedNumericFieldChecksByEntity.Value[entity];
+			return CachedChecksByEntity.Value[entity];
 		}
 
 		private static readonly Lazy<IReadOnlyDictionary<string, NumericFieldCheck>>
-			CachedNumericFieldChecksByEntity =
+			CachedChecksByEntity =
 				new Lazy<IReadOnlyDictionary<string, NumericFieldCheck>>(
 					() => RuleCorpus.Files.SelectMany(file => file.NumericFieldChecks)
 						.ToDictionary(check => check.Entity, StringComparer.Ordinal));
@@ -281,7 +281,7 @@ namespace Chummer.Tests
 			string fileName = Path.GetFileName(xmlPath);
 			List<NumericFieldCheck> checks = new List<NumericFieldCheck>();
 
-			foreach (RequiredFields.RequiredFieldRule rule in RequiredFields.RequiredFieldRules
+			foreach (RequiredFields.RequiredFieldRule rule in RequiredFields.Rules
 				.Where(rule => string.Equals(rule.FileName, fileName, StringComparison.Ordinal)))
 			{
 				string className = CreateClassOf(rule.Entity);
@@ -386,7 +386,7 @@ namespace Chummer.Tests
 		public static IEnumerable<string> ClassesWithoutAnEntity()
 		{
 			HashSet<string> reached = new HashSet<string>(
-				RequiredFields.RequiredFieldRules.Select(rule => CreateClassOf(rule.Entity)),
+				RequiredFields.Rules.Select(rule => CreateClassOf(rule.Entity)),
 				StringComparer.Ordinal);
 
 			return ConvertedFields.Keys

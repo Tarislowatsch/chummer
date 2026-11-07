@@ -106,7 +106,7 @@ namespace Chummer.Tests
 		public static IEnumerable<object[]> PackFilesCitingBooks()
 		{
 			return PairedPackFiles()
-				.Where(file => BookReferences.BookReferencesIn(Load(file.FilePath)).Count > 0)
+				.Where(file => BookReferences.In(Load(file.FilePath)).Count > 0)
 				.Select(file => new object[] { file.FilePath });
 		}
 
@@ -186,7 +186,7 @@ namespace Chummer.Tests
 				return Enumerable.Empty<string>();
 
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
-				CategoryDeclarations.CategoryDeclarationsFor(file.BaseFilePath);
+				CategoryDeclarations.For(file.BaseFilePath);
 
 			return CategoryDeclarations.DeclarationBlocksIn(pack.DocumentElement, file.FileName)
 				.SelectMany(block => block.Value
@@ -209,7 +209,7 @@ namespace Chummer.Tests
 			PackFile file, XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
-				CategoryDeclarations.CategoryDeclarationsFor(file.BaseFilePath);
+				CategoryDeclarations.For(file.BaseFilePath);
 			if (file.IsOverride)
 				return baseBlocks;
 
@@ -241,7 +241,7 @@ namespace Chummer.Tests
 				}
 
 				HashSet<string> set = new HashSet<string>(declared, StringComparer.Ordinal);
-				foreach (CategoryDeclarations.CategoryUsage usage in CategoryDeclarations.CategoryUsagesIn(collection))
+				foreach (CategoryDeclarations.CategoryUsage usage in CategoryDeclarations.UsagesIn(collection))
 				{
 					if (!set.Contains(usage.Category))
 						yield return usage;

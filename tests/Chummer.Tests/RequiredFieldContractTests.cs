@@ -12,10 +12,10 @@ namespace Chummer.Tests
 	public class RequiredFieldContractTests
 	{
 		[Theory]
-		[MemberData(nameof(RequiredFields.EntitiesWithRequiredFields), MemberType = typeof(RequiredFields))]
+		[MemberData(nameof(RequiredFields.Entities), MemberType = typeof(RequiredFields))]
 		public void EveryEntryCarriesTheFieldsItsCreateReadsUnguarded(string entity)
 		{
-			RequiredFields.RequiredFieldContract contract = RequiredFields.RequiredFieldContractFor(entity);
+			RequiredFields.RequiredFieldContract contract = RequiredFields.ContractFor(entity);
 
 			// - a missing field usually vanishes from a whole batch of entries at once
 			// - grouping by field shows how many distinct fields broke
@@ -81,8 +81,9 @@ namespace Chummer.Tests
 
 			Assert.True(drifted.Length == 0,
 				"These Create methods changed the elements they read, so the rules derived from "
-				+ "them in " + nameof(RequiredFields.RequiredFieldRules) + " and the diverted values in "
-				+ nameof(NumericFields) + " may no longer describe them. Re-read each one, fix "
+				+ "them in " + nameof(RequiredFields) + "." + nameof(RequiredFields.Rules)
+				+ " and the diverted values in " + nameof(NumericFields)
+				+ " may no longer describe them. Re-read each one, fix "
 				+ "its rule and diversions, then update the hash:\n  "
 				+ string.Join("\n  ", drifted));
 		}
@@ -108,7 +109,7 @@ namespace Chummer.Tests
 		public void TheGearRulesBetweenThemCoverEveryGearEntry()
 		{
 			int partitioned = new[] { "Gear", "Commlink", "OperatingSystem" }
-				.Sum(entity => RequiredFields.RequiredFieldContractFor(entity).ItemCount);
+				.Sum(entity => RequiredFields.ContractFor(entity).ItemCount);
 
 			Assert.Equal(
 				NameUniqueness.RuleCollectionFor(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"), "gears")
@@ -122,7 +123,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void OnlyTheKnownUnpopulatedRulesMatchNothing()
 		{
-			string[] vacant = RequiredFields.RequiredFieldContracts
+			string[] vacant = RequiredFields.Contracts
 				.Where(contract => contract.ItemCount == 0)
 				.Select(contract => contract.Rule.Entity)
 				.OrderBy(entity => entity, StringComparer.Ordinal)

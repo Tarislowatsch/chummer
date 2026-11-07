@@ -11,11 +11,11 @@ namespace Chummer.Tests
 	public class CapacityExpressionTests
 	{
 		[Theory]
-		[MemberData(nameof(ExpressionChecks.ExpressionRuleIds), "capacity", MemberType = typeof(ExpressionChecks))]
-		[MemberData(nameof(ExpressionChecks.ExpressionRuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.RuleIds), "capacity", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.RuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryCapacityPassesItsCalculatorsAndConsumers(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.ExpressionCheckFor(id);
+			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
 
 			if (check.Failures.Count > 0)
 			{
@@ -140,7 +140,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachRuleReachesTheMeasuredValues()
 		{
-			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.RequiredFieldRules
+			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.Rules
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			Dictionary<string, int> actual = CapacityExpressions.Rules.ToDictionary(rule => rule.Id, rule =>
 			{

@@ -117,7 +117,7 @@ namespace Chummer.Tests
 			return new SourceLines(code, bare);
 		}
 
-		// - extent by brace depth from the first line, like the Create fingerprints in RequiredFields
+		// - extent by brace depth, like the Create fingerprints in RequiredFields
 		public SourceLines BlockFrom(int start)
 		{
 			int depth = 0;

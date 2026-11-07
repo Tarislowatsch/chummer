@@ -53,7 +53,7 @@ namespace Chummer.Tests
 			XmlDocument document = Catalogue(WithMetavariant(Entry("Dwarf", "SR4"), "Gnome", "XYZ"));
 
 			BookReferences.BookReference undeclared = BookReferences
-				.ReferencesToUndeclaredBooks(BookReferences.BookReferencesIn(document), DeclaredCodes)
+				.Undeclared(BookReferences.In(document), DeclaredCodes)
 				.Single();
 
 			Assert.Equal("Gnome", undeclared.ItemName);
@@ -97,18 +97,18 @@ namespace Chummer.Tests
 				Entry("Cybereye", category: "Bike"), "Thermographic Vision", "Rotocraft"));
 
 			Assert.Equal(new[] { "Bike" },
-				CategoryDeclarations.CategoryUsagesIn(collection).Select(usage => usage.Category).ToArray());
+				CategoryDeclarations.UsagesIn(collection).Select(usage => usage.Category).ToArray());
 		}
 
 		[Fact]
 		public void ItemWithoutACategoryIsNotAUsage()
 		{
-			Assert.Empty(CategoryDeclarations.CategoryUsagesIn(Collection(Entry("Banshee"))));
+			Assert.Empty(CategoryDeclarations.UsagesIn(Collection(Entry("Banshee"))));
 		}
 
 		private static string[] UndeclaredCodesIn(XmlDocument document)
 		{
-			return BookReferences.ReferencesToUndeclaredBooks(BookReferences.BookReferencesIn(document), DeclaredCodes)
+			return BookReferences.Undeclared(BookReferences.In(document), DeclaredCodes)
 				.Select(reference => reference.Code)
 				.ToArray();
 		}
@@ -118,7 +118,7 @@ namespace Chummer.Tests
 		{
 			CategoryDeclarations.CategoryContract contract = new CategoryDeclarations.CategoryContract(
 				"vehicles.xml", "vehicles", "categories", declared,
-				CategoryDeclarations.CategoryUsagesIn(Collection(items)).ToArray());
+				CategoryDeclarations.UsagesIn(Collection(items)).ToArray());
 
 			return contract.UndeclaredUsages().Select(usage => usage.Category).ToArray();
 		}

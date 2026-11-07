@@ -8,10 +8,10 @@ namespace Chummer.Tests
 	public class EssExpressionTests
 	{
 		[Theory]
-		[MemberData(nameof(ExpressionChecks.ExpressionRuleIds), "ess", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.RuleIds), "ess", MemberType = typeof(ExpressionChecks))]
 		public void EveryEssParsesInItsCalculator(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.ExpressionCheckFor(id);
+			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
 
 			if (check.Failures.Count > 0)
 			{

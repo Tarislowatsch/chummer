@@ -199,24 +199,26 @@ namespace Chummer.Tests
 			return found;
 		}
 
-		public static IEnumerable<object[]> CrossFileReferenceRuleIds()
+		public static IEnumerable<object[]> RuleIds()
 		{
 			return Rules.Select(rule => new object[] { rule.Id });
 		}
 
-		public static ReferenceCheck CrossFileReferenceCheckFor(string id)
+		public static ReferenceCheck CheckFor(string id)
 		{
-			return CachedCrossFileReferenceChecksById.Value[id];
+			return CachedChecksById.Value[id];
 		}
 
-		public static IReadOnlyList<ReferenceCheck> CrossFileReferenceChecks =>
-			CachedCrossFileReferenceChecksById.Value.Values.ToArray();
+		public static IReadOnlyList<ReferenceCheck> Checks => CachedChecks.Value;
 
-		private static readonly Lazy<IReadOnlyDictionary<string, ReferenceCheck>> CachedCrossFileReferenceChecksById =
-			new Lazy<IReadOnlyDictionary<string, ReferenceCheck>>(CheckCrossFileReferences);
+		private static readonly Lazy<IReadOnlyList<ReferenceCheck>> CachedChecks =
+			new Lazy<IReadOnlyList<ReferenceCheck>>(() => CachedChecksById.Value.Values.ToArray());
+
+		private static readonly Lazy<IReadOnlyDictionary<string, ReferenceCheck>> CachedChecksById =
+			new Lazy<IReadOnlyDictionary<string, ReferenceCheck>>(BuildChecks);
 
 		// - joined after the single parse: both halves of a rule are known only once every file is read
-		private static IReadOnlyDictionary<string, ReferenceCheck> CheckCrossFileReferences()
+		private static IReadOnlyDictionary<string, ReferenceCheck> BuildChecks()
 		{
 			ILookup<string, Reference> references = RuleCorpus.Files
 				.SelectMany(file => file.CrossFileReferences)

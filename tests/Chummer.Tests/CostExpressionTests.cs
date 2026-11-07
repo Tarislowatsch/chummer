@@ -21,10 +21,10 @@ namespace Chummer.Tests
 			};
 
 		[Theory]
-		[MemberData(nameof(ExpressionChecks.ExpressionRuleIds), "cost", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.RuleIds), "cost", MemberType = typeof(ExpressionChecks))]
 		public void EveryCostParsesInItsCalculator(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.ExpressionCheckFor(id);
+			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
 			ExpressionChecks.ExpressionFailure[] unexpected = check.Failures
 				.Where(failure => !KnownFailuresFor(id).Contains(failure.Key))
 				.ToArray();
@@ -46,7 +46,7 @@ namespace Chummer.Tests
 		{
 			string[] stale = KnownFailures
 				.SelectMany(entry => entry.Value
-					.Where(key => !ExpressionChecks.ExpressionCheckFor(entry.Key).Failures
+					.Where(key => !ExpressionChecks.CheckFor(entry.Key).Failures
 						.Any(failure => failure.Key == key))
 					.Select(key => entry.Key + ": " + key))
 				.ToArray();

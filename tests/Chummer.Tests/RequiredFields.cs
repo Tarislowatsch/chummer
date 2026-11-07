@@ -22,7 +22,7 @@ namespace Chummer.Tests
 		// - per entity type, the elements its Create dereferences unguarded, cited to the exact lines
 		// - the empty catch is the only optionality marker the code has
 		// - hand-derived, not parsed from C#: telling real guards from guard-shaped reads takes judgement
-		private static readonly IReadOnlyList<RequiredFieldRule> DeclaredRequiredFieldRules = new[]
+		private static readonly IReadOnlyList<RequiredFieldRule> DeclaredRules = new[]
 		{
 			// clsUnique.cs:1036-1051
 			Rule("Quality", "qualities.xml", "/chummer/qualities/quality",
@@ -197,19 +197,19 @@ namespace Chummer.Tests
 			public IReadOnlyList<MissingField> MissingFields { get; }
 		}
 
-		public static IEnumerable<object[]> EntitiesWithRequiredFields()
+		public static IEnumerable<object[]> Entities()
 		{
-			return CachedRequiredFieldContracts.Value
+			return CachedContracts.Value
 				.Select(contract => new object[] { contract.Rule.Entity });
 		}
 
-		public static RequiredFieldContract RequiredFieldContractFor(string entity)
+		public static RequiredFieldContract ContractFor(string entity)
 		{
-			return CachedRequiredFieldContractsByEntity.Value[entity];
+			return CachedContractsByEntity.Value[entity];
 		}
 
 		// - every declared rule, matched or not, for the guards that watch the table itself
-		public static IReadOnlyList<RequiredFieldRule> RequiredFieldRules => DeclaredRequiredFieldRules;
+		public static IReadOnlyList<RequiredFieldRule> Rules => DeclaredRules;
 
 		// - matches only a declaration: a call site never names the parameter type
 		// - tolerates a line break after the paren
@@ -326,27 +326,27 @@ namespace Chummer.Tests
 			}
 		}
 
-		public static IReadOnlyList<RequiredFieldContract> RequiredFieldContracts =>
-			CachedRequiredFieldContracts.Value;
+		public static IReadOnlyList<RequiredFieldContract> Contracts =>
+			CachedContracts.Value;
 
-		private static readonly Lazy<IReadOnlyList<RequiredFieldContract>> CachedRequiredFieldContracts =
-			new Lazy<IReadOnlyList<RequiredFieldContract>>(BuildRequiredFieldContracts);
+		private static readonly Lazy<IReadOnlyList<RequiredFieldContract>> CachedContracts =
+			new Lazy<IReadOnlyList<RequiredFieldContract>>(BuildContracts);
 
 		private static readonly Lazy<IReadOnlyDictionary<string, RequiredFieldContract>>
-			CachedRequiredFieldContractsByEntity =
+			CachedContractsByEntity =
 				new Lazy<IReadOnlyDictionary<string, RequiredFieldContract>>(
-					() => CachedRequiredFieldContracts.Value.ToDictionary(
+					() => CachedContracts.Value.ToDictionary(
 						contract => contract.Rule.Entity, StringComparer.Ordinal));
 
-		private static IReadOnlyList<RequiredFieldContract> BuildRequiredFieldContracts()
+		private static IReadOnlyList<RequiredFieldContract> BuildContracts()
 		{
-			EnsureEntityNamesAreUnique(DeclaredRequiredFieldRules);
+			EnsureEntityNamesAreUnique(DeclaredRules);
 
 			RequiredFieldContract[] contracts = RuleCorpus.Files
 				.SelectMany(file => file.RequiredFieldContracts)
 				.ToArray();
 
-			EnsureEveryRuleWasEvaluated(DeclaredRequiredFieldRules, contracts);
+			EnsureEveryRuleWasEvaluated(DeclaredRules, contracts);
 
 			return contracts;
 		}
@@ -374,7 +374,7 @@ namespace Chummer.Tests
 
 		// - a mistyped file name produces no contract, no theory case and no failure
 		// - one entity type's whole contract then stops being checked while the run stays green
-		// - public like TryResolveDeclarationBlock: no real run reaches the throw, a test must
+		// - public: no real run reaches the throw, only a test can
 		public static void EnsureEveryRuleWasEvaluated(IEnumerable<RequiredFieldRule> declared,
 			IEnumerable<RequiredFieldContract> evaluated)
 		{
@@ -396,25 +396,25 @@ namespace Chummer.Tests
 		}
 
 		// - inside the single parse: these rules would otherwise reopen a third of the corpus
-		internal static IReadOnlyList<RequiredFieldContract> RequiredFieldContractsFor(string fileName,
+		internal static IReadOnlyList<RequiredFieldContract> ContractsIn(string fileName,
 			string xmlPath, XmlDocument document)
 		{
-			return DeclaredRequiredFieldRules
+			return DeclaredRules
 				.Where(rule => string.Equals(rule.FileName, fileName, StringComparison.Ordinal))
-				.Select(rule => EvaluateRequiredFields(rule, xmlPath, document))
+				.Select(rule => Evaluate(rule, xmlPath, document))
 				.ToArray();
 		}
 
 		// - public so the detection tests can drive it with hand-built XML
 		// - the real files show today's data is complete, never that an absence would be reported
-		public static RequiredFieldContract EvaluateRequiredFields(RequiredFieldRule rule,
+		public static RequiredFieldContract Evaluate(RequiredFieldRule rule,
 			string filePath, XmlDocument document)
 		{
 			List<MissingField> missing = new List<MissingField>();
 			XmlNodeList items = document.SelectNodes(rule.ItemXPath);
 
 			foreach (XmlNode item in items)
-				missing.AddRange(MissingRequiredFieldsIn(item, rule.RequiredFields));
+				missing.AddRange(MissingFieldsIn(item, rule.RequiredFields));
 
 			return new RequiredFieldContract(rule, filePath, items.Count, missing);
 		}
@@ -422,7 +422,7 @@ namespace Chummer.Tests
 		// - presence, not content: an empty element satisfies this, as the code tolerates it
 		// - clsUnique.cs:5589 tests <maxrating>'s text for "", so empty is a value the data uses
 		// - XmlNode's indexer, the call Create makes: direct children only, exact ordinal match
-		public static IEnumerable<MissingField> MissingRequiredFieldsIn(XmlNode item,
+		public static IEnumerable<MissingField> MissingFieldsIn(XmlNode item,
 			IReadOnlyList<string> requiredFields)
 		{
 			return requiredFields

@@ -16,7 +16,7 @@ namespace Chummer.Tests
 		{
 			// Grouped by code: one dropped book is one problem, not hundreds of identical lines.
 			var unknown = BookReferences
-				.ReferencesToUndeclaredBooks(BookReferences.BookReferencesFor(xmlPath), BookReferences.BookCodes)
+				.Undeclared(BookReferences.For(xmlPath), BookReferences.BookCodes)
 				.GroupBy(reference => reference.Code, StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();

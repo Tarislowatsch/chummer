@@ -51,7 +51,7 @@ namespace Chummer.Tests
 				.Select(file => new object[] { file.FilePath });
 		}
 
-		public static IReadOnlyList<BookReference> BookReferencesFor(string xmlPath)
+		public static IReadOnlyList<BookReference> For(string xmlPath)
 		{
 			return RuleCorpus.FileAt(xmlPath).BookReferences;
 		}
@@ -59,7 +59,7 @@ namespace Chummer.Tests
 		// - every <source>, at any depth, the opposite axis from the anchored uniqueness check
 		// - <source> has no definition/reference duality to conflate, unlike <name>
 		// - anchoring to collection items would silently drop the metavariant references
-		public static IReadOnlyList<BookReference> BookReferencesIn(XmlDocument document)
+		public static IReadOnlyList<BookReference> In(XmlDocument document)
 		{
 			return document.SelectNodes("//source").Cast<XmlNode>()
 				.Select(node => new BookReference(node.InnerText, RuleCorpus.NearestItemName(node)))
@@ -69,7 +69,7 @@ namespace Chummer.Tests
 		// - one implementation for the real files and the hand-built cases that prove it works
 		// - ordinal and verbatim: Options.BookXPath() (clsOptions.cs:2086-2090) compares exactly
 		// - the set is rebuilt here so a caller's comparer cannot defeat the test next door
-		public static IEnumerable<BookReference> ReferencesToUndeclaredBooks(
+		public static IEnumerable<BookReference> Undeclared(
 			IEnumerable<BookReference> references, IEnumerable<string> declaredCodes)
 		{
 			HashSet<string> declared = new HashSet<string>(declaredCodes, StringComparer.Ordinal);

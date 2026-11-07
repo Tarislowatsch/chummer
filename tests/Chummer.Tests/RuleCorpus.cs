@@ -6,11 +6,9 @@ using System.Xml;
 
 namespace Chummer.Tests
 {
-	// - the top-level rule files, parsed once for every contract module
-	// - RuleFile carries one slice per contract module
 	public static class RuleCorpus
 	{
-		// - everything the data tests need from one file, so it is parsed exactly once for all of them
+		// - everything the data tests need from one file
 		public sealed class RuleFile
 		{
 			public RuleFile(string filePath, IReadOnlyList<NameUniqueness.RuleCollection> collections,
@@ -45,7 +43,7 @@ namespace Chummer.Tests
 
 			public IReadOnlyList<BookReferences.BookReference> BookReferences { get; }
 
-			// - declaration block name -> its values, gathered only for names in DeclarationBlockNames
+			// - declaration block name -> its values, see CategoryDeclarations.IsDeclarationBlock
 			// - a file with none is simply absent from the category check
 			public IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarations { get; }
 
@@ -109,10 +107,10 @@ namespace Chummer.Tests
 
 				files.Add(new RuleFile(xmlPath,
 					NameUniqueness.CollectionsIn(xmlPath, fileName, collections),
-					BookReferences.BookReferencesIn(document),
+					BookReferences.In(document),
 					declarations,
-					collections.SelectMany(CategoryDeclarations.CategoryUsagesIn).ToArray(),
-					RequiredFields.RequiredFieldContractsFor(fileName, xmlPath, document),
+					collections.SelectMany(CategoryDeclarations.UsagesIn).ToArray(),
+					RequiredFields.ContractsIn(fileName, xmlPath, document),
 					BonusVocabulary.BonusTagsIn(fileName, document),
 					NumericFields.ChecksIn(xmlPath, document),
 					ExpressionChecks.ChecksIn(xmlPath, document, ExpressionChecks.AllRules),
@@ -128,12 +126,13 @@ namespace Chummer.Tests
 		{
 			return root.ChildNodes.Cast<XmlNode>()
 				.Where(node => node.NodeType == XmlNodeType.Element
-					&& !CategoryDeclarations.DeclarationBlockNames.Contains(node.Name));
+					&& !CategoryDeclarations.IsDeclarationBlock(node.Name));
 		}
 
-		internal static string IndexKey(string xmlPath, string collectionName)
+		// - hand tables pass the file name to stay readable, caches the full path
+		internal static string CollectionKey(string file, string collectionName)
 		{
-			return xmlPath + "/" + collectionName;
+			return file + "/" + collectionName;
 		}
 
 		// - the entry's own <name>, else the nearest ancestor's, else "(unnamed)"
