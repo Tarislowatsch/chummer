@@ -168,15 +168,36 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachIndexedHandlerReadsTheMeasuredFields()
 		{
-			FieldReaders.HandlerBranch branch = Assert.Single(FieldReaders.HandlerBranches);
-
-			Assert.Equal("addattribute", branch.Handler);
-			Assert.Equal(new[] { "name" }, branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
-			Assert.Equal(new[] { "name" }, branch.Dispatch.Keys);
-			Assert.Equal(new[] { "MAG", "RES" }, branch.Dispatch["name"].OrderBy(value => value, StringComparer.Ordinal));
+			Assert.Equal(
+				new[]
+				{
+					"addattribute: name",
+					"conditionmonitor: overflow, physical, stun, threshold, thresholdoffset",
+					"selectattribute: affectbase, attribute, aug, excludeattribute, max, min, val",
+					"selectskill: applytorating, max, val",
+					"selectskillgroup: applytorating, bonus",
+				},
+				FieldReaders.HandlerBranches.Select(branch => branch.Handler + ": "
+					+ string.Join(", ", branch.Fields.OrderBy(field => field, StringComparer.Ordinal))));
 		}
 
-		// - deliberately no allowlist: every name is MAG or RES today
+		[Fact]
+		public void EachIndexedHandlerDispatchesOnTheMeasuredValues()
+		{
+			Assert.Equal(
+				new[]
+				{
+					"addattribute/name: MAG, RES",
+					"selectskill/applytorating: yes",
+					"selectskillgroup/applytorating: yes",
+				},
+				FieldReaders.HandlerBranches.SelectMany(branch => branch.Dispatch
+					.OrderBy(entry => entry.Key, StringComparer.Ordinal)
+					.Select(entry => branch.Handler + "/" + entry.Key + ": "
+						+ string.Join(", ", entry.Value.OrderBy(value => value, StringComparer.Ordinal)))));
+		}
+
+		// - deliberately no allowlist: every compared value matches today
 		[Fact]
 		public void EveryDispatchedHandlerValueMatchesAComparison()
 		{
@@ -190,15 +211,23 @@ namespace Chummer.Tests
 			Assert.True(unhandled.Length == 0, "No comparison in the branch matches:\n  " + string.Join("\n  ", unhandled));
 		}
 
+		// - key "file text": a line number would break on every unrelated edit above it
+		// - Commlink prints its matrix condition monitor under the bonus handler's name
+		private static readonly IReadOnlyDictionary<string, int> KnownForeignHandlerLiterals =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "clsEquipment.cs \"conditionmonitor\"", 1 },
+			};
+
 		[Fact]
 		public void NoLiteralOutsideItsBranchNamesAnIndexedHandler()
 		{
-			string[] outside = FieldReaders.HandlerBranches
-				.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
-				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
-				.ToArray();
-
-			Assert.True(outside.Length == 0, "Extend the extraction to these reads:\n  " + string.Join("\n  ", outside));
+			CountReport.AssertEqual("Handler literals outside their branch (extend the extraction?)",
+				KnownForeignHandlerLiterals,
+				FieldReaders.HandlerBranches
+					.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
+					.GroupBy(literal => literal.File + " \"" + literal.Text + "\"", StringComparer.Ordinal)
+					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
 
 		[Fact]
