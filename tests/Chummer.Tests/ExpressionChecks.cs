@@ -141,19 +141,21 @@ namespace Chummer.Tests
 			if (max <= 0)
 				return new[] { 0 };
 
-			int min = 1;
-			string minText = fields[1] == null ? null : item[fields[1]]?.InnerText;
-			int declaredMin;
-			if (minText != null && int.TryParse(minText, NumberStyles.Integer, CultureInfo.InvariantCulture,
-				out declaredMin) && declaredMin > min)
-			{
-				min = declaredMin;
-			}
+			int min = MinimumRating(fields[1] == null ? null : item[fields[1]]?.InnerText);
 
 			return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExhaustiveRatingLimit) - min + 1))
 				.Concat(new[] { max })
 				.Distinct()
 				.ToArray();
+		}
+
+		// - the dialogs take minrating as is, 0 included (frmSelectGear.cs:1097), 1 without one
+		// - a negative one would be no rating at all: it counts as 0
+		public static int MinimumRating(string minText)
+		{
+			return int.TryParse(minText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int declared)
+				? Math.Max(0, declared)
+				: 1;
 		}
 
 		// - "entity: name (rating)" for every entry whose range the sweep cuts short

@@ -93,6 +93,20 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>10</rating><minrating>2</minrating></gear>")));
 			Assert.Equal(new[] { 1, 2, 3, 4 }, ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>4</rating></gear>")));
+			Assert.Equal(new[] { 0, 1, 2 },
+				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>2</rating><minrating>0</minrating></gear>")));
+		}
+
+		// - one rule for both sweeps, BonusValues.RatingsOf calls it as well
+		[Theory]
+		[InlineData(null, 1)]
+		[InlineData("x", 1)]
+		[InlineData("0", 0)]
+		[InlineData("-2", 0)]
+		[InlineData("3", 3)]
+		public void TheMinimumRatingIsTakenAsTheDialogsTakeIt(string minText, int expected)
+		{
+			Assert.Equal(expected, ExpressionChecks.MinimumRating(minText));
 		}
 
 		// - above the limit the sweep stops, the top end is still replayed
