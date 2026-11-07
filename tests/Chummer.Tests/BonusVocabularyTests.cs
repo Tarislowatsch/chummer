@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Xunit;
@@ -13,9 +14,21 @@ namespace Chummer.Tests
 		[MemberData(nameof(BonusVocabulary.TopLevelRuleXmlFilesWithBonuses), MemberType = typeof(BonusVocabulary))]
 		public void EveryBonusTagHasACodePathThatReadsIt(string xmlPath)
 		{
+			AssertHandled(xmlPath, BonusVocabulary.BonusTagsFor(xmlPath));
+		}
+
+		[Theory]
+		[MemberData(nameof(BonusVocabulary.PackFilesWithBonuses), MemberType = typeof(BonusVocabulary))]
+		public void EveryPackBonusTagHasACodePathThatReadsIt(string packPath)
+		{
+			AssertHandled(packPath, BonusVocabulary.BonusTagsInPack(packPath));
+		}
+
+		private static void AssertHandled(string xmlPath, IReadOnlyList<BonusVocabulary.BonusTag> tags)
+		{
 			// Grouped by tag: one misspelling copied across entries is one problem.
 			var unhandled = BonusVocabulary
-				.UnhandledTags(BonusVocabulary.BonusTagsFor(xmlPath), BonusVocabulary.VocabularyFor)
+				.UnhandledTags(tags, BonusVocabulary.VocabularyFor)
 				.GroupBy(tag => tag.Consumer + " <" + tag.Tag + ">", StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();

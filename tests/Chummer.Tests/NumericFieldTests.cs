@@ -14,7 +14,19 @@ namespace Chummer.Tests
 		[MemberData(nameof(NumericFields.Entities), MemberType = typeof(NumericFields))]
 		public void EveryValueACreateConvertsParsesAsItsType(string entity)
 		{
-			NumericFields.NumericFieldCheck check = NumericFields.CheckFor(entity);
+			AssertConvertible(NumericFields.CheckFor(entity));
+		}
+
+		[Theory]
+		[MemberData(nameof(NumericFields.PackEntities), MemberType = typeof(NumericFields))]
+		public void EveryPackValueACreateConvertsParsesAsItsType(string packPath, string entity)
+		{
+			AssertConvertible(NumericFields.PackCheckFor(packPath, entity));
+		}
+
+		private static void AssertConvertible(NumericFields.NumericFieldCheck check)
+		{
+			string entity = check.Entity;
 
 			// Grouped by field: one bad copy-paste tends to repeat across entries.
 			var unconvertible = check.Unconvertible

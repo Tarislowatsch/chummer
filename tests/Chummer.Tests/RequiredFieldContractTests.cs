@@ -15,7 +15,20 @@ namespace Chummer.Tests
 		[MemberData(nameof(RequiredFields.Entities), MemberType = typeof(RequiredFields))]
 		public void EveryEntryCarriesTheFieldsItsCreateReadsUnguarded(string entity)
 		{
-			RequiredFields.RequiredFieldContract contract = RequiredFields.ContractFor(entity);
+			AssertComplete(RequiredFields.ContractFor(entity));
+		}
+
+		// - a missing field crashes Create once a user copies the pack into data/
+		[Theory]
+		[MemberData(nameof(RequiredFields.PackEntities), MemberType = typeof(RequiredFields))]
+		public void EveryPackEntryCarriesTheFieldsItsCreateReadsUnguarded(string packPath, string entity)
+		{
+			AssertComplete(RequiredFields.PackContractFor(packPath, entity));
+		}
+
+		private static void AssertComplete(RequiredFields.RequiredFieldContract contract)
+		{
+			string entity = contract.Rule.Entity;
 
 			// - a missing field usually vanishes from a whole batch of entries at once
 			// - grouping by field shows how many distinct fields broke
