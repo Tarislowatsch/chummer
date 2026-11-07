@@ -8,7 +8,7 @@ using System.Xml;
 namespace Chummer.Tests
 {
 	// - a field no code reads does nothing, yet the data still states a rule
-	// - element names are checked against every literal, requirement blocks against their consumer
+	// - names against every literal, requirement and handler blocks against their consumer
 	public static class FieldReaders
 	{
 		// One data file as Load merges it: top-level, or a pack file merged into its base.
@@ -367,21 +367,156 @@ namespace Chummer.Tests
 
 		public static IReadOnlyList<RequirementUse> AllRequirementUses => CachedCorpus.Value.Uses;
 
+		// - bonus handlers whose branch reads every field as <bonus>["handler"]["field"]
+		// - the name level misses their dead fields: min, max and val are read by other handlers
+		// - other handlers read through loop variables this extraction cannot follow
+		public static readonly IReadOnlyList<string> IndexedHandlers = new[] { "addattribute" };
+
+		public const string HandlerConsumerFile = "clsImprovement.cs";
+
+		public enum BlockReach
+		{
+			// - the first block of its name below a root CreateImprovements walks
+			First,
+
+			// - the indexer returns the first block only: this one is never read
+			LaterSibling,
+
+			// - not a direct child of such a root, e.g. under a vehicle mod
+			OutsideRoot,
+		}
+
+		// One child of a handler block in the data, e.g. addattribute/min.
+		public sealed class HandlerField
+		{
+			public HandlerField(string file, string handler, BlockReach reach, string tag)
+			{
+				File = file;
+				Handler = handler;
+				Reach = reach;
+				Tag = tag;
+			}
+
+			public string File { get; }
+
+			public string Handler { get; }
+
+			public BlockReach Reach { get; }
+
+			public string Tag { get; }
+
+			public string Entry => File + " " + Handler + "/" + Tag
+				+ (Reach == BlockReach.First ? "" : " (" + Reach + ")");
+		}
+
+		// - public so the detection tests can drive it with hand-built XML
+		public static IReadOnlyList<HandlerField> HandlerFieldsIn(string file, string baseFile, XmlDocument document,
+			IEnumerable<string> handlers)
+		{
+			IReadOnlyCollection<XmlNode> roots = BonusVocabulary.CreateImprovementsRoots(baseFile, document);
+			return handlers
+				.SelectMany(handler => document.SelectNodes("//" + handler).Cast<XmlElement>()
+					.SelectMany(block =>
+					{
+						BlockReach reach = !roots.Contains(block.ParentNode) ? BlockReach.OutsideRoot
+							: block.ParentNode[handler] == block ? BlockReach.First
+							: BlockReach.LaterSibling;
+						return block.ChildNodes.Cast<XmlNode>()
+							.Select(TagOf).Where(tag => tag != null)
+							.Select(tag => new HandlerField(file, handler, reach, tag));
+					}))
+				.ToArray();
+		}
+
+		// One handler's branch in CreateImprovements: its literals and the fields its indexer reads.
+		public sealed class HandlerBranch
+		{
+			public HandlerBranch(string handler, IReadOnlyList<NameLookups.Literal> literals,
+				IReadOnlyCollection<string> fields)
+			{
+				Handler = handler;
+				Literals = literals;
+				Fields = fields;
+			}
+
+			public string Handler { get; }
+
+			public IReadOnlyList<NameLookups.Literal> Literals { get; }
+
+			public IReadOnlyCollection<string> Fields { get; }
+		}
+
+		// - public so the detection tests can drive it with hand-built source
+		public static HandlerBranch BranchOf(string handler, string fileName, string[] lines)
+		{
+			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBranch(handler, lines);
+			Regex read = new Regex(Regex.Escape(parameter) + @"\[\s*""" + Regex.Escape(handler)
+				+ @"""\s*\]\s*\[\s*""([^""]+)""\s*\]");
+
+			string[] sites = Enumerable.Range(start + 1, block.Code.Length)
+				.Select(line => fileName + ":" + line).ToArray();
+			return new HandlerBranch(handler,
+				NameLookups.LiteralsIn(fileName, lines).Where(literal => sites.Contains(literal.Site)).ToArray(),
+				new HashSet<string>(
+					block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).Select(match => match.Groups[1].Value),
+					StringComparer.Ordinal));
+		}
+
+		public static IReadOnlyList<HandlerBranch> HandlerBranches => CachedBranches.Value;
+
+		private static readonly Lazy<IReadOnlyList<HandlerBranch>> CachedBranches =
+			new Lazy<IReadOnlyList<HandlerBranch>>(() =>
+			{
+				string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
+					.Single(path => Path.GetFileName(path) == HandlerConsumerFile));
+				return IndexedHandlers.Select(handler => BranchOf(handler, HandlerConsumerFile, lines)).ToArray();
+			});
+
+		public static IEnumerable<HandlerField> UnreadHandlerFields(IEnumerable<HandlerField> fields,
+			IEnumerable<HandlerBranch> branches)
+		{
+			Dictionary<string, HandlerBranch> byHandler = branches.ToDictionary(branch => branch.Handler, StringComparer.Ordinal);
+			return fields.Where(field => field.Reach != BlockReach.First || !byHandler[field.Handler].Fields.Contains(field.Tag));
+		}
+
+		// - a read outside the branch would leave its findings standing while the code uses them
+		public static IEnumerable<NameLookups.Literal> HandlerLiteralsOutsideBranch(IEnumerable<NameLookups.Literal> literals,
+			HandlerBranch branch)
+		{
+			return literals.Where(literal => IdentifiersIn(new[] { literal.Text }).Contains(branch.Handler)
+				&& !branch.Literals.Any(inside => inside.Site == literal.Site && inside.Text == literal.Text));
+		}
+
+		// - a field literal in the branch the indexer pattern missed, e.g. SelectSingleNode("val")
+		public static IReadOnlyCollection<string> UnextractedFields(HandlerBranch branch, IEnumerable<string> dataTags)
+		{
+			HashSet<string> tags = new HashSet<string>(dataTags, StringComparer.Ordinal);
+			return new HashSet<string>(
+				IdentifiersIn(branch.Literals.Select(literal => literal.Text))
+					.Where(identifier => tags.Contains(identifier) && !branch.Fields.Contains(identifier)),
+				StringComparer.Ordinal);
+		}
+
+		public static IReadOnlyList<HandlerField> AllHandlerFields => CachedCorpus.Value.Fields;
+
 		// - XmlDocument is not safe under xUnit's parallel classes: only immutable records leave here
-		private static readonly Lazy<(IReadOnlyList<ElementName> Names, IReadOnlyList<RequirementUse> Uses)> CachedCorpus =
-			new Lazy<(IReadOnlyList<ElementName>, IReadOnlyList<RequirementUse>)>(() =>
+		private static readonly Lazy<(IReadOnlyList<ElementName> Names, IReadOnlyList<RequirementUse> Uses,
+			IReadOnlyList<HandlerField> Fields)> CachedCorpus =
+			new Lazy<(IReadOnlyList<ElementName>, IReadOnlyList<RequirementUse>, IReadOnlyList<HandlerField>)>(() =>
 			{
 				List<ElementName> names = new List<ElementName>();
 				List<RequirementUse> uses = new List<RequirementUse>();
+				List<HandlerField> fields = new List<HandlerField>();
 				foreach (DataFile file in DataFiles)
 				{
 					XmlDocument document = new XmlDocument();
 					document.Load(file.FilePath);
 					names.AddRange(ElementNamesIn(file.Label, document));
 					uses.AddRange(RequirementUsesIn(file.Label, file.BaseFileName, document));
+					fields.AddRange(HandlerFieldsIn(file.Label, file.BaseFileName, document, IndexedHandlers));
 				}
 
-				return (names, uses);
+				return (names, uses, fields);
 			});
 
 		// - path below the document element, e.g. "mods/mod" for vehicles.xml

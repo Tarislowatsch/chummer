@@ -132,6 +132,71 @@ namespace Chummer.Tests
 			Assert.True(moved.Length == 0, "Re-read these consumers and fix the line:\n  " + string.Join("\n  ", moved));
 		}
 
+		// - key "file handler/field": the field has no effect on the character
+		// - addattribute: CreateImprovements reads only name, to enable MAG or RES
+		private static readonly IReadOnlyDictionary<string, int> KnownUnreadHandlerFields =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "critters.xml addattribute/aug", 312 },
+				{ "critters.xml addattribute/max", 312 },
+				{ "critters.xml addattribute/min", 312 },
+				{ "critters.xml addattribute/val", 312 },
+				{ "custom content/Dumpshock Datahaven Issue 1/custom_datahaven1_critters.xml addattribute/aug", 1 },
+				{ "custom content/Dumpshock Datahaven Issue 1/custom_datahaven1_critters.xml addattribute/max", 1 },
+				{ "custom content/Dumpshock Datahaven Issue 1/custom_datahaven1_critters.xml addattribute/min", 1 },
+				{ "custom content/Dumpshock Datahaven Issue 1/custom_datahaven1_critters.xml addattribute/val", 1 },
+				{ "metatypes.xml addattribute/aug", 65 },
+				{ "metatypes.xml addattribute/max", 65 },
+				{ "metatypes.xml addattribute/min", 65 },
+				{ "metatypes.xml addattribute/val", 65 },
+				{ "qualities.xml addattribute/aug", 31 },
+				{ "qualities.xml addattribute/max", 31 },
+				{ "qualities.xml addattribute/min", 31 },
+				{ "qualities.xml addattribute/val", 31 },
+			};
+
+		[Fact]
+		public void EveryHandlerFieldIsReadByItsBranch()
+		{
+			AssertCounts("Handler fields no branch reads", KnownUnreadHandlerFields,
+				FieldReaders.UnreadHandlerFields(FieldReaders.AllHandlerFields, FieldReaders.HandlerBranches)
+					.GroupBy(field => field.Entry, StringComparer.Ordinal)
+					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
+		}
+
+		// - a missing field fails loudly, an over-reaching extractor would hide one
+		[Fact]
+		public void EachIndexedHandlerReadsTheMeasuredFields()
+		{
+			FieldReaders.HandlerBranch branch = Assert.Single(FieldReaders.HandlerBranches);
+
+			Assert.Equal("addattribute", branch.Handler);
+			Assert.Equal(new[] { "name" }, branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
+		}
+
+		[Fact]
+		public void NoLiteralOutsideItsBranchNamesAnIndexedHandler()
+		{
+			string[] outside = FieldReaders.HandlerBranches
+				.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
+				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
+				.ToArray();
+
+			Assert.True(outside.Length == 0, "Extend the extraction to these reads:\n  " + string.Join("\n  ", outside));
+		}
+
+		[Fact]
+		public void EveryFieldLiteralInABranchIsExtracted()
+		{
+			string[] missed = FieldReaders.HandlerBranches
+				.SelectMany(branch => FieldReaders.UnextractedFields(branch, FieldReaders.AllHandlerFields
+						.Where(field => field.Handler == branch.Handler).Select(field => field.Tag))
+					.Select(field => branch.Handler + "/" + field))
+				.ToArray();
+
+			Assert.True(missed.Length == 0, "The indexer pattern misses:\n  " + string.Join("\n  ", missed));
+		}
+
 		// - top-level files plus every pack file Load would merge
 		// - bumping the number is only correct for a deliberately added or removed data file
 		[Fact]
