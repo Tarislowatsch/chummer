@@ -129,8 +129,19 @@ namespace Chummer.Tests
 					&& !CategoryDeclarations.IsDeclarationBlock(node.Name));
 		}
 
-		// - hand tables pass the file name to stay readable, caches the full path
-		internal static string CollectionKey(string file, string collectionName)
+		// - file name, not path: the hand-written tables have to stay readable
+		// - a path would not throw, the lookup would just find nothing
+		internal static string TableKey(string fileName, string collectionName)
+		{
+			return CollectionKey(fileName, collectionName);
+		}
+
+		internal static string CacheKey(string xmlPath, string collectionName)
+		{
+			return CollectionKey(xmlPath, collectionName);
+		}
+
+		private static string CollectionKey(string file, string collectionName)
 		{
 			return file + "/" + collectionName;
 		}

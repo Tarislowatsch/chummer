@@ -26,7 +26,7 @@ namespace Chummer.Tests
 		private static string[] KeyFieldsFor(string xmlFileName, string collectionName)
 		{
 			string[] fields;
-			return CompositeKeyFields.TryGetValue(RuleCorpus.CollectionKey(xmlFileName, collectionName), out fields)
+			return CompositeKeyFields.TryGetValue(RuleCorpus.TableKey(xmlFileName, collectionName), out fields)
 				? fields
 				: NameOnlyKeyFields;
 		}
@@ -67,7 +67,7 @@ namespace Chummer.Tests
 
 		public static RuleCollection RuleCollectionFor(string xmlPath, string collectionName)
 		{
-			return CachedRuleCollectionsByKey.Value[RuleCorpus.CollectionKey(xmlPath, collectionName)];
+			return CachedRuleCollectionsByKey.Value[RuleCorpus.CacheKey(xmlPath, collectionName)];
 		}
 
 		// - a dictionary, not a scan per call: the allowlist guard would make that quadratic
@@ -82,7 +82,7 @@ namespace Chummer.Tests
 
 			foreach (RuleCollection collection in CachedRuleCollections.Value)
 			{
-				string key = RuleCorpus.CollectionKey(collection.FilePath, collection.Name);
+				string key = RuleCorpus.CacheKey(collection.FilePath, collection.Name);
 				if (index.ContainsKey(key))
 				{
 					// - two same-named wrappers collide on a case id and xUnit drops the second

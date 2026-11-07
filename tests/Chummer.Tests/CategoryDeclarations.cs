@@ -109,7 +109,7 @@ namespace Chummer.Tests
 
 		public static CategoryContract ContractFor(string xmlPath, string collectionName)
 		{
-			return CachedCategoryContractsByKey.Value[RuleCorpus.CollectionKey(xmlPath, collectionName)];
+			return CachedCategoryContractsByKey.Value[RuleCorpus.CacheKey(xmlPath, collectionName)];
 		}
 
 		private static readonly Lazy<IReadOnlyList<CategoryContract>> CachedCategoryContracts =
@@ -118,7 +118,7 @@ namespace Chummer.Tests
 		private static readonly Lazy<IReadOnlyDictionary<string, CategoryContract>> CachedCategoryContractsByKey =
 			new Lazy<IReadOnlyDictionary<string, CategoryContract>>(
 				() => CachedCategoryContracts.Value.ToDictionary(
-					contract => RuleCorpus.CollectionKey(contract.FilePath, contract.CollectionName),
+					contract => RuleCorpus.CacheKey(contract.FilePath, contract.CollectionName),
 					StringComparer.Ordinal));
 
 		private static IReadOnlyList<CategoryContract> BuildCategoryContracts()
@@ -155,7 +155,7 @@ namespace Chummer.Tests
 		{
 			declared = null;
 
-			string key = RuleCorpus.CollectionKey(xmlFileName, collectionName);
+			string key = RuleCorpus.TableKey(xmlFileName, collectionName);
 			if (CollectionsWithoutDeclarations.Contains(key))
 			{
 				block = null;
@@ -193,7 +193,7 @@ namespace Chummer.Tests
 		{
 			return RuleCorpus.Files
 				.SelectMany(file => file.CategoryUsages
-					.Select(usage => RuleCorpus.CollectionKey(file.FileName, usage.CollectionName)))
+					.Select(usage => RuleCorpus.TableKey(file.FileName, usage.CollectionName)))
 				.Distinct(StringComparer.Ordinal);
 		}
 
@@ -240,7 +240,7 @@ namespace Chummer.Tests
 		public static IEnumerable<CategoryUsage> UsagesIn(XmlNode collection)
 		{
 			// - direct children only: a picker lists weapon[category = "..."] at that level alone
-			// - not the deep axis of BookReferences.In: a deeper <category> belongs to a reference
+			// - not the deep axis of BookReferences.In: no picker lists a deeper <category>
 			return collection.ChildNodes.Cast<XmlNode>()
 				.Where(item => item.NodeType == XmlNodeType.Element && item["category"] != null)
 				.Select(item => new CategoryUsage(collection.Name, item["category"].InnerText,
