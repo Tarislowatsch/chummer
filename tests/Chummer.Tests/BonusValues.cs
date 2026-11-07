@@ -1,0 +1,610 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.XPath;
+
+namespace Chummer.Tests
+{
+	// - CreateImprovements turns bonus values into numbers through ValueToInt, outside any try
+	// - each replay mirrors one handler branch: its guards, its reads, its conversions
+	public static class BonusValues
+	{
+		public static readonly IReadOnlyList<string> Calculators = new[]
+		{
+			"ImprovementManager.ValueToInt",
+			"ImprovementManager.NodeExists",
+		};
+
+		// - ValueToInt prints the XPath result in the thread culture: the app never sets one
+		// - the parse back is en-US: under de-DE "1,5" reads as 15
+		public static readonly CultureInfo LocalCulture = new CultureInfo("de-DE");
+
+		// - stand-ins for the character's TotalValue: no bonus value names an attribute today
+		// - 0 is a mundane's MAG, an odd value exposes a fraction
+		public static readonly IReadOnlyList<int> AttributeStandIns = new[] { 0, 1, 2, 3 };
+
+		// - the order ValueToInt replaces them in
+		private static readonly string[] AttributeCodes =
+			{ "BOD", "AGI", "REA", "STR", "CHA", "INT", "LOG", "WIL", "EDG", "MAG", "RES" };
+
+		// - branches whose only ValueToInt argument is nodBonus["handler"].InnerText
+		public static readonly IReadOnlyList<string> SimpleHandlers = new[]
+		{
+			"adeptpowerpoints", "armorencumbrancepenalty", "basicbiowareessmultiplier", "basiclifestylecost",
+			"biowareessmultiplier", "complexformlimit", "composure", "concealability", "cyberwareessmultiplier",
+			"damageresistance", "drainresist", "essencemax", "fadingresist", "flypercent", "flyspeed",
+			"freenegativequalities", "freepositivequalities", "freespiritpowerpoints", "genetechcostmultiplier",
+			"initiation", "initiative", "initiativepass", "initiativepassadd", "judgeintentions", "liftandcarry",
+			"lifestylecost", "matrixinitiative", "matrixinitiativepass", "matrixinitiativepassadd", "memory",
+			"movementpercent", "notoriety", "nuyenamt", "nuyenmaxbp", "reach", "restricteditemcount", "skillwire",
+			"spelllimit", "submersion", "swimpercent", "throwrange", "throwstr", "transgenicsgenetechcost",
+			"unarmedap", "unarmeddv",
+		};
+
+		// - hand ports of the branches that read more than one plain value
+		// - a value is only replayed past the guards that let the code reach it
+		public static readonly IReadOnlyDictionary<string, Action<XmlNode, Reader>> PortedBranches =
+			new Dictionary<string, Action<XmlNode, Reader>>(StringComparer.Ordinal)
+			{
+				{ "selectskill", (bonus, reader) =>
+					{
+						XmlNode block = bonus.SelectSingleNode("selectskill");
+						if (block.InnerXml.Contains("val"))
+							reader.Value("selectskill/val", () => bonus["selectskill"]["val"].InnerText);
+						if (block.InnerXml.Contains("max"))
+							reader.Value("selectskill/max", () => bonus["selectskill"]["max"].InnerText);
+					}
+				},
+				{ "selectskillgroup", (bonus, reader) =>
+					reader.Value("selectskillgroup/bonus", () => bonus["selectskillgroup"]["bonus"].InnerText)
+				},
+				{ "selectattribute", (bonus, reader) =>
+					{
+						foreach (string tag in new[] { "min", "val", "max", "aug" })
+						{
+							if (bonus["selectattribute"].InnerXml.Contains(tag))
+								reader.Value("selectattribute/" + tag, () => bonus["selectattribute"][tag].InnerXml);
+						}
+					}
+				},
+				{ "specificattribute", SpecificAttribute },
+				{ "conditionmonitor", (bonus, reader) =>
+					{
+						XmlNode block = bonus.SelectSingleNode("conditionmonitor");
+						foreach (string tag in new[] { "physical", "stun" })
+						{
+							if (block.InnerXml.Contains(tag))
+								reader.Value("conditionmonitor/" + tag, () => block[tag].InnerText);
+						}
+
+						foreach (string tag in new[] { "threshold", "thresholdoffset" })
+						{
+							if (NodeExists(block, tag))
+								reader.Value("conditionmonitor/" + tag, () => block[tag].InnerText);
+						}
+
+						if (block.InnerXml.Contains("overflow"))
+							reader.Value("conditionmonitor/overflow", () => block["overflow"].InnerText);
+					}
+				},
+				{ "livingpersona", (bonus, reader) =>
+					{
+						XmlNode block = bonus.SelectSingleNode("livingpersona");
+						foreach (string tag in new[] { "response", "signal", "firewall", "system", "biofeedback" })
+						{
+							if (block.InnerXml.Contains(tag))
+								reader.Value("livingpersona/" + tag, () => block[tag].InnerText);
+						}
+					}
+				},
+				{ "specificskill", (bonus, reader) =>
+					{
+						foreach (XmlNode skill in bonus.SelectNodes("specificskill"))
+						{
+							if (skill["bonus"] != null)
+								reader.Value("specificskill/bonus", () => skill["bonus"].InnerXml);
+							if (skill["max"] != null)
+								reader.Value("specificskill/max", () => skill["max"].InnerText);
+						}
+					}
+				},
+				{ "skillcategory", (bonus, reader) => EveryBlock(bonus, reader, "skillcategory", "bonus", true) },
+				{ "skillgroup", (bonus, reader) => EveryBlock(bonus, reader, "skillgroup", "bonus", true) },
+				{ "skillattribute", (bonus, reader) => EveryBlock(bonus, reader, "skillattribute", "bonus", true) },
+				{ "weaponcategorydv", (bonus, reader) => EveryBlock(bonus, reader, "weaponcategorydv", "bonus", true) },
+				{ "spellcategory", (bonus, reader) => EveryBlock(bonus, reader, "spellcategory", "val", false) },
+				{ "skillarticulation", (bonus, reader) =>
+					{
+						XmlNode block = bonus.SelectSingleNode("skillarticulation");
+						reader.Value("skillarticulation/bonus", () => block["bonus"].InnerText);
+					}
+				},
+				{ "armor", (bonus, reader) =>
+					{
+						XmlNode block = bonus.SelectSingleNode("armor");
+						foreach (string tag in new[] { "b", "i" })
+						{
+							if (NodeExists(block, tag))
+								reader.Value("armor/" + tag, () => block[tag].InnerText);
+						}
+					}
+				},
+			};
+
+		// - clsImprovement.cs:1568, ESS and "-natural" bypass ValueToInt with a plain Convert.ToInt32
+		private static void SpecificAttribute(XmlNode bonus, Reader reader)
+		{
+			foreach (XmlNode attribute in bonus.SelectNodes("specificattribute"))
+			{
+				if (reader.Decide("specificattribute/name", () => attribute["name"].InnerText) == "ESS")
+				{
+					reader.Integer("specificattribute/val (ESS)", () => attribute["val"].InnerText);
+					continue;
+				}
+
+				if (attribute.InnerXml.Contains("min"))
+					reader.Value("specificattribute/min", () => attribute["min"].InnerXml);
+				if (attribute.InnerXml.Contains("val"))
+					reader.Value("specificattribute/val", () => attribute["val"].InnerXml);
+				if (attribute.InnerXml.Contains("max"))
+				{
+					if (reader.Decide("specificattribute/max", () => attribute["max"].InnerText.Contains("-natural")))
+					{
+						reader.Integer("specificattribute/max (-natural)",
+							() => attribute["max"].InnerText.Replace("-natural", string.Empty));
+					}
+					else
+					{
+						reader.Value("specificattribute/max", () => attribute["max"].InnerXml);
+					}
+				}
+
+				if (attribute.InnerXml.Contains("aug"))
+					reader.Value("specificattribute/aug", () => attribute["aug"].InnerXml);
+			}
+		}
+
+		// - SelectNodes reaches every block, the indexer only the first child of that name
+		private static void EveryBlock(XmlNode bonus, Reader reader, string handler, string tag, bool innerXml)
+		{
+			foreach (XmlNode block in bonus.SelectNodes(handler))
+			{
+				reader.Value(handler + "/" + tag, innerXml
+					? (Func<string>)(() => block[tag].InnerXml)
+					: () => block[tag].InnerText);
+			}
+		}
+
+		public static Action<XmlNode, Reader> ReplayOf(string handler)
+		{
+			if (PortedBranches.TryGetValue(handler, out Action<XmlNode, Reader> replay))
+				return replay;
+			if (SimpleHandlers.Contains(handler))
+				return (bonus, reader) => reader.Value(handler, () => bonus[handler].InnerText);
+			return null;
+		}
+
+		public static IEnumerable<string> ReplayedHandlers =>
+			PortedBranches.Keys.Concat(SimpleHandlers).OrderBy(handler => handler, StringComparer.Ordinal);
+
+		// clsImprovement.cs:1106
+		public static bool NodeExists(XmlNode node, string name)
+		{
+			try
+			{
+				return node.SelectSingleNode(name) != null;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
+		// - clsImprovement.cs:1060, with the thread culture made explicit
+		// - attribute stands in for every TotalValue the code substitutes
+		public static int ValueToInt(string value, int rating, int attribute, CultureInfo threadCulture)
+		{
+			if (value.Contains("Rating") || AttributeCodes.Any(value.Contains))
+			{
+				foreach (string code in AttributeCodes)
+					value = value.Replace(code, attribute.ToString(threadCulture));
+
+				XPathNavigator nav = new XmlDocument().CreateNavigator();
+				XPathExpression expression = nav.Compile(value.Replace("Rating", rating.ToString(threadCulture)));
+				decimal number = Convert.ToDecimal(Convert.ToString(nav.Evaluate(expression), threadCulture),
+					ExpressionChecks.ApplicationCulture);
+				return Convert.ToInt32(Math.Floor(number));
+			}
+
+			if (value.Contains("FixedValues"))
+			{
+				string[] values = value.Replace("FixedValues(", string.Empty).Replace(")", string.Empty).Split(',');
+				return Convert.ToInt32(values[rating - 1], threadCulture);
+			}
+
+			return Convert.ToInt32(value, threadCulture);
+		}
+
+		// - thrown where both cultures parse but disagree: the character silently gets the other number
+		public sealed class CultureDependent : Exception
+		{
+			public CultureDependent(int english, int local)
+				: base("en-US gives " + english + ", de-DE gives " + local)
+			{
+				English = english;
+				Local = local;
+			}
+
+			public int English { get; }
+
+			public int Local { get; }
+		}
+
+		// - a failure at one read, labelled with its path below the bonus root
+		public sealed class ReadFailed : Exception
+		{
+			public ReadFailed(string path, string value, Exception inner)
+				: base(path + " = " + (value ?? "(missing)") + ": " + inner.Message, inner)
+			{
+				Path = path;
+				Value = value;
+			}
+
+			public string Path { get; }
+
+			// - null when the read itself threw, e.g. a guard passed on a missing element
+			public string Value { get; }
+		}
+
+		// - one replay of one branch at one rating
+		public sealed class Reader
+		{
+			private readonly List<(string Path, string Value)> _reached = new List<(string Path, string Value)>();
+
+			public Reader(int rating)
+			{
+				Rating = rating;
+			}
+
+			public int Rating { get; }
+
+			public IReadOnlyList<(string Path, string Value)> Reached => _reached;
+
+			public void Value(string path, Func<string> read)
+			{
+				string value = Read(path, read);
+				_reached.Add((path, value));
+				ConvertEach(path, value, (attribute, culture) => ValueToInt(value, Rating, attribute, culture));
+			}
+
+			// - a direct Convert.ToInt32 in the same branch, also in the thread culture
+			public void Integer(string path, Func<string> read)
+			{
+				string value = Read(path, read);
+				_reached.Add((path, value));
+				ConvertEach(path, value, (attribute, culture) => System.Convert.ToInt32(value, culture));
+			}
+
+			// - a read that decides what ValueToInt gets, e.g. the attribute's name
+			public T Decide<T>(string path, Func<T> read)
+			{
+				try
+				{
+					return read();
+				}
+				catch (Exception exception)
+				{
+					throw new ReadFailed(path, null, exception);
+				}
+			}
+
+			private static string Read(string path, Func<string> read)
+			{
+				try
+				{
+					return read();
+				}
+				catch (Exception exception)
+				{
+					throw new ReadFailed(path, null, exception);
+				}
+			}
+
+			private static void ConvertEach(string path, string value, Func<int, CultureInfo, int> convert)
+			{
+				IEnumerable<int> attributes = AttributeCodes.Any(value.Contains) ? AttributeStandIns : new[] { 0 };
+				foreach (int attribute in attributes)
+				{
+					int english;
+					int local;
+					try
+					{
+						english = convert(attribute, ExpressionChecks.ApplicationCulture);
+						local = convert(attribute, LocalCulture);
+					}
+					catch (Exception exception)
+					{
+						throw new ReadFailed(path, value, exception);
+					}
+
+					if (english != local)
+						throw new ReadFailed(path, value, new CultureDependent(english, local));
+				}
+			}
+		}
+
+		// - min..max of the owner's rating, its levels, else every rating up to the limit
+		// - "levels yes" powers and critter "rating yes" go up to MAG: no number to read
+		public static IReadOnlyList<int> RatingsOf(XmlNode root)
+		{
+			XmlNode owner = root.ParentNode;
+			foreach (string field in new[] { "rating", "maxrating", "levels" })
+			{
+				string text = owner[field]?.InnerText;
+				if (text == null)
+					continue;
+
+				if (!int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int max))
+					break;
+				if (max <= 0)
+					return new[] { 0 };
+
+				int min = 1;
+				if (int.TryParse(owner["minrating"]?.InnerText, NumberStyles.Integer, CultureInfo.InvariantCulture,
+					out int declared) && declared > min)
+				{
+					min = declared;
+				}
+
+				return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExpressionChecks.ExhaustiveRatingLimit) - min + 1))
+					.Concat(new[] { max })
+					.Distinct()
+					.ToArray();
+			}
+
+			return Enumerable.Range(1, ExpressionChecks.ExhaustiveRatingLimit).ToArray();
+		}
+
+		public sealed class BonusValueFailure
+		{
+			public BonusValueFailure(string file, string itemName, string handler, int rating, ReadFailed failure)
+			{
+				File = file;
+				ItemName = itemName;
+				Handler = handler;
+				Rating = rating;
+				Path = failure.Path;
+				Value = failure.Value;
+				Error = failure.InnerException is CultureDependent
+					? failure.InnerException.Message
+					: failure.InnerException.GetType().Name;
+			}
+
+			public string File { get; }
+
+			public string ItemName { get; }
+
+			public string Handler { get; }
+
+			public int Rating { get; }
+
+			public string Path { get; }
+
+			public string Value { get; }
+
+			public string Error { get; }
+
+			// - the allowlist key: independent of the rating that broke it
+			public string Key => File + " | " + ItemName + " | " + Path + " = " + (Value ?? "(missing)");
+		}
+
+		public sealed class BonusValueCheck
+		{
+			public BonusValueCheck(IReadOnlyList<BonusValueFailure> failures,
+				IReadOnlyList<(string File, string Path, string Value)> reached, IReadOnlyList<string> cutShort)
+			{
+				Failures = failures;
+				Reached = reached;
+				CutShort = cutShort;
+			}
+
+			public IReadOnlyList<BonusValueFailure> Failures { get; }
+
+			// - every value a replay converted at its first rating, for the coverage pins
+			public IReadOnlyList<(string File, string Path, string Value)> Reached { get; }
+
+			// - "file: item (rating)" for owners rated above the limit, replayed at the top end only
+			public IReadOnlyList<string> CutShort { get; }
+		}
+
+		// - public so the detection tests can drive it with hand-built XML
+		// - one failure per root and branch: the code stops at the first throw as well
+		public static BonusValueCheck CheckIn(string file, string baseFile, XmlDocument document)
+		{
+			List<BonusValueFailure> failures = new List<BonusValueFailure>();
+			List<(string, string, string)> reached = new List<(string, string, string)>();
+			List<string> cutShort = new List<string>();
+
+			foreach (XmlNode root in BonusVocabulary.CreateImprovementsRoots(baseFile, document))
+			{
+				IReadOnlyList<int> ratings = RatingsOf(root);
+				string itemName = DataPaths.ItemLabel(root.ParentNode);
+				if (ratings[ratings.Count - 1] > ExpressionChecks.ExhaustiveRatingLimit)
+					cutShort.Add(file + ": " + itemName + " (" + ratings[ratings.Count - 1] + ")");
+
+				foreach (string handler in ReplayedHandlers.Where(handler => NodeExists(root, handler)))
+				{
+					Action<XmlNode, Reader> replay = ReplayOf(handler);
+					for (int i = 0; i < ratings.Count; i++)
+					{
+						Reader reader = new Reader(ratings[i]);
+						try
+						{
+							replay(root, reader);
+						}
+						catch (ReadFailed failure)
+						{
+							failures.Add(new BonusValueFailure(file, itemName, handler, ratings[i], failure));
+							break;
+						}
+						finally
+						{
+							if (i == 0)
+								reached.AddRange(reader.Reached.Select(value => (file, value.Path, value.Value)));
+						}
+					}
+				}
+			}
+
+			return new BonusValueCheck(failures, reached, cutShort.Distinct(StringComparer.Ordinal).ToArray());
+		}
+
+		// - XmlDocument is not safe under xUnit's parallel classes: only immutable records leave here
+		public static BonusValueCheck Corpus => CachedCorpus.Value;
+
+		private static readonly Lazy<BonusValueCheck> CachedCorpus = new Lazy<BonusValueCheck>(() =>
+		{
+			BonusValueCheck[] checks = FieldReaders.DataFiles.Select(file =>
+			{
+				XmlDocument document = new XmlDocument();
+				document.Load(file.FilePath);
+				return CheckIn(file.Label, file.BaseFileName, document);
+			}).ToArray();
+
+			return new BonusValueCheck(
+				checks.SelectMany(check => check.Failures).ToArray(),
+				checks.SelectMany(check => check.Reached).ToArray(),
+				checks.SelectMany(check => check.CutShort).ToArray());
+		});
+
+		// One ValueToInt call in the source: the branch it sits in and its argument as written.
+		public sealed class Call
+		{
+			public Call(int line, string handler, string argument)
+			{
+				Line = line;
+				Handler = handler;
+				Argument = argument;
+			}
+
+			// - 1-based
+			public int Line { get; }
+
+			// - "(no branch)" outside every NodeExists(<bonus>, "handler") block
+			public string Handler { get; }
+
+			public string Argument { get; }
+
+			public string Key => Handler + " | " + Argument;
+		}
+
+		public const string NoBranch = "(no branch)";
+
+		private static readonly Regex CallStart = new Regex(@"(?<![\w.])ValueToInt\s*\(", RegexOptions.Compiled);
+
+		// - public so the detection tests can drive it with hand-built source
+		// - the innermost branch wins: a block nested in another is the one that guards the call
+		public static IReadOnlyList<Call> CallsIn(string[] lines, IEnumerable<string> handlers)
+		{
+			string[] code = SourceLines.Of(lines).Code;
+			string[] bare = SourceLines.Of(lines).Bare;
+			(string Handler, int Start, int Length)[] branches = handlers
+				.Select(handler =>
+				{
+					(int start, SourceLines block, string unused) = BonusVocabulary.HandlerBlock(handler, lines);
+					return (handler, start, block.Code.Length);
+				})
+				.ToArray();
+
+			List<Call> calls = new List<Call>();
+			for (int i = 0; i < code.Length; i++)
+			{
+				// - Bare has no literals: a "ValueToInt(" inside a string is no call
+				if (!CallStart.IsMatch(bare[i]))
+					continue;
+
+				foreach (Match match in CallStart.Matches(code[i]))
+				{
+					string argument = FirstArgument(code, i, match.Index + match.Length);
+					if (argument.StartsWith("string ", StringComparison.Ordinal))
+						continue;
+
+					string handler = branches
+						.Where(branch => i >= branch.Start && i < branch.Start + branch.Length)
+						.OrderBy(branch => branch.Length)
+						.Select(branch => branch.Handler)
+						.FirstOrDefault() ?? NoBranch;
+					calls.Add(new Call(i + 1, handler, argument));
+				}
+			}
+
+			return calls;
+		}
+
+		// - up to the first comma at depth 0, across lines, whitespace collapsed
+		private static string FirstArgument(string[] code, int line, int column)
+		{
+			StringBuilder argument = new StringBuilder();
+			int depth = 0;
+			char quote = '\0';
+			for (int i = line; i < code.Length; i++, column = 0)
+			{
+				string text = code[i];
+				for (int j = column; j < text.Length; j++)
+				{
+					char current = text[j];
+					if (quote != '\0')
+					{
+						argument.Append(current);
+						if (current == '\\' && j + 1 < text.Length)
+							argument.Append(text[++j]);
+						else if (current == quote)
+							quote = '\0';
+						continue;
+					}
+
+					if (current == '"' || current == '\'')
+						quote = current;
+					else if (current == '(' || current == '[')
+						depth++;
+					else if (current == ')' || current == ']')
+						depth--;
+
+					if (depth < 0 || (depth == 0 && current == ','))
+						return Regex.Replace(argument.ToString().Trim(), @"\s+", " ");
+					argument.Append(current);
+				}
+
+				argument.Append(' ');
+			}
+
+			throw new InvalidOperationException("Unterminated ValueToInt call at line " + (line + 1));
+		}
+
+		public static IReadOnlyList<Call> ApplicationCalls => CachedCalls.Value;
+
+		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls = new Lazy<IReadOnlyList<Call>>(() =>
+		{
+			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
+				.Single(path => Path.GetFileName(path) == FieldReaders.HandlerConsumerFile));
+			return CallsIn(lines, BonusVocabulary.HandledTagsIn(lines));
+		});
+
+		// - "handler" -> hash of its branch, comment-free and whitespace-collapsed
+		public static IReadOnlyDictionary<string, string> BranchFingerprints(IEnumerable<string> handlers)
+		{
+			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
+				.Single(path => Path.GetFileName(path) == FieldReaders.HandlerConsumerFile));
+			return handlers.ToDictionary(handler => handler, handler => DataPaths.Fingerprint(
+					BonusVocabulary.HandlerBlock(handler, lines).Block.Code
+						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
+						.Where(line => line.Length > 0)),
+				StringComparer.Ordinal);
+		}
+	}
+}
