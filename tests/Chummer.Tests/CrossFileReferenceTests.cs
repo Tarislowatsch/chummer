@@ -245,6 +245,34 @@ namespace Chummer.Tests
 				"These rules check a different number of references than pinned:\n  " + string.Join("\n  ", drifted));
 		}
 
+		// - summed over all packs: the case pin only notices a rule losing its last reference
+		private static readonly IReadOnlyDictionary<string, int> PinnedPackReferenceCounts =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "critter powers", 5 },
+				{ "critter skills", 3 },
+				{ "metatype positive qualities", 4 },
+				{ "metatype powers", 60 },
+				{ "tradition spirits", 9 },
+				{ "vehicle gears", 49 },
+				{ "vehicle mods", 81 },
+				{ "vehicle weapons", 1 },
+				{ "weapon mods", 4 },
+				{ "weapon range by category", 3 },
+			};
+
+		[Fact]
+		public void EveryPackRuleChecksItsMeasuredReferenceCount()
+		{
+			Dictionary<string, int> actual = CrossFileReferences.PackRuleIds()
+				.Select(testCase => CrossFileReferences.PackCheckFor((string)testCase[0], (string)testCase[1]))
+				.GroupBy(check => check.Rule.Id, StringComparer.Ordinal)
+				.ToDictionary(group => group.Key, group => group.Sum(check => check.ReferenceCount),
+					StringComparer.Ordinal);
+
+			CountReport.AssertEqual("Pack references per rule", PinnedPackReferenceCounts, actual);
+		}
+
 		// - every consumer sits directly in Chummer/, where several subfolders reuse file names
 		private static string CodeOf(string fileName)
 		{
