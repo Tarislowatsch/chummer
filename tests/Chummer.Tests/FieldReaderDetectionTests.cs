@@ -199,6 +199,148 @@ namespace Chummer.Tests
 			Assert.Equal(expected, FieldReaders.ConsumerLineSelectsGroup(reader, literals));
 		}
 
+		[Fact]
+		public void HandlerFieldsKeepTheirReachFromTheConsumersView()
+		{
+			XmlDocument document = Document("<chummer><qualities><quality><bonus>"
+				+ "<addattribute><name>MAG</name><min>1</min></addattribute>"
+				+ "<addattribute><name>RES</name>loose</addattribute>"
+				+ "</bonus></quality><quality><bonus><specificskill><bonus>"
+				+ "<addattribute><name>MAG</name></addattribute>"
+				+ "</bonus></specificskill></bonus></quality></qualities></chummer>");
+
+			Assert.Equal(
+				new[]
+				{
+					"q.xml addattribute/name",
+					"q.xml addattribute/min",
+					"q.xml addattribute/name (LaterSibling)",
+					"q.xml addattribute/" + FieldReaders.TextTag + " (LaterSibling)",
+					"q.xml addattribute/name (OutsideRoot)",
+				},
+				FieldReaders.HandlerFieldsIn("q.xml", "qualities.xml", document, new[] { "addattribute" })
+					.Select(field => field.Entry));
+		}
+
+		// - vehicles.xml mods/mod/bonus goes to Vehicle, never to CreateImprovements
+		[Fact]
+		public void AHandlerBlockOnAVehicleModIsOutsideTheRoots()
+		{
+			XmlDocument document = Document("<chummer><mods><mod><bonus>"
+				+ "<addattribute><name>MAG</name></addattribute></bonus></mod></mods></chummer>");
+
+			Assert.Equal("v.xml addattribute/name (OutsideRoot)", Assert.Single(
+				FieldReaders.HandlerFieldsIn("v.xml", "vehicles.xml", document, new[] { "addattribute" })).Entry);
+		}
+
+		private static readonly string[] HandlerSource =
+		{
+			"public bool CreateImprovements(Improvement.ImprovementSource objSource, string s, XmlNode nodBonus, bool b)",
+			"{",
+			"	if (NodeExists(nodBonus, \"addattribute\"))",
+			"	{",
+			"		if (nodBonus[\"addattribute\"][\"name\"].InnerText == \"MAG\") { }",
+			"		// x = nodBonus[\"addattribute\"][\"max\"];",
+			"		y = nodBonus[\"addattribute\"].SelectSingleNode(\"val\");",
+			"	}",
+			"	z = nodBonus[\"addattribute\"][\"min\"];",
+			"}",
+		};
+
+		[Fact]
+		public void ABranchReadsOnlyTheIndexedFieldsInsideIt()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+
+			Assert.Equal(new[] { "name" }, branch.Fields);
+			Assert.Equal(new[] { "x.cs:3", "x.cs:5", "x.cs:5", "x.cs:5", "x.cs:7", "x.cs:7" },
+				branch.Literals.Select(literal => literal.Site));
+		}
+
+		[Fact]
+		public void AFieldLiteralTheIndexerMissesIsUnextracted()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+
+			Assert.Equal(new[] { "val" },
+				FieldReaders.UnextractedFields(branch, new[] { "name", "min", "max", "val" }));
+		}
+
+		[Fact]
+		public void AHandlerLiteralOutsideTheBranchIsReported()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+			NameLookups.Literal[] literals = NameLookups.LiteralsIn("x.cs", HandlerSource)
+				.Concat(new[] { new NameLookups.Literal("y.cs:1", "bonus/addattribute/val") })
+				.ToArray();
+
+			Assert.Equal(new[] { "x.cs:9", "y.cs:1" },
+				FieldReaders.HandlerLiteralsOutsideBranch(literals, branch).Select(literal => literal.Site).Distinct());
+		}
+
+		[Fact]
+		public void AFieldReadOnlyByALaterBlockOrOutsideTheRootsIsUnread()
+		{
+			FieldReaders.HandlerField[] fields =
+			{
+				new FieldReaders.HandlerField("a", "addattribute", FieldReaders.BlockReach.First, "name", "MAG"),
+				new FieldReaders.HandlerField("b", "addattribute", FieldReaders.BlockReach.First, "min", "1"),
+				new FieldReaders.HandlerField("c", "addattribute", FieldReaders.BlockReach.LaterSibling, "name", "MAG"),
+				new FieldReaders.HandlerField("d", "addattribute", FieldReaders.BlockReach.OutsideRoot, "name", "MAG"),
+			};
+
+			Assert.Equal(new[] { "b", "c", "d" },
+				FieldReaders.UnreadHandlerFields(fields, new[] { NameBranch() }).Select(field => field.File));
+		}
+
+		[Fact]
+		public void ABranchDispatchesOnTheComparedValues()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+
+			Assert.Equal(new[] { "MAG" }, Assert.Single(branch.Dispatch, entry => entry.Key == "name").Value);
+		}
+
+		// - uncompared fields and unread blocks are no value findings
+		[Fact]
+		public void OnlyAReachedValueNoComparisonMatchesIsUnhandled()
+		{
+			FieldReaders.HandlerField[] fields =
+			{
+				new FieldReaders.HandlerField("a", "addattribute", FieldReaders.BlockReach.First, "name", "MAG"),
+				new FieldReaders.HandlerField("b", "addattribute", FieldReaders.BlockReach.First, "name", "EDG"),
+				new FieldReaders.HandlerField("c", "addattribute", FieldReaders.BlockReach.First, "name", " MAG"),
+				new FieldReaders.HandlerField("d", "addattribute", FieldReaders.BlockReach.First, "min", "EDG"),
+				new FieldReaders.HandlerField("e", "addattribute", FieldReaders.BlockReach.LaterSibling, "name", "EDG"),
+			};
+
+			Assert.Equal(new[] { "b", "c" },
+				FieldReaders.UnhandledHandlerValues(fields, new[] { NameBranch() }).Select(field => field.File));
+		}
+
+		[Fact]
+		public void AHandlerFieldKeepsItsValueAsTheBranchComparesIt()
+		{
+			XmlDocument document = Document("<chummer><qualities><quality><bonus>"
+				+ "<addattribute><name>RES</name></addattribute></bonus></quality></qualities></chummer>");
+
+			Assert.Equal("RES", Assert.Single(
+				FieldReaders.HandlerFieldsIn("q.xml", "qualities.xml", document, new[] { "addattribute" })).Value);
+		}
+
+		private static FieldReaders.HandlerBranch NameBranch()
+		{
+			return new FieldReaders.HandlerBranch("addattribute", new NameLookups.Literal[0], new[] { "name" },
+				new Dictionary<string, IReadOnlyCollection<string>> { { "name", new[] { "MAG", "RES" } } });
+		}
+
+		[Fact]
+		public void AHandlerWithoutABranchThrows()
+		{
+			Assert.Throws<System.InvalidOperationException>(
+				() => FieldReaders.BranchOf("addskill", "x.cs", HandlerSource));
+		}
+
 		private static FieldReaders.RequirementReader Reader(string group, FieldReaders.ReadStyle style)
 		{
 			return new FieldReaders.RequirementReader("qualities.xml", "qualities/quality", group, "frmSelectQuality.cs:1", style);

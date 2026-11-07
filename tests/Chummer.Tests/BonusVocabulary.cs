@@ -105,10 +105,7 @@ namespace Chummer.Tests
 		// - direct children only: XmlNode lookups by tag name never look deeper
 		public static IReadOnlyList<BonusTag> BonusTagsIn(string fileName, XmlDocument document)
 		{
-			HashSet<XmlNode> vehicleModRoots = new HashSet<XmlNode>(
-				string.Equals(fileName, VehicleModFile, StringComparison.Ordinal)
-					? document.SelectNodes(VehicleModBonusXPath).Cast<XmlNode>()
-					: Enumerable.Empty<XmlNode>());
+			HashSet<XmlNode> vehicleModRoots = VehicleModRoots(fileName, document);
 
 			List<BonusTag> tags = new List<BonusTag>();
 
@@ -142,6 +139,34 @@ namespace Chummer.Tests
 			return tags;
 		}
 
+		// - fileName is the base file: a pack shares its consumer
+		public static IReadOnlyCollection<XmlNode> CreateImprovementsRoots(string fileName, XmlDocument document)
+		{
+			HashSet<XmlNode> vehicleModRoots = VehicleModRoots(fileName, document);
+			return new HashSet<XmlNode>(
+				document.SelectNodes(BonusRootXPath).Cast<XmlNode>().Where(root => !vehicleModRoots.Contains(root)));
+		}
+
+		private static HashSet<XmlNode> VehicleModRoots(string fileName, XmlDocument document)
+		{
+			return new HashSet<XmlNode>(
+				string.Equals(fileName, VehicleModFile, StringComparison.Ordinal)
+					? document.SelectNodes(VehicleModBonusXPath).Cast<XmlNode>()
+					: Enumerable.Empty<XmlNode>());
+		}
+
+		// - the block behind NodeExists(<bonus>, "handler"), with its 0-based first line in the file
+		internal static (int Start, SourceLines Block, string Parameter) HandlerBlock(string handler, string[] lines)
+		{
+			SourceLines body = CreateImprovementsBody(lines, out string parameter, out int bodyStart);
+			Regex check = NodeExistsCheck(parameter, Regex.Escape(handler));
+			int start = Array.FindIndex(body.Code, line => check.IsMatch(line));
+			if (start < 0)
+				throw new InvalidOperationException("CreateImprovements has no branch for \"" + handler + "\"");
+
+			return (bodyStart + start, body.BlockFrom(start), parameter);
+		}
+
 		private static readonly Regex CreateImprovementsSignature = new Regex(
 			@"\bbool\s+CreateImprovements\s*\([^)]*\bXmlNode\s+(\w+)", RegexOptions.Compiled);
 
@@ -149,8 +174,7 @@ namespace Chummer.Tests
 		// - matched over the joined body: a call broken across lines still counts
 		public static IReadOnlyCollection<string> HandledTagsIn(string[] lines)
 		{
-			string parameter;
-			SourceLines body = CreateImprovementsBody(lines, out parameter);
+			SourceLines body = CreateImprovementsBody(lines, out string parameter, out _);
 			Regex check = NodeExistsCheck(parameter, @"([^""]+)");
 
 			return new HashSet<string>(
@@ -161,8 +185,7 @@ namespace Chummer.Tests
 		// - only the case labels inside the enabletab branch, not other switches in the method
 		public static IReadOnlyCollection<string> EnabledTabsIn(string[] lines)
 		{
-			string parameter;
-			SourceLines body = CreateImprovementsBody(lines, out parameter);
+			SourceLines body = CreateImprovementsBody(lines, out string parameter, out _);
 			Regex check = NodeExistsCheck(parameter, "enabletab");
 			Regex label = new Regex(@"\bcase\s+""([^""]+)""\s*:");
 
@@ -182,7 +205,7 @@ namespace Chummer.Tests
 		}
 
 		// - throws rather than returns empty: no method would make every data tag look unhandled
-		private static SourceLines CreateImprovementsBody(string[] lines, out string parameter)
+		private static SourceLines CreateImprovementsBody(string[] lines, out string parameter, out int start)
 		{
 			SourceLines source = SourceLines.Of(lines);
 			int[] signatures = Enumerable.Range(0, source.Code.Length)
@@ -197,6 +220,7 @@ namespace Chummer.Tests
 			}
 
 			parameter = CreateImprovementsSignature.Match(source.Code[signatures[0]]).Groups[1].Value;
+			start = signatures[0];
 			return source.BlockFrom(signatures[0]);
 		}
 
