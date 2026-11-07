@@ -110,4 +110,4 @@ namespace Chummer.Tests
 				.Where(token => token.IsLiteral).Select(token => token.Text));
 		}
 	}
-}
+}

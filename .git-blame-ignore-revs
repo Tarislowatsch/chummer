@@ -1,0 +1,6 @@
+# - commits that only reformat, skipped by GitHub blame and `git blame`
+# - local use: git config blame.ignoreRevsFile .git-blame-ignore-revs
+# - the hashes only survive a merge commit, never a squash or rebase merge
+
+# Renormalize line endings to LF in the index
+76c8053a81a2d4e00b85cfb7aa3c1085bccef288
