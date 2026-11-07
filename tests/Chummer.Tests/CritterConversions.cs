@@ -101,7 +101,8 @@ namespace Chummer.Tests
 		private static readonly IReadOnlyDictionary<string, Root> QualityRoots =
 			new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlQuality", new Root(Qualities, "") } };
 
-		// - read off the code by hand: EveryLoopOverAConvertedPathIsScanned reports a missing one
+		// - read off the code by hand: the loop guard finds a missing loader only by its loops
+		// - one reading only root fields, like objSelected["bodmin"], stays invisible
 		public static readonly IReadOnlyList<Scope> Scopes = new[]
 		{
 			new Scope("SpiritControl.cs", null, CritterRoots),
@@ -142,8 +143,10 @@ namespace Chummer.Tests
 			// - checked for null first: a missing attribute is skipped, not converted
 			public bool Guarded { get; }
 
-			public string Description => Corpus.Name + ": " + Path
-				+ (Form == Form.DigitBeforeD6 ? " (digit before D6)" : "") + (Guarded ? " (if present)" : "");
+			// - what the data side checks: one key per corpus, path and form
+			public string DataKey => Corpus.Name + ": " + Path + (Form == Form.DigitBeforeD6 ? " (digit before D6)" : "");
+
+			public string Description => DataKey + (Guarded ? " (if present)" : "");
 		}
 
 		public static IReadOnlyList<Conversion> ApplicationConversions => CachedConversions.Value;
@@ -159,7 +162,14 @@ namespace Chummer.Tests
 				.Single(path => string.Equals(System.IO.Path.GetFileName(path), fileName, StringComparison.Ordinal)));
 		}
 
-		private static readonly Regex Start = new Regex(@"\bConvert\.To\w+\(|\b\w+\.(?:Try)?Parse\(", RegexOptions.Compiled);
+		private static readonly Regex Start = new Regex(@"\b(Convert\.To\w+|\w+\.(?:Try)?Parse)\(", RegexOptions.Compiled);
+
+		// - ErrorOf checks as int: ToBoolean or ToByte would throw on values that pass here
+		private static readonly string[] IntegerConversions = { "Convert.ToInt32", "int.Parse", "Int32.Parse" };
+
+		// - any rebinding drops the old binding: a stale one would resolve a foreign read
+		private static readonly Regex Rebinding = new Regex(
+			@"\bforeach\s*\(\s*[\w.<>\[\]]+\s+(\w+)\s+in\b|(?<![\w.])(\w+)\s*=(?!=)", RegexOptions.Compiled);
 
 		private static readonly Regex Loop = new Regex(
 			@"\bforeach\s*\(\s*XmlNode\s+(\w+)\s+in\s+(\w+)\.SelectNodes\(\s*""([^""]+)""\s*\)\s*\)", RegexOptions.Compiled);
@@ -199,14 +209,17 @@ namespace Chummer.Tests
 
 			for (int i = 0; i < code.Length; i++)
 			{
+				foreach (Match rebinding in Rebinding.Matches(code[i]))
+					bound.Remove(rebinding.Groups[1].Success ? rebinding.Groups[1].Value : rebinding.Groups[2].Value);
+
 				foreach (Match loop in Loop.Matches(code[i]))
 				{
-					string variable = loop.Groups[1].Value;
 					Root parent;
 					if (scope.Roots.TryGetValue(loop.Groups[2].Value, out parent) || bound.TryGetValue(loop.Groups[2].Value, out parent))
-						bound[variable] = new Root(parent.Corpus, Join(parent.Prefix, loop.Groups[3].Value), loop.Groups[3].Value);
-					else
-						bound.Remove(variable);
+					{
+						bound[loop.Groups[1].Value] =
+							new Root(parent.Corpus, Join(parent.Prefix, loop.Groups[3].Value), loop.Groups[3].Value);
+					}
 				}
 
 				foreach (Match start in Start.Matches(code[i]))
@@ -220,8 +233,10 @@ namespace Chummer.Tests
 					argument = Regex.Replace(argument, @"\s+", "");
 					if (!NodeRead.IsMatch(argument))
 						continue;
+					if (!IntegerConversions.Contains(start.Groups[1].Value, StringComparer.Ordinal))
+						throw Unknown(site, start.Groups[1].Value + "(" + argument + ")");
 
-					conversions.Add(Understand(site, argument, scope.Roots, bound, code, i));
+					conversions.Add(Understand(site, argument, scope.Roots, bound, code, i, start.Index));
 				}
 			}
 
@@ -229,7 +244,7 @@ namespace Chummer.Tests
 		}
 
 		private static Conversion Understand(string site, string argument, IReadOnlyDictionary<string, Root> roots,
-			IReadOnlyDictionary<string, Root> bound, string[] code, int line)
+			IReadOnlyDictionary<string, Root> bound, string[] code, int line, int column)
 		{
 			Root holder;
 			Match attribute = AttributeRead.Match(argument);
@@ -238,7 +253,8 @@ namespace Chummer.Tests
 				// - a null check ending in another statement guards nothing
 				string guard = @"\bif\s*\(\s*" + Regex.Escape(attribute.Groups[1].Value) + @"\.Attributes\[""" + attribute.Groups[2].Value
 					+ @"""\]\s*!=\s*null\s*\)";
-				bool guarded = Regex.IsMatch(code[line], guard + @"\s*\w")
+				bool guarded = Regex.Matches(code[line], guard).Cast<Match>().Any(check => check.Index + check.Length <= column
+						&& code[line].Substring(check.Index + check.Length, column - check.Index - check.Length).IndexOfAny(new[] { ';', '}' }) < 0)
 					|| (line > 0 && Regex.IsMatch(code[line - 1], "^\\s*" + guard + "\\s*$"));
 				return new Conversion(site, holder.Corpus, Join(holder.Prefix, "@" + attribute.Groups[2].Value), Form.Whole, guarded,
 					holder.LoopPath);

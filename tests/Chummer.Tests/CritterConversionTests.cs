@@ -56,7 +56,7 @@ namespace Chummer.Tests
 		private static readonly IReadOnlyDictionary<string, int> PinnedValueCounts =
 			new Dictionary<string, int>(StringComparer.Ordinal)
 			{
-				{ "critters: essmax", 11 },
+				{ "critters: essmax (digit before D6)", 11 },
 				{ "critters: metavariants/metavariant/powers/power/@rating", 0 },
 				{ "critters: powers/power/@rating", 185 },
 				{ "critters: skills/knowledge/@rating", 2 },
@@ -72,12 +72,15 @@ namespace Chummer.Tests
 		public void EveryConvertedPathReachesTheMeasuredValues()
 		{
 			Dictionary<string, int> actual = CritterConversions.ApplicationConversions
-				.GroupBy(conversion => (conversion.Corpus, conversion.Path, conversion.Form))
+				.GroupBy(conversion => conversion.DataKey, StringComparer.Ordinal)
 				.ToDictionary(
-					group => group.Key.Corpus.Name + ": " + group.Key.Path,
-					group => group.Key.Corpus.Files().Sum(file => CritterConversions.ValuesIn(CustomContent.Load(file),
-						group.Key.Corpus.ItemXPath, group.Key.Path, group.Key.Form,
-						group.Any(conversion => !conversion.Guarded)).Count()),
+					group => group.Key,
+					group =>
+					{
+						CritterConversions.Conversion first = group.First();
+						return first.Corpus.Files().Sum(file => CritterConversions.ValuesIn(CustomContent.Load(file),
+							first.Corpus.ItemXPath, first.Path, first.Form, group.Any(conversion => !conversion.Guarded)).Count());
+					},
 					StringComparer.Ordinal);
 
 			PinReport.AssertEqual("Values per converted path", PinnedValueCounts, actual);

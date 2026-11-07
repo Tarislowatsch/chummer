@@ -55,19 +55,35 @@ namespace Chummer.Tests
 		[InlineData("foreach (XmlNode objXmlPower in objXmlCritter.SelectNodes(\"powers/power\")) "
 			+ "a = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].Value);")]
 		[InlineData("a = Convert.ToInt32(objXmlMetatype[\"essmax\"].InnerText.Substring(intOther, 1));")]
+		[InlineData("a = Convert.ToBoolean(objXmlMetatype[\"essmax\"].InnerText);")]
+		[InlineData("a = Convert.ToDecimal(objXmlMetatype[\"essmax\"].InnerText);")]
+		[InlineData("a = Convert.ToByte(objXmlMetatype[\"essmax\"].InnerText);")]
 		public void AConversionOfAnUnknownShapeThrows(string line)
 		{
 			Assert.Throws<InvalidOperationException>(() => CritterConversions.ConversionsIn(WholeFile, new[] { line }));
 		}
 
-		// - a later loop over foreign data must not inherit the earlier binding
-		[Fact]
-		public void ALoopOverAnUnknownParentDropsTheBinding()
+		[Theory]
+		[InlineData("a = Convert.ToInt32(objXmlMetatype[\"essmax\"].InnerText);")]
+		[InlineData("a = int.Parse(objXmlMetatype[\"essmax\"].InnerText);")]
+		[InlineData("a = Int32.Parse(objXmlMetatype[\"essmax\"].InnerText);")]
+		public void AnIntegerConversionIsUnderstood(string line)
+		{
+			Assert.Equal("critters: essmax", Assert.Single(CritterConversions.ConversionsIn(WholeFile, new[] { line })).Description);
+		}
+
+		// - a later rebinding of any shape must not inherit the earlier binding
+		[Theory]
+		[InlineData("foreach (XmlNode objXmlPower in objXmlDocument.SelectNodes(\"/chummer/powers/power\"))")]
+		[InlineData("foreach (XmlNode objXmlPower in objXmlDocument[\"powers\"].ChildNodes)")]
+		[InlineData("objXmlPower = objXmlDocument.SelectSingleNode(\"/chummer/powers/power\");")]
+		[InlineData("XmlNode objXmlPower = objXmlDocument.SelectSingleNode(\"/chummer/powers/power\");")]
+		public void AnyRebindingDropsTheBinding(string rebinding)
 		{
 			string[] source =
 			{
 				"foreach (XmlNode objXmlPower in objXmlCritter.SelectNodes(\"powers/power\")) { }",
-				"foreach (XmlNode objXmlPower in objXmlDocument.SelectNodes(\"/chummer/powers/power\"))",
+				rebinding,
 				"	a = Convert.ToInt32(objXmlPower.Attributes[\"points\"].InnerText);",
 			};
 
@@ -90,16 +106,23 @@ namespace Chummer.Tests
 			Assert.Equal(guarded, Assert.Single(CritterConversions.ConversionsIn(WholeFile, source)).Guarded);
 		}
 
-		[Fact]
-		public void AGuardOnTheSameLineCounts()
+		// - the if must directly precede the conversion: no statement may end in between
+		[Theory]
+		[InlineData("if (objXmlPower.Attributes[\"rating\"] != null) r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);", true)]
+		[InlineData("if (objXmlPower.Attributes[\"rating\"] != null) { r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText); }", true)]
+		[InlineData("if (objXmlPower.Attributes[\"rating\"] != null) foo(); r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);", false)]
+		[InlineData("if (objXmlPower.Attributes[\"rating\"] != null) foo(); else r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);", false)]
+		[InlineData("if (objXmlPower.Attributes[\"rating\"] != null) { } r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);", false)]
+		[InlineData("r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText); if (objXmlPower.Attributes[\"rating\"] != null) { }", false)]
+		public void AGuardOnTheSameLineCountsOnlyDirectlyBeforeTheConversion(string line, bool guarded)
 		{
 			string[] source =
 			{
 				"foreach (XmlNode objXmlPower in objXmlCritter.SelectNodes(\"powers/power\"))",
-				"	if (objXmlPower.Attributes[\"rating\"] != null) r = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);",
+				"	" + line,
 			};
 
-			Assert.True(Assert.Single(CritterConversions.ConversionsIn(WholeFile, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(CritterConversions.ConversionsIn(WholeFile, source)).Guarded);
 		}
 
 		[Fact]
