@@ -165,36 +165,47 @@ namespace Chummer.Tests
 		}
 
 		// - a missing field fails loudly, an over-reaching extractor would hide one
+		// - swapskillattribute has no rule data: only the custom improvement form writes it
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerFields =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "addattribute", "name" },
+				{ "conditionmonitor", "overflow physical stun threshold thresholdoffset" },
+				{ "livingpersona", "biofeedback firewall response signal system" },
+				{ "selectattribute", "affectbase attribute aug excludeattribute max min val" },
+				{ "selectskill", "applytorating max val" },
+				{ "selectskillgroup", "applytorating bonus" },
+				{ "swapskillattribute", "attribute" },
+			};
+
 		[Fact]
 		public void EachIndexedHandlerReadsTheMeasuredFields()
 		{
-			Assert.Equal(
-				new[]
-				{
-					"addattribute: name",
-					"conditionmonitor: overflow, physical, stun, threshold, thresholdoffset",
-					"selectattribute: affectbase, attribute, aug, excludeattribute, max, min, val",
-					"selectskill: applytorating, max, val",
-					"selectskillgroup: applytorating, bonus",
-				},
-				FieldReaders.HandlerBranches.Select(branch => branch.Handler + ": "
-					+ string.Join(", ", branch.Fields.OrderBy(field => field, StringComparer.Ordinal))));
+			CountReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
+				FieldReaders.HandlerBranches.ToDictionary(branch => branch.Handler, branch => Sorted(branch.Fields),
+					StringComparer.Ordinal));
 		}
+
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "addattribute/name", "MAG RES" },
+				{ "selectskill/applytorating", "yes" },
+				{ "selectskillgroup/applytorating", "yes" },
+			};
 
 		[Fact]
 		public void EachIndexedHandlerDispatchesOnTheMeasuredValues()
 		{
-			Assert.Equal(
-				new[]
-				{
-					"addattribute/name: MAG, RES",
-					"selectskill/applytorating: yes",
-					"selectskillgroup/applytorating: yes",
-				},
-				FieldReaders.HandlerBranches.SelectMany(branch => branch.Dispatch
-					.OrderBy(entry => entry.Key, StringComparer.Ordinal)
-					.Select(entry => branch.Handler + "/" + entry.Key + ": "
-						+ string.Join(", ", entry.Value.OrderBy(value => value, StringComparer.Ordinal)))));
+			CountReport.AssertEqual("Compared values per handler field", MeasuredHandlerDispatch,
+				FieldReaders.HandlerBranches
+					.SelectMany(branch => branch.Dispatch.Select(entry => (Key: branch.Handler + "/" + entry.Key, entry.Value)))
+					.ToDictionary(entry => entry.Key, entry => Sorted(entry.Value), StringComparer.Ordinal));
+		}
+
+		private static string Sorted(IEnumerable<string> values)
+		{
+			return string.Join(" ", values.OrderBy(value => value, StringComparer.Ordinal));
 		}
 
 		// - deliberately no allowlist: every compared value matches today
