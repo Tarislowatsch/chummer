@@ -165,15 +165,21 @@ namespace Chummer.Tests
 				new NameLookups.Literal("frmSelectSpell.cs:31", "required"),
 				new NameLookups.Literal("frmCreate.cs:40", "required/oneof/metatype"),
 				new NameLookups.Literal("frmCreate.cs:41", "required/oneof/metamagic"),
+				new NameLookups.Literal("clsLog.cs:50", "field required"),
+				new NameLookups.Literal("clsLog.cs:51", "required/allof/x"),
 			};
 			FieldReaders.RequirementReader metamagic = new FieldReaders.RequirementReader("metamagic.xml",
 				"metamagics/metamagic", "required/allof", "frmSelectMetamagic.cs:10", FieldReaders.ReadStyle.PathLiterals);
 
 			Assert.Equal(
 				new[] { "frmSelectMetamagic.cs:12", "frmSelectMetamagic.cs:20", "frmSelectSpell.cs:30",
-					"frmSelectSpell.cs:31", "frmCreate.cs:41" },
+					"frmSelectSpell.cs:31", "frmCreate.cs:41", "clsLog.cs:51" },
 				FieldReaders.UnlistedRequirementLiterals(literals, new[] { metamagic },
-						new Dictionary<string, string> { { "frmCreate.cs required/oneof/metatype", "why" } })
+						new Dictionary<string, string>
+						{
+							{ "frmCreate.cs required/oneof/metatype", "why" },
+							{ "clsLog.cs required", "why" },
+						})
 					.Select(literal => literal.Site));
 		}
 

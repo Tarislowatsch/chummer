@@ -193,7 +193,7 @@ namespace Chummer.Tests
 				.ToArray();
 		}
 
-		// - "file group/tag" -> why that consumer is no reader in the table
+		// - "file group/tag", or "file required" for a bare word -> why it is no reader in the table
 		// - leaving a reader out can only add findings, never hide one
 		// - keyed down to the tag: a whole group in frmCreate.cs would wave any new check through
 		public static readonly IReadOnlyDictionary<string, string> KnownExtraReaders =
@@ -205,7 +205,6 @@ namespace Chummer.Tests
 				{ "frmCreate.cs required/oneof/metavariant", "ChangeMetatype re-checks a quality's metavariant" },
 			};
 
-		// - a mention needs a reader for its file and group, or a known extra reader for its tag
 		// - keyed by group: a new oneof read in a file listed for allof must fail too
 		// - a bare block needs a reader of that block in the same file
 		public static IEnumerable<NameLookups.Literal> UnlistedRequirementLiterals(
@@ -221,10 +220,10 @@ namespace Chummer.Tests
 			IReadOnlyDictionary<string, string> extraReaders)
 		{
 			IEnumerable<RequirementReader> inFile = readers.Where(reader => reader.ConsumerFile == file);
-			if (mention.Group == null)
-				return inFile.Any(reader => reader.Group.Split('/')[0] == mention.Block);
-			return inFile.Any(reader => reader.Group == mention.Group)
-				|| extraReaders.ContainsKey(file + " " + mention.Display);
+			bool read = mention.Group == null
+				? inFile.Any(reader => reader.Group.Split('/')[0] == mention.Block)
+				: inFile.Any(reader => reader.Group == mention.Group);
+			return read || extraReaders.ContainsKey(file + " " + mention.Display);
 		}
 
 		// - the line in Consumer must still hold the group's literal: a shifted file leaves a dead pointer
