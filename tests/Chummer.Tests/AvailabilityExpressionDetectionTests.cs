@@ -93,6 +93,8 @@ namespace Chummer.Tests
 			Assert.Equal(new[] { 2, 3, 4, 5, 6, 7, 8, 9, 10 },
 				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>10</rating><minrating>2</minrating></gear>")));
 			Assert.Equal(new[] { 1, 2, 3, 4 }, ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>4</rating></gear>")));
+			Assert.Equal(new[] { 0, 1, 2 },
+				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>2</rating><minrating>0</minrating></gear>")));
 		}
 
 		// - above the limit the sweep stops, the top end is still replayed

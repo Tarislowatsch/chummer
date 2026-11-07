@@ -141,11 +141,12 @@ namespace Chummer.Tests
 			if (max <= 0)
 				return new[] { 0 };
 
+			// - the dialogs take minrating as is, 0 included (frmSelectGear.cs:1097)
 			int min = 1;
 			string minText = fields[1] == null ? null : item[fields[1]]?.InnerText;
 			int declaredMin;
 			if (minText != null && int.TryParse(minText, NumberStyles.Integer, CultureInfo.InvariantCulture,
-				out declaredMin) && declaredMin > min)
+				out declaredMin) && declaredMin >= 0)
 			{
 				min = declaredMin;
 			}

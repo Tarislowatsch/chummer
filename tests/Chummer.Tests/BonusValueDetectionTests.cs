@@ -33,11 +33,52 @@ namespace Chummer.Tests
 			Assert.Equal("IndexOutOfRangeException", failure.Error);
 		}
 
+		// - "levels yes" goes up to MAG, unrated cyberware runs at 0: both get 0..limit
 		[Fact]
-		public void AnOwnerWithoutANumericRatingIsReplayedUpToTheLimit()
+		public void AnOwnerWithoutANumericRatingIsReplayedFromZeroToTheLimit()
 		{
-			Assert.Equal(3, Assert.Single(Failures(
-				"<power><name>P</name><levels>yes</levels><bonus><reach>FixedValues(1,2)</reach></bonus></power>")).Rating);
+			XmlDocument document = new XmlDocument();
+			document.LoadXml("<power><name>P</name><levels>yes</levels><bonus><reach>1</reach></bonus></power>");
+
+			Assert.Equal(Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1),
+				BonusValues.RatingsOf(document.SelectSingleNode("power/bonus")));
+		}
+
+		[Fact]
+		public void UnratedCyberwareIsReplayedAtZero()
+		{
+			Assert.Equal(0, Assert.Single(Failures(
+				"<cyberware><name>C</name><bonus><reach>FixedValues(1)</reach></bonus></cyberware>")).Rating);
+		}
+
+		[Fact]
+		public void AMinimumRatingOfZeroIsReplayed()
+		{
+			Assert.Equal(0, Assert.Single(Failures(
+				"<gear><name>G</name><rating>2</rating><minrating>0</minrating>"
+					+ "<bonus><reach>FixedValues(1,2)</reach></bonus></gear>")).Rating);
+		}
+
+		// - "0,333…" reads as 333333333333333 under en-US and overflows Int32
+		[Fact]
+		public void ACultureThatThrowsIsStillReportedAsCultureDependent()
+		{
+			Assert.Equal("en-US gives 0, de-DE throws OverflowException", Assert.Single(Failures(
+				"<gear><name>G</name><rating>1</rating><bonus><reach>Rating div 3</reach></bonus></gear>")).Error);
+		}
+
+		[Fact]
+		public void TheGermanCultureIgnoresThisMachinesOverrides()
+		{
+			Assert.False(BonusValues.LocalCulture.UseUserOverride);
+		}
+
+		[Fact]
+		public void AFailingValueDoesNotHideTheNextInItsBranch()
+		{
+			Assert.Equal(new[] { "conditionmonitor/physical", "conditionmonitor/stun" }, Failures(
+				"<gear><name>G</name><rating>1</rating><bonus><conditionmonitor><physical>Rating div 2</physical>"
+					+ "<stun>x</stun></conditionmonitor></bonus></gear>").Select(failure => failure.Path));
 		}
 
 		[Fact]
@@ -147,7 +188,7 @@ namespace Chummer.Tests
 			"\t{",
 			"\t\tCreate(ValueToInt(nodBonus[\"reach\"].InnerText,",
 			"\t\t\tintRating));",
-			"\t\tstring s = \"ValueToInt(fake, 1)\";",
+			"\t\tLog(\"ValueToInt(fake, 1)\", this.ValueToInt(nodBonus[\"reach\"].InnerText, intRating + 1));",
 			"\t}",
 			"\tif (NodeExists(nodBonus, \"armor\"))",
 			"\t{",
@@ -169,9 +210,10 @@ namespace Chummer.Tests
 			Assert.Equal(
 				new[]
 				{
-					"5 reach | nodBonus[\"reach\"].InnerText",
-					"13 b | Pick(nodBonus, \"b\")",
-					"16 (no branch) | nodBonus[\"stray\"].InnerText",
+					"5 reach | nodBonus[\"reach\"].InnerText, intRating",
+					"7 reach | nodBonus[\"reach\"].InnerText, intRating + 1",
+					"13 b | Pick(nodBonus, \"b\"), intRating",
+					"16 (no branch) | nodBonus[\"stray\"].InnerText, intRating",
 				},
 				BonusValues.CallsIn(Source, new[] { "reach", "armor", "b" })
 					.Select(call => call.Line + " " + call.Key));

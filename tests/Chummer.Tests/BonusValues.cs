@@ -22,7 +22,8 @@ namespace Chummer.Tests
 
 		// - ValueToInt prints the XPath result in the thread culture: the app never sets one
 		// - the parse back is en-US: under de-DE "1,5" reads as 15
-		public static readonly CultureInfo LocalCulture = new CultureInfo("de-DE");
+		// - GetCultureInfo ignores this machine's overrides of its own culture
+		public static readonly CultureInfo LocalCulture = CultureInfo.GetCultureInfo("de-DE");
 
 		// - stand-ins for the character's TotalValue: no bonus value names an attribute today
 		// - 0 is a mundane's MAG, an odd value exposes a fraction
@@ -230,19 +231,13 @@ namespace Chummer.Tests
 			return Convert.ToInt32(value, threadCulture);
 		}
 
-		// - thrown where both cultures parse but disagree: the character silently gets the other number
+		// - en-US converts, de-DE gives another number or throws: the defect is in ValueToInt
 		public sealed class CultureDependent : Exception
 		{
-			public CultureDependent(int english, int local)
-				: base("en-US gives " + english + ", de-DE gives " + local)
+			public CultureDependent(int english, string local)
+				: base("en-US gives " + english + ", de-DE " + local)
 			{
-				English = english;
-				Local = local;
 			}
-
-			public int English { get; }
-
-			public int Local { get; }
 		}
 
 		// - a failure at one read, labelled with its path below the bonus root
@@ -262,9 +257,12 @@ namespace Chummer.Tests
 		}
 
 		// - one replay of one branch at one rating
+		// - a failing value is recorded and the replay goes on: a known one must not hide the next
 		public sealed class Reader
 		{
 			private readonly List<(string Path, string Value)> _reached = new List<(string Path, string Value)>();
+
+			private readonly List<ReadFailed> _failures = new List<ReadFailed>();
 
 			public Reader(int rating)
 			{
@@ -275,19 +273,31 @@ namespace Chummer.Tests
 
 			public IReadOnlyList<(string Path, string Value)> Reached => _reached;
 
+			public IReadOnlyList<ReadFailed> Failures => _failures;
+
 			public void Value(string path, Func<string> read)
 			{
-				string value = Read(path, read);
-				_reached.Add((path, value));
-				ConvertEach(path, value, (attribute, culture) => ValueToInt(value, Rating, attribute, culture));
+				Record(path, read, (value, attribute, culture) => ValueToInt(value, Rating, attribute, culture));
 			}
 
 			// - a direct Convert.ToInt32 in the same branch, also in the thread culture
 			public void Integer(string path, Func<string> read)
 			{
-				string value = Read(path, read);
-				_reached.Add((path, value));
-				ConvertEach(path, value, (attribute, culture) => System.Convert.ToInt32(value, culture));
+				Record(path, read, (value, attribute, culture) => System.Convert.ToInt32(value, culture));
+			}
+
+			private void Record(string path, Func<string> read, Func<string, int, CultureInfo, int> convert)
+			{
+				try
+				{
+					string value = Read(path, read);
+					_reached.Add((path, value));
+					ConvertEach(path, value, (attribute, culture) => convert(value, attribute, culture));
+				}
+				catch (ReadFailed failure)
+				{
+					_failures.Add(failure);
+				}
 			}
 
 			// - a read that decides what ValueToInt gets, e.g. the attribute's name
@@ -321,25 +331,35 @@ namespace Chummer.Tests
 				foreach (int attribute in attributes)
 				{
 					int english;
-					int local;
 					try
 					{
 						english = convert(attribute, ExpressionChecks.ApplicationCulture);
-						local = convert(attribute, LocalCulture);
 					}
 					catch (Exception exception)
 					{
 						throw new ReadFailed(path, value, exception);
 					}
 
-					if (english != local)
+					// - "0,333…" reads as 333333333333333 and overflows: still the culture, not the data
+					string local;
+					try
+					{
+						int number = convert(attribute, LocalCulture);
+						local = number == english ? null : "gives " + number;
+					}
+					catch (Exception exception)
+					{
+						local = "throws " + exception.GetType().Name;
+					}
+
+					if (local != null)
 						throw new ReadFailed(path, value, new CultureDependent(english, local));
 				}
 			}
 		}
 
-		// - min..max of the owner's rating, its levels, else every rating up to the limit
-		// - "levels yes" powers and critter "rating yes" go up to MAG: no number to read
+		// - min..max of the owner's rating or levels, minrating taken as is (frmSelectGear.cs:1097)
+		// - no number: 0 for unrated cyberware (frmSelectCyberware.cs:254), up to MAG for "levels yes"
 		public static IReadOnlyList<int> RatingsOf(XmlNode root)
 		{
 			XmlNode owner = root.ParentNode;
@@ -354,12 +374,8 @@ namespace Chummer.Tests
 				if (max <= 0)
 					return new[] { 0 };
 
-				int min = 1;
-				if (int.TryParse(owner["minrating"]?.InnerText, NumberStyles.Integer, CultureInfo.InvariantCulture,
-					out int declared) && declared > min)
-				{
-					min = declared;
-				}
+				int min = int.TryParse(owner["minrating"]?.InnerText, NumberStyles.Integer, CultureInfo.InvariantCulture,
+					out int declared) ? Math.Max(0, declared) : 1;
 
 				return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExpressionChecks.ExhaustiveRatingLimit) - min + 1))
 					.Concat(new[] { max })
@@ -367,7 +383,7 @@ namespace Chummer.Tests
 					.ToArray();
 			}
 
-			return Enumerable.Range(1, ExpressionChecks.ExhaustiveRatingLimit).ToArray();
+			return Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1).ToArray();
 		}
 
 		public sealed class BonusValueFailure
@@ -423,7 +439,7 @@ namespace Chummer.Tests
 		}
 
 		// - public so the detection tests can drive it with hand-built XML
-		// - one failure per root and branch: the code stops at the first throw as well
+		// - one failure per value, at its first failing rating
 		public static BonusValueCheck CheckIn(string file, string baseFile, XmlDocument document)
 		{
 			List<BonusValueFailure> failures = new List<BonusValueFailure>();
@@ -440,23 +456,32 @@ namespace Chummer.Tests
 				foreach (string handler in ReplayedHandlers.Where(handler => NodeExists(root, handler)))
 				{
 					Action<XmlNode, Reader> replay = ReplayOf(handler);
+					HashSet<string> reported = new HashSet<string>(StringComparer.Ordinal);
 					for (int i = 0; i < ratings.Count; i++)
 					{
 						Reader reader = new Reader(ratings[i]);
+						List<ReadFailed> found = new List<ReadFailed>();
+
+						// - only a Decide read still throws: what follows it depends on its result
 						try
 						{
 							replay(root, reader);
 						}
 						catch (ReadFailed failure)
 						{
-							failures.Add(new BonusValueFailure(file, itemName, handler, ratings[i], failure));
-							break;
+							found.Add(failure);
 						}
-						finally
+
+						found.InsertRange(0, reader.Failures);
+						foreach (BonusValueFailure failure in found
+							.Select(each => new BonusValueFailure(file, itemName, handler, ratings[i], each))
+							.Where(failure => reported.Add(failure.Key)))
 						{
-							if (i == 0)
-								reached.AddRange(reader.Reached.Select(value => (file, value.Path, value.Value)));
+							failures.Add(failure);
 						}
+
+						if (i == 0)
+							reached.AddRange(reader.Reached.Select(value => (file, value.Path, value.Value)));
 					}
 				}
 			}
@@ -482,14 +507,14 @@ namespace Chummer.Tests
 				checks.SelectMany(check => check.CutShort).ToArray());
 		});
 
-		// One ValueToInt call in the source: the branch it sits in and its argument as written.
+		// One ValueToInt call in the source: the branch it sits in and its arguments as written.
 		public sealed class Call
 		{
-			public Call(int line, string handler, string argument)
+			public Call(int line, string handler, string arguments)
 			{
 				Line = line;
 				Handler = handler;
-				Argument = argument;
+				Arguments = arguments;
 			}
 
 			// - 1-based
@@ -498,21 +523,24 @@ namespace Chummer.Tests
 			// - "(no branch)" outside every NodeExists(<bonus>, "handler") block
 			public string Handler { get; }
 
-			public string Argument { get; }
+			// - both arguments: the replays take the rating as intRating
+			public string Arguments { get; }
 
-			public string Key => Handler + " | " + Argument;
+			public string Key => Handler + " | " + Arguments;
 		}
 
 		public const string NoBranch = "(no branch)";
 
-		private static readonly Regex CallStart = new Regex(@"(?<![\w.])ValueToInt\s*\(", RegexOptions.Compiled);
+		// - this. is the only qualified form a private method can take
+		private static readonly Regex CallStart =
+			new Regex(@"(?<![\w.])(?:this\s*\.\s*)?ValueToInt\s*\(", RegexOptions.Compiled);
 
 		// - public so the detection tests can drive it with hand-built source
 		// - the innermost branch wins: a block nested in another is the one that guards the call
 		public static IReadOnlyList<Call> CallsIn(string[] lines, IEnumerable<string> handlers)
 		{
 			string[] code = SourceLines.Of(lines).Code;
-			string[] bare = SourceLines.Of(lines).Bare;
+			string[] masked = MaskLiterals(code);
 			(string Handler, int Start, int Length)[] branches = handlers
 				.Select(handler =>
 				{
@@ -524,13 +552,9 @@ namespace Chummer.Tests
 			List<Call> calls = new List<Call>();
 			for (int i = 0; i < code.Length; i++)
 			{
-				// - Bare has no literals: a "ValueToInt(" inside a string is no call
-				if (!CallStart.IsMatch(bare[i]))
-					continue;
-
-				foreach (Match match in CallStart.Matches(code[i]))
+				foreach (Match match in CallStart.Matches(masked[i]))
 				{
-					string argument = FirstArgument(code, i, match.Index + match.Length);
+					string argument = ArgumentsOf(code, i, match.Index + match.Length);
 					if (argument.StartsWith("string ", StringComparison.Ordinal))
 						continue;
 
@@ -546,8 +570,59 @@ namespace Chummer.Tests
 			return calls;
 		}
 
-		// - up to the first comma at depth 0, across lines, whitespace collapsed
-		private static string FirstArgument(string[] code, int line, int column)
+		// - literal contents blanked, columns kept: a "ValueToInt(" inside a string is no call
+		// - Bare drops literals instead, so its columns do not match Code
+		private static string[] MaskLiterals(string[] code)
+		{
+			string[] masked = new string[code.Length];
+			bool verbatim = false;
+			for (int i = 0; i < code.Length; i++)
+			{
+				char[] line = code[i].ToCharArray();
+				char quote = verbatim ? '"' : '\0';
+				for (int j = 0; j < line.Length; j++)
+				{
+					char current = line[j];
+					if (quote == '\0')
+					{
+						if (current == '"' || current == '\'')
+						{
+							quote = current;
+							verbatim = current == '"' && j > 0 && line[j - 1] == '@';
+						}
+
+						continue;
+					}
+
+					if (!verbatim && current == '\\' && j + 1 < line.Length)
+					{
+						line[j] = ' ';
+						line[++j] = ' ';
+					}
+					else if (verbatim && current == '"' && j + 1 < line.Length && line[j + 1] == '"')
+					{
+						line[j] = ' ';
+						line[++j] = ' ';
+					}
+					else if (current == quote)
+					{
+						quote = '\0';
+						verbatim = false;
+					}
+					else
+					{
+						line[j] = ' ';
+					}
+				}
+
+				masked[i] = new string(line);
+			}
+
+			return masked;
+		}
+
+		// - up to the closing parenthesis, across lines, whitespace collapsed
+		private static string ArgumentsOf(string[] code, int line, int column)
 		{
 			StringBuilder argument = new StringBuilder();
 			int depth = 0;
@@ -575,7 +650,7 @@ namespace Chummer.Tests
 					else if (current == ')' || current == ']')
 						depth--;
 
-					if (depth < 0 || (depth == 0 && current == ','))
+					if (depth < 0)
 						return Regex.Replace(argument.ToString().Trim(), @"\s+", " ");
 					argument.Append(current);
 				}
