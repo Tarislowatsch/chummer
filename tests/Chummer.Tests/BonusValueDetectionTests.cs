@@ -59,7 +59,6 @@ namespace Chummer.Tests
 					+ "<bonus><reach>FixedValues(1,2)</reach></bonus></gear>")).Rating);
 		}
 
-		// - "0,333…" reads as 333333333333333 under en-US and overflows Int32
 		[Fact]
 		public void ACultureThatThrowsIsStillReportedAsCultureDependent()
 		{

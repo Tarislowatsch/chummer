@@ -358,8 +358,9 @@ namespace Chummer.Tests
 			}
 		}
 
-		// - min..max of the owner's rating or levels, minrating taken as is (frmSelectGear.cs:1097)
+		// - min..max of the owner's rating or levels
 		// - no number: 0 for unrated cyberware (frmSelectCyberware.cs:254), up to MAG for "levels yes"
+		// - qualities always get 1 (clsUnique.cs:1094): the open sweep can err red, never silent
 		public static IReadOnlyList<int> RatingsOf(XmlNode root)
 		{
 			XmlNode owner = root.ParentNode;
@@ -374,8 +375,7 @@ namespace Chummer.Tests
 				if (max <= 0)
 					return new[] { 0 };
 
-				int min = int.TryParse(owner["minrating"]?.InnerText, NumberStyles.Integer, CultureInfo.InvariantCulture,
-					out int declared) ? Math.Max(0, declared) : 1;
+				int min = ExpressionChecks.MinimumRating(owner["minrating"]?.InnerText);
 
 				return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExpressionChecks.ExhaustiveRatingLimit) - min + 1))
 					.Concat(new[] { max })

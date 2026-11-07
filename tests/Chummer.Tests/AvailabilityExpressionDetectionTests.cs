@@ -97,6 +97,18 @@ namespace Chummer.Tests
 				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>2</rating><minrating>0</minrating></gear>")));
 		}
 
+		// - one rule for both sweeps, BonusValues.RatingsOf calls it as well
+		[Theory]
+		[InlineData(null, 1)]
+		[InlineData("x", 1)]
+		[InlineData("0", 0)]
+		[InlineData("-2", 0)]
+		[InlineData("3", 3)]
+		public void TheMinimumRatingIsTakenAsTheDialogsTakeIt(string minText, int expected)
+		{
+			Assert.Equal(expected, ExpressionChecks.MinimumRating(minText));
+		}
+
 		// - above the limit the sweep stops, the top end is still replayed
 		[Fact]
 		public void RatingsAboveTheLimitKeepOnlyTheTopEnd()
