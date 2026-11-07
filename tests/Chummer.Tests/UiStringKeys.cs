@@ -171,8 +171,8 @@ namespace Chummer.Tests
 			// - frmSelectWeaponAccessory.cs:91 and six copies in frmCreate/frmCareer, split on '/'
 			// - every file: PACKS kits copy packs.xml's <mount> too (frmCreate.cs:21063, :21429)
 			Form("\"String_Mount\" + strCurrentMount", "String_Mount", "",
-				"every top-level data file //mount",
-				() => TopLevelDataValues("//mount").SelectMany(MountParts)),
+				"every data and pack file //mount",
+				() => AllDataValues("//mount").SelectMany(MountParts)),
 			// SkillControl.cs:649 and :653
 			Form("\"String_Attribute\" + _objSkill.Attribute + \"Short\"", "String_Attribute", "Short",
 				"skills.xml //skill/attribute", () => DataValues("skills.xml", "//skill/attribute")),
@@ -183,13 +183,13 @@ namespace Chummer.Tests
 			// - frmSelectAttribute.cs:193 gets bonus lists (clsImprovement.cs:1416, :1502)
 			// - frmCreateImprovement only adds and removes fixed attributes in code
 			Form("\"String_Attribute\" + strAttribute + \"Short\"", "String_Attribute", "Short",
-				"skills.xml //skill/attribute and every top-level data file's selectattribute/swapskillattribute",
-				() => DataValues("skills.xml", "//skill/attribute").Concat(TopLevelDataValues(
+				"skills.xml //skill/attribute and every data and pack file's selectattribute/swapskillattribute",
+				() => DataValues("skills.xml", "//skill/attribute").Concat(AllDataValues(
 					"//bonus/selectattribute/attribute | //bonus/swapskillattribute/attribute"))),
 			// frmSelectPACKSKit.cs:127, element names upper-cased
 			Form("\"String_Attribute\" + objXmlAttribute.Name.ToUpper() + \"Short\"", "String_Attribute", "Short",
 				"packs.xml //attributes/* element names",
-				() => Load("packs.xml").SelectNodes("//attributes/*").Cast<XmlNode>()
+				() => Nodes("packs.xml", "//attributes/*")
 					.Select(node => node.Name.ToUpperInvariant())),
 			// clsUnique.cs:7271
 			Form("\"String_\" + _objContactType.ToString()", "String_", "",
@@ -215,8 +215,7 @@ namespace Chummer.Tests
 			return mount.Split('/').Where(part => part != "");
 		}
 
-		// - top-level only: the pack follow-up ticket covers custom content
-		private static IEnumerable<string> TopLevelDataValues(string xpath)
+		private static IEnumerable<string> AllDataValues(string xpath)
 		{
 			return Directory.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
 				.SelectMany(path => DataValues(Path.GetFileName(path), xpath));
@@ -224,14 +223,17 @@ namespace Chummer.Tests
 
 		private static IEnumerable<string> DataValues(string fileName, string xpath)
 		{
-			return Load(fileName).SelectNodes(xpath).Cast<XmlNode>().Select(node => node.InnerText);
+			return Nodes(fileName, xpath).Select(node => node.InnerText);
 		}
 
-		private static XmlDocument Load(string fileName)
+		// - the base file plus every pack file Load would merge into it once copied in
+		private static IEnumerable<XmlNode> Nodes(string fileName, string xpath)
 		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(Path.Combine(DataPaths.ChummerDataDir, fileName));
-			return document;
+			return new[] { Path.Combine(DataPaths.ChummerDataDir, fileName) }
+				.Concat(CustomContent.PairedPackFiles()
+					.Where(pack => string.Equals(pack.BaseFileName, fileName, StringComparison.Ordinal))
+					.Select(pack => pack.FilePath))
+				.SelectMany(path => CustomContent.Load(path).SelectNodes(xpath).Cast<XmlNode>());
 		}
 
 		// - public so the detection tests can drive it with hand-built source

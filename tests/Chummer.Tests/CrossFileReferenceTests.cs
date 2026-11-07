@@ -44,10 +44,24 @@ namespace Chummer.Tests
 		public void EveryReferenceResolves(string id)
 		{
 			CrossFileReferences.ReferenceCheck check = CrossFileReferences.CheckFor(id);
+			AssertResolved(check, check.Rule.SourceLabel, KnownUnresolvedReferences);
+		}
 
+		// - no allowlist: the known references above are base entries
+		[Theory]
+		[MemberData(nameof(CrossFileReferences.PackRuleIds), MemberType = typeof(CrossFileReferences))]
+		public void EveryPackReferenceResolves(string packPath, string id)
+		{
+			AssertResolved(CrossFileReferences.PackCheckFor(packPath, id), Path.GetFileName(packPath),
+				new HashSet<string>());
+		}
+
+		private static void AssertResolved(CrossFileReferences.ReferenceCheck check, string source,
+			HashSet<string> known)
+		{
 			// Grouped by key: one bad name repeated across critters is one problem.
 			var unexpected = check.Unresolved
-				.Where(reference => !KnownUnresolvedReferences.Contains(Entry(reference)))
+				.Where(reference => !known.Contains(Entry(reference)))
 				.GroupBy(reference => reference.Display, StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
@@ -55,7 +69,7 @@ namespace Chummer.Tests
 			if (unexpected.Length > 0)
 			{
 				Assert.Fail(FailureReport.Build(
-					check.Rule.SourceLabel + " has " + unexpected.Length + " " + id
+					source + " has " + unexpected.Length + " " + check.Rule.Id
 						+ " value(s) that " + check.Rule.Consumer + " cannot find",
 					unexpected,
 					group => Entry(group.First()) + "  (" + group.Count() + "x, e.g. '"

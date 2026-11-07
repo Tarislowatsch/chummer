@@ -42,7 +42,7 @@ namespace Chummer.Tests
 		}
 
 		// - bonus targets live in every file that carries a bonus
-		// - every file the suite loads: top-level data only, not "custom content/"
+		// - pack files included: they are scoped by their base file's name
 		public const string AnyFile = "*";
 
 		public sealed class ReferenceRule
@@ -229,23 +229,56 @@ namespace Chummer.Tests
 
 			Dictionary<string, ReferenceCheck> checks = new Dictionary<string, ReferenceCheck>(StringComparer.Ordinal);
 
+			// - Add, not the indexer: a repeated id would replace the first rule's check
 			foreach (ReferenceRule rule in Rules)
-			{
-				Reference[] ruleReferences = references[rule.Id].ToArray();
-				IReadOnlyList<IReadOnlyList<string>> definitions =
-					targetKeys[rule.Id].SelectMany(keys => keys.Keys).ToArray();
-				int[] definitionCounts = Enumerable.Range(0, rule.Targets.Count)
-					.Select(index => targetKeys[rule.Id]
-						.Where(keys => keys.TargetIndex == index)
-						.Sum(keys => keys.Keys.Count))
-					.ToArray();
-
-				// - Add, not the indexer: a repeated id would replace the first rule's check
-				checks.Add(rule.Id, new ReferenceCheck(rule, ruleReferences.Length,
-					definitionCounts, Unresolved(rule, ruleReferences, definitions)));
-			}
+				checks.Add(rule.Id, CheckOf(rule, references[rule.Id].ToArray(), targetKeys[rule.Id].ToArray()));
 
 			return checks;
+		}
+
+		private static ReferenceCheck CheckOf(ReferenceRule rule, IReadOnlyList<Reference> references,
+			IReadOnlyList<TargetKeys> targetKeys)
+		{
+			IReadOnlyList<IReadOnlyList<string>> definitions = targetKeys.SelectMany(keys => keys.Keys).ToArray();
+			int[] definitionCounts = Enumerable.Range(0, rule.Targets.Count)
+				.Select(index => targetKeys.Where(keys => keys.TargetIndex == index).Sum(keys => keys.Keys.Count))
+				.ToArray();
+
+			return new ReferenceCheck(rule, references.Count, definitionCounts,
+				Unresolved(rule, references, definitions));
+		}
+
+		public static IEnumerable<object[]> PackRuleIds()
+		{
+			return CustomContent.PairedPackFiles()
+				.SelectMany(file => PackChecksIn(file.FilePath)
+					.Select(check => new object[] { file.FilePath, check.Rule.Id }));
+		}
+
+		public static ReferenceCheck PackCheckFor(string packPath, string id)
+		{
+			return PackChecksIn(packPath).Single(check => string.Equals(check.Rule.Id, id, StringComparison.Ordinal));
+		}
+
+		// - targets: the top-level data plus the custom files of the same pack
+		// - other packs stay invisible: a user copies in only the packs they want
+		// - override files add no name: they rewrite a base entry's content
+		private static IEnumerable<ReferenceCheck> PackChecksIn(string packPath)
+		{
+			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
+			ILookup<string, Reference> references = ReferencesIn(file.BaseFileName, CustomContent.Load(packPath), Rules)
+				.ToLookup(reference => reference.RuleId, StringComparer.Ordinal);
+			ILookup<string, TargetKeys> targetKeys = RuleCorpus.Files
+				.SelectMany(top => top.CrossFileTargetKeys)
+				.Concat(CustomContent.PairedPackFiles()
+					.Where(other => string.Equals(other.PackName, file.PackName, StringComparison.Ordinal)
+						&& !other.IsOverride)
+					.SelectMany(other => TargetKeysIn(other.BaseFileName, CustomContent.Load(other.FilePath), Rules)))
+				.ToLookup(keys => keys.RuleId, StringComparer.Ordinal);
+
+			return Rules
+				.Where(rule => references[rule.Id].Any())
+				.Select(rule => CheckOf(rule, references[rule.Id].ToArray(), targetKeys[rule.Id].ToArray()));
 		}
 
 		// - a reference resolves when any target offers a key equal on every field it carries

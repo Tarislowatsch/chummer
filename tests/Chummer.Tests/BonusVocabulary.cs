@@ -114,6 +114,18 @@ namespace Chummer.Tests
 			return RuleCorpus.FileAt(xmlPath).BonusTags;
 		}
 
+		public static IEnumerable<object[]> PackFilesWithBonuses()
+		{
+			return CustomContent.PairedPackFiles()
+				.Where(file => BonusTagsInPack(file.FilePath).Count > 0)
+				.Select(file => new object[] { file.FilePath });
+		}
+
+		public static IReadOnlyList<BonusTag> BonusTagsInPack(string packPath)
+		{
+			return BonusTagsIn(CustomContent.PackFileFor(packPath).BaseFileName, CustomContent.Load(packPath));
+		}
+
 		// - public so the detection tests can drive it with hand-built XML
 		// - direct children only: XmlNode lookups by tag name never look deeper
 		public static IReadOnlyList<BonusTag> BonusTagsIn(string fileName, XmlDocument document)

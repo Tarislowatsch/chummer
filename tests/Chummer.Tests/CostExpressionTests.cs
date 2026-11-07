@@ -24,15 +24,27 @@ namespace Chummer.Tests
 		[MemberData(nameof(ExpressionChecks.RuleIds), "cost", MemberType = typeof(ExpressionChecks))]
 		public void EveryCostParsesInItsCalculator(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
+			AssertParses(ExpressionChecks.CheckFor(id), KnownFailuresFor(id));
+		}
+
+		// - no allowlist: the known failures above are base entries
+		[Theory]
+		[MemberData(nameof(ExpressionChecks.PackRuleIds), "cost", MemberType = typeof(ExpressionChecks))]
+		public void EveryPackCostParsesInItsCalculator(string packPath, string id)
+		{
+			AssertParses(ExpressionChecks.PackCheckFor(packPath, id), new string[0]);
+		}
+
+		private static void AssertParses(ExpressionChecks.ExpressionCheck check, IReadOnlyCollection<string> known)
+		{
 			ExpressionChecks.ExpressionFailure[] unexpected = check.Failures
-				.Where(failure => !KnownFailuresFor(id).Contains(failure.Key))
+				.Where(failure => !known.Contains(failure.Key))
 				.ToArray();
 
 			if (unexpected.Length > 0)
 			{
 				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + id
+					Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + check.Rule.Id
 						+ " value(s) its calculator throws on",
 					unexpected,
 					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "

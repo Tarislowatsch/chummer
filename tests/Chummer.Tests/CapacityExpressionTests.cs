@@ -15,12 +15,23 @@ namespace Chummer.Tests
 		[MemberData(nameof(ExpressionChecks.RuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryCapacityPassesItsCalculatorsAndConsumers(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
+			AssertPasses(ExpressionChecks.CheckFor(id));
+		}
 
+		[Theory]
+		[MemberData(nameof(ExpressionChecks.PackRuleIds), "capacity", MemberType = typeof(ExpressionChecks))]
+		[MemberData(nameof(ExpressionChecks.PackRuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
+		public void EveryPackCapacityPassesItsCalculatorsAndConsumers(string packPath, string id)
+		{
+			AssertPasses(ExpressionChecks.PackCheckFor(packPath, id));
+		}
+
+		private static void AssertPasses(ExpressionChecks.ExpressionCheck check)
+		{
 			if (check.Failures.Count > 0)
 			{
 				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + id
+					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
 						+ " value(s) a capacity calculator or its consumer fails on",
 					check.Failures,
 					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "

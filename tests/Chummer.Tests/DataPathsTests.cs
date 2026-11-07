@@ -166,5 +166,40 @@ namespace Chummer.Tests
 		{
 			Assert.Equal(18, CustomContent.PackFilesCitingBooks().Count());
 		}
+
+		// - a pack scoped by the wrong file name reaches no rule: its pack theories run zero cases
+		// - one case per pack file and rule that reaches an entry there
+		[Fact]
+		public void PackEntitiesFindsEveryRuleAPackReaches()
+		{
+			Assert.Equal(18, RequiredFields.PackEntities().Count());
+		}
+
+		[Fact]
+		public void PackNumericEntitiesFindsEveryRuleAPackReaches()
+		{
+			Assert.Equal(15, NumericFields.PackEntities().Count());
+		}
+
+		// - per field: a total would hide one field losing what another gains
+		[Fact]
+		public void PackExpressionRuleIdsFindsEveryRuleAPackReaches()
+		{
+			Assert.Equal(new[] { 15, 13, 1, 6, 7 }, new[] { "avail", "cost", "ess", "capacity", "armorcapacity" }
+				.Select(field => ExpressionChecks.PackRuleIds(field).Count()));
+		}
+
+		// - aprilfools metatypes, datahaven1 critters, rigger4 cyberware
+		[Fact]
+		public void PackFilesWithBonusesFindsEveryBonusFile()
+		{
+			Assert.Equal(3, BonusVocabulary.PackFilesWithBonuses().Count());
+		}
+
+		[Fact]
+		public void PackReferenceRuleIdsFindsEveryRuleAPackUses()
+		{
+			Assert.Equal(16, CrossFileReferences.PackRuleIds().Count());
+		}
 	}
 }

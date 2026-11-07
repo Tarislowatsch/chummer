@@ -67,11 +67,12 @@ namespace Chummer.Tests
 
 		public sealed class NumericFieldCheck
 		{
-			public NumericFieldCheck(string entity, string filePath, IReadOnlyList<ConvertedField> fields,
-				IReadOnlyList<UnconvertibleValue> unconvertible)
+			public NumericFieldCheck(string entity, string filePath, int itemCount,
+				IReadOnlyList<ConvertedField> fields, IReadOnlyList<UnconvertibleValue> unconvertible)
 			{
 				Entity = entity;
 				FilePath = filePath;
+				ItemCount = itemCount;
 				Fields = fields;
 				Unconvertible = unconvertible;
 			}
@@ -79,6 +80,8 @@ namespace Chummer.Tests
 			public string Entity { get; }
 
 			public string FilePath { get; }
+
+			public int ItemCount { get; }
 
 			public IReadOnlyList<ConvertedField> Fields { get; }
 
@@ -276,9 +279,9 @@ namespace Chummer.Tests
 						.ToDictionary(check => check.Entity, StringComparer.Ordinal));
 
 		// - inside the single parse, like the required-field contracts it borrows its XPaths from
-		public static IReadOnlyList<NumericFieldCheck> ChecksIn(string xmlPath, XmlDocument document)
+		public static IReadOnlyList<NumericFieldCheck> ChecksIn(string fileName, string xmlPath,
+			XmlDocument document)
 		{
-			string fileName = Path.GetFileName(xmlPath);
 			List<NumericFieldCheck> checks = new List<NumericFieldCheck>();
 
 			foreach (RequiredFields.RequiredFieldRule rule in RequiredFields.Rules
@@ -289,12 +292,32 @@ namespace Chummer.Tests
 				if (!ConvertedFields.TryGetValue(className, out fields))
 					continue;
 
-				checks.Add(new NumericFieldCheck(rule.Entity, xmlPath, fields,
-					UnconvertibleValuesIn(document.SelectNodes(rule.ItemXPath).Cast<XmlNode>(),
-						className, fields)));
+				XmlNode[] items = document.SelectNodes(rule.ItemXPath).Cast<XmlNode>().ToArray();
+				checks.Add(new NumericFieldCheck(rule.Entity, xmlPath, items.Length, fields,
+					UnconvertibleValuesIn(items, className, fields)));
 			}
 
 			return checks;
+		}
+
+		public static IEnumerable<object[]> PackEntities()
+		{
+			return CustomContent.PairedPackFiles()
+				.SelectMany(file => PackChecksIn(file.FilePath))
+				.Select(check => new object[] { check.FilePath, check.Entity });
+		}
+
+		public static NumericFieldCheck PackCheckFor(string packPath, string entity)
+		{
+			return PackChecksIn(packPath)
+				.Single(check => string.Equals(check.Entity, entity, StringComparison.Ordinal));
+		}
+
+		// - only rules that reach an entry, as for the required-field contracts
+		private static IEnumerable<NumericFieldCheck> PackChecksIn(string packPath)
+		{
+			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, CustomContent.Load(packPath))
+				.Where(check => check.ItemCount > 0);
 		}
 
 		// - public so the detection tests can drive it with hand-built XML
