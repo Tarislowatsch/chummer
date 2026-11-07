@@ -96,6 +96,23 @@ namespace Chummer.Tests
 				+ nameof(KnownUndeclaredCategories) + ":\n  " + string.Join("\n  ", stale));
 		}
 
+		// - a renamed collection leaves its hand-written exemption applying to nothing
+		// - the count pin in DataPathsTests cannot tell that silence from a legitimate change
+		// - both structures share the check: a key belongs to exactly one of them
+		[Fact]
+		public void CategoryScopeExceptionsAllNameARealCollection()
+		{
+			string[] known = CategoryDeclarations.CollectionsUsingCategories().ToArray();
+
+			string[] stale = CategoryDeclarations.CategoryScopeExceptionKeys()
+				.Where(key => !known.Contains(key))
+				.ToArray();
+
+			Assert.True(stale.Length == 0,
+				"These category scope exceptions name a (file, collection) that carries no "
+				+ "<category> any more:\n  " + string.Join("\n  ", stale));
+		}
+
 		// Deferred categories are copied verbatim from the failure output into the list.
 		private static string Entry(string xmlPath, string collectionName, string category)
 		{
