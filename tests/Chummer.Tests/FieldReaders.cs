@@ -151,6 +151,49 @@ namespace Chummer.Tests
 				"frmSelectQuality.cs:833", ReadStyle.NameDispatch),
 		};
 
+		private static readonly Regex RequirementStep =
+			new Regex(@"(?<![A-Za-z0-9_])(required|forbidden)/([A-Za-z0-9_]+)");
+
+		// - the group a literal walks into, e.g. "required/oneof", or "required" for a direct child
+		// - null when the literal names no step below required or forbidden
+		public static string RequirementGroupOf(string literal)
+		{
+			Match match = RequirementStep.Match(literal);
+			if (!match.Success)
+				return null;
+			string block = match.Groups[1].Value;
+			return GroupNames.Contains(match.Groups[2].Value) ? block + "/" + match.Groups[2].Value : block;
+		}
+
+		// - "file group" -> why that consumer is no reader in the table
+		// - leaving a reader out can only add findings, never hide one
+		public static readonly IReadOnlyDictionary<string, string> KnownExtraReaders =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "frmCreate.cs required/allof", "ChangeMetatype re-checks qualities.xml metatype/metavariant" },
+				{ "frmCreate.cs required/oneof", "ChangeMetatype re-checks qualities.xml metatype/metavariant" },
+			};
+
+		// - every literal stepping below required or forbidden needs a reader or a known extra reader
+		// - keyed by file and group: a new oneof read in a file listed for allof must fail too
+		public static IEnumerable<NameLookups.Literal> UnlistedRequirementLiterals(
+			IEnumerable<NameLookups.Literal> literals, IEnumerable<RequirementReader> readers,
+			IReadOnlyDictionary<string, string> extraReaders)
+		{
+			HashSet<string> listed = new HashSet<string>(
+				readers.Select(reader => reader.ConsumerFile + " " + reader.Group).Concat(extraReaders.Keys),
+				StringComparer.Ordinal);
+			return literals.Where(literal => RequirementGroupOf(literal.Text) is string group
+				&& !listed.Contains(literal.File + " " + group));
+		}
+
+		// - the line in Consumer must still hold the group's literal: a shifted file leaves a dead pointer
+		public static bool ConsumerLineSelectsGroup(RequirementReader reader, IEnumerable<NameLookups.Literal> literals)
+		{
+			return literals.Any(literal => literal.Site == reader.Consumer
+				&& (literal.Text == reader.Group || literal.Text.StartsWith(reader.Group + "/", StringComparison.Ordinal)));
+		}
+
 		private static readonly Regex NameComparison = new Regex(@"\.Name\s*==\s*""([^""]+)""");
 
 		// - public so the detection tests can drive it with hand-built source

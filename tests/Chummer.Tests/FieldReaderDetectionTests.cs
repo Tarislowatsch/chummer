@@ -124,6 +124,57 @@ namespace Chummer.Tests
 			Assert.Throws<System.InvalidOperationException>(() => FieldReaders.TagsReadBy(reader, new[] { line }));
 		}
 
+		[Theory]
+		[InlineData("required/oneof", "required/oneof")]
+		[InlineData("required/allof/metatype[. = \"", "required/allof")]
+		[InlineData(" and (required/oneof[contains(., 'A')])", "required/oneof")]
+		[InlineData("forbidden/oneof", "forbidden/oneof")]
+		[InlineData("required/bodymin", "required")]
+		[InlineData("required/allofx", "required")]
+		[InlineData("required", null)]
+		[InlineData("notrequired/oneof", null)]
+		public void RequirementGroupOfFindsTheGroupStep(string literal, string group)
+		{
+			Assert.Equal(group, FieldReaders.RequirementGroupOf(literal));
+		}
+
+		// - frmSelectMetamagic is listed for allof: a new oneof read there must still fail
+		[Fact]
+		public void ARequirementLiteralNeedsAReaderForItsOwnGroup()
+		{
+			NameLookups.Literal[] literals =
+			{
+				new NameLookups.Literal("frmSelectMetamagic.cs:10", "required/allof/metamagic"),
+				new NameLookups.Literal("frmSelectMetamagic.cs:20", "required/oneof/metamagic"),
+				new NameLookups.Literal("frmSelectSpell.cs:30", "required/allof/metamagic"),
+				new NameLookups.Literal("frmCreate.cs:40", "required/oneof/metatype"),
+				new NameLookups.Literal("frmSelectSpell.cs:50", "required"),
+			};
+			FieldReaders.RequirementReader metamagic = new FieldReaders.RequirementReader("metamagic.xml",
+				"metamagics/metamagic", "required/allof", "frmSelectMetamagic.cs:10", FieldReaders.ReadStyle.PathLiterals);
+
+			Assert.Equal(new[] { "frmSelectMetamagic.cs:20", "frmSelectSpell.cs:30" },
+				FieldReaders.UnlistedRequirementLiterals(literals, new[] { metamagic },
+						new System.Collections.Generic.Dictionary<string, string> { { "frmCreate.cs required/oneof", "why" } })
+					.Select(literal => literal.Site));
+		}
+
+		[Theory]
+		[InlineData("frmSelectQuality.cs:529", true)]
+		[InlineData("frmSelectQuality.cs:530", false)]
+		public void AConsumerLineMustHoldTheGroupLiteral(string consumer, bool expected)
+		{
+			NameLookups.Literal[] literals =
+			{
+				new NameLookups.Literal("frmSelectQuality.cs:529", "required/oneof"),
+				new NameLookups.Literal("frmSelectQuality.cs:530", "required/oneofx"),
+			};
+			FieldReaders.RequirementReader reader = new FieldReaders.RequirementReader("qualities.xml",
+				"qualities/quality", "required/oneof", consumer, FieldReaders.ReadStyle.NameDispatch);
+
+			Assert.Equal(expected, FieldReaders.ConsumerLineSelectsGroup(reader, literals));
+		}
+
 		private static FieldReaders.RequirementReader Reader(string group, FieldReaders.ReadStyle style)
 		{
 			return new FieldReaders.RequirementReader("qualities.xml", "qualities/quality", group, "frmSelectQuality.cs:1", style);

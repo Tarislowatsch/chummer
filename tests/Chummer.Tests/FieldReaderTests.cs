@@ -97,6 +97,41 @@ namespace Chummer.Tests
 			Assert.True(vacant.Length == 0, "These readers match nothing:\n  " + string.Join("\n  ", vacant));
 		}
 
+		// - a new consumer would leave the pinned findings standing while the code already reads them
+		[Fact]
+		public void EveryRequirementLiteralBelongsToAListedReader()
+		{
+			string[] unlisted = FieldReaders.UnlistedRequirementLiterals(NameLookups.AllLiterals,
+					FieldReaders.Readers, FieldReaders.KnownExtraReaders)
+				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
+				.ToArray();
+
+			Assert.True(unlisted.Length == 0, "Add a reader or a known extra reader for:\n  "
+				+ string.Join("\n  ", unlisted));
+		}
+
+		[Fact]
+		public void EveryKnownExtraReaderStillReadsItsGroup()
+		{
+			string[] stale = FieldReaders.KnownExtraReaders.Keys
+				.Where(key => !NameLookups.AllLiterals.Any(literal =>
+					literal.File + " " + FieldReaders.RequirementGroupOf(literal.Text) == key))
+				.ToArray();
+
+			Assert.True(stale.Length == 0, "Remove from KnownExtraReaders:\n  " + string.Join("\n  ", stale));
+		}
+
+		[Fact]
+		public void EveryConsumerLineStillSelectsItsGroup()
+		{
+			string[] moved = FieldReaders.Readers
+				.Where(reader => !FieldReaders.ConsumerLineSelectsGroup(reader, NameLookups.AllLiterals))
+				.Select(reader => reader.Key + ": " + reader.Consumer)
+				.ToArray();
+
+			Assert.True(moved.Length == 0, "Re-read these consumers and fix the line:\n  " + string.Join("\n  ", moved));
+		}
+
 		// - top-level files plus every pack file Load would merge
 		// - bumping the number is only correct for a deliberately added or removed data file
 		[Fact]
