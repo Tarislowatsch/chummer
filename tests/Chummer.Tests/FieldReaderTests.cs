@@ -46,7 +46,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryElementNameIsSpelledBySomeCodeLiteral()
 		{
-			CountReport.AssertEqual("Element names no code literal spells", KnownUnreadNames,
+			PinReport.AssertEqual("Element names no code literal spells", KnownUnreadNames,
 				FieldReaders.UnreadNames(FieldReaders.AllElementNames, FieldReaders.LiteralIdentifiers)
 					.ToDictionary(name => name.Entry, name => name.Count, StringComparer.Ordinal));
 		}
@@ -54,7 +54,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryRequirementHasAConsumerThatReadsIt()
 		{
-			CountReport.AssertEqual("Requirements no consumer reads", KnownUnreadRequirements,
+			PinReport.AssertEqual("Requirements no consumer reads", KnownUnreadRequirements,
 				FieldReaders.UnreadRequirements(FieldReaders.AllRequirementUses, FieldReaders.Readers,
 						FieldReaders.TagsReadBy)
 					.GroupBy(use => use.Entry, StringComparer.Ordinal)
@@ -79,7 +79,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachReaderReadsTheMeasuredTags()
 		{
-			CountReport.AssertEqual("Tags read per consumer", PinnedTagCounts,
+			PinReport.AssertEqual("Tags read per consumer", PinnedTagCounts,
 				FieldReaders.Readers.ToDictionary(reader => reader.Key,
 					reader => FieldReaders.TagsReadBy(reader).Count, StringComparer.Ordinal));
 		}
@@ -158,25 +158,57 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryHandlerFieldIsReadByItsBranch()
 		{
-			CountReport.AssertEqual("Handler fields no branch reads", KnownUnreadHandlerFields,
+			PinReport.AssertEqual("Handler fields no branch reads", KnownUnreadHandlerFields,
 				FieldReaders.UnreadHandlerFields(FieldReaders.AllHandlerFields, FieldReaders.HandlerBranches)
 					.GroupBy(field => field.Entry, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
 
 		// - a missing field fails loudly, an over-reaching extractor would hide one
+		// - swapskillattribute's one rule block is empty: only custom improvements fill it
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerFields =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "addattribute", "name" },
+				{ "conditionmonitor", "overflow physical stun threshold thresholdoffset" },
+				{ "livingpersona", "biofeedback firewall response signal system" },
+				{ "selectattribute", "affectbase attribute aug excludeattribute max min val" },
+				{ "selectskill", "applytorating max val" },
+				{ "selectskillgroup", "applytorating bonus" },
+				{ "swapskillattribute", "attribute" },
+			};
+
 		[Fact]
 		public void EachIndexedHandlerReadsTheMeasuredFields()
 		{
-			FieldReaders.HandlerBranch branch = Assert.Single(FieldReaders.HandlerBranches);
-
-			Assert.Equal("addattribute", branch.Handler);
-			Assert.Equal(new[] { "name" }, branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
-			Assert.Equal(new[] { "name" }, branch.Dispatch.Keys);
-			Assert.Equal(new[] { "MAG", "RES" }, branch.Dispatch["name"].OrderBy(value => value, StringComparer.Ordinal));
+			PinReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
+				FieldReaders.HandlerBranches.ToDictionary(branch => branch.Handler, branch => Sorted(branch.Fields),
+					StringComparer.Ordinal));
 		}
 
-		// - deliberately no allowlist: every name is MAG or RES today
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "addattribute/name", "MAG RES" },
+				{ "selectskill/applytorating", "yes" },
+				{ "selectskillgroup/applytorating", "yes" },
+			};
+
+		[Fact]
+		public void EachIndexedHandlerDispatchesOnTheMeasuredValues()
+		{
+			PinReport.AssertEqual("Compared values per handler field", MeasuredHandlerDispatch,
+				FieldReaders.HandlerBranches
+					.SelectMany(branch => branch.Dispatch.Select(entry => (Key: branch.Handler + "/" + entry.Key, entry.Value)))
+					.ToDictionary(entry => entry.Key, entry => Sorted(entry.Value), StringComparer.Ordinal));
+		}
+
+		private static string Sorted(IEnumerable<string> values)
+		{
+			return string.Join(" ", values.OrderBy(value => value, StringComparer.Ordinal));
+		}
+
+		// - deliberately no allowlist: every compared value matches today
 		[Fact]
 		public void EveryDispatchedHandlerValueMatchesAComparison()
 		{
@@ -190,15 +222,23 @@ namespace Chummer.Tests
 			Assert.True(unhandled.Length == 0, "No comparison in the branch matches:\n  " + string.Join("\n  ", unhandled));
 		}
 
+		// - key "file text": a line number would break on every unrelated edit above it
+		// - Commlink prints its matrix condition monitor under the bonus handler's name
+		private static readonly IReadOnlyDictionary<string, int> KnownForeignHandlerLiterals =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "clsEquipment.cs \"conditionmonitor\"", 1 },
+			};
+
 		[Fact]
 		public void NoLiteralOutsideItsBranchNamesAnIndexedHandler()
 		{
-			string[] outside = FieldReaders.HandlerBranches
-				.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
-				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
-				.ToArray();
-
-			Assert.True(outside.Length == 0, "Extend the extraction to these reads:\n  " + string.Join("\n  ", outside));
+			PinReport.AssertEqual("Handler literals outside their branch (extend the extraction?)",
+				KnownForeignHandlerLiterals,
+				FieldReaders.HandlerBranches
+					.SelectMany(branch => FieldReaders.HandlerLiteralsOutsideBranch(NameLookups.AllLiterals, branch))
+					.GroupBy(literal => literal.File + " \"" + literal.Text + "\"", StringComparer.Ordinal)
+					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
 
 		[Fact]

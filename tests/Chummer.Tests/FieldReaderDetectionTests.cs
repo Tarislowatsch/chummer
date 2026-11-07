@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Xunit;
@@ -241,7 +242,7 @@ namespace Chummer.Tests
 			"	{",
 			"		if (nodBonus[\"addattribute\"][\"name\"].InnerText == \"MAG\") { }",
 			"		// x = nodBonus[\"addattribute\"][\"max\"];",
-			"		y = nodBonus[\"addattribute\"].SelectSingleNode(\"val\");",
+			"		y = nodBonus.SelectSingleNode(\"addattribute/val\");",
 			"	}",
 			"	z = nodBonus[\"addattribute\"][\"min\"];",
 			"}",
@@ -253,8 +254,33 @@ namespace Chummer.Tests
 			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
 
 			Assert.Equal(new[] { "name" }, branch.Fields);
-			Assert.Equal(new[] { "x.cs:3", "x.cs:5", "x.cs:5", "x.cs:5", "x.cs:7", "x.cs:7" },
+			Assert.Equal(new[] { "x.cs:3", "x.cs:5", "x.cs:5", "x.cs:5", "x.cs:7" },
 				branch.Literals.Select(literal => literal.Site));
+		}
+
+		[Fact]
+		public void ABranchReadsAFieldWhetherBlockOrFieldIsSelectedOrIndexed()
+		{
+			string[] source =
+			{
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, string s, XmlNode nodBonus, bool b)",
+				"{",
+				"	if (NodeExists(nodBonus, \"conditionmonitor\"))",
+				"	{",
+				"		a = nodBonus.SelectSingleNode(\"conditionmonitor\")[\"physical\"];",
+				"		b = nodBonus[\"conditionmonitor\"].SelectNodes(\"attribute\");",
+				"		c = nodBonus.SelectSingleNode(\"conditionmonitor\").SelectSingleNode(\"stun\");",
+				"		d = nodBonus[\"conditionmonitor\"].SelectSingleNode(\"over/flow\");",
+				"		if (nodBonus.SelectSingleNode(\"conditionmonitor\")[\"mode\"].InnerText == \"x\") { }",
+				"	}",
+				"}",
+			};
+
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("conditionmonitor", "x.cs", source);
+
+			Assert.Equal(new[] { "attribute", "mode", "physical", "stun" },
+				branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
+			Assert.Equal(new[] { "x" }, Assert.Single(branch.Dispatch, entry => entry.Key == "mode").Value);
 		}
 
 		[Fact]

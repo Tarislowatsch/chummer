@@ -270,7 +270,7 @@ namespace Chummer.Tests
 				.ToDictionary(group => group.Key, group => group.Sum(check => check.ReferenceCount),
 					StringComparer.Ordinal);
 
-			CountReport.AssertEqual("Pack references per rule", PinnedPackReferenceCounts, actual);
+			PinReport.AssertEqual("Pack references per rule", PinnedPackReferenceCounts, actual);
 		}
 
 		// - every consumer sits directly in Chummer/, where several subfolders reuse file names

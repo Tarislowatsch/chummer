@@ -367,10 +367,14 @@ namespace Chummer.Tests
 
 		public static IReadOnlyList<RequirementUse> AllRequirementUses => CachedCorpus.Value.Uses;
 
-		// - bonus handlers whose branch reads every field as <bonus>["handler"]["field"]
+		// - bonus handlers whose branch reads every field directly off its block, see BranchOf
 		// - the name level misses their dead fields: min, max and val are read by other handlers
-		// - other handlers read through loop variables this extraction cannot follow
-		public static readonly IReadOnlyList<string> IndexedHandlers = new[] { "addattribute" };
+		// - the rest read through variables or carry only text
+		public static readonly IReadOnlyList<string> IndexedHandlers = new[]
+		{
+			"addattribute", "conditionmonitor", "livingpersona", "selectattribute", "selectskill",
+			"selectskillgroup", "swapskillattribute",
+		};
 
 		public const string HandlerConsumerFile = "clsImprovement.cs";
 
@@ -459,22 +463,28 @@ namespace Chummer.Tests
 		public static HandlerBranch BranchOf(string handler, string fileName, string[] lines)
 		{
 			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBlock(handler, lines);
-			string indexer = Regex.Escape(parameter) + @"\[\s*""" + Regex.Escape(handler) + @"""\s*\]\s*\[\s*""([^""]+)""\s*\]";
-			Regex read = new Regex(indexer);
-			Regex comparison = new Regex(indexer + @"\.InnerText\s*==\s*""([^""]*)""");
+			// - block and field each by indexer or by SelectSingleNode/SelectNodes
+			// - a path like "handler/field" is left to the literal guard
+			string name = Regex.Escape(handler);
+			string blockOf = Regex.Escape(parameter) + @"(?:\[\s*""" + name + @"""\s*\]"
+				+ @"|\.SelectSingleNode\(\s*""" + name + @"""\s*\))";
+			string fieldRead = blockOf + @"\s*(?:\[\s*""(?<field>[^""]+)""\s*\]"
+				+ @"|\.Select(?:SingleNode|Nodes)\(\s*""(?<field>\w+)""\s*\))";
+			Regex read = new Regex(fieldRead);
+			Regex comparison = new Regex(fieldRead + @"\.InnerText\s*==\s*""(?<value>[^""]*)""");
 
 			string[] sites = Enumerable.Range(start + 1, block.Code.Length)
 				.Select(line => fileName + ":" + line).ToArray();
 			return new HandlerBranch(handler,
 				NameLookups.LiteralsIn(fileName, lines).Where(literal => sites.Contains(literal.Site)).ToArray(),
 				new HashSet<string>(
-					block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).Select(match => match.Groups[1].Value),
+					block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).Select(match => match.Groups["field"].Value),
 					StringComparer.Ordinal),
 				block.Code.SelectMany(line => comparison.Matches(line).Cast<Match>())
-					.GroupBy(match => match.Groups[1].Value, StringComparer.Ordinal)
+					.GroupBy(match => match.Groups["field"].Value, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key,
 						group => (IReadOnlyCollection<string>)new HashSet<string>(
-							group.Select(match => match.Groups[2].Value), StringComparer.Ordinal),
+							group.Select(match => match.Groups["value"].Value), StringComparer.Ordinal),
 						StringComparer.Ordinal));
 		}
 

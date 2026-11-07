@@ -95,7 +95,7 @@ namespace Chummer.Tests
 				}
 			}
 
-			CountReport.AssertEqual("Capacity literals per member", PinnedFieldReads, actual);
+			PinReport.AssertEqual("Capacity literals per member", PinnedFieldReads, actual);
 		}
 
 		// - usegear/capacity at any depth: CreateChildren recurses (clsEquipment.cs:9968)
@@ -161,7 +161,7 @@ namespace Chummer.Tests
 					.Count(item => item[rule.Field] != null);
 			}, StringComparer.Ordinal);
 
-			CountReport.AssertEqual("Values per rule", PinnedValueCounts, actual);
+			PinReport.AssertEqual("Values per rule", PinnedValueCounts, actual);
 		}
 	}
 }
