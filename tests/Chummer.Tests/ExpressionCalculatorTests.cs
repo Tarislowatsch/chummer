@@ -132,7 +132,7 @@ namespace Chummer.Tests
 					.OrderBy(entry => entry, StringComparer.Ordinal));
 		}
 
-		// - above the limit only the top rating is replayed: a new entry must be listed on purpose
+		// - above the limit only the top rating is replayed: a pack entry there must fail here first
 		[Fact]
 		public void NoPackEntryExceedsTheExhaustiveRatingLimit()
 		{

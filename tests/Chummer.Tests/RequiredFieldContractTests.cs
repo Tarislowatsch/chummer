@@ -150,5 +150,33 @@ namespace Chummer.Tests
 				},
 				vacant);
 		}
+
+		// - summed over all packs: the case pin only notices an entity losing its last entry
+		private static readonly IReadOnlyDictionary<string, int> PinnedPackEntryCounts =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "Armor", 1 },
+				{ "ArmorMod", 1 },
+				{ "CritterPower", 1 },
+				{ "Cyberware", 1 },
+				{ "Gear", 13 },
+				{ "Metamagic", 1 },
+				{ "Vehicle", 21 },
+				{ "Vehicle built-in weapon reference", 1 },
+				{ "VehicleMod", 4 },
+				{ "Weapon", 3 },
+			};
+
+		[Fact]
+		public void EveryPackEntityReachesItsMeasuredEntryCount()
+		{
+			Dictionary<string, int> actual = RequiredFields.PackEntities()
+				.Select(testCase => RequiredFields.PackContractFor((string)testCase[0], (string)testCase[1]))
+				.GroupBy(contract => contract.Rule.Entity, StringComparer.Ordinal)
+				.ToDictionary(group => group.Key, group => group.Sum(contract => contract.ItemCount),
+					StringComparer.Ordinal);
+
+			CountReport.AssertEqual("Pack entries per entity", PinnedPackEntryCounts, actual);
+		}
 	}
 }
