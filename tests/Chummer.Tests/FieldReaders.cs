@@ -206,7 +206,7 @@ namespace Chummer.Tests
 			};
 
 		// - keyed by group: a new oneof read in a file listed for allof must fail too
-		// - a bare block needs a reader of that block in the same file
+		// - a bare block needs a reader of that block in the same file, or a known extra reader
 		public static IEnumerable<NameLookups.Literal> UnlistedRequirementLiterals(
 			IEnumerable<NameLookups.Literal> literals, IEnumerable<RequirementReader> readers,
 			IReadOnlyDictionary<string, string> extraReaders)
