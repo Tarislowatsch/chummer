@@ -6,10 +6,10 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	public class CritterConversionDetectionTests
+	public class LoaderConversionDetectionTests
 	{
-		private static readonly CritterConversions.Scope WholeFile =
-			new CritterConversions.Scope("x.cs", null, CritterConversions.CritterRoots);
+		private static readonly LoaderConversions.Scope WholeFile =
+			new LoaderConversions.Scope("x.cs", null, LoaderConversions.CritterRoots);
 
 		private static readonly string[] LoaderSource =
 		{
@@ -28,7 +28,7 @@ namespace Chummer.Tests
 			"// z = Convert.ToInt32(objXmlFoo.InnerText);",
 		};
 
-		private static string[] Describe(IEnumerable<CritterConversions.Conversion> conversions)
+		private static string[] Describe(IEnumerable<LoaderConversions.Conversion> conversions)
 		{
 			return conversions.Select(conversion => conversion.Site + " " + conversion.Description).ToArray();
 		}
@@ -44,7 +44,7 @@ namespace Chummer.Tests
 					"x.cs:9 critters: skills/knowledge/@rating",
 					"x.cs:11 critters: essmax (digit before D6)",
 				},
-				Describe(CritterConversions.ConversionsIn(WholeFile, LoaderSource)));
+				Describe(LoaderConversions.ConversionsIn(WholeFile, LoaderSource)));
 		}
 
 		[Theory]
@@ -60,7 +60,7 @@ namespace Chummer.Tests
 		[InlineData("a = Convert.ToByte(objXmlMetatype[\"essmax\"].InnerText);")]
 		public void AConversionOfAnUnknownShapeThrows(string line)
 		{
-			Assert.Throws<InvalidOperationException>(() => CritterConversions.ConversionsIn(WholeFile, new[] { line }));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, new[] { line }));
 		}
 
 		[Theory]
@@ -69,7 +69,7 @@ namespace Chummer.Tests
 		[InlineData("a = Int32.Parse(objXmlMetatype[\"essmax\"].InnerText);")]
 		public void AnIntegerConversionIsUnderstood(string line)
 		{
-			Assert.Equal("critters: essmax", Assert.Single(CritterConversions.ConversionsIn(WholeFile, new[] { line })).Description);
+			Assert.Equal("critters: essmax", Assert.Single(LoaderConversions.ConversionsIn(WholeFile, new[] { line })).Description);
 		}
 
 		// - a later rebinding of any shape must not inherit the earlier binding
@@ -91,7 +91,7 @@ namespace Chummer.Tests
 				"	a = Convert.ToInt32(objXmlPower.Attributes[\"points\"].InnerText);",
 			};
 
-			Assert.Throws<InvalidOperationException>(() => CritterConversions.ConversionsIn(WholeFile, source));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, source));
 		}
 
 		[Theory]
@@ -107,7 +107,7 @@ namespace Chummer.Tests
 				"		intRating = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);",
 			};
 
-			Assert.Equal(guarded, Assert.Single(CritterConversions.ConversionsIn(WholeFile, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, source)).Guarded);
 		}
 
 		// - the if must directly precede the conversion: no statement may end in between
@@ -126,7 +126,7 @@ namespace Chummer.Tests
 				"	" + line,
 			};
 
-			Assert.Equal(guarded, Assert.Single(CritterConversions.ConversionsIn(WholeFile, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, source)).Guarded);
 		}
 
 		[Fact]
@@ -140,7 +140,7 @@ namespace Chummer.Tests
 			};
 
 			Assert.Equal(new[] { "x.cs:2 critters: skills/knowledge/@rating" },
-				Describe(CritterConversions.ConversionsIn(WholeFile, source)));
+				Describe(LoaderConversions.ConversionsIn(WholeFile, source)));
 		}
 
 		private static readonly string[] FormSource =
@@ -172,10 +172,10 @@ namespace Chummer.Tests
 			"}",
 		};
 
-		private static readonly CritterConversions.Scope PossessScope = new CritterConversions.Scope("f.cs", "mnuPossess_Click",
-			new Dictionary<string, CritterConversions.Root>
+		private static readonly LoaderConversions.Scope PossessScope = new LoaderConversions.Scope("f.cs", "mnuPossess_Click",
+			new Dictionary<string, LoaderConversions.Root>
 			{
-				{ "objSelected", new CritterConversions.Root(CritterConversions.Vessels, "") },
+				{ "objSelected", new LoaderConversions.Root(LoaderConversions.Vessels, "") },
 			});
 
 		// - the other methods of a large form are none of this scan's business
@@ -188,15 +188,15 @@ namespace Chummer.Tests
 					"f.cs:9 vessels: bodmin",
 					"f.cs:12 vessels: powers/power/@rating (if present)",
 				},
-				Describe(CritterConversions.ConversionsIn(PossessScope, FormSource)));
+				Describe(LoaderConversions.ConversionsIn(PossessScope, FormSource)));
 		}
 
 		[Fact]
 		public void AMissingMethodThrows()
 		{
-			CritterConversions.Scope renamed = new CritterConversions.Scope("f.cs", "mnuGone_Click", PossessScope.Roots);
+			LoaderConversions.Scope renamed = new LoaderConversions.Scope("f.cs", "mnuGone_Click", PossessScope.Roots);
 
-			Assert.Throws<InvalidOperationException>(() => CritterConversions.ConversionsIn(renamed, FormSource));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(renamed, FormSource));
 		}
 
 		// - counted only outside the scanned lines, for a read of its own loop variable
@@ -204,21 +204,21 @@ namespace Chummer.Tests
 		public void AnUnscannedLoopIsOneThatConvertsItsOwnVariable()
 		{
 			Assert.Equal(new[] { "f.cs:16 powers/power" },
-				CritterConversions.UnscannedLoops("f.cs", FormSource, new[] { "powers/power" }, new[] { (6, 12) }));
+				LoaderConversions.UnscannedLoops("f.cs", FormSource, new[] { "powers/power" }, new[] { (6, 12) }));
 		}
 
 		[Theory]
-		[InlineData("5", CritterConversions.Form.Whole, null)]
-		[InlineData("F", CritterConversions.Form.Whole, "FormatException")]
-		[InlineData("1.5", CritterConversions.Form.Whole, "FormatException")]
-		[InlineData(null, CritterConversions.Form.Whole, "missing: NullReferenceException")]
-		[InlineData("2D6+3", CritterConversions.Form.DigitBeforeD6, null)]
-		[InlineData("6+1D6", CritterConversions.Form.DigitBeforeD6, null)]
-		[InlineData("D6", CritterConversions.Form.DigitBeforeD6, "nothing before D6: ArgumentOutOfRangeException")]
-		[InlineData("FD6", CritterConversions.Form.DigitBeforeD6, "FormatException")]
-		public void AValueConvertsAsTheLoaderWould(string value, CritterConversions.Form form, string expected)
+		[InlineData("5", LoaderConversions.Form.Whole, null)]
+		[InlineData("F", LoaderConversions.Form.Whole, "FormatException")]
+		[InlineData("1.5", LoaderConversions.Form.Whole, "FormatException")]
+		[InlineData(null, LoaderConversions.Form.Whole, "missing: NullReferenceException")]
+		[InlineData("2D6+3", LoaderConversions.Form.DigitBeforeD6, null)]
+		[InlineData("6+1D6", LoaderConversions.Form.DigitBeforeD6, null)]
+		[InlineData("D6", LoaderConversions.Form.DigitBeforeD6, "nothing before D6: ArgumentOutOfRangeException")]
+		[InlineData("FD6", LoaderConversions.Form.DigitBeforeD6, "FormatException")]
+		public void AValueConvertsAsTheLoaderWould(string value, LoaderConversions.Form form, string expected)
 		{
-			Assert.Equal(expected, CritterConversions.ErrorOf(value, form));
+			Assert.Equal(expected, LoaderConversions.ErrorOf(value, form));
 		}
 
 		private const string Metatypes = "/chummer/metatypes/metatype";
@@ -238,10 +238,10 @@ namespace Chummer.Tests
 		public void OnlyAnUnguardedAttributeMustBePresent()
 		{
 			Assert.Equal(new[] { "(none)", "x" },
-				CritterConversions.ValuesIn(Document(), Metatypes, "skills/knowledge/@rating", CritterConversions.Form.Whole, true)
+				LoaderConversions.ValuesIn(Document(), Metatypes, "skills/knowledge/@rating", LoaderConversions.Form.Whole, true)
 					.Select(found => found.Value ?? "(none)"));
 			Assert.Equal(new[] { "2" },
-				CritterConversions.ValuesIn(Document(), Metatypes, "powers/power/@rating", CritterConversions.Form.Whole, false)
+				LoaderConversions.ValuesIn(Document(), Metatypes, "powers/power/@rating", LoaderConversions.Form.Whole, false)
 					.Select(found => found.Value));
 		}
 
@@ -249,18 +249,18 @@ namespace Chummer.Tests
 		[Fact]
 		public void TheDigitFormSkipsAValueWithoutD6()
 		{
-			Assert.Empty(CritterConversions.ValuesIn(Document(), Metatypes, "essmax", CritterConversions.Form.DigitBeforeD6, false));
+			Assert.Empty(LoaderConversions.ValuesIn(Document(), Metatypes, "essmax", LoaderConversions.Form.DigitBeforeD6, false));
 		}
 
 		[Fact]
 		public void AFailureNamesFileItemPathAndValue()
 		{
-			CritterConversions.Conversion[] conversions =
+			LoaderConversions.Conversion[] conversions =
 			{
-				new CritterConversions.Conversion("x.cs:1", CritterConversions.Critters, "skills/knowledge/@rating",
-					CritterConversions.Form.Whole, false),
-				new CritterConversions.Conversion("x.cs:2", CritterConversions.Vessels, "powers/power/@rating",
-					CritterConversions.Form.Whole, false),
+				new LoaderConversions.Conversion("x.cs:1", LoaderConversions.Critters, "skills/knowledge/@rating",
+					LoaderConversions.Form.Whole, false),
+				new LoaderConversions.Conversion("x.cs:2", LoaderConversions.Vessels, "powers/power/@rating",
+					LoaderConversions.Form.Whole, false),
 			};
 
 			Assert.Equal(
@@ -269,7 +269,7 @@ namespace Chummer.Tests
 					"m.xml: Wolf skills/knowledge/@rating = (none): missing: NullReferenceException",
 					"m.xml: Wolf skills/knowledge/@rating = x: FormatException",
 				},
-				CritterConversions.FailuresIn("m.xml", Document(), CritterConversions.Critters, conversions));
+				LoaderConversions.FailuresIn("m.xml", Document(), LoaderConversions.Critters, conversions));
 		}
 	}
 }

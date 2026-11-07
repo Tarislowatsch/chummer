@@ -22,7 +22,7 @@ namespace Chummer.Tests
 		};
 
 		// - every caller binds these to loops below /chummer/metatypes/metatype
-		// - skills/knowledge is missing on purpose: CritterConversions checks its direct Convert.ToInt32
+		// - skills/knowledge is missing on purpose: LoaderConversions checks its direct Convert.ToInt32
 		public static readonly IReadOnlyDictionary<string, string[]> LoopArguments =
 			new Dictionary<string, string[]>(StringComparer.Ordinal)
 			{

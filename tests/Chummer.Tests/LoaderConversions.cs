@@ -10,7 +10,7 @@ namespace Chummer.Tests
 {
 	// - fields a critter, vessel or quality loader converts directly, outside ExpressionToString
 	// - a non-number or a missing unguarded attribute throws into the UI
-	public static class CritterConversions
+	public static class LoaderConversions
 	{
 		public enum Form
 		{

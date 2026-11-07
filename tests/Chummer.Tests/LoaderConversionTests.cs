@@ -6,15 +6,15 @@ using Xunit;
 
 namespace Chummer.Tests
 {
-	public class CritterConversionTests
+	public class LoaderConversionTests
 	{
 		// - deliberately no allowlist: every value converts today
 		[Fact]
 		public void EveryDirectlyConvertedValueConverts()
 		{
-			string[] failures = CritterConversions.Corpora
-				.SelectMany(corpus => corpus.Files().SelectMany(path => CritterConversions.FailuresIn(Path.GetFileName(path),
-					CustomContent.Load(path), corpus, CritterConversions.ApplicationConversions)))
+			string[] failures = LoaderConversions.Corpora
+				.SelectMany(corpus => corpus.Files().SelectMany(path => LoaderConversions.FailuresIn(Path.GetFileName(path),
+					CustomContent.Load(path), corpus, LoaderConversions.ApplicationConversions)))
 				.ToArray();
 
 			Assert.True(failures.Length == 0,
@@ -46,7 +46,7 @@ namespace Chummer.Tests
 		public void TheLoadersConvertTheMeasuredFields()
 		{
 			PinReport.AssertEqual("Direct conversions per loader", PinnedConversionSites,
-				CritterConversions.ApplicationConversions
+				LoaderConversions.ApplicationConversions
 					.GroupBy(conversion => conversion.File + " " + conversion.Description, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
@@ -71,14 +71,14 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryConvertedPathReachesTheMeasuredValues()
 		{
-			Dictionary<string, int> actual = CritterConversions.ApplicationConversions
+			Dictionary<string, int> actual = LoaderConversions.ApplicationConversions
 				.GroupBy(conversion => conversion.DataKey, StringComparer.Ordinal)
 				.ToDictionary(
 					group => group.Key,
 					group =>
 					{
-						CritterConversions.Conversion first = group.First();
-						return first.Corpus.Files().Sum(file => CritterConversions.ValuesIn(CustomContent.Load(file),
+						LoaderConversions.Conversion first = group.First();
+						return first.Corpus.Files().Sum(file => LoaderConversions.ValuesIn(CustomContent.Load(file),
 							first.Corpus.ItemXPath, first.Path, first.Form, group.Any(conversion => !conversion.Guarded)).Count());
 					},
 					StringComparer.Ordinal);
@@ -98,7 +98,7 @@ namespace Chummer.Tests
 		public void EveryLoopOverAConvertedPathIsScanned()
 		{
 			PinReport.AssertEqual("Loops outside the scopes that convert their variable", KnownUnscannedLoops,
-				CritterConversions.ApplicationUnscannedLoops()
+				LoaderConversions.ApplicationUnscannedLoops()
 					.Select(loop => loop.Substring(0, loop.IndexOf(':')) + loop.Substring(loop.IndexOf(' ')))
 					.GroupBy(key => key, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
