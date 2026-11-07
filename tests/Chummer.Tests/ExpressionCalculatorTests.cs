@@ -36,6 +36,19 @@ namespace Chummer.Tests
 				{ "WeaponMod.TotalCost", "2ED9CDCE8F3C2C40" },
 				{ "Cyberware.CalculatedESS", "A036BBB612C578D5" },
 				{ "frmSelectCyberware.UpdateCyberwareInfo", "EDFA0E780E9A1F41" },
+				{ "Armor.CalculatedCapacity", "8F84C5123096F853" },
+				{ "Armor.CapacityRemaining", "A1888264E000DF7F" },
+				{ "ArmorMod.CalculatedCapacity", "EFB60AE6D5E0D06E" },
+				{ "Cyberware.CalculatedCapacity", "BA6B3E292E9412C8" },
+				{ "Cyberware.CapacityRemaining", "EB1E95164B37C9A6" },
+				{ "Gear.CalculatedArmorCapacity", "506740D6A9C105DF" },
+				{ "Gear.CalculatedCapacity", "B8C2BF6F731973A3" },
+				{ "Gear.CapacityRemaining", "E13B93D7C5ED3311" },
+				{ "Gear.PluginArmorCapacity", "50CE0B08188A0A17" },
+				{ "Gear.PluginCapacity", "036495AAEAB2A853" },
+				{ "TechProgram.CalculatedCapacity", "6D870F89B42E3537" },
+				{ "frmSelectArmorMod.UpdateSelectedArmor", "4CDE8691C715E37F" },
+				{ "frmSelectGear.UpdateGearInfo", "622D4BED27B67394" },
 			};
 
 		[Fact]
@@ -121,7 +134,8 @@ namespace Chummer.Tests
 
 		private static IEnumerable<string> PortedCalculators()
 		{
-			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators).Concat(EssExpressions.Calculators);
+			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators).Concat(EssExpressions.Calculators)
+				.Concat(CapacityExpressions.Calculators).Distinct(StringComparer.Ordinal);
 		}
 
 		private static IEnumerable<string> EntitiesRequiring(string field)
