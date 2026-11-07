@@ -84,18 +84,23 @@ namespace Chummer.Tests
 				}
 			}
 
-			AssertCounts("Capacity literals per member", PinnedFieldReads, actual);
+			CountReport.AssertEqual("Capacity literals per member", PinnedFieldReads, actual);
 		}
 
-		// - gear.xml gears/usegear/capacity, wrapped in brackets (clsEquipment.cs:9963)
-		// - the child is then deducted from its parent like any plugin
+		// - usegear/capacity at any depth: CreateChildren recurses (clsEquipment.cs:9968)
+		// - wrapped in brackets (:9963), then deducted from its parent like any plugin
+		// - exact count: a moved path must not leave this green with no value checked
 		[Fact]
 		public void EveryChildGearCapacityOverrideParses()
 		{
 			XmlDocument document = new XmlDocument();
 			document.Load(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"));
-			string[] failures = document.SelectNodes("/chummer/gears/gear/gears/usegear[capacity]").Cast<XmlNode>()
+			string[] capacities = document.SelectNodes("//usegear[capacity]").Cast<XmlNode>()
 				.Select(child => "[" + child["capacity"].InnerText + "]")
+				.ToArray();
+			Assert.Equal(3, capacities.Length);
+
+			string[] failures = capacities
 				.Where(capacity =>
 				{
 					try
@@ -111,31 +116,6 @@ namespace Chummer.Tests
 				.ToArray();
 
 			Assert.True(failures.Length == 0, "Unparsable child capacities:\n  " + string.Join("\n  ", failures));
-		}
-
-		// - one line per key: Assert.Equal truncates a dictionary after a few entries
-		private static void AssertCounts(string headline, IReadOnlyDictionary<string, int> expected,
-			IReadOnlyDictionary<string, int> actual)
-		{
-			string[] differences = expected.Keys.Union(actual.Keys, StringComparer.Ordinal)
-				.Select(key => new
-				{
-					Key = key,
-					Expected = expected.TryGetValue(key, out int wanted) ? wanted : -1,
-					Actual = actual.TryGetValue(key, out int found) ? found : -1,
-				})
-				.Where(entry => entry.Expected != entry.Actual)
-				.Select(entry => entry.Key + ": expected " + Describe(entry.Expected) + ", found " + Describe(entry.Actual))
-				.OrderBy(line => line, StringComparer.Ordinal)
-				.ToArray();
-
-			Assert.True(differences.Length == 0, headline + " differ:\n  " + string.Join("\n  ", differences));
-		}
-
-		// - -1 marks a missing key: a pinned 0 must still exist as a key
-		private static string Describe(int count)
-		{
-			return count < 0 ? "nothing" : count.ToString();
 		}
 
 		// - a green run proves nothing if a rule reaches no value: Gear skips an absent field
@@ -170,7 +150,7 @@ namespace Chummer.Tests
 					.Count(item => item[rule.Field] != null);
 			}, StringComparer.Ordinal);
 
-			AssertCounts("Values per rule", PinnedValueCounts, actual);
+			CountReport.AssertEqual("Values per rule", PinnedValueCounts, actual);
 		}
 	}
 }

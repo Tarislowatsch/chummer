@@ -46,7 +46,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryElementNameIsSpelledBySomeCodeLiteral()
 		{
-			AssertCounts("Element names no code literal spells", KnownUnreadNames,
+			CountReport.AssertEqual("Element names no code literal spells", KnownUnreadNames,
 				FieldReaders.UnreadNames(FieldReaders.AllElementNames, FieldReaders.LiteralIdentifiers)
 					.ToDictionary(name => name.Entry, name => name.Count, StringComparer.Ordinal));
 		}
@@ -54,7 +54,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryRequirementHasAConsumerThatReadsIt()
 		{
-			AssertCounts("Requirements no consumer reads", KnownUnreadRequirements,
+			CountReport.AssertEqual("Requirements no consumer reads", KnownUnreadRequirements,
 				FieldReaders.UnreadRequirements(FieldReaders.AllRequirementUses, FieldReaders.Readers,
 						FieldReaders.TagsReadBy)
 					.GroupBy(use => use.Entry, StringComparer.Ordinal)
@@ -79,7 +79,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EachReaderReadsTheMeasuredTags()
 		{
-			AssertCounts("Tags read per consumer", PinnedTagCounts,
+			CountReport.AssertEqual("Tags read per consumer", PinnedTagCounts,
 				FieldReaders.Readers.ToDictionary(reader => reader.Key,
 					reader => FieldReaders.TagsReadBy(reader).Count, StringComparer.Ordinal));
 		}
@@ -158,7 +158,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryHandlerFieldIsReadByItsBranch()
 		{
-			AssertCounts("Handler fields no branch reads", KnownUnreadHandlerFields,
+			CountReport.AssertEqual("Handler fields no branch reads", KnownUnreadHandlerFields,
 				FieldReaders.UnreadHandlerFields(FieldReaders.AllHandlerFields, FieldReaders.HandlerBranches)
 					.GroupBy(field => field.Entry, StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
@@ -219,27 +219,6 @@ namespace Chummer.Tests
 		public void ScansTheMeasuredDataFiles()
 		{
 			Assert.Equal(50, FieldReaders.DataFiles.Count);
-		}
-
-		// - one line per differing key: Assert.Equal truncates a dictionary after a few entries
-		// - "expected 0" is a new finding, "found 0" an entry that is fixed and must go
-		private static void AssertCounts(string headline, IReadOnlyDictionary<string, int> expected,
-			IReadOnlyDictionary<string, int> actual)
-		{
-			string[] differences = expected.Keys.Union(actual.Keys, StringComparer.Ordinal)
-				.Select(key => new
-				{
-					Key = key,
-					Expected = expected.TryGetValue(key, out int wanted) ? wanted : 0,
-					Actual = actual.TryGetValue(key, out int found) ? found : 0,
-				})
-				.Where(entry => entry.Expected != entry.Actual)
-				.OrderBy(entry => entry.Key, StringComparer.Ordinal)
-				.Select(entry => entry.Key + ": expected " + entry.Expected + ", found " + entry.Actual)
-				.ToArray();
-
-			if (differences.Length > 0)
-				Assert.Fail(FailureReport.Build(headline + " differ from the pinned list", differences, line => line));
 		}
 	}
 }

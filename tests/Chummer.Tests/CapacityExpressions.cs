@@ -360,6 +360,7 @@ namespace Chummer.Tests
 		}
 
 		// - frmSelectGear.cs:984, the whole Standard branch sits in a try that shows "0"
+		// - the original prints in the thread culture: under de-DE "2,5" skips the '.' rounding
 		public static void SelectGear(string capacity, int rating)
 		{
 			try
