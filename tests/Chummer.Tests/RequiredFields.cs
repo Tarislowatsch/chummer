@@ -208,6 +208,27 @@ namespace Chummer.Tests
 			return CachedContractsByEntity.Value[entity];
 		}
 
+		public static IEnumerable<object[]> PackEntities()
+		{
+			return CustomContent.PairedPackFiles()
+				.SelectMany(file => PackContractsIn(file.FilePath))
+				.Select(contract => new object[] { contract.FilePath, contract.Rule.Entity });
+		}
+
+		public static RequiredFieldContract PackContractFor(string packPath, string entity)
+		{
+			return PackContractsIn(packPath)
+				.Single(contract => string.Equals(contract.Rule.Entity, entity, StringComparison.Ordinal));
+		}
+
+		// - only rules that reach an entry: the rest would be always-green cases
+		private static IEnumerable<RequiredFieldContract> PackContractsIn(string packPath)
+		{
+			return ContractsIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath,
+					CustomContent.Load(packPath))
+				.Where(contract => contract.ItemCount > 0);
+		}
+
 		// - every declared rule, matched or not, for the guards that watch the table itself
 		public static IReadOnlyList<RequiredFieldRule> Rules => DeclaredRules;
 

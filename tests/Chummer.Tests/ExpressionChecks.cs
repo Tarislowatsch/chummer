@@ -317,11 +317,34 @@ namespace Chummer.Tests
 				() => RuleCorpus.Files.SelectMany(file => file.ExpressionChecks)
 					.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
 
-		// - inside the single parse, scoped by the required-field rules' XPaths
-		public static IReadOnlyList<ExpressionCheck> ChecksIn(string xmlPath, XmlDocument document,
-			IEnumerable<ExpressionRule> rules)
+		public static IEnumerable<object[]> PackRuleIds(string field)
 		{
-			string fileName = System.IO.Path.GetFileName(xmlPath);
+			return AllPackChecks
+				.Where(check => string.Equals(check.Rule.Field, field, StringComparison.Ordinal))
+				.Select(check => new object[] { check.FilePath, check.Rule.Id });
+		}
+
+		public static ExpressionCheck PackCheckFor(string packPath, string id)
+		{
+			return PackChecksIn(packPath)
+				.Single(check => string.Equals(check.Rule.Id, id, StringComparison.Ordinal));
+		}
+
+		public static IEnumerable<ExpressionCheck> AllPackChecks =>
+			CustomContent.PairedPackFiles().SelectMany(file => PackChecksIn(file.FilePath));
+
+		// - only rules that reach an entry, as for the required-field contracts
+		private static IEnumerable<ExpressionCheck> PackChecksIn(string packPath)
+		{
+			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, CustomContent.Load(packPath),
+					AllRules)
+				.Where(check => check.ItemCount > 0);
+		}
+
+		// - inside the single parse, scoped by the required-field rules' XPaths
+		public static IReadOnlyList<ExpressionCheck> ChecksIn(string fileName, string xmlPath,
+			XmlDocument document, IEnumerable<ExpressionRule> rules)
+		{
 			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.Rules
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			List<ExpressionCheck> checks = new List<ExpressionCheck>();

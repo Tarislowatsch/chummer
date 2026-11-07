@@ -112,8 +112,8 @@ namespace Chummer.Tests
 					collections.SelectMany(CategoryDeclarations.UsagesIn).ToArray(),
 					RequiredFields.ContractsIn(fileName, xmlPath, document),
 					BonusVocabulary.BonusTagsIn(fileName, document),
-					NumericFields.ChecksIn(xmlPath, document),
-					ExpressionChecks.ChecksIn(xmlPath, document, ExpressionChecks.AllRules),
+					NumericFields.ChecksIn(fileName, xmlPath, document),
+					ExpressionChecks.ChecksIn(fileName, xmlPath, document, ExpressionChecks.AllRules),
 					CrossFileReferences.ReferencesIn(fileName, document, CrossFileReferences.Rules),
 					CrossFileReferences.TargetKeysIn(fileName, document, CrossFileReferences.Rules)));
 			}

@@ -42,7 +42,10 @@ namespace Chummer.Tests
 			// - more than one would merge the file into several documents
 			public IReadOnlyList<string> BaseFileNames { get; }
 
-			public string BaseFilePath => Path.Combine(DataPaths.ChummerDataDir, BaseFileNames.Single());
+			// - the contracts' rule tables are keyed by it: a pack shares its base file's rules
+			public string BaseFileName => BaseFileNames.Single();
+
+			public string BaseFilePath => Path.Combine(DataPaths.ChummerDataDir, BaseFileName);
 		}
 
 		public static IReadOnlyList<PackFile> PackFiles => CachedPackFiles.Value;

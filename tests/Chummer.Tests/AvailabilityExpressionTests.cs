@@ -12,12 +12,22 @@ namespace Chummer.Tests
 		[MemberData(nameof(ExpressionChecks.RuleIds), "avail", MemberType = typeof(ExpressionChecks))]
 		public void EveryAvailabilityParsesInItsCalculator(string id)
 		{
-			ExpressionChecks.ExpressionCheck check = ExpressionChecks.CheckFor(id);
+			AssertParses(ExpressionChecks.CheckFor(id));
+		}
 
+		[Theory]
+		[MemberData(nameof(ExpressionChecks.PackRuleIds), "avail", MemberType = typeof(ExpressionChecks))]
+		public void EveryPackAvailabilityParsesInItsCalculator(string packPath, string id)
+		{
+			AssertParses(ExpressionChecks.PackCheckFor(packPath, id));
+		}
+
+		private static void AssertParses(ExpressionChecks.ExpressionCheck check)
+		{
 			if (check.Failures.Count > 0)
 			{
 				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + id
+					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
 						+ " value(s) its calculator throws on",
 					check.Failures,
 					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "

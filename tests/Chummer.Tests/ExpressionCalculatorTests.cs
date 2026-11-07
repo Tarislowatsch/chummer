@@ -132,6 +132,13 @@ namespace Chummer.Tests
 					.OrderBy(entry => entry, StringComparer.Ordinal));
 		}
 
+		// - above the limit only the top rating is replayed: a new entry must be listed on purpose
+		[Fact]
+		public void NoPackEntryExceedsTheExhaustiveRatingLimit()
+		{
+			Assert.Empty(ExpressionChecks.AllPackChecks.SelectMany(check => check.CutShort));
+		}
+
 		private static IEnumerable<string> PortedCalculators()
 		{
 			return AvailabilityExpressions.Calculators.Concat(CostExpressions.Calculators).Concat(EssExpressions.Calculators)
