@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Xml;
 using Xunit;
 
@@ -126,36 +127,59 @@ namespace Chummer.Tests
 
 		[Theory]
 		[InlineData("required/oneof", "required/oneof")]
-		[InlineData("required/allof/metatype[. = \"", "required/allof")]
+		[InlineData("required/allof/metatype[. = \"", "required/allof/metatype")]
 		[InlineData(" and (required/oneof[contains(., 'A')])", "required/oneof")]
 		[InlineData("forbidden/oneof", "forbidden/oneof")]
-		[InlineData("required/bodymin", "required")]
-		[InlineData("required/allofx", "required")]
-		[InlineData("required", null)]
-		[InlineData("notrequired/oneof", null)]
-		public void RequirementGroupOfFindsTheGroupStep(string literal, string group)
+		[InlineData("required/bodymin", "required/bodymin")]
+		[InlineData("required/allofx", "required/allofx")]
+		[InlineData("required", "required")]
+		[InlineData("<required>", "required")]
+		[InlineData("required/oneof/a or forbidden", "required/oneof/a forbidden")]
+		[InlineData("notrequired/oneof", "")]
+		[InlineData("requiredness", "")]
+		public void RequirementMentionsKeepBlockGroupAndTag(string literal, string mentions)
 		{
-			Assert.Equal(group, FieldReaders.RequirementGroupOf(literal));
+			Assert.Equal(mentions, string.Join(" ",
+				FieldReaders.RequirementMentionsIn(literal).Select(mention => mention.Display)));
 		}
 
-		// - frmSelectMetamagic is listed for allof: a new oneof read there must still fail
+		[Fact]
+		public void ADirectChildIsItsBlocksGroupWithATag()
+		{
+			FieldReaders.RequirementMention mention = Assert.Single(FieldReaders.RequirementMentionsIn("required/bodymin"));
+
+			Assert.Equal("required", mention.Group);
+			Assert.Equal("bodymin", mention.Tag);
+		}
+
 		[Fact]
 		public void ARequirementLiteralNeedsAReaderForItsOwnGroup()
 		{
 			NameLookups.Literal[] literals =
 			{
 				new NameLookups.Literal("frmSelectMetamagic.cs:10", "required/allof/metamagic"),
+				new NameLookups.Literal("frmSelectMetamagic.cs:11", "<required>"),
+				new NameLookups.Literal("frmSelectMetamagic.cs:12", "forbidden"),
 				new NameLookups.Literal("frmSelectMetamagic.cs:20", "required/oneof/metamagic"),
 				new NameLookups.Literal("frmSelectSpell.cs:30", "required/allof/metamagic"),
+				new NameLookups.Literal("frmSelectSpell.cs:31", "required"),
 				new NameLookups.Literal("frmCreate.cs:40", "required/oneof/metatype"),
-				new NameLookups.Literal("frmSelectSpell.cs:50", "required"),
+				new NameLookups.Literal("frmCreate.cs:41", "required/oneof/metamagic"),
+				new NameLookups.Literal("clsLog.cs:50", "field required"),
+				new NameLookups.Literal("clsLog.cs:51", "required/allof/x"),
 			};
 			FieldReaders.RequirementReader metamagic = new FieldReaders.RequirementReader("metamagic.xml",
 				"metamagics/metamagic", "required/allof", "frmSelectMetamagic.cs:10", FieldReaders.ReadStyle.PathLiterals);
 
-			Assert.Equal(new[] { "frmSelectMetamagic.cs:20", "frmSelectSpell.cs:30" },
+			Assert.Equal(
+				new[] { "frmSelectMetamagic.cs:12", "frmSelectMetamagic.cs:20", "frmSelectSpell.cs:30",
+					"frmSelectSpell.cs:31", "frmCreate.cs:41", "clsLog.cs:51" },
 				FieldReaders.UnlistedRequirementLiterals(literals, new[] { metamagic },
-						new System.Collections.Generic.Dictionary<string, string> { { "frmCreate.cs required/oneof", "why" } })
+						new Dictionary<string, string>
+						{
+							{ "frmCreate.cs required/oneof/metatype", "why" },
+							{ "clsLog.cs required", "why" },
+						})
 					.Select(literal => literal.Site));
 		}
 

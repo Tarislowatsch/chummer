@@ -111,12 +111,12 @@ namespace Chummer.Tests
 		}
 
 		[Fact]
-		public void EveryKnownExtraReaderStillReadsItsGroup()
+		public void EveryKnownExtraReaderStillReadsItsTag()
 		{
-			string[] stale = FieldReaders.KnownExtraReaders.Keys
-				.Where(key => !NameLookups.AllLiterals.Any(literal =>
-					literal.File + " " + FieldReaders.RequirementGroupOf(literal.Text) == key))
-				.ToArray();
+			HashSet<string> read = new HashSet<string>(NameLookups.AllLiterals
+				.SelectMany(literal => FieldReaders.RequirementMentionsIn(literal.Text)
+					.Select(mention => literal.File + " " + mention.Display)), StringComparer.Ordinal);
+			string[] stale = FieldReaders.KnownExtraReaders.Keys.Where(key => !read.Contains(key)).ToArray();
 
 			Assert.True(stale.Length == 0, "Remove from KnownExtraReaders:\n  " + string.Join("\n  ", stale));
 		}

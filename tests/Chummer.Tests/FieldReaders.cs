@@ -151,40 +151,79 @@ namespace Chummer.Tests
 				"frmSelectQuality.cs:833", ReadStyle.NameDispatch),
 		};
 
-		private static readonly Regex RequirementStep =
-			new Regex(@"(?<![A-Za-z0-9_])(required|forbidden)/([A-Za-z0-9_]+)");
-
-		// - the group a literal walks into, e.g. "required/oneof", or "required" for a direct child
-		// - null when the literal names no step below required or forbidden
-		public static string RequirementGroupOf(string literal)
+		// One place a literal names a requirement block: bare, as a group, or with a tag below it.
+		public sealed class RequirementMention
 		{
-			Match match = RequirementStep.Match(literal);
-			if (!match.Success)
-				return null;
-			string block = match.Groups[1].Value;
-			return GroupNames.Contains(match.Groups[2].Value) ? block + "/" + match.Groups[2].Value : block;
+			public RequirementMention(string block, string group, string tag)
+			{
+				Block = block;
+				Group = group;
+				Tag = tag;
+			}
+
+			public string Block { get; }
+
+			// - null for a bare "required": InnerXml.Contains and ["required"] name no group
+			// - the block itself for a direct child such as "required/bodymin"
+			public string Group { get; }
+
+			public string Tag { get; }
+
+			public string Display => Group == null ? Block : Tag == null ? Group : Group + "/" + Tag;
 		}
 
-		// - "file group" -> why that consumer is no reader in the table
+		private static readonly Regex RequirementPath = new Regex(
+			@"(?<![A-Za-z0-9_])(required|forbidden)(?:/([A-Za-z0-9_]+)(?:/([A-Za-z0-9_]+))?)?(?![A-Za-z0-9_])");
+
+		// - public so the detection tests can drive it with made-up literals
+		public static IReadOnlyList<RequirementMention> RequirementMentionsIn(string literal)
+		{
+			return RequirementPath.Matches(literal).Cast<Match>()
+				.Select(match =>
+				{
+					string block = match.Groups[1].Value;
+					string step = match.Groups[2].Success ? match.Groups[2].Value : null;
+					string below = match.Groups[3].Success ? match.Groups[3].Value : null;
+					if (step == null)
+						return new RequirementMention(block, null, null);
+					return GroupNames.Contains(step)
+						? new RequirementMention(block, block + "/" + step, below)
+						: new RequirementMention(block, block, step);
+				})
+				.ToArray();
+		}
+
+		// - "file group/tag", or "file required" for a bare word -> why it is no reader in the table
 		// - leaving a reader out can only add findings, never hide one
+		// - keyed down to the tag: a whole group in frmCreate.cs would wave any new check through
 		public static readonly IReadOnlyDictionary<string, string> KnownExtraReaders =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
-				{ "frmCreate.cs required/allof", "ChangeMetatype re-checks qualities.xml metatype/metavariant" },
-				{ "frmCreate.cs required/oneof", "ChangeMetatype re-checks qualities.xml metatype/metavariant" },
+				{ "frmCreate.cs required/allof/metatype", "ChangeMetatype re-checks a quality's metatype" },
+				{ "frmCreate.cs required/allof/metavariant", "ChangeMetatype re-checks a quality's metavariant" },
+				{ "frmCreate.cs required/oneof/metatype", "ChangeMetatype re-checks a quality's metatype" },
+				{ "frmCreate.cs required/oneof/metavariant", "ChangeMetatype re-checks a quality's metavariant" },
 			};
 
-		// - every literal stepping below required or forbidden needs a reader or a known extra reader
-		// - keyed by file and group: a new oneof read in a file listed for allof must fail too
+		// - keyed by group: a new oneof read in a file listed for allof must fail too
+		// - a bare block needs a reader of that block in the same file, or a known extra reader
 		public static IEnumerable<NameLookups.Literal> UnlistedRequirementLiterals(
 			IEnumerable<NameLookups.Literal> literals, IEnumerable<RequirementReader> readers,
 			IReadOnlyDictionary<string, string> extraReaders)
 		{
-			HashSet<string> listed = new HashSet<string>(
-				readers.Select(reader => reader.ConsumerFile + " " + reader.Group).Concat(extraReaders.Keys),
-				StringComparer.Ordinal);
-			return literals.Where(literal => RequirementGroupOf(literal.Text) is string group
-				&& !listed.Contains(literal.File + " " + group));
+			RequirementReader[] all = readers.ToArray();
+			return literals.Where(literal => RequirementMentionsIn(literal.Text)
+				.Any(mention => !IsListed(literal.File, mention, all, extraReaders)));
+		}
+
+		private static bool IsListed(string file, RequirementMention mention, RequirementReader[] readers,
+			IReadOnlyDictionary<string, string> extraReaders)
+		{
+			IEnumerable<RequirementReader> inFile = readers.Where(reader => reader.ConsumerFile == file);
+			bool read = mention.Group == null
+				? inFile.Any(reader => reader.Group.Split('/')[0] == mention.Block)
+				: inFile.Any(reader => reader.Group == mention.Group);
+			return read || extraReaders.ContainsKey(file + " " + mention.Display);
 		}
 
 		// - the line in Consumer must still hold the group's literal: a shifted file leaves a dead pointer
