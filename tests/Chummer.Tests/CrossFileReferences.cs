@@ -199,6 +199,53 @@ namespace Chummer.Tests
 			return found;
 		}
 
+		public static IEnumerable<object[]> CrossFileReferenceRuleIds()
+		{
+			return Rules.Select(rule => new object[] { rule.Id });
+		}
+
+		public static ReferenceCheck CrossFileReferenceCheckFor(string id)
+		{
+			return CachedCrossFileReferenceChecksById.Value[id];
+		}
+
+		public static IReadOnlyList<ReferenceCheck> CrossFileReferenceChecks =>
+			CachedCrossFileReferenceChecksById.Value.Values.ToArray();
+
+		private static readonly Lazy<IReadOnlyDictionary<string, ReferenceCheck>> CachedCrossFileReferenceChecksById =
+			new Lazy<IReadOnlyDictionary<string, ReferenceCheck>>(CheckCrossFileReferences);
+
+		// - joined after the single parse: both halves of a rule are known only once every file is read
+		private static IReadOnlyDictionary<string, ReferenceCheck> CheckCrossFileReferences()
+		{
+			ILookup<string, Reference> references = RuleCorpus.Files
+				.SelectMany(file => file.CrossFileReferences)
+				.ToLookup(reference => reference.RuleId, StringComparer.Ordinal);
+			ILookup<string, TargetKeys> targetKeys = RuleCorpus.Files
+				.SelectMany(file => file.CrossFileTargetKeys)
+				.ToLookup(keys => keys.RuleId, StringComparer.Ordinal);
+
+			Dictionary<string, ReferenceCheck> checks = new Dictionary<string, ReferenceCheck>(StringComparer.Ordinal);
+
+			foreach (ReferenceRule rule in Rules)
+			{
+				Reference[] ruleReferences = references[rule.Id].ToArray();
+				IReadOnlyList<IReadOnlyList<string>> definitions =
+					targetKeys[rule.Id].SelectMany(keys => keys.Keys).ToArray();
+				int[] definitionCounts = Enumerable.Range(0, rule.Targets.Count)
+					.Select(index => targetKeys[rule.Id]
+						.Where(keys => keys.TargetIndex == index)
+						.Sum(keys => keys.Keys.Count))
+					.ToArray();
+
+				// - Add, not the indexer: a repeated id would replace the first rule's check
+				checks.Add(rule.Id, new ReferenceCheck(rule, ruleReferences.Length,
+					definitionCounts, Unresolved(rule, ruleReferences, definitions)));
+			}
+
+			return checks;
+		}
+
 		// - a reference resolves when any target offers a key equal on every field it carries
 		public static IReadOnlyList<Reference> Unresolved(ReferenceRule rule,
 			IEnumerable<Reference> references, IReadOnlyList<IReadOnlyList<string>> definitions)
@@ -240,9 +287,9 @@ namespace Chummer.Tests
 		{
 			XmlNode bonus = reference.SelectSingleNode("ancestor::bonus[last()]");
 			if (bonus != null)
-				return DataPaths.ItemLabel(bonus.ParentNode);
+				return RuleCorpus.ItemLabel(bonus.ParentNode);
 
-			return DataPaths.ItemLabel(reference.Name == "name" ? reference.ParentNode.ParentNode : reference.ParentNode);
+			return RuleCorpus.ItemLabel(reference.Name == "name" ? reference.ParentNode.ParentNode : reference.ParentNode);
 		}
 
 		private static string ValueOf(XmlNode node, string path)

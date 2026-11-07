@@ -449,7 +449,7 @@ namespace Chummer.Tests
 			foreach (XmlNode root in BonusVocabulary.CreateImprovementsRoots(baseFile, document))
 			{
 				IReadOnlyList<int> ratings = RatingsOf(root);
-				string itemName = DataPaths.ItemLabel(root.ParentNode);
+				string itemName = RuleCorpus.ItemLabel(root.ParentNode);
 				if (ratings[ratings.Count - 1] > ExpressionChecks.ExhaustiveRatingLimit)
 					cutShort.Add(file + ": " + itemName + " (" + ratings[ratings.Count - 1] + ")");
 
@@ -675,7 +675,7 @@ namespace Chummer.Tests
 		{
 			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
 				.Single(path => Path.GetFileName(path) == FieldReaders.HandlerConsumerFile));
-			return handlers.ToDictionary(handler => handler, handler => DataPaths.Fingerprint(
+			return handlers.ToDictionary(handler => handler, handler => SourceLines.Fingerprint(
 					BonusVocabulary.HandlerBlock(handler, lines).Block.Code
 						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
 						.Where(line => line.Length > 0)),

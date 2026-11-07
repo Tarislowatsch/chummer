@@ -15,7 +15,7 @@ namespace Chummer.Tests
 			string block;
 			IReadOnlyCollection<string> declared;
 
-			bool inScope = DataPaths.TryResolveDeclarationBlock("weapons.xml", "weapons",
+			bool inScope = CategoryDeclarations.TryResolveDeclarationBlock("weapons.xml", "weapons",
 				Declarations("categories", "Bike", "Car"), out block, out declared);
 
 			Assert.True(inScope);
@@ -29,7 +29,7 @@ namespace Chummer.Tests
 			string block;
 			IReadOnlyCollection<string> declared;
 
-			bool inScope = DataPaths.TryResolveDeclarationBlock("vehicles.xml", "mods",
+			bool inScope = CategoryDeclarations.TryResolveDeclarationBlock("vehicles.xml", "mods",
 				Declarations("modcategories", "Standard", "Special"), out block, out declared);
 
 			Assert.True(inScope);
@@ -45,7 +45,7 @@ namespace Chummer.Tests
 			IReadOnlyCollection<string> declared;
 
 			Assert.Throws<InvalidOperationException>(() =>
-				DataPaths.TryResolveDeclarationBlock("vehicles.xml", "mods",
+				CategoryDeclarations.TryResolveDeclarationBlock("vehicles.xml", "mods",
 					Declarations("categories", "Bike", "Car"), out block, out declared));
 		}
 
@@ -56,7 +56,7 @@ namespace Chummer.Tests
 			IReadOnlyCollection<string> declared;
 
 			InvalidOperationException error = Assert.Throws<InvalidOperationException>(() =>
-				DataPaths.TryResolveDeclarationBlock("vehicles.xml", "mods",
+				CategoryDeclarations.TryResolveDeclarationBlock("vehicles.xml", "mods",
 					NoDeclarations, out block, out declared));
 
 			Assert.Contains("vehicles.xml/mods", error.Message);
@@ -70,7 +70,7 @@ namespace Chummer.Tests
 			string block;
 			IReadOnlyCollection<string> declared;
 
-			Assert.False(DataPaths.TryResolveDeclarationBlock("lifestyles.xml", "qualities",
+			Assert.False(CategoryDeclarations.TryResolveDeclarationBlock("lifestyles.xml", "qualities",
 				NoDeclarations, out block, out declared));
 		}
 
@@ -81,7 +81,7 @@ namespace Chummer.Tests
 			string block;
 			IReadOnlyCollection<string> declared;
 
-			Assert.False(DataPaths.TryResolveDeclarationBlock("weapons.xml", "mods",
+			Assert.False(CategoryDeclarations.TryResolveDeclarationBlock("weapons.xml", "mods",
 				Declarations("categories", "Weapon Mod"), out block, out declared));
 		}
 

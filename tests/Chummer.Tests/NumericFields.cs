@@ -155,7 +155,7 @@ namespace Chummer.Tests
 			Dictionary<string, IReadOnlyList<ConvertedField>> fields =
 				new Dictionary<string, IReadOnlyList<ConvertedField>>(StringComparer.Ordinal);
 
-			foreach (Match signature in DataPaths.EntityCreateSignature.Matches(joined))
+			foreach (Match signature in RequiredFields.EntityCreateSignature.Matches(joined))
 			{
 				int line = 0;
 				for (int i = 0; i < signature.Index; i++)
@@ -164,7 +164,7 @@ namespace Chummer.Tests
 						line++;
 				}
 
-				string className = DataPaths.ClassNameAbove(source.Code, line);
+				string className = RequiredFields.ClassNameAbove(source.Code, line);
 				string body = string.Join("\n", source.BlockFrom(line).Code);
 				IReadOnlyList<ConvertedField> converted =
 					ConvertedFieldsInBody(className, body, signature.Groups[1].Value);
@@ -257,13 +257,31 @@ namespace Chummer.Tests
 			return nodes;
 		}
 
+		public static IEnumerable<object[]> EntitiesWithNumericFields()
+		{
+			return CachedNumericFieldChecksByEntity.Value.Keys
+				.OrderBy(entity => entity, StringComparer.Ordinal)
+				.Select(entity => new object[] { entity });
+		}
+
+		public static NumericFieldCheck NumericFieldCheckFor(string entity)
+		{
+			return CachedNumericFieldChecksByEntity.Value[entity];
+		}
+
+		private static readonly Lazy<IReadOnlyDictionary<string, NumericFieldCheck>>
+			CachedNumericFieldChecksByEntity =
+				new Lazy<IReadOnlyDictionary<string, NumericFieldCheck>>(
+					() => RuleCorpus.Files.SelectMany(file => file.NumericFieldChecks)
+						.ToDictionary(check => check.Entity, StringComparer.Ordinal));
+
 		// - inside the single parse, like the required-field contracts it borrows its XPaths from
 		public static IReadOnlyList<NumericFieldCheck> ChecksIn(string xmlPath, XmlDocument document)
 		{
 			string fileName = Path.GetFileName(xmlPath);
 			List<NumericFieldCheck> checks = new List<NumericFieldCheck>();
 
-			foreach (DataPaths.RequiredFieldRule rule in DataPaths.RequiredFieldRules
+			foreach (RequiredFields.RequiredFieldRule rule in RequiredFields.RequiredFieldRules
 				.Where(rule => string.Equals(rule.FileName, fileName, StringComparison.Ordinal)))
 			{
 				string className = CreateClassOf(rule.Entity);
@@ -295,7 +313,7 @@ namespace Chummer.Tests
 						if (IsDiverted(className, field, value) || Converts(field.Conversion, value))
 							continue;
 
-						unconvertible.Add(new UnconvertibleValue(DataPaths.ItemLabel(item), field, value));
+						unconvertible.Add(new UnconvertibleValue(RuleCorpus.ItemLabel(item), field, value));
 					}
 				}
 			}
@@ -368,7 +386,7 @@ namespace Chummer.Tests
 		public static IEnumerable<string> ClassesWithoutAnEntity()
 		{
 			HashSet<string> reached = new HashSet<string>(
-				DataPaths.RequiredFieldRules.Select(rule => CreateClassOf(rule.Entity)),
+				RequiredFields.RequiredFieldRules.Select(rule => CreateClassOf(rule.Entity)),
 				StringComparer.Ordinal);
 
 			return ConvertedFields.Keys

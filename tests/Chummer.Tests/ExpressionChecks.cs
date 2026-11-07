@@ -164,7 +164,7 @@ namespace Chummer.Tests
 			return items
 				.Select(item => new { Item = item, Ratings = RatingsOf(entity, item) })
 				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > ExhaustiveRatingLimit)
-				.Select(entry => entity + ": " + DataPaths.ItemLabel(entry.Item) + " ("
+				.Select(entry => entity + ": " + RuleCorpus.ItemLabel(entry.Item) + " ("
 					+ entry.Ratings[entry.Ratings.Count - 1] + ")");
 		}
 
@@ -204,7 +204,7 @@ namespace Chummer.Tests
 					if (fingerprints[key] != "(missing)")
 						throw new InvalidOperationException(key + " is declared twice, so its port is ambiguous.");
 
-					fingerprints[key] = DataPaths.Fingerprint(source.BlockFrom(i).Code
+					fingerprints[key] = SourceLines.Fingerprint(source.BlockFrom(i).Code
 						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
 						.Where(line => line.Length > 0));
 				}
@@ -283,7 +283,7 @@ namespace Chummer.Tests
 							? "silently 0 (" + exception.InnerException.GetType().Name + ")"
 							: exception.GetType().Name;
 
-						failures.Add(new ExpressionFailure(DataPaths.ItemLabel(item), rating,
+						failures.Add(new ExpressionFailure(RuleCorpus.ItemLabel(item), rating,
 							FieldOf(item, rule.Field), error));
 
 						// - one failing rating per entry is enough to name the defect
@@ -295,18 +295,40 @@ namespace Chummer.Tests
 			return failures;
 		}
 
+		public static IEnumerable<object[]> ExpressionRuleIds(string field)
+		{
+			return AllRules
+				.Where(rule => string.Equals(rule.Field, field, StringComparison.Ordinal))
+				.Select(rule => new object[] { rule.Id });
+		}
+
+		// - throws for a declared rule no file produced: its entity's file was never scanned
+		public static ExpressionCheck ExpressionCheckFor(string id)
+		{
+			ExpressionCheck check;
+			if (!CachedExpressionChecksById.Value.TryGetValue(id, out check))
+				throw new InvalidOperationException(id + " names an entity whose file was not scanned.");
+
+			return check;
+		}
+
+		private static readonly Lazy<IReadOnlyDictionary<string, ExpressionCheck>> CachedExpressionChecksById =
+			new Lazy<IReadOnlyDictionary<string, ExpressionCheck>>(
+				() => RuleCorpus.Files.SelectMany(file => file.ExpressionChecks)
+					.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
+
 		// - inside the single parse, scoped by the required-field rules' XPaths
 		public static IReadOnlyList<ExpressionCheck> ChecksIn(string xmlPath, XmlDocument document,
 			IEnumerable<ExpressionRule> rules)
 		{
 			string fileName = System.IO.Path.GetFileName(xmlPath);
-			Dictionary<string, DataPaths.RequiredFieldRule> entities = DataPaths.RequiredFieldRules
+			Dictionary<string, RequiredFields.RequiredFieldRule> entities = RequiredFields.RequiredFieldRules
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			List<ExpressionCheck> checks = new List<ExpressionCheck>();
 
 			foreach (ExpressionRule rule in rules)
 			{
-				DataPaths.RequiredFieldRule entity = entities[rule.Entity];
+				RequiredFields.RequiredFieldRule entity = entities[rule.Entity];
 				if (!string.Equals(entity.FileName, fileName, StringComparison.Ordinal))
 					continue;
 

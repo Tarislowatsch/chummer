@@ -52,8 +52,8 @@ namespace Chummer.Tests
 		{
 			XmlDocument document = Catalogue(WithMetavariant(Entry("Dwarf", "SR4"), "Gnome", "XYZ"));
 
-			DataPaths.BookReference undeclared = DataPaths
-				.ReferencesToUndeclaredBooks(DataPaths.BookReferencesIn(document), DeclaredCodes)
+			BookReferences.BookReference undeclared = BookReferences
+				.ReferencesToUndeclaredBooks(BookReferences.BookReferencesIn(document), DeclaredCodes)
 				.Single();
 
 			Assert.Equal("Gnome", undeclared.ItemName);
@@ -97,18 +97,18 @@ namespace Chummer.Tests
 				Entry("Cybereye", category: "Bike"), "Thermographic Vision", "Rotocraft"));
 
 			Assert.Equal(new[] { "Bike" },
-				DataPaths.CategoryUsagesIn(collection).Select(usage => usage.Category).ToArray());
+				CategoryDeclarations.CategoryUsagesIn(collection).Select(usage => usage.Category).ToArray());
 		}
 
 		[Fact]
 		public void ItemWithoutACategoryIsNotAUsage()
 		{
-			Assert.Empty(DataPaths.CategoryUsagesIn(Collection(Entry("Banshee"))));
+			Assert.Empty(CategoryDeclarations.CategoryUsagesIn(Collection(Entry("Banshee"))));
 		}
 
 		private static string[] UndeclaredCodesIn(XmlDocument document)
 		{
-			return DataPaths.ReferencesToUndeclaredBooks(DataPaths.BookReferencesIn(document), DeclaredCodes)
+			return BookReferences.ReferencesToUndeclaredBooks(BookReferences.BookReferencesIn(document), DeclaredCodes)
 				.Select(reference => reference.Code)
 				.ToArray();
 		}
@@ -116,9 +116,9 @@ namespace Chummer.Tests
 		// Reimplementing the set difference here would let these facts drift from the real check.
 		private static string[] UndeclaredCategoriesIn(string[] declared, params XmlElement[] items)
 		{
-			DataPaths.CategoryContract contract = new DataPaths.CategoryContract(
+			CategoryDeclarations.CategoryContract contract = new CategoryDeclarations.CategoryContract(
 				"vehicles.xml", "vehicles", "categories", declared,
-				DataPaths.CategoryUsagesIn(Collection(items)).ToArray());
+				CategoryDeclarations.CategoryUsagesIn(Collection(items)).ToArray());
 
 			return contract.UndeclaredUsages().Select(usage => usage.Category).ToArray();
 		}

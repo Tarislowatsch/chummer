@@ -10,12 +10,12 @@ namespace Chummer.Tests
 	public class BonusVocabularyTests
 	{
 		[Theory]
-		[MemberData(nameof(DataPaths.TopLevelRuleXmlFilesWithBonuses), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(BonusVocabulary.TopLevelRuleXmlFilesWithBonuses), MemberType = typeof(BonusVocabulary))]
 		public void EveryBonusTagHasACodePathThatReadsIt(string xmlPath)
 		{
 			// Grouped by tag: one misspelling copied across entries is one problem.
 			var unhandled = BonusVocabulary
-				.UnhandledTags(DataPaths.BonusTagsFor(xmlPath), BonusVocabulary.VocabularyFor)
+				.UnhandledTags(BonusVocabulary.BonusTagsFor(xmlPath), BonusVocabulary.VocabularyFor)
 				.GroupBy(tag => tag.Consumer + " <" + tag.Tag + ">", StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();

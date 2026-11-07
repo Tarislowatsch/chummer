@@ -106,7 +106,7 @@ namespace Chummer.Tests
 		public static IEnumerable<object[]> PackFilesCitingBooks()
 		{
 			return PairedPackFiles()
-				.Where(file => DataPaths.BookReferencesIn(Load(file.FilePath)).Count > 0)
+				.Where(file => BookReferences.BookReferencesIn(Load(file.FilePath)).Count > 0)
 				.Select(file => new object[] { file.FilePath });
 		}
 
@@ -125,7 +125,7 @@ namespace Chummer.Tests
 				.SelectMany(books => Load(books.FilePath).SelectNodes("/chummer/books/book/code").Cast<XmlNode>())
 				.Select(code => code.InnerText);
 
-			return new HashSet<string>(DataPaths.BookCodes.Concat(packCodes), StringComparer.Ordinal);
+			return new HashSet<string>(BookReferences.BookCodes.Concat(packCodes), StringComparer.Ordinal);
 		}
 
 		// One named entry in a pack file, keyed the way Load looks it up.
@@ -186,9 +186,9 @@ namespace Chummer.Tests
 				return Enumerable.Empty<string>();
 
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
-				DataPaths.CategoryDeclarationsFor(file.BaseFilePath);
+				CategoryDeclarations.CategoryDeclarationsFor(file.BaseFilePath);
 
-			return DataPaths.DeclarationBlocksIn(pack.DocumentElement, file.FileName)
+			return CategoryDeclarations.DeclarationBlocksIn(pack.DocumentElement, file.FileName)
 				.SelectMany(block => block.Value
 					.Where(value => Values(baseBlocks, block.Key).Contains(value, StringComparer.Ordinal))
 					.Select(value => block.Key + "/" + value));
@@ -209,12 +209,12 @@ namespace Chummer.Tests
 			PackFile file, XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
-				DataPaths.CategoryDeclarationsFor(file.BaseFilePath);
+				CategoryDeclarations.CategoryDeclarationsFor(file.BaseFilePath);
 			if (file.IsOverride)
 				return baseBlocks;
 
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> packBlocks =
-				DataPaths.DeclarationBlocksIn(pack.DocumentElement, file.FileName);
+				CategoryDeclarations.DeclarationBlocksIn(pack.DocumentElement, file.FileName);
 
 			return baseBlocks.Keys.Union(packBlocks.Keys, StringComparer.Ordinal)
 				.ToDictionary(
@@ -224,23 +224,24 @@ namespace Chummer.Tests
 		}
 
 		// - scope resolved against the base file name: overrides and exemptions apply unchanged
-		public static IEnumerable<DataPaths.CategoryUsage> UndeclaredCategoryUsages(PackFile file, XmlDocument pack)
+		public static IEnumerable<CategoryDeclarations.CategoryUsage> UndeclaredCategoryUsages(PackFile file,
+			XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations =
 				CategoryDeclarationsVisibleTo(file, pack);
 
-			foreach (XmlNode collection in DataPaths.CatalogueCollectionsIn(pack.DocumentElement))
+			foreach (XmlNode collection in RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement))
 			{
 				string block;
 				IReadOnlyCollection<string> declared;
-				if (!DataPaths.TryResolveDeclarationBlock(file.BaseFileNames[0], collection.Name,
+				if (!CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileNames[0], collection.Name,
 						declarations, out block, out declared))
 				{
 					continue;
 				}
 
 				HashSet<string> set = new HashSet<string>(declared, StringComparer.Ordinal);
-				foreach (DataPaths.CategoryUsage usage in DataPaths.CategoryUsagesIn(collection))
+				foreach (CategoryDeclarations.CategoryUsage usage in CategoryDeclarations.CategoryUsagesIn(collection))
 				{
 					if (!set.Contains(usage.Category))
 						yield return usage;

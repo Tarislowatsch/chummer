@@ -45,8 +45,8 @@ namespace Chummer.Tests
 		{
 			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
 
-			var unknown = DataPaths
-				.ReferencesToUndeclaredBooks(DataPaths.BookReferencesIn(CustomContent.Load(packPath)),
+			var unknown = BookReferences
+				.ReferencesToUndeclaredBooks(BookReferences.BookReferencesIn(CustomContent.Load(packPath)),
 					CustomContent.BookCodesVisibleTo(file))
 				.GroupBy(reference => reference.Code, StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)

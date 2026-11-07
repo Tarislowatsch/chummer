@@ -11,12 +11,12 @@ namespace Chummer.Tests
 	public class BookReferenceTests
 	{
 		[Theory]
-		[MemberData(nameof(DataPaths.TopLevelRuleXmlFilesCitingBooks), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(BookReferences.TopLevelRuleXmlFilesCitingBooks), MemberType = typeof(BookReferences))]
 		public void EverySourceCitesADeclaredBook(string xmlPath)
 		{
 			// Grouped by code: one dropped book is one problem, not hundreds of identical lines.
-			var unknown = DataPaths
-				.ReferencesToUndeclaredBooks(DataPaths.BookReferencesFor(xmlPath), DataPaths.BookCodes)
+			var unknown = BookReferences
+				.ReferencesToUndeclaredBooks(BookReferences.BookReferencesFor(xmlPath), BookReferences.BookCodes)
 				.GroupBy(reference => reference.Code, StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();

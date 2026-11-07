@@ -85,7 +85,7 @@ namespace Chummer.Tests
 				+ "</usegear>"
 				+ "</gears></gear></gears></chummer>");
 
-			DataPaths.RequiredFieldContract contract = Evaluate("Gear child <usegear> reference", document);
+			RequiredFields.RequiredFieldContract contract = Evaluate("Gear child <usegear> reference", document);
 
 			Assert.Equal(3, contract.ItemCount);
 			Assert.Equal(new[] { "category" },
@@ -106,7 +106,7 @@ namespace Chummer.Tests
 				+ "</gear>"
 				+ "</gears></gear></gears></chummer>");
 
-			DataPaths.RequiredFieldContract contract = Evaluate("Gear child <gear> reference", document);
+			RequiredFields.RequiredFieldContract contract = Evaluate("Gear child <gear> reference", document);
 
 			// - the deeper <gear> is neither counted nor faulted: no Create ever reads it
 			Assert.Equal(2, contract.ItemCount);
@@ -118,7 +118,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void AReferencedAccessoryWithoutMountIsReported()
 		{
-			DataPaths.RequiredFieldContract contract =
+			RequiredFields.RequiredFieldContract contract =
 				Evaluate("WeaponAccessory built into a weapon", WeaponsDocument("Smartgun System"));
 
 			Assert.Equal(1, contract.ItemCount);
@@ -128,7 +128,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void AnAccessoryNoWeaponReferencesIsNotHeldToMount()
 		{
-			DataPaths.RequiredFieldContract contract =
+			RequiredFields.RequiredFieldContract contract =
 				Evaluate("WeaponAccessory built into a weapon", WeaponsDocument("Silencer"));
 
 			Assert.Equal(0, contract.ItemCount);
@@ -139,7 +139,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void ATopLevelEntryWithoutANameIsReportedAsUnnamed()
 		{
-			DataPaths.MissingField missing = DataPaths.MissingRequiredFieldsIn(
+			RequiredFields.MissingField missing = RequiredFields.MissingRequiredFieldsIn(
 					Document("<gear><avail>4</avail></gear>").DocumentElement, new[] { "name" })
 				.Single();
 
@@ -157,7 +157,7 @@ namespace Chummer.Tests
 				+ "<gears><usegear><category>Matrix Programs</category></usegear></gears>"
 				+ "</gear></gears></chummer>");
 
-			DataPaths.RequiredFieldContract contract = Evaluate("Gear child <usegear> reference", document);
+			RequiredFields.RequiredFieldContract contract = Evaluate("Gear child <usegear> reference", document);
 
 			Assert.Equal("Suite: Basic", contract.MissingFields.Single().ItemName);
 		}
@@ -167,13 +167,13 @@ namespace Chummer.Tests
 		[Fact]
 		public void ARuleNamingAFileThatWasNotScannedIsRejected()
 		{
-			DataPaths.RequiredFieldRule orphaned =
-				new DataPaths.RequiredFieldRule("Vehicle", "vehicels.xml", "/chummer/vehicles/vehicle",
+			RequiredFields.RequiredFieldRule orphaned =
+				new RequiredFields.RequiredFieldRule("Vehicle", "vehicels.xml", "/chummer/vehicles/vehicle",
 					new[] { "name" });
 
 			InvalidOperationException error = Assert.Throws<InvalidOperationException>(
-				() => DataPaths.EnsureEveryRuleWasEvaluated(
-					new[] { orphaned }, new DataPaths.RequiredFieldContract[0]));
+				() => RequiredFields.EnsureEveryRuleWasEvaluated(
+					new[] { orphaned }, new RequiredFields.RequiredFieldContract[0]));
 
 			Assert.Contains("Vehicle -> vehicels.xml", error.Message);
 		}
@@ -181,14 +181,14 @@ namespace Chummer.Tests
 		[Fact]
 		public void ARuleWhoseFileWasScannedIsAccepted()
 		{
-			DataPaths.RequiredFieldRule rule =
-				new DataPaths.RequiredFieldRule("Vehicle", "vehicles.xml", "/chummer/vehicles/vehicle",
+			RequiredFields.RequiredFieldRule rule =
+				new RequiredFields.RequiredFieldRule("Vehicle", "vehicles.xml", "/chummer/vehicles/vehicle",
 					new[] { "name" });
 
-			DataPaths.EnsureEveryRuleWasEvaluated(
+			RequiredFields.EnsureEveryRuleWasEvaluated(
 				new[] { rule },
-				new[] { new DataPaths.RequiredFieldContract(rule, "vehicles.xml", 0,
-					new DataPaths.MissingField[0]) });
+				new[] { new RequiredFields.RequiredFieldContract(rule, "vehicles.xml", 0,
+					new RequiredFields.MissingField[0]) });
 		}
 
 		// - the entity name is the theory's case id: xUnit silently drops a duplicated case
@@ -197,7 +197,7 @@ namespace Chummer.Tests
 		public void TwoRulesSharingAnEntityNameAreRejected()
 		{
 			InvalidOperationException error = Assert.Throws<InvalidOperationException>(
-				() => DataPaths.EnsureEntityNamesAreUnique(new[]
+				() => RequiredFields.EnsureEntityNamesAreUnique(new[]
 				{
 					RuleNamed("Metamagic", "metamagic.xml"),
 					RuleNamed("Metamagic", "echoes.xml"),
@@ -209,16 +209,16 @@ namespace Chummer.Tests
 		[Fact]
 		public void RulesWithDistinctEntityNamesAreAccepted()
 		{
-			DataPaths.EnsureEntityNamesAreUnique(new[]
+			RequiredFields.EnsureEntityNamesAreUnique(new[]
 			{
 				RuleNamed("Metamagic", "metamagic.xml"),
 				RuleNamed("Echo", "echoes.xml"),
 			});
 		}
 
-		private static DataPaths.RequiredFieldRule RuleNamed(string entity, string fileName)
+		private static RequiredFields.RequiredFieldRule RuleNamed(string entity, string fileName)
 		{
-			return new DataPaths.RequiredFieldRule(entity, fileName, "/chummer", new[] { "name" });
+			return new RequiredFields.RequiredFieldRule(entity, fileName, "/chummer", new[] { "name" });
 		}
 
 		// - the pinned hashes only prove what today's sources hash to, never what a change would do
@@ -279,7 +279,7 @@ namespace Chummer.Tests
 
 			Assert.Equal(
 				FingerprintOf("_name = objXmlSample[\"name\"].InnerText;"),
-				DataPaths.FingerprintsIn(lines)["Sample"]);
+				RequiredFields.FingerprintsIn(lines)["Sample"]);
 		}
 
 		// - a second Create in one class would silently shadow the first under the pinned table's key
@@ -300,7 +300,7 @@ namespace Chummer.Tests
 			};
 
 			InvalidOperationException error = Assert.Throws<InvalidOperationException>(
-				() => DataPaths.FingerprintsIn(lines));
+				() => RequiredFields.FingerprintsIn(lines));
 
 			Assert.Contains("Sample", error.Message);
 		}
@@ -318,22 +318,22 @@ namespace Chummer.Tests
 			lines.Add("	}");
 			lines.Add("}");
 
-			return DataPaths.FingerprintsIn(lines.ToArray())["Sample"];
+			return RequiredFields.FingerprintsIn(lines.ToArray())["Sample"];
 		}
 
 		// Runs the real rule, not a copy: the XPath under test is the one the suite uses.
-		private static DataPaths.RequiredFieldContract Evaluate(string entity, XmlDocument document)
+		private static RequiredFields.RequiredFieldContract Evaluate(string entity, XmlDocument document)
 		{
-			DataPaths.RequiredFieldRule rule =
-				DataPaths.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
+			RequiredFields.RequiredFieldRule rule =
+				RequiredFields.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
 
-			return DataPaths.EvaluateRequiredFields(rule, rule.FileName, document);
+			return RequiredFields.EvaluateRequiredFields(rule, rule.FileName, document);
 		}
 
 		private static string[] MatchedNames(string entity, XmlDocument document)
 		{
-			DataPaths.RequiredFieldRule rule =
-				DataPaths.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
+			RequiredFields.RequiredFieldRule rule =
+				RequiredFields.RequiredFieldRules.Single(candidate => candidate.Entity == entity);
 
 			return document.SelectNodes(rule.ItemXPath).Cast<XmlNode>()
 				.Select(node => node["name"].InnerText)
@@ -342,7 +342,7 @@ namespace Chummer.Tests
 
 		private static string[] AbsentFieldsIn(string itemXml, params string[] requiredFields)
 		{
-			return DataPaths.MissingRequiredFieldsIn(Document(itemXml).DocumentElement, requiredFields)
+			return RequiredFields.MissingRequiredFieldsIn(Document(itemXml).DocumentElement, requiredFields)
 				.Select(missing => missing.Field)
 				.ToArray();
 		}

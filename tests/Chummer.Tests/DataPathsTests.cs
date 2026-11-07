@@ -89,7 +89,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void TopLevelRuleXmlCollectionsFindsEveryNamedCollection()
 		{
-			Assert.Equal(42, DataPaths.TopLevelRuleXmlCollections().Count());
+			Assert.Equal(42, NameUniqueness.TopLevelRuleXmlCollections().Count());
 		}
 
 		// - derivable: 27 top-level files minus the four carrying no <source>
@@ -97,7 +97,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void TopLevelRuleXmlFilesCitingBooksFindsEveryCitingFile()
 		{
-			Assert.Equal(23, DataPaths.TopLevelRuleXmlFilesCitingBooks().Count());
+			Assert.Equal(23, BookReferences.TopLevelRuleXmlFilesCitingBooks().Count());
 		}
 
 		// - derivable: 18 files carry a <bonus>, plus improvements.xml through <internal>
@@ -105,7 +105,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void TopLevelRuleXmlFilesWithBonusesFindsEveryBonusFile()
 		{
-			Assert.Equal(19, DataPaths.TopLevelRuleXmlFilesWithBonuses().Count());
+			Assert.Equal(19, BonusVocabulary.TopLevelRuleXmlFilesWithBonuses().Count());
 		}
 
 		// - derivable: 24 collections carry <category>, 2 are exempt, 2 sit in files with no block
@@ -113,7 +113,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void CategoryKeyedCollectionsCoversEveryGovernedCollection()
 		{
-			Assert.Equal(20, DataPaths.CategoryKeyedCollections().Count());
+			Assert.Equal(20, CategoryDeclarations.CategoryKeyedCollections().Count());
 		}
 
 		// - a renamed collection leaves its hand-written exemption applying to nothing
@@ -122,9 +122,9 @@ namespace Chummer.Tests
 		[Fact]
 		public void CategoryScopeExceptionsAllNameARealCollection()
 		{
-			string[] known = DataPaths.CollectionsUsingCategories().ToArray();
+			string[] known = CategoryDeclarations.CollectionsUsingCategories().ToArray();
 
-			string[] stale = DataPaths.CategoryScopeExceptionKeys()
+			string[] stale = CategoryDeclarations.CategoryScopeExceptionKeys()
 				.Where(key => !known.Contains(key))
 				.ToArray();
 
@@ -139,7 +139,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void RequiredFieldRulesCoverEveryEntityType()
 		{
-			Assert.Equal(29, DataPaths.RequiredFieldRules.Count);
+			Assert.Equal(29, RequiredFields.RequiredFieldRules.Count);
 		}
 
 		// - the only guard that looks at the production code rather than at the table or the data
@@ -148,12 +148,12 @@ namespace Chummer.Tests
 		[Fact]
 		public void NoEntityCreateMethodHasAppearedWithoutARule()
 		{
-			IReadOnlyList<string> sites = DataPaths.EntityCreateMethodSites();
+			IReadOnlyList<string> sites = RequiredFields.EntityCreateMethodSites();
 
 			Assert.True(sites.Count == 21,
 				"The rule table was read off 21 Create(XmlNode ...) methods, but the sources now "
 				+ "hold " + sites.Count + ". Every one of them needs an entry in "
-				+ nameof(DataPaths.RequiredFieldRules) + ":\n  " + string.Join("\n  ", sites));
+				+ nameof(RequiredFields.RequiredFieldRules) + ":\n  " + string.Join("\n  ", sites));
 		}
 
 		// - a Create changing underneath its rule is drift no check over the table or the data can see
@@ -188,7 +188,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void NoCreateMethodChangedSinceItsRuleWasRead()
 		{
-			IReadOnlyDictionary<string, string> actual = DataPaths.EntityCreateFingerprints();
+			IReadOnlyDictionary<string, string> actual = RequiredFields.EntityCreateFingerprints();
 
 			string[] drifted = CreateMethodFingerprints
 				.Where(pinned => !actual.ContainsKey(pinned.Key)
@@ -202,7 +202,7 @@ namespace Chummer.Tests
 
 			Assert.True(drifted.Length == 0,
 				"These Create methods changed the elements they read, so the rules derived from "
-				+ "them in " + nameof(DataPaths.RequiredFieldRules) + " and the diverted values in "
+				+ "them in " + nameof(RequiredFields.RequiredFieldRules) + " and the diverted values in "
 				+ nameof(NumericFields) + " may no longer describe them. Re-read each one, fix "
 				+ "its rule and diversions, then update the hash:\n  "
 				+ string.Join("\n  ", drifted));
@@ -213,7 +213,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void EveryCreateMethodHasAPinnedFingerprint()
 		{
-			string[] unpinned = DataPaths.EntityCreateFingerprints().Keys
+			string[] unpinned = RequiredFields.EntityCreateFingerprints().Keys
 				.Where(className => !CreateMethodFingerprints.ContainsKey(className))
 				.OrderBy(className => className, StringComparer.Ordinal)
 				.ToArray();
@@ -229,10 +229,10 @@ namespace Chummer.Tests
 		public void TheGearRulesBetweenThemCoverEveryGearEntry()
 		{
 			int partitioned = new[] { "Gear", "Commlink", "OperatingSystem" }
-				.Sum(entity => DataPaths.RequiredFieldContractFor(entity).ItemCount);
+				.Sum(entity => RequiredFields.RequiredFieldContractFor(entity).ItemCount);
 
 			Assert.Equal(
-				DataPaths.RuleCollectionFor(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"), "gears")
+				NameUniqueness.RuleCollectionFor(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"), "gears")
 					.ItemKeys.Count,
 				partitioned);
 		}
@@ -243,7 +243,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void OnlyTheKnownUnpopulatedRulesMatchNothing()
 		{
-			string[] vacant = DataPaths.RequiredFieldContracts
+			string[] vacant = RequiredFields.RequiredFieldContracts
 				.Where(contract => contract.ItemCount == 0)
 				.Select(contract => contract.Rule.Entity)
 				.OrderBy(entity => entity, StringComparer.Ordinal)
@@ -263,7 +263,7 @@ namespace Chummer.Tests
 		[Fact]
 		public void BookCodesFindsEveryDeclaredBook()
 		{
-			Assert.Equal(42, DataPaths.BookCodes.Count);
+			Assert.Equal(42, BookReferences.BookCodes.Count);
 		}
 
 		// - 23 files in 6 packs: a discovery gap would drop a whole pack from every pack check

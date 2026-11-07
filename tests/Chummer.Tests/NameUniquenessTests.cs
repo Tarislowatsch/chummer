@@ -37,7 +37,7 @@ namespace Chummer.Tests
 		};
 
 		[Theory]
-		[MemberData(nameof(DataPaths.TopLevelRuleXmlCollections), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(NameUniqueness.TopLevelRuleXmlCollections), MemberType = typeof(NameUniqueness))]
 		public void NamesAreUniqueWithinCollection(string xmlPath, string collectionName)
 		{
 			KeyValuePair<string, int>[] unexpected = DuplicateKeyCounts(xmlPath, collectionName)
@@ -50,7 +50,7 @@ namespace Chummer.Tests
 				Assert.Fail(FailureReport.Build(
 					Path.GetFileName(xmlPath) + " has " + unexpected.Length
 						+ " duplicate name(s) in <" + collectionName + "> (key: "
-						+ string.Join(" + ", DataPaths.RuleCollectionFor(xmlPath, collectionName).KeyFields)
+						+ string.Join(" + ", NameUniqueness.RuleCollectionFor(xmlPath, collectionName).KeyFields)
 						+ ")",
 					unexpected,
 					pair => "'" + Display(pair.Key) + "' appears " + pair.Value + " times"));
@@ -63,7 +63,7 @@ namespace Chummer.Tests
 		public void AllowlistedDuplicatesAllStillExist()
 		{
 			HashSet<string> actual = new HashSet<string>(StringComparer.Ordinal);
-			foreach (object[] testCase in DataPaths.TopLevelRuleXmlCollections())
+			foreach (object[] testCase in NameUniqueness.TopLevelRuleXmlCollections())
 			{
 				string xmlPath = (string)testCase[0];
 				string collectionName = (string)testCase[1];
@@ -83,8 +83,8 @@ namespace Chummer.Tests
 		private static IEnumerable<KeyValuePair<string, int>> DuplicateKeyCounts(
 			string xmlPath, string collectionName)
 		{
-			return DataPaths.DuplicateItemKeys(
-				DataPaths.RuleCollectionFor(xmlPath, collectionName).ItemKeys);
+			return NameUniqueness.DuplicateItemKeys(
+				NameUniqueness.RuleCollectionFor(xmlPath, collectionName).ItemKeys);
 		}
 
 		// - printable form, not the raw key: a composite key carries a U+001F nobody can type
@@ -96,7 +96,7 @@ namespace Chummer.Tests
 
 		private static string Display(string value)
 		{
-			return value.Replace(DataPaths.KeyFieldSeparator, " + ");
+			return value.Replace(NameUniqueness.KeyFieldSeparator, " + ");
 		}
 	}
 }

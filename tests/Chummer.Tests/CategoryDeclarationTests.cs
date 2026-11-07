@@ -8,7 +8,7 @@ namespace Chummer.Tests
 {
 	// - undeclared values are unreachable: dropdown frmSelectWeapon.cs:47, query frmSelectWeapon.cs:82
 	// - translation matches the block (clsXmlManager.cs:226): raw text prints (clsEquipment.cs:304)
-	// - scope is decided in DataPaths.CategoryDeclarationBlockOverrides, off the consuming code
+	// - scope is decided in CategoryDeclarations.CategoryDeclarationBlockOverrides, off the consuming code
 	public class CategoryDeclarationTests
 	{
 		// - declaring one of these is a visible behaviour change to make deliberately, not a tidy-up
@@ -47,10 +47,11 @@ namespace Chummer.Tests
 		};
 
 		[Theory]
-		[MemberData(nameof(DataPaths.CategoryKeyedCollections), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(CategoryDeclarations.CategoryKeyedCollections), MemberType = typeof(CategoryDeclarations))]
 		public void EveryCategoryUsedIsDeclared(string xmlPath, string collectionName)
 		{
-			DataPaths.CategoryContract contract = DataPaths.CategoryContractFor(xmlPath, collectionName);
+			CategoryDeclarations.CategoryContract contract =
+				CategoryDeclarations.CategoryContractFor(xmlPath, collectionName);
 
 			var unexpected = contract.UndeclaredUsages()
 				.GroupBy(usage => usage.Category, StringComparer.Ordinal)
@@ -75,12 +76,12 @@ namespace Chummer.Tests
 		public void AllowlistedCategoriesAreAllStillUndeclared()
 		{
 			HashSet<string> actual = new HashSet<string>(StringComparer.Ordinal);
-			foreach (object[] testCase in DataPaths.CategoryKeyedCollections())
+			foreach (object[] testCase in CategoryDeclarations.CategoryKeyedCollections())
 			{
 				string xmlPath = (string)testCase[0];
 				string collectionName = (string)testCase[1];
-				foreach (DataPaths.CategoryUsage usage in
-					DataPaths.CategoryContractFor(xmlPath, collectionName).UndeclaredUsages())
+				foreach (CategoryDeclarations.CategoryUsage usage in
+					CategoryDeclarations.CategoryContractFor(xmlPath, collectionName).UndeclaredUsages())
 				{
 					actual.Add(Entry(xmlPath, collectionName, usage.Category));
 				}

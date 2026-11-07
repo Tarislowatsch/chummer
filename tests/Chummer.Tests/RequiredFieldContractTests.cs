@@ -11,10 +11,10 @@ namespace Chummer.Tests
 	public class RequiredFieldContractTests
 	{
 		[Theory]
-		[MemberData(nameof(DataPaths.EntitiesWithRequiredFields), MemberType = typeof(DataPaths))]
+		[MemberData(nameof(RequiredFields.EntitiesWithRequiredFields), MemberType = typeof(RequiredFields))]
 		public void EveryEntryCarriesTheFieldsItsCreateReadsUnguarded(string entity)
 		{
-			DataPaths.RequiredFieldContract contract = DataPaths.RequiredFieldContractFor(entity);
+			RequiredFields.RequiredFieldContract contract = RequiredFields.RequiredFieldContractFor(entity);
 
 			// - a missing field usually vanishes from a whole batch of entries at once
 			// - grouping by field shows how many distinct fields broke

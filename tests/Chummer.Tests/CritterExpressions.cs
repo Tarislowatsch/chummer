@@ -114,7 +114,7 @@ namespace Chummer.Tests
 
 					if (verdict != null)
 					{
-						yield return new Failure(fileName + ": " + DataPaths.ItemLabel(metatype) + " " + Describe(value)
+						yield return new Failure(fileName + ": " + RuleCorpus.ItemLabel(metatype) + " " + Describe(value)
 							+ " = " + value.InnerText, verdict.Item1, verdict.Item2);
 					}
 				}
