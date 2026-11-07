@@ -101,6 +101,19 @@ namespace Chummer.Tests
 			return tags.Where(tag => !vocabularyFor(tag.Consumer).Contains(tag.Tag));
 		}
 
+		// - only files with a bonus tag: the rest would contribute empty, always-green cases
+		public static IEnumerable<object[]> TopLevelRuleXmlFilesWithBonuses()
+		{
+			return RuleCorpus.Files
+				.Where(file => file.BonusTags.Count > 0)
+				.Select(file => new object[] { file.FilePath });
+		}
+
+		public static IReadOnlyList<BonusTag> BonusTagsFor(string xmlPath)
+		{
+			return RuleCorpus.FileAt(xmlPath).BonusTags;
+		}
+
 		// - public so the detection tests can drive it with hand-built XML
 		// - direct children only: XmlNode lookups by tag name never look deeper
 		public static IReadOnlyList<BonusTag> BonusTagsIn(string fileName, XmlDocument document)
@@ -114,7 +127,7 @@ namespace Chummer.Tests
 				Consumer consumer = vehicleModRoots.Contains(root)
 					? Consumer.VehicleMod
 					: Consumer.CreateImprovements;
-				string itemName = DataPaths.ItemLabel(root.ParentNode);
+				string itemName = RuleCorpus.ItemLabel(root.ParentNode);
 
 				foreach (XmlElement child in root.ChildNodes.OfType<XmlElement>())
 				{
@@ -133,7 +146,7 @@ namespace Chummer.Tests
 			{
 				tags.AddRange(document.SelectNodes(CustomImprovementTagXPath).Cast<XmlNode>()
 					.Select(tag => new BonusTag(Consumer.CreateImprovements, tag.InnerText,
-						DataPaths.ItemLabel(tag.ParentNode))));
+						RuleCorpus.ItemLabel(tag.ParentNode))));
 			}
 
 			return tags;

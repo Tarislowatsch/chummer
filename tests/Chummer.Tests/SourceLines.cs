@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Chummer.Tests
@@ -115,7 +117,7 @@ namespace Chummer.Tests
 			return new SourceLines(code, bare);
 		}
 
-		// - extent by brace depth from the first line, like the Create fingerprints in DataPaths
+		// - extent by brace depth, like the Create fingerprints in RequiredFields
 		public SourceLines BlockFrom(int start)
 		{
 			int depth = 0;
@@ -136,6 +138,17 @@ namespace Chummer.Tests
 			return new SourceLines(
 				Code.Skip(start).Take(count).ToArray(),
 				Bare.Skip(start).Take(count).ToArray());
+		}
+
+		internal static string Fingerprint(IEnumerable<string> lines)
+		{
+			using (SHA256 sha = SHA256.Create())
+			{
+				byte[] hash = sha.ComputeHash(Encoding.UTF8.GetBytes(string.Join("\n", lines)));
+
+				// - 16 hex characters: collision-safe enough while the pinned table stays readable
+				return BitConverter.ToString(hash).Replace("-", string.Empty).Substring(0, 16);
+			}
 		}
 	}
 }

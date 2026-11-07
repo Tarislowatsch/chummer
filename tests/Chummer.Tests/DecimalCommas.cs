@@ -30,14 +30,14 @@ namespace Chummer.Tests
 			foreach (XmlElement leaf in document.SelectNodes("//*[not(*)]").Cast<XmlElement>())
 			{
 				if (ReadsAsNumber(leaf.InnerText))
-					yield return DataPaths.ItemLabel(leaf.ParentNode) + " " + leaf.Name + " = '" + leaf.InnerText + "'";
+					yield return RuleCorpus.ItemLabel(leaf.ParentNode) + " " + leaf.Name + " = '" + leaf.InnerText + "'";
 			}
 
 			foreach (XmlAttribute attribute in document.SelectNodes("//@*").Cast<XmlAttribute>())
 			{
 				if (ReadsAsNumber(attribute.Value))
 				{
-					yield return DataPaths.ItemLabel(attribute.OwnerElement) + " " + attribute.OwnerElement.Name
+					yield return RuleCorpus.ItemLabel(attribute.OwnerElement) + " " + attribute.OwnerElement.Name
 						+ "/@" + attribute.Name + " = '" + attribute.Value + "'";
 				}
 			}

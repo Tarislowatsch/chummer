@@ -86,7 +86,7 @@ namespace Chummer.Tests
 			stray.InnerText = "Blades";
 			collection.AppendChild(stray);
 
-			Assert.Equal(new[] { "Bottle" }, DataPaths.ItemKeysIn(collection, NameOnly).ToArray());
+			Assert.Equal(new[] { "Bottle" }, NameUniqueness.ItemKeysIn(collection, NameOnly).ToArray());
 		}
 
 		[Fact]
@@ -101,8 +101,8 @@ namespace Chummer.Tests
 		// Reimplementing the grouping here would let these facts drift from the check they describe.
 		private static string[] DuplicateKeysIn(string[] keyFields, params XmlElement[] items)
 		{
-			return DataPaths.DuplicateItemKeys(DataPaths.ItemKeysIn(Collection(items), keyFields))
-				.Select(pair => pair.Key.Replace(DataPaths.KeyFieldSeparator, " + "))
+			return NameUniqueness.DuplicateItemKeys(NameUniqueness.ItemKeysIn(Collection(items), keyFields))
+				.Select(pair => pair.Key.Replace(NameUniqueness.KeyFieldSeparator, " + "))
 				.ToArray();
 		}
 

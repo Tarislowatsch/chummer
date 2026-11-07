@@ -89,7 +89,7 @@ namespace Chummer.Tests
 		public void EveryExpressionRuleReachesEntries()
 		{
 			string[] empty = ExpressionChecks.AllRules
-				.Where(rule => DataPaths.ExpressionCheckFor(rule.Id).ItemCount == 0)
+				.Where(rule => ExpressionChecks.CheckFor(rule.Id).ItemCount == 0)
 				.Select(rule => rule.Id)
 				.ToArray();
 
@@ -127,7 +127,7 @@ namespace Chummer.Tests
 					"Gear: Certified Credstick, Standard (5000)",
 				},
 				ExpressionChecks.AllRules
-					.SelectMany(rule => DataPaths.ExpressionCheckFor(rule.Id).CutShort)
+					.SelectMany(rule => ExpressionChecks.CheckFor(rule.Id).CutShort)
 					.Distinct(StringComparer.Ordinal)
 					.OrderBy(entry => entry, StringComparer.Ordinal));
 		}
@@ -140,7 +140,7 @@ namespace Chummer.Tests
 
 		private static IEnumerable<string> EntitiesRequiring(string field)
 		{
-			return DataPaths.RequiredFieldRules
+			return RequiredFields.Rules
 				.Where(rule => rule.RequiredFields.Contains(field))
 				.Select(rule => rule.Entity)
 				.OrderBy(entity => entity, StringComparer.Ordinal);
