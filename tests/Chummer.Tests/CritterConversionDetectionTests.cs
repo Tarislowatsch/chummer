@@ -78,6 +78,10 @@ namespace Chummer.Tests
 		[InlineData("foreach (XmlNode objXmlPower in objXmlDocument[\"powers\"].ChildNodes)")]
 		[InlineData("objXmlPower = objXmlDocument.SelectSingleNode(\"/chummer/powers/power\");")]
 		[InlineData("XmlNode objXmlPower = objXmlDocument.SelectSingleNode(\"/chummer/powers/power\");")]
+		[InlineData("dict.TryGetValue(key, out objXmlPower);")]
+		[InlineData("dict.TryGetValue(key, out XmlNode objXmlPower);")]
+		[InlineData("Load(ref objXmlPower);")]
+		[InlineData("if (objOther is XmlNode objXmlPower) { }")]
 		public void AnyRebindingDropsTheBinding(string rebinding)
 		{
 			string[] source =

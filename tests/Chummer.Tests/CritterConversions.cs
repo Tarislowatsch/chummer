@@ -168,8 +168,10 @@ namespace Chummer.Tests
 		private static readonly string[] IntegerConversions = { "Convert.ToInt32", "int.Parse", "Int32.Parse" };
 
 		// - any rebinding drops the old binding: a stale one would resolve a foreign read
+		// - foreach, assignment or declaration, out or ref argument, is pattern
 		private static readonly Regex Rebinding = new Regex(
-			@"\bforeach\s*\(\s*[\w.<>\[\]]+\s+(\w+)\s+in\b|(?<![\w.])(\w+)\s*=(?!=)", RegexOptions.Compiled);
+			@"\bforeach\s*\(\s*[\w.<>\[\]]+\s+(?<v>\w+)\s+in\b|(?<![\w.])(?<v>\w+)\s*=(?!=)"
+			+ @"|\b(?:out|ref)\s+(?:[\w.<>\[\]]+\s+)?(?<v>\w+)\b|\bis\s+[\w.<>\[\]]+\s+(?<v>\w+)\b", RegexOptions.Compiled);
 
 		private static readonly Regex Loop = new Regex(
 			@"\bforeach\s*\(\s*XmlNode\s+(\w+)\s+in\s+(\w+)\.SelectNodes\(\s*""([^""]+)""\s*\)\s*\)", RegexOptions.Compiled);
@@ -210,7 +212,7 @@ namespace Chummer.Tests
 			for (int i = 0; i < code.Length; i++)
 			{
 				foreach (Match rebinding in Rebinding.Matches(code[i]))
-					bound.Remove(rebinding.Groups[1].Success ? rebinding.Groups[1].Value : rebinding.Groups[2].Value);
+					bound.Remove(rebinding.Groups["v"].Value);
 
 				foreach (Match loop in Loop.Matches(code[i]))
 				{
@@ -253,8 +255,7 @@ namespace Chummer.Tests
 				// - a null check ending in another statement guards nothing
 				string guard = @"\bif\s*\(\s*" + Regex.Escape(attribute.Groups[1].Value) + @"\.Attributes\[""" + attribute.Groups[2].Value
 					+ @"""\]\s*!=\s*null\s*\)";
-				bool guarded = Regex.Matches(code[line], guard).Cast<Match>().Any(check => check.Index + check.Length <= column
-						&& code[line].Substring(check.Index + check.Length, column - check.Index - check.Length).IndexOfAny(new[] { ';', '}' }) < 0)
+				bool guarded = Regex.Matches(code[line], guard).Cast<Match>().Any(check => GuardsColumn(check, code[line], column))
 					|| (line > 0 && Regex.IsMatch(code[line - 1], "^\\s*" + guard + "\\s*$"));
 				return new Conversion(site, holder.Corpus, Join(holder.Prefix, "@" + attribute.Groups[2].Value), Form.Whole, guarded,
 					holder.LoopPath);
@@ -276,6 +277,13 @@ namespace Chummer.Tests
 			}
 
 			throw Unknown(site, argument);
+		}
+
+		// - the check ends before the conversion, and no statement or block closes in between
+		private static bool GuardsColumn(Match check, string line, int column)
+		{
+			int end = check.Index + check.Length;
+			return end <= column && line.Substring(end, column - end).IndexOfAny(new[] { ';', '}' }) < 0;
 		}
 
 		private static InvalidOperationException Unknown(string site, string text)
