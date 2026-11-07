@@ -10,17 +10,12 @@
 #   tests/fixtures/**/*.chum      UTF-16 LE with BOM
 #   *.cs, *.resx, *.csproj, *.sln UTF-8 (180 and 78 files checked, no UTF-16)
 #
-# Every text file in the repository is stored with CRLF.
-#
-# Note the deliberate absence of `* text=auto`. Any `text` attribute means
-# "store LF in the index", so switching it on renormalises all 382 text files
-# in one rewrite. That is a decision to take on purpose, with a
-# .git-blame-ignore-revs entry alongside it, not a side effect of adding this
-# file - especially with the Phase 4 to 6 refactoring still ahead, which leans
-# on git blame. Until then line endings stay exactly as they are.
-#
-# What is set below is only what protects data or improves diffs, with no
-# rewrite attached.
+# - the index stores LF, the working copy gets CRLF
+# - an editor writing LF no longer turns into a whole-file diff
+# - the one-off renormalize commit is listed in .git-blame-ignore-revs
+* text=auto eol=crlf
+
+# Every rule below overrides the line above.
 
 # Saved characters are UTF-16 LE and are the regression corpus for the Phase 2
 # golden master, where byte stability is the whole point. Marked binary so no
