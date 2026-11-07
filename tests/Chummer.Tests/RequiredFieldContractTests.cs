@@ -103,7 +103,7 @@ namespace Chummer.Tests
 		}
 
 		// - an overlap or a gap checks a gear entry against the wrong Create's contract or against none
-		// - this pins the partition over the real file, not the hand-built one in the detection tests
+		// - pins the partition over the real file, not the detection tests' hand-built one
 		[Fact]
 		public void TheGearRulesBetweenThemCoverEveryGearEntry()
 		{

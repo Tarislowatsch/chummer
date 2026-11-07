@@ -8,7 +8,7 @@ namespace Chummer.Tests
 {
 	// - undeclared values are unreachable: dropdown frmSelectWeapon.cs:47, query frmSelectWeapon.cs:82
 	// - translation matches the block (clsXmlManager.cs:226): raw text prints (clsEquipment.cs:304)
-	// - scope is decided in CategoryDeclarations.CategoryDeclarationBlockOverrides, off the consuming code
+	// - scope is set in CategoryDeclarations.CategoryDeclarationBlockOverrides, off the code
 	public class CategoryDeclarationTests
 	{
 		// - declaring one of these is a visible behaviour change to make deliberately, not a tidy-up
