@@ -281,18 +281,57 @@ namespace Chummer.Tests
 		[Fact]
 		public void AFieldReadOnlyByALaterBlockOrOutsideTheRootsIsUnread()
 		{
-			FieldReaders.HandlerBranch branch = new FieldReaders.HandlerBranch("addattribute",
-				new NameLookups.Literal[0], new[] { "name" });
 			FieldReaders.HandlerField[] fields =
 			{
-				new FieldReaders.HandlerField("a", "addattribute", FieldReaders.BlockReach.First, "name"),
-				new FieldReaders.HandlerField("b", "addattribute", FieldReaders.BlockReach.First, "min"),
-				new FieldReaders.HandlerField("c", "addattribute", FieldReaders.BlockReach.LaterSibling, "name"),
-				new FieldReaders.HandlerField("d", "addattribute", FieldReaders.BlockReach.OutsideRoot, "name"),
+				new FieldReaders.HandlerField("a", "addattribute", FieldReaders.BlockReach.First, "name", "MAG"),
+				new FieldReaders.HandlerField("b", "addattribute", FieldReaders.BlockReach.First, "min", "1"),
+				new FieldReaders.HandlerField("c", "addattribute", FieldReaders.BlockReach.LaterSibling, "name", "MAG"),
+				new FieldReaders.HandlerField("d", "addattribute", FieldReaders.BlockReach.OutsideRoot, "name", "MAG"),
 			};
 
 			Assert.Equal(new[] { "b", "c", "d" },
-				FieldReaders.UnreadHandlerFields(fields, new[] { branch }).Select(field => field.File));
+				FieldReaders.UnreadHandlerFields(fields, new[] { NameBranch() }).Select(field => field.File));
+		}
+
+		[Fact]
+		public void ABranchDispatchesOnTheComparedValues()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+
+			Assert.Equal(new[] { "MAG" }, Assert.Single(branch.Dispatch, entry => entry.Key == "name").Value);
+		}
+
+		// - uncompared fields and unread blocks are no value findings
+		[Fact]
+		public void OnlyAReachedValueNoComparisonMatchesIsUnhandled()
+		{
+			FieldReaders.HandlerField[] fields =
+			{
+				new FieldReaders.HandlerField("a", "addattribute", FieldReaders.BlockReach.First, "name", "MAG"),
+				new FieldReaders.HandlerField("b", "addattribute", FieldReaders.BlockReach.First, "name", "EDG"),
+				new FieldReaders.HandlerField("c", "addattribute", FieldReaders.BlockReach.First, "name", " MAG"),
+				new FieldReaders.HandlerField("d", "addattribute", FieldReaders.BlockReach.First, "min", "EDG"),
+				new FieldReaders.HandlerField("e", "addattribute", FieldReaders.BlockReach.LaterSibling, "name", "EDG"),
+			};
+
+			Assert.Equal(new[] { "b", "c" },
+				FieldReaders.UnhandledHandlerValues(fields, new[] { NameBranch() }).Select(field => field.File));
+		}
+
+		[Fact]
+		public void AHandlerFieldKeepsItsValueAsTheBranchComparesIt()
+		{
+			XmlDocument document = Document("<chummer><qualities><quality><bonus>"
+				+ "<addattribute><name>RES</name></addattribute></bonus></quality></qualities></chummer>");
+
+			Assert.Equal("RES", Assert.Single(
+				FieldReaders.HandlerFieldsIn("q.xml", "qualities.xml", document, new[] { "addattribute" })).Value);
+		}
+
+		private static FieldReaders.HandlerBranch NameBranch()
+		{
+			return new FieldReaders.HandlerBranch("addattribute", new NameLookups.Literal[0], new[] { "name" },
+				new Dictionary<string, IReadOnlyCollection<string>> { { "name", new[] { "MAG", "RES" } } });
 		}
 
 		[Fact]

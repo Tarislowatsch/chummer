@@ -156,7 +156,7 @@ namespace Chummer.Tests
 		}
 
 		// - the block behind NodeExists(<bonus>, "handler"), with its 0-based first line in the file
-		internal static (int Start, SourceLines Block, string Parameter) HandlerBranch(string handler, string[] lines)
+		internal static (int Start, SourceLines Block, string Parameter) HandlerBlock(string handler, string[] lines)
 		{
 			SourceLines body = CreateImprovementsBody(lines, out string parameter, out int bodyStart);
 			Regex check = NodeExistsCheck(parameter, Regex.Escape(handler));

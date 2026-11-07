@@ -389,12 +389,13 @@ namespace Chummer.Tests
 		// One child of a handler block in the data, e.g. addattribute/min.
 		public sealed class HandlerField
 		{
-			public HandlerField(string file, string handler, BlockReach reach, string tag)
+			public HandlerField(string file, string handler, BlockReach reach, string tag, string value)
 			{
 				File = file;
 				Handler = handler;
 				Reach = reach;
 				Tag = tag;
+				Value = value;
 			}
 
 			public string File { get; }
@@ -404,6 +405,9 @@ namespace Chummer.Tests
 			public BlockReach Reach { get; }
 
 			public string Tag { get; }
+
+			// - InnerText untrimmed: the branch compares it as is
+			public string Value { get; }
 
 			public string Entry => File + " " + Handler + "/" + Tag
 				+ (Reach == BlockReach.First ? "" : " (" + Reach + ")");
@@ -422,8 +426,8 @@ namespace Chummer.Tests
 							: block.ParentNode[handler] == block ? BlockReach.First
 							: BlockReach.LaterSibling;
 						return block.ChildNodes.Cast<XmlNode>()
-							.Select(TagOf).Where(tag => tag != null)
-							.Select(tag => new HandlerField(file, handler, reach, tag));
+							.Select(node => (Tag: TagOf(node), node.InnerText)).Where(child => child.Tag != null)
+							.Select(child => new HandlerField(file, handler, reach, child.Tag, child.InnerText));
 					}))
 				.ToArray();
 		}
@@ -432,11 +436,12 @@ namespace Chummer.Tests
 		public sealed class HandlerBranch
 		{
 			public HandlerBranch(string handler, IReadOnlyList<NameLookups.Literal> literals,
-				IReadOnlyCollection<string> fields)
+				IReadOnlyCollection<string> fields, IReadOnlyDictionary<string, IReadOnlyCollection<string>> dispatch)
 			{
 				Handler = handler;
 				Literals = literals;
 				Fields = fields;
+				Dispatch = dispatch;
 			}
 
 			public string Handler { get; }
@@ -444,14 +449,19 @@ namespace Chummer.Tests
 			public IReadOnlyList<NameLookups.Literal> Literals { get; }
 
 			public IReadOnlyCollection<string> Fields { get; }
+
+			// - field -> the values its InnerText is compared to with ==
+			// - the comparisons have no else: any other value does nothing
+			public IReadOnlyDictionary<string, IReadOnlyCollection<string>> Dispatch { get; }
 		}
 
 		// - public so the detection tests can drive it with hand-built source
 		public static HandlerBranch BranchOf(string handler, string fileName, string[] lines)
 		{
-			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBranch(handler, lines);
-			Regex read = new Regex(Regex.Escape(parameter) + @"\[\s*""" + Regex.Escape(handler)
-				+ @"""\s*\]\s*\[\s*""([^""]+)""\s*\]");
+			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBlock(handler, lines);
+			string indexer = Regex.Escape(parameter) + @"\[\s*""" + Regex.Escape(handler) + @"""\s*\]\s*\[\s*""([^""]+)""\s*\]";
+			Regex read = new Regex(indexer);
+			Regex comparison = new Regex(indexer + @"\.InnerText\s*==\s*""([^""]*)""");
 
 			string[] sites = Enumerable.Range(start + 1, block.Code.Length)
 				.Select(line => fileName + ":" + line).ToArray();
@@ -459,7 +469,13 @@ namespace Chummer.Tests
 				NameLookups.LiteralsIn(fileName, lines).Where(literal => sites.Contains(literal.Site)).ToArray(),
 				new HashSet<string>(
 					block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).Select(match => match.Groups[1].Value),
-					StringComparer.Ordinal));
+					StringComparer.Ordinal),
+				block.Code.SelectMany(line => comparison.Matches(line).Cast<Match>())
+					.GroupBy(match => match.Groups[1].Value, StringComparer.Ordinal)
+					.ToDictionary(group => group.Key,
+						group => (IReadOnlyCollection<string>)new HashSet<string>(
+							group.Select(match => match.Groups[2].Value), StringComparer.Ordinal),
+						StringComparer.Ordinal));
 		}
 
 		public static IReadOnlyList<HandlerBranch> HandlerBranches => CachedBranches.Value;
@@ -477,6 +493,17 @@ namespace Chummer.Tests
 		{
 			Dictionary<string, HandlerBranch> byHandler = branches.ToDictionary(branch => branch.Handler, StringComparer.Ordinal);
 			return fields.Where(field => field.Reach != BlockReach.First || !byHandler[field.Handler].Fields.Contains(field.Tag));
+		}
+
+		// - a read field whose value no comparison matches is just as dead
+		// - a later or unreached block is already unread as a whole
+		public static IEnumerable<HandlerField> UnhandledHandlerValues(IEnumerable<HandlerField> fields,
+			IEnumerable<HandlerBranch> branches)
+		{
+			Dictionary<string, HandlerBranch> byHandler = branches.ToDictionary(branch => branch.Handler, StringComparer.Ordinal);
+			return fields.Where(field => field.Reach == BlockReach.First
+				&& byHandler[field.Handler].Dispatch.TryGetValue(field.Tag, out IReadOnlyCollection<string> values)
+				&& !values.Contains(field.Value));
 		}
 
 		// - a read outside the branch would leave its findings standing while the code uses them

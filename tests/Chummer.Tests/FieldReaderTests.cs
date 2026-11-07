@@ -172,6 +172,22 @@ namespace Chummer.Tests
 
 			Assert.Equal("addattribute", branch.Handler);
 			Assert.Equal(new[] { "name" }, branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
+			Assert.Equal(new[] { "name" }, branch.Dispatch.Keys);
+			Assert.Equal(new[] { "MAG", "RES" }, branch.Dispatch["name"].OrderBy(value => value, StringComparer.Ordinal));
+		}
+
+		// - deliberately no allowlist: every name is MAG or RES today
+		[Fact]
+		public void EveryDispatchedHandlerValueMatchesAComparison()
+		{
+			string[] unhandled = FieldReaders.UnhandledHandlerValues(FieldReaders.AllHandlerFields,
+					FieldReaders.HandlerBranches)
+				.GroupBy(field => field.Entry + " = \"" + field.Value + "\"", StringComparer.Ordinal)
+				.Select(group => group.Key + " ×" + group.Count())
+				.OrderBy(line => line, StringComparer.Ordinal)
+				.ToArray();
+
+			Assert.True(unhandled.Length == 0, "No comparison in the branch matches:\n  " + string.Join("\n  ", unhandled));
 		}
 
 		[Fact]
