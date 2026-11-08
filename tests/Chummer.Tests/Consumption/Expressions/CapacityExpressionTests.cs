@@ -74,7 +74,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			Dictionary<string, int> actual = new Dictionary<string, int>(StringComparer.Ordinal);
 			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string[] members = ExpressionChecks.EnclosingMembers(file.Source);
+				string[] members = SourceMembers.EnclosingMembers(file.Source);
 				foreach (NameLookups.Literal literal in NameLookups.LiteralsIn(file.Name, file.Source)
 					.Where(literal => literal.Text == "capacity" || literal.Text == "armorcapacity"))
 				{

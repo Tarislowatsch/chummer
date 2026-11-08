@@ -56,7 +56,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void NoPortedCalculatorChangedSinceItWasRead()
 		{
-			IReadOnlyDictionary<string, string> actual = ExpressionChecks.CalculatorFingerprints(PortedCalculators());
+			IReadOnlyDictionary<string, string> actual = SourceMembers.Fingerprints(PortedCalculators());
 
 			string[] drifted = actual
 				.Where(entry => !PinnedFingerprints.ContainsKey(entry.Key)

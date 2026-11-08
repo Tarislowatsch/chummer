@@ -72,7 +72,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void RangeUnchangedSinceItsPortWasWritten()
 		{
-			string actual = ExpressionChecks.CalculatorFingerprints(new[] { "Weapon.Range" })["Weapon.Range"];
+			string actual = SourceMembers.Fingerprints(new[] { "Weapon.Range" })["Weapon.Range"];
 
 			Assert.True(actual == PinnedRangeFingerprint,
 				"Weapon.Range now hashes to " + actual + ", pinned as " + PinnedRangeFingerprint

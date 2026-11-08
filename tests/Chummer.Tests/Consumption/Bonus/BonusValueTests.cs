@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -171,7 +170,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void NoPortedCodeChangedSinceItWasRead()
 		{
-			Dictionary<string, string> actual = ExpressionChecks.CalculatorFingerprints(BonusValues.Calculators)
+			Dictionary<string, string> actual = SourceMembers.Fingerprints(BonusValues.Calculators)
 				.Concat(BonusValues.BranchFingerprints(BonusValues.PortedBranches.Keys))
 				.ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
 
