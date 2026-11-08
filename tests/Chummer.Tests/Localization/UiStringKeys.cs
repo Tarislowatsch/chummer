@@ -185,7 +185,7 @@ namespace Chummer.Tests.Localization
 			// clsUnique.cs:7271
 			Form("\"String_\" + _objContactType.ToString()", "String_", "",
 				"enum ContactType in clsUnique.cs",
-				() => EnumMembers(string.Join("\n", SourceCorpus.File("clsUnique.cs").Lines),
+				() => EnumMembers(string.Join("\n", SourceCorpus.File("clsUnique.cs").Source.Code),
 					"ContactType")),
 			// - both inside a try that falls back to the raw value
 			Form("\"String_Attribute\" + _strExtra + \"Short\"", "String_Attribute", "Short",

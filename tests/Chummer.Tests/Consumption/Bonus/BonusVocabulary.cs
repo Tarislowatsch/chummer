@@ -250,7 +250,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		// - blind spot: matches any .Bonus read, not one on a vehicle mod specifically
 		public static IReadOnlyList<string> VehicleModTagsNoLongerRead()
 		{
-			string[] sources = SourceCorpus.Files.Select(file => string.Join("\n", file.Lines)).ToArray();
+			string[] sources = SourceCorpus.Files.Select(file => string.Join("\n", file.Source.Code)).ToArray();
 
 			return VehicleModTags
 				.Where(tag =>

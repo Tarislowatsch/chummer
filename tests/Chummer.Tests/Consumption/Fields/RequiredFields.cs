@@ -250,7 +250,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string source = string.Join("\n", file.Lines);
+				string source = string.Join("\n", file.Source.Code);
 
 				foreach (Match match in EntityCreateSignature.Matches(source))
 				{
@@ -271,7 +271,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				foreach (KeyValuePair<string, string> entry in FingerprintsIn(file.Lines))
+				foreach (KeyValuePair<string, string> entry in FingerprintsIn(file.Source))
 					AddFingerprint(fingerprints, entry.Key, entry.Value);
 			}
 
@@ -280,19 +280,19 @@ namespace Chummer.Tests.Consumption.Fields
 
 		// - public so the detection tests can drive it with hand-built source
 		// - the real methods only show today's hashes, never that a deleted read would change one
-		public static IReadOnlyDictionary<string, string> FingerprintsIn(string[] lines)
+		public static IReadOnlyDictionary<string, string> FingerprintsIn(SourceLines source)
 		{
 			Dictionary<string, string> fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
 
 			// - joined first: a broken-after-the-paren signature must match, as in the sites scan
-			string source = string.Join("\n", lines);
+			string joined = string.Join("\n", source.Code);
 
-			foreach (Match signature in EntityCreateSignature.Matches(source))
+			foreach (Match signature in EntityCreateSignature.Matches(joined))
 			{
-				int signatureLine = source.Take(signature.Index).Count(character => character == '\n');
+				int signatureLine = joined.Take(signature.Index).Count(character => character == '\n');
 
-				AddFingerprint(fingerprints, ClassNameAbove(lines, signatureLine),
-					SourceLines.Fingerprint(NodeReadsIn(lines, signatureLine, signature.Groups[1].Value)));
+				AddFingerprint(fingerprints, ClassNameAbove(source.Code, signatureLine),
+					SourceLines.Fingerprint(NodeReadsIn(source, signatureLine, signature.Groups[1].Value)));
 			}
 
 			return fingerprints;
@@ -326,25 +326,14 @@ namespace Chummer.Tests.Consumption.Fields
 
 		// - the lines inside one Create that its required-field rule was read off
 		// - extent by brace depth: a nested type or lambda cannot end the method early
-		private static IEnumerable<string> NodeReadsIn(string[] lines, int signatureLine, string parameter)
+		private static IEnumerable<string> NodeReadsIn(SourceLines source, int signatureLine, string parameter)
 		{
 			Regex read = new Regex(@"\b" + Regex.Escape(parameter) + @"\s*\[");
-			int depth = 0;
-			bool opened = false;
 
-			for (int i = signatureLine; i < lines.Length; i++)
-			{
-				depth += lines[i].Count(character => character == '{')
-					- lines[i].Count(character => character == '}');
-				opened |= lines[i].IndexOf('{') >= 0;
-
-				string line = lines[i].Trim();
-				if (read.IsMatch(line) || line == "try" || line.StartsWith("catch", StringComparison.Ordinal))
-					yield return Regex.Replace(line, @"\s+", " ");
-
-				if (opened && depth <= 0)
-					yield break;
-			}
+			return source.BlockFrom(signatureLine).Code
+				.Select(line => line.Trim())
+				.Where(line => read.IsMatch(line) || line == "try" || line.StartsWith("catch", StringComparison.Ordinal))
+				.Select(line => Regex.Replace(line, @"\s+", " "));
 		}
 
 		public static IReadOnlyList<RequiredFieldContract> Contracts =>

@@ -261,6 +261,6 @@ namespace Chummer.Tests.Localization
 
 		private static readonly Lazy<IReadOnlyDictionary<string, string>> CachedClassBases =
 			new Lazy<IReadOnlyDictionary<string, string>>(() => ClassBasesIn(
-				SourceCorpus.Files.Select(file => string.Join("\n", file.Lines))));
+				SourceCorpus.Files.Select(file => string.Join("\n", file.Source.Code))));
 	}
 }
