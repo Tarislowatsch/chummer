@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Chummer.Tests.Kernel
@@ -43,9 +44,21 @@ namespace Chummer.Tests.Kernel
 
 		// - lexed once: about twenty scans walk the whole tree
 		private static readonly Lazy<IReadOnlyList<SourceFile>> CachedFiles =
-			new Lazy<IReadOnlyList<SourceFile>>(() => DataPaths.ApplicationSourceFiles()
+			new Lazy<IReadOnlyList<SourceFile>>(() => ApplicationSourceFiles()
 				.Select(path => new SourceFile(path, SourceLines.Of(System.IO.File.ReadAllLines(path))))
 				.ToArray());
+
+		// - private: a scan that lists the files itself would read and lex them a second time
+		// - obj/ is generated and absent from a fresh clone: results would differ between here and CI
+		private static IEnumerable<string> ApplicationSourceFiles()
+		{
+			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
+
+			return Directory
+				.EnumerateFiles(Path.Combine(DataPaths.RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
+				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
+				.OrderBy(path => path, StringComparer.Ordinal);
+		}
 
 		private static readonly Lazy<IReadOnlyDictionary<string, SourceFile>> CachedFilesByPath =
 			new Lazy<IReadOnlyDictionary<string, SourceFile>>(

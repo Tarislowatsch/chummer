@@ -136,17 +136,6 @@ namespace Chummer.Tests.Kernel
 				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });
 		}
 
-		// - obj/ is generated and absent from a fresh clone: results would differ between here and CI
-		internal static IEnumerable<string> ApplicationSourceFiles()
-		{
-			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
-
-			return Directory
-				.EnumerateFiles(Path.Combine(RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
-				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
-				.OrderBy(path => path, StringComparer.Ordinal);
-		}
-
 		private static string FindRepoRoot()
 		{
 			DirectoryInfo dir = new DirectoryInfo(AppContext.BaseDirectory);
