@@ -1,9 +1,10 @@
 using System;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - a code books.xml does not declare never matches an enabled book: the entry is unbuyable
 	// - filter sites: frmSelectWeapon.cs:82, frmSelectArmorMod.cs:58, frmSelectProgramOption.cs:37

@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - every <source> has to name a book code books.xml declares
 	public static class BookReferences

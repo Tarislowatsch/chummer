@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Presentation
 {
 	// - hand-built input: every shipped include has the same shape
 	public class StylesheetIncludeDetectionTests

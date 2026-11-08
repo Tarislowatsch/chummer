@@ -4,8 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Chummer.Tests.Consumption.Bonus;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - a field no code reads does nothing, yet the data still states a rule
 	// - names against every literal, requirement and handler blocks against their consumer

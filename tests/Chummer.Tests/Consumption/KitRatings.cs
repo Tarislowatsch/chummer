@@ -4,8 +4,10 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - Create takes the kit rating past the Rating setter's cap
 	// - a rating above the item's maximum shows up in the tree, the save and the print

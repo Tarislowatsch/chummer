@@ -3,7 +3,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - hand-built source: the real code shows today's tags, never that a bad one is caught
 	public class UiTagKeyDetectionTests

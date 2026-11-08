@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the real data holds no near misses: its theories cannot pin these key shapes
 	// - each case mirrors one lookup shape a rule in CrossFileReferences relies on

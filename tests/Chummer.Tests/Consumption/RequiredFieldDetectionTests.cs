@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - a detection gone blind would leave all 29 data theory cases passing unchanged
 	// - the real data holds no near-miss that would notice the difference

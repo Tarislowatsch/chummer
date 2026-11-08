@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - undeclared values are unreachable: dropdown frmSelectWeapon.cs:47, query frmSelectWeapon.cs:82
 	// - translation matches the block (clsXmlManager.cs:226): raw text prints (clsEquipment.cs:304)

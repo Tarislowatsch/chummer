@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - deliberately no allowlist: every key resolves today
 	public class UiStringKeyTests

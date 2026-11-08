@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Bonus
 {
 	// - the real data is clean: none of these near-misses occurs there to pin the rules
 	public class BonusVocabularyDetectionTests

@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Bonus
 {
 	// - the .xsd files enumerate the tags the data uses, never the ones the code reads
 	// - deliberately no allowlist: every tag in the data has a consumer today

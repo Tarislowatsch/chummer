@@ -1,7 +1,7 @@
 using System.Linq;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - a failure message is read only when something is already wrong
 	// - that is the worst moment to discover the count is off by one

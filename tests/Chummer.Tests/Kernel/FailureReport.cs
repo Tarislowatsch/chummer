@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - three near-identical copies of this format had accumulated across the checks
 	// - truncation keeps a file with hundreds of findings from burying the CI log

@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Xml;
+using Chummer.Tests.Rulebook;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	public class KitRatingDetectionTests
 	{

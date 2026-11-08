@@ -1,8 +1,9 @@
 ﻿using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption.Expressions;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Bonus
 {
 	public class BonusValueDetectionTests
 	{

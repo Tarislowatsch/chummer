@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the scope count next door moves for any reason and names no rule
 	// - the missing-block throw is unreachable through the real data

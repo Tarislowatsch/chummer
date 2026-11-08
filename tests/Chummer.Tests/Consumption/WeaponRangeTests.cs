@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - deliberately no allowlist: ranges.xml is clean today
 	// - which weapons reach a row is a cross-file rule, see CrossFileReferences

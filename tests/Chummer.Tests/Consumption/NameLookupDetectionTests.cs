@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - hand-built source: the real code shows today's lookups, never that a bad one is caught
 	public class NameLookupDetectionTests

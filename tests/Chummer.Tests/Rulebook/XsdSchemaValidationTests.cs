@@ -3,9 +3,10 @@ using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Schema;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the application itself never validates: no XmlSchemaSet, no ValidationType anywhere
 	// - per-pair cases keep one bad pair from hiding the rest

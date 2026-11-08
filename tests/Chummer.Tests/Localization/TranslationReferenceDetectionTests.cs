@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - each case mirrors one lookup in the translation pass of XmlManager.Load
 	public class TranslationReferenceDetectionTests

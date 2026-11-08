@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - a commented-out read must not count: that would hide what the code really does
 	// - Bare also drops literals: a "{0}" placeholder must not move the brace depth

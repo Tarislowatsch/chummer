@@ -5,8 +5,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - fields a critter, vessel, quality or kit loader converts directly, outside ExpressionToString
 	// - a non-number or a missing unguarded attribute or element throws into the UI

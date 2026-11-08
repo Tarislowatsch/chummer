@@ -1,9 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - an unguarded Convert on a bad value closes the app, nothing upstream catches it
 	// - inside a Create's empty catch the same value turns into 0 without a word

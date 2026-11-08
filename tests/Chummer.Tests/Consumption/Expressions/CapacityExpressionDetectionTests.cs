@@ -3,7 +3,7 @@ using System.Xml;
 using System.Xml.XPath;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	public class CapacityExpressionDetectionTests
 	{

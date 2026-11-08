@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - one line per differing key: Assert.Equal truncates a dictionary after a few entries
 	// - "nothing" marks a missing key: a pinned 0 or "" stays distinct from an absent one

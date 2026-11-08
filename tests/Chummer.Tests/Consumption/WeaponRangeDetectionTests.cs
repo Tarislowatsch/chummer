@@ -2,7 +2,7 @@
 using System.Xml.XPath;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - hand-built formulas: the real data shows today's values, never that a bad one is caught
 	public class WeaponRangeDetectionTests

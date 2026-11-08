@@ -6,8 +6,9 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - Weapon.Range (clsEquipment.cs:6566) reads one band of one range row
 	// - a missing band lands in the catch and shows as -1

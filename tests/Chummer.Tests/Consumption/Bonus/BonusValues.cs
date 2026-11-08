@@ -7,8 +7,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Bonus
 {
 	// - CreateImprovements turns bonus values into numbers through ValueToInt, outside any try
 	// - each replay mirrors one handler branch: its guards, its reads, its conversions

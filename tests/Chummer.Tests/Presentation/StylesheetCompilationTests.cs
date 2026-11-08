@@ -2,9 +2,10 @@
 using System.Linq;
 using System.Xml;
 using System.Xml.Xsl;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Presentation
 {
 	// - well-formed is not compilable: a bad XPath or unknown function only fails here
 	// - proves the sheets compile, not that their output is right

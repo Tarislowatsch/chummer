@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - CalculatedESS (clsEquipment.cs:3622) and the selection dialog read ess without a try
 	// - grade, suite and improvement multipliers are runtime state and not replayed

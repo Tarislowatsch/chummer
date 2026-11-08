@@ -1,7 +1,8 @@
 ﻿using System.IO;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - ValidateCharacter parses every item's availability when a character is finished
 	// - an avail its calculator cannot parse throws there, with nothing catching it

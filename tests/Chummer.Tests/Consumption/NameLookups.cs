@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - a name shared across collections (Binding, Hardening) is harmless while every lookup is anchored
 	// - a "//", "*" or axis step before a name filter lets one collection's item answer for another

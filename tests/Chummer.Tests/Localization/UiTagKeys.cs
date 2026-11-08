@@ -4,8 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - a control's Tag is a GetString key wherever a lookup reads that control's type
 	// - UpdateControls catches a miss, but rethrows under _blnDebug

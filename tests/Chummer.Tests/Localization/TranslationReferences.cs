@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - a port of the translation pass in XmlManager.Load (clsXmlManager.cs:184-313)
 	// - a translation whose lookup misses is dropped without a word: the item shows in English

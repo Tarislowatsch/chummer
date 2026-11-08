@@ -1,7 +1,8 @@
 ﻿using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - a malformed file crashes the app: clsXmlManager.cs:145 throws XmlException unfiltered
 	// - per-file cases keep one bad file from hiding the rest

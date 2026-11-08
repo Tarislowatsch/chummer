@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Localization
 {
 	// - GetString indexes a dictionary filled from en-us.xml only (clsLanguageManager.cs:140, :440)
 	// - an unknown key throws KeyNotFoundException: most calls have no try

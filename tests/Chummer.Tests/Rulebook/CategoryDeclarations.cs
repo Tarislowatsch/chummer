@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - every catalogue <category> has to be declared in the block the code resolves it against
 	public static class CategoryDeclarations

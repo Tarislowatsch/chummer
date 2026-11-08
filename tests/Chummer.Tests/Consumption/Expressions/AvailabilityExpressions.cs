@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - each port replays one TotalAvail plus the GetAvailInt ValidateCharacter runs on it
 	// - ports, not a common grammar: Armor knows no Rating, Cyberware alone knows FixedValues

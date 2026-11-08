@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - the calculators return text, the CapacityRemaining getters parse it without a try
 	// - the forms show both on selection, unguarded (frmCreate.cs:16956)

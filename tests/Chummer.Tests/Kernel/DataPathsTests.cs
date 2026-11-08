@@ -1,8 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Consumption;
+using Chummer.Tests.Consumption.Bonus;
+using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Localization;
+using Chummer.Tests.Rulebook;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - a [Theory] with an empty MemberData source reports green on zero cases
 	// - broken path resolution would silently disable the well-formedness theories

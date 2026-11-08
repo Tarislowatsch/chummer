@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - a cost its calculator cannot parse throws wherever the price is shown or summed
 	// - inside Cyberware's empty catch it costs 0 instead, without a word

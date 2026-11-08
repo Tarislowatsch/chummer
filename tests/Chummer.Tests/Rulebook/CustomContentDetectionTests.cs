@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - hand-built input: the shipped packs are too clean to show each check can fail
 	public class CustomContentDetectionTests

@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - Gear.Create reads <avail> unguarded (clsEquipment.cs:9552): a missing field closes the app
 	// - nothing on the way out catches the throw (clsXmlManager.cs:145 rethrows unfiltered)

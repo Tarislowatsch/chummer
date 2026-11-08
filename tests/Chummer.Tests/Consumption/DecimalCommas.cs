@@ -2,8 +2,10 @@
 using System.Globalization;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - every Convert.ToDecimal/ToDouble on data passes en-US, where a comma groups thousands
 	// - "0,5" converts without a throw, to 5

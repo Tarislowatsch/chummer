@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption;
+using Chummer.Tests.Consumption.Bonus;
+using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	public static class RuleCorpus
 	{

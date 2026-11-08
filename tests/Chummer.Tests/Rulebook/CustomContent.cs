@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the shipped packs under data/custom content/, checked as XmlManager.Load would merge them
 	// - Load reads data/ itself only: a pack takes effect once its files are copied there

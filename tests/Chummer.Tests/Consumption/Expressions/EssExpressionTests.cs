@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - deliberately no allowlist: every ess value parses today
 	public class EssExpressionTests

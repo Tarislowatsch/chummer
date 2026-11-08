@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption.Bonus;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - a name the code looks up and misses is a crash on null or a silent no-op
 	// - each rule mirrors its consumer's lookup: key, category filter, fallback file

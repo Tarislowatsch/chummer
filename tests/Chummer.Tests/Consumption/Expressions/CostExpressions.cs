@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - each port replays the Create's Variable(...) handling, then the cost calculators
 	// - Weapon and Lifestyle are absent: their Create converts <cost> and NumericFields pins it

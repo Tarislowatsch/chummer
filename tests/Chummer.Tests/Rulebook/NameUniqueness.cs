@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - no two entries of a collection may share the key the application looks them up by
 	public static class NameUniqueness

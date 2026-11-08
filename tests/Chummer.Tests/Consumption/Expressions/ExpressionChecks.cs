@@ -6,8 +6,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - avail and cost are tiny programs: each calculator substitutes, then runs them as XPath
 	// - the ports in AvailabilityExpressions/CostExpressions replay one calculator each

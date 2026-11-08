@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the table is hand-read off the consumers: a lookup it does not list stays unchecked
 	// - the guards below catch a rule gone vacant or a consumer gone, not a missing rule

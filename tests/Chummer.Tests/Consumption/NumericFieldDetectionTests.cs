@@ -4,7 +4,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption
 {
 	// - every real value converts today: the data cases cannot show a blind check
 	// - hand-built XML and source pin each decision to something that fails when it changes

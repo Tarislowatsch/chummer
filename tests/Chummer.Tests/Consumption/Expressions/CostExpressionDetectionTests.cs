@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - the data holds one failing cost: the other cases cannot show a port gone lenient
 	// - each case pins one quirk of one calculator to an entry it accepts or rejects

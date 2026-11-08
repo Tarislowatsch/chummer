@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the theory over the real files cannot pin the rules: the data has no near-miss pairs
 	// - hand-built XML here fails when the rules change

@@ -2,7 +2,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - the theories over the real files cannot pin these rules: the data has no near-miss cases
 	// - the axis pair matters most: deep for <source>, direct children only for <category>

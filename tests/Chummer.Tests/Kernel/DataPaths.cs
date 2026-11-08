@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Xml;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Kernel
 {
 	// - the assembly runs from bin\Debug\net48, not the repo root
 	// - every path is found by walking up from the assembly to the repo's marker file

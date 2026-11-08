@@ -5,8 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Localization;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - a drain is XPath once its consumer has swapped each attribute code for a value
 	// - PrintToStream evaluates it without a try: a code left in throws on print

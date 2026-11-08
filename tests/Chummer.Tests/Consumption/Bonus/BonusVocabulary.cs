@@ -4,8 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Chummer.Tests.Kernel;
+using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Bonus
 {
 	// - CreateImprovements dispatches on tag names with no else: an unknown tag does nothing
 	// - the item stays buyable and silently grants nothing

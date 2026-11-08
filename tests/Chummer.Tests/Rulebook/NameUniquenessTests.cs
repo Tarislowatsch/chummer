@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Rulebook
 {
 	// - <name> is the de-facto primary key: the data has no ids or guids
 	// - a duplicate makes the second entry unreachable through name-based XPath lookups

@@ -3,7 +3,7 @@ using System.Linq;
 using System.Xml;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - every real avail parses today: the data cases cannot show a port gone lenient
 	// - each case pins one quirk of one calculator to an entry it accepts or rejects

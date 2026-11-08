@@ -4,7 +4,7 @@ using System.Xml;
 using System.Xml.XPath;
 using Xunit;
 
-namespace Chummer.Tests
+namespace Chummer.Tests.Consumption.Expressions
 {
 	// - hand-built values: the real data shows today's values, never that a bad one is caught
 	public class EssExpressionDetectionTests
