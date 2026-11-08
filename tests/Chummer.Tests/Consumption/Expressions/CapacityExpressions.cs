@@ -103,7 +103,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		{
 			string capacity = ExpressionChecks.FieldOf(item, "capacity");
 			IEnumerable<int> ratings = rating == 0
-				? Enumerable.Range(1, ExpressionChecks.ExhaustiveRatingLimit)
+				? Enumerable.Range(1, Ratings.ExhaustiveLimit)
 				: new[] { rating };
 			foreach (int each in ratings)
 				CalculatedTechProgramCapacity(capacity, each);

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Xml;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -41,7 +40,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		{
 			XmlDocument document = Xml.Parse("<power><name>P</name><levels>yes</levels><bonus><reach>1</reach></bonus></power>");
 
-			Assert.Equal(Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1),
+			Assert.Equal(Enumerable.Range(0, Ratings.ExhaustiveLimit + 1),
 				BonusValues.RatingsOf(document.SelectSingleNode("power/bonus")));
 		}
 

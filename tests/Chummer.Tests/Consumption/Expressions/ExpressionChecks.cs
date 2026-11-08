@@ -81,7 +81,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				CutShort = cutShort;
 			}
 
-			// - entries rated above ExhaustiveRatingLimit, replayed at the top end only
+			// - entries rated above Ratings.ExhaustiveLimit, replayed at the top end only
 			public IReadOnlyList<string> CutShort { get; }
 
 			public ExpressionRule Rule { get; }
@@ -116,11 +116,6 @@ namespace Chummer.Tests.Consumption.Expressions
 				{ "TechProgram", new[] { "maxrating", null } },
 			};
 
-		// - every rating up to here is replayed, no assumption about the expressions needed
-		// - above it only the top end: credsticks reach 1000000, a full sweep would take minutes
-		public const int ExhaustiveRatingLimit = 100;
-
-		// - min..max, cut at the limit, plus max itself
 		public static IReadOnlyList<int> RatingsOf(string entity, XmlNode item)
 		{
 			string[] fields;
@@ -139,21 +134,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			if (max <= 0)
 				return new[] { 0 };
 
-			int min = MinimumRating(fields[1] == null ? null : item[fields[1]]?.InnerText);
-
-			return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExhaustiveRatingLimit) - min + 1))
-				.Concat(new[] { max })
-				.Distinct()
-				.ToArray();
-		}
-
-		// - the dialogs take minrating as is, 0 included (frmSelectGear.cs:1097), 1 without one
-		// - a negative one would be no rating at all: it counts as 0
-		public static int MinimumRating(string minText)
-		{
-			return int.TryParse(minText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int declared)
-				? Math.Max(0, declared)
-				: 1;
+			return Ratings.Sweep(Ratings.Minimum(fields[1] == null ? null : item[fields[1]]?.InnerText), max);
 		}
 
 		// - "entity: name (rating)" for every entry whose range the sweep cuts short
@@ -161,7 +142,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		{
 			return items
 				.Select(item => new { Item = item, Ratings = RatingsOf(entity, item) })
-				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > ExhaustiveRatingLimit)
+				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > Ratings.ExhaustiveLimit)
 				.Select(entry => entity + ": " + RuleCorpus.ItemLabel(entry.Item) + " ("
 					+ entry.Ratings[entry.Ratings.Count - 1] + ")");
 		}

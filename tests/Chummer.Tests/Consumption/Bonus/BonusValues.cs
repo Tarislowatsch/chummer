@@ -6,7 +6,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Bonus
@@ -376,15 +375,10 @@ namespace Chummer.Tests.Consumption.Bonus
 				if (max <= 0)
 					return new[] { 0 };
 
-				int min = ExpressionChecks.MinimumRating(owner["minrating"]?.InnerText);
-
-				return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExpressionChecks.ExhaustiveRatingLimit) - min + 1))
-					.Concat(new[] { max })
-					.Distinct()
-					.ToArray();
+				return Ratings.Sweep(Ratings.Minimum(owner["minrating"]?.InnerText), max);
 			}
 
-			return Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1).ToArray();
+			return Enumerable.Range(0, Ratings.ExhaustiveLimit + 1).ToArray();
 		}
 
 		public sealed class BonusValueFailure
@@ -451,7 +445,7 @@ namespace Chummer.Tests.Consumption.Bonus
 			{
 				IReadOnlyList<int> ratings = RatingsOf(root);
 				string itemName = RuleCorpus.ItemLabel(root.ParentNode);
-				if (ratings[ratings.Count - 1] > ExpressionChecks.ExhaustiveRatingLimit)
+				if (ratings[ratings.Count - 1] > Ratings.ExhaustiveLimit)
 					cutShort.Add(file + ": " + itemName + " (" + ratings[ratings.Count - 1] + ")");
 
 				foreach (string handler in ReplayedHandlers.Where(handler => NodeExists(root, handler)))
