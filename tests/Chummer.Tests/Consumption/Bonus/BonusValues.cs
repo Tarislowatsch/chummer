@@ -20,11 +20,6 @@ namespace Chummer.Tests.Consumption.Bonus
 			"ImprovementManager.NodeExists",
 		};
 
-		// - ValueToInt prints the XPath result in the thread culture: the app never sets one
-		// - the parse back is en-US: under de-DE "1,5" reads as 15
-		// - GetCultureInfo ignores this machine's overrides of its own culture
-		public static readonly CultureInfo LocalCulture = CultureInfo.GetCultureInfo("de-DE");
-
 		// - stand-ins for the character's TotalValue: no bonus value names an attribute today
 		// - 0 is a mundane's MAG, an odd value exposes a fraction
 		public static readonly IReadOnlyList<int> AttributeStandIns = new[] { 0, 1, 2, 3 };
@@ -340,11 +335,12 @@ namespace Chummer.Tests.Consumption.Bonus
 						throw new ReadFailed(path, value, exception);
 					}
 
+					// - ValueToInt prints in the thread culture, then parses back as en-US: "1,5" reads as 15
 					// - "0,333…" reads as 333333333333333 and overflows: still the culture, not the data
 					string local;
 					try
 					{
-						int number = convert(attribute, LocalCulture);
+						int number = convert(attribute, Cultures.German);
 						local = number == english ? null : "gives " + number;
 					}
 					catch (Exception exception)

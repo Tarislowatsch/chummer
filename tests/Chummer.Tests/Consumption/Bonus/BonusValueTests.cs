@@ -8,7 +8,7 @@ namespace Chummer.Tests.Consumption.Bonus
 {
 	public class BonusValueTests
 	{
-		// - code defect, not data: ValueToInt prints in the thread culture, see BonusValues.LocalCulture
+		// - code defect, not data: ValueToInt prints in the thread culture, see BonusValues.ConvertEach
 		// - fixing ValueToInt empties this list, the data stays as it is
 		private static readonly IReadOnlyDictionary<string, string> KnownFailures =
 			new Dictionary<string, string>(StringComparer.Ordinal)

@@ -11,7 +11,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		public void AFractionPrintedInTheGermanCultureParsesTenfold()
 		{
 			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.Application));
-			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, BonusValues.LocalCulture));
+			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.German));
 		}
 
 		[Fact]
@@ -69,7 +69,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void TheGermanCultureIgnoresThisMachinesOverrides()
 		{
-			Assert.False(BonusValues.LocalCulture.UseUserOverride);
+			Assert.False(Cultures.German.UseUserOverride);
 		}
 
 		[Fact]

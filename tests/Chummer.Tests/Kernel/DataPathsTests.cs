@@ -158,6 +158,14 @@ namespace Chummer.Tests.Kernel
 			Assert.Equal(23, PackFiles.All.Count);
 		}
 
+		// - top-level files plus every pack file Load would merge
+		// - bumping the number is only correct for a deliberately added or removed data file
+		[Fact]
+		public void DataFilesWithPacksFindsEveryDataFile()
+		{
+			Assert.Equal(50, DataPaths.DataFilesWithPacks.Count);
+		}
+
 		// - derivable: every pack file, since each base file it pairs with has a schema
 		[Fact]
 		public void PackXmlWithSchemaFilesFindsEveryPair()
