@@ -8,7 +8,6 @@ using System.Xml;
 using System.Xml.XPath;
 using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -102,9 +101,6 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - stand-in for runtime state the data cannot supply: parent cost, Body, Speed, Accel
 		// - a round integer keeps a multiplier like ".1" from inventing a fractional crash
 		public const int RuntimeStandIn = 1000;
-
-		// - the culture every calculator passes to Convert.ToDouble
-		public static readonly CultureInfo ApplicationCulture = new CultureInfo("en-US");
 
 		// - XmlNode field -> the rating range the selection dialogs offer for that class
 		private static readonly IReadOnlyDictionary<string, string[]> RatingFields =
@@ -258,7 +254,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - Evaluate(...).ToString() as the code writes it, pinned to the en-US run
 		public static string EvaluateToString(string expression)
 		{
-			return Convert.ToString(Evaluate(expression), ApplicationCulture);
+			return Convert.ToString(Evaluate(expression), Cultures.Application);
 		}
 
 		// - what the field reads in the Create: verbatim text, "" when the element is absent
@@ -351,12 +347,12 @@ namespace Chummer.Tests.Consumption.Expressions
 		}
 
 		public static IEnumerable<ExpressionCheck> AllPackChecks =>
-			CustomContent.PairedPackFiles().SelectMany(file => PackChecksIn(file.FilePath));
+			PackFiles.Paired().SelectMany(file => PackChecksIn(file.FilePath));
 
 		// - only rules that reach an entry, as for the required-field contracts
 		private static IEnumerable<ExpressionCheck> PackChecksIn(string packPath)
 		{
-			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, Xml.Load(packPath),
+			return ChecksIn(PackFiles.For(packPath).BaseFileName, packPath, Xml.Load(packPath),
 					AllRules)
 				.Where(check => check.ItemCount > 0);
 		}

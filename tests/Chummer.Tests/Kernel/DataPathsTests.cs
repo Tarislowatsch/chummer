@@ -151,11 +151,11 @@ namespace Chummer.Tests.Kernel
 		}
 
 		// - 23 files in 6 packs: a discovery gap would drop a whole pack from every pack check
-		// - also pins PairedPackFileCases: the pairing guard makes every file a paired one
+		// - also pins PackFiles.PairedCases: the pairing guard makes every file a paired one
 		[Fact]
 		public void PackFilesFindsEveryShippedPackFile()
 		{
-			Assert.Equal(23, CustomContent.PackFiles.Count);
+			Assert.Equal(23, PackFiles.All.Count);
 		}
 
 		// - derivable: every pack file, since each base file it pairs with has a schema

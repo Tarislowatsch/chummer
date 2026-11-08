@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -57,12 +58,12 @@ namespace Chummer.Tests.Consumption.Expressions
 		{
 			if (ess.StartsWith("FixedValues"))
 			{
-				return Convert.ToDouble(Convert.ToDecimal(FixedValues(ess)[rating - 1], ExpressionChecks.ApplicationCulture),
-					ExpressionChecks.ApplicationCulture);
+				return Convert.ToDouble(Convert.ToDecimal(FixedValues(ess)[rating - 1], Cultures.Application),
+					Cultures.Application);
 			}
 
 			return Convert.ToDouble(ExpressionChecks.Evaluate(ess.Replace("Rating", rating.ToString())),
-				ExpressionChecks.ApplicationCulture);
+				Cultures.Application);
 		}
 
 		// - public so the detection tests can drive it with hand-built values
@@ -71,15 +72,15 @@ namespace Chummer.Tests.Consumption.Expressions
 			if (ess.Contains("Rating"))
 			{
 				return Convert.ToDecimal(ExpressionChecks.Evaluate(ess.Replace("Rating", rating.ToString())),
-					ExpressionChecks.ApplicationCulture);
+					Cultures.Application);
 			}
 
 			if (ess.StartsWith("FixedValues"))
 			{
-				return Convert.ToDecimal(FixedValues(ess)[rating - 1], ExpressionChecks.ApplicationCulture);
+				return Convert.ToDecimal(FixedValues(ess)[rating - 1], Cultures.Application);
 			}
 
-			return Convert.ToDecimal(ess, ExpressionChecks.ApplicationCulture);
+			return Convert.ToDecimal(ess, Cultures.Application);
 		}
 	}
 }

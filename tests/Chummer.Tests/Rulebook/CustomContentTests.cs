@@ -28,11 +28,11 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void EveryPackFilePairsWithExactlyOneBaseFile()
 		{
-			string[] unpaired = CustomContent.PackFiles
+			string[] unpaired = PackFiles.All
 				.Where(file => file.Prefix == null || file.BaseFileNames.Count != 1)
 				.Select(file => file.PackName + "/" + file.FileName + " -> "
 					+ (file.Prefix == null
-						? "starts with neither '" + CustomContent.CustomPrefix + "' nor '" + CustomContent.OverridePrefix + "'"
+						? "starts with neither '" + PackFiles.CustomPrefix + "' nor '" + PackFiles.OverridePrefix + "'"
 						: "[" + string.Join(", ", file.BaseFileNames) + "]"))
 				.ToArray();
 
@@ -43,7 +43,7 @@ namespace Chummer.Tests.Rulebook
 		[MemberData(nameof(CustomContent.PackFilesCitingBooks), MemberType = typeof(CustomContent))]
 		public void EverySourceCitesABookThePackCanSee(string packPath)
 		{
-			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
+			PackFiles.PackFile file = PackFiles.For(packPath);
 
 			var unknown = BookReferences
 				.Undeclared(BookReferences.In(Xml.Load(packPath)),
@@ -61,10 +61,10 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		[Theory]
-		[MemberData(nameof(CustomContent.PairedPackFileCases), MemberType = typeof(CustomContent))]
+		[MemberData(nameof(PackFiles.PairedCases), MemberType = typeof(PackFiles))]
 		public void LoadKeepsEveryPackEntry(string packPath)
 		{
-			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
+			PackFiles.PackFile file = PackFiles.For(packPath);
 
 			string[] unexpected = DiscardedEntries(file)
 				.Where(entry => !KnownDiscardedEntries.Contains(entry))
@@ -80,7 +80,7 @@ namespace Chummer.Tests.Rulebook
 		public void AllowlistedDiscardedEntriesAreAllStillDiscarded()
 		{
 			HashSet<string> actual = new HashSet<string>(
-				CustomContent.PairedPackFiles().SelectMany(DiscardedEntries), StringComparer.Ordinal);
+				PackFiles.Paired().SelectMany(DiscardedEntries), StringComparer.Ordinal);
 
 			AssertNoneStale(KnownDiscardedEntries, actual, nameof(KnownDiscardedEntries));
 		}
@@ -91,7 +91,7 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void NoTwoCustomEntriesShareAName()
 		{
-			string[] duplicated = CustomContent.PairedPackFiles()
+			string[] duplicated = PackFiles.Paired()
 				.Where(file => !file.IsOverride)
 				.SelectMany(file => CustomContent.NamedItemsIn(Xml.Load(file.FilePath))
 					.Select(item => new { Key = file.BaseFileNames[0] + item.XPath, Source = file.PackName + "/" + file.FileName }))
@@ -108,9 +108,9 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void OverridesOfOneBaseEntryAgreeOnItsContent()
 		{
-			string[] conflicting = CustomContent.ConflictingOverrides(CustomContent.PairedPackFiles()
+			string[] conflicting = CustomContent.ConflictingOverrides(PackFiles.Paired()
 					.Where(file => file.IsOverride)
-					.Select(file => new KeyValuePair<CustomContent.PackFile, XmlDocument>(
+					.Select(file => new KeyValuePair<PackFiles.PackFile, XmlDocument>(
 						file, Xml.Load(file.FilePath))))
 				.Select(entry => entry.Key + " in " + string.Join(", ", entry.Value))
 				.ToArray();
@@ -122,7 +122,7 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void NoCustomFileRedeclaresABaseCategory()
 		{
-			string[] redeclared = CustomContent.PairedPackFiles()
+			string[] redeclared = PackFiles.Paired()
 				.SelectMany(file => CustomContent.RedeclaredCategories(file, Xml.Load(file.FilePath))
 					.Select(entry => file.PackName + "/" + file.FileName + ": " + entry))
 				.ToArray();
@@ -132,10 +132,10 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		[Theory]
-		[MemberData(nameof(CustomContent.PairedPackFileCases), MemberType = typeof(CustomContent))]
+		[MemberData(nameof(PackFiles.PairedCases), MemberType = typeof(PackFiles))]
 		public void EveryCategoryUsedIsDeclared(string packPath)
 		{
-			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
+			PackFiles.PackFile file = PackFiles.For(packPath);
 
 			var unexpected = UndeclaredCategories(file)
 				.GroupBy(entry => entry.Key, StringComparer.Ordinal)
@@ -155,13 +155,13 @@ namespace Chummer.Tests.Rulebook
 		public void AllowlistedCategoriesAreAllStillUndeclared()
 		{
 			HashSet<string> actual = new HashSet<string>(
-				CustomContent.PairedPackFiles().SelectMany(UndeclaredCategories).Select(entry => entry.Key),
+				PackFiles.Paired().SelectMany(UndeclaredCategories).Select(entry => entry.Key),
 				StringComparer.Ordinal);
 
 			AssertNoneStale(KnownUndeclaredCategories, actual, nameof(KnownUndeclaredCategories));
 		}
 
-		private static IEnumerable<string> DiscardedEntries(CustomContent.PackFile file)
+		private static IEnumerable<string> DiscardedEntries(PackFiles.PackFile file)
 		{
 			XmlDocument baseDocument = Xml.Load(file.BaseFilePath);
 
@@ -170,7 +170,7 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		// - key is <pack file>/<collection>/<category>, value the entry's name for the message
-		private static IEnumerable<KeyValuePair<string, string>> UndeclaredCategories(CustomContent.PackFile file)
+		private static IEnumerable<KeyValuePair<string, string>> UndeclaredCategories(PackFiles.PackFile file)
 		{
 			return CustomContent.UndeclaredCategoryUsages(file, Xml.Load(file.FilePath))
 				.Select(usage => new KeyValuePair<string, string>(

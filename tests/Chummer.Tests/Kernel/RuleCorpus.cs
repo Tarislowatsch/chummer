@@ -89,9 +89,7 @@ namespace Chummer.Tests.Kernel
 		{
 			List<RuleFile> files = new List<RuleFile>();
 
-			foreach (string xmlPath in Directory
-				.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-				.OrderBy(path => path, StringComparer.Ordinal))
+			foreach (string xmlPath in DataPaths.TopLevelRuleXmlFiles())
 			{
 				XmlDocument document = Xml.Load(xmlPath);
 

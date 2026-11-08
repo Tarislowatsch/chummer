@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -77,7 +76,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			string[] baseFiles = { "metatypes.xml", "critters.xml" };
 
 			return baseFiles.Select(file => Path.Combine(DataPaths.ChummerDataDir, file))
-				.Concat(CustomContent.PackFiles
+				.Concat(PackFiles.All
 					.Where(pack => pack.BaseFileNames.Intersect(baseFiles, StringComparer.Ordinal).Any())
 					.Select(pack => pack.FilePath));
 		}

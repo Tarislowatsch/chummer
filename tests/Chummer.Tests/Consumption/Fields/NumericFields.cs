@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Fields
 {
@@ -108,9 +107,6 @@ namespace Chummer.Tests.Consumption.Fields
 				// - clsEquipment.cs:976 hands "Variable(...)" to a parser of its own
 				{ "Armor.cost", value => value.StartsWith("Variable", StringComparison.Ordinal) },
 			};
-
-		// - the only culture a Create passes, to Convert.ToDouble (clsEquipment.cs:4289)
-		private static readonly CultureInfo ApplicationCulture = new CultureInfo("en-US");
 
 		public static string CreateClassOf(string entity)
 		{
@@ -304,7 +300,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 		public static IEnumerable<object[]> PackEntities()
 		{
-			return CustomContent.PairedPackFiles()
+			return PackFiles.Paired()
 				.SelectMany(file => PackChecksIn(file.FilePath))
 				.Select(check => new object[] { check.FilePath, check.Entity });
 		}
@@ -318,7 +314,7 @@ namespace Chummer.Tests.Consumption.Fields
 		// - only rules that reach an entry, as for the required-field contracts
 		private static IEnumerable<NumericFieldCheck> PackChecksIn(string packPath)
 		{
-			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, Xml.Load(packPath))
+			return ChecksIn(PackFiles.For(packPath).BaseFileName, packPath, Xml.Load(packPath))
 				.Where(check => check.ItemCount > 0);
 		}
 
@@ -389,7 +385,7 @@ namespace Chummer.Tests.Consumption.Fields
 				case Conversion.Double:
 					double number;
 					return double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands,
-						ApplicationCulture, out number);
+						Cultures.Application, out number);
 				default:
 					throw new ArgumentOutOfRangeException(nameof(conversion), conversion, null);
 			}

@@ -18,7 +18,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[InlineData("FixedValues(0.1,0.25,0.5)", 2, "0.25")]
 		public void CalculatesTheShapesTheDataUses(string ess, int rating, string expected)
 		{
-			Assert.Equal(decimal.Parse(expected, ExpressionChecks.ApplicationCulture), EssExpressions.Calculate(ess, rating));
+			Assert.Equal(decimal.Parse(expected, Cultures.Application), EssExpressions.Calculate(ess, rating));
 		}
 
 		[Fact]

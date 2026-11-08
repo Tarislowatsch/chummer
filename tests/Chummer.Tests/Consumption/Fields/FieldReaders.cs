@@ -6,7 +6,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Fields
 {
@@ -14,33 +13,6 @@ namespace Chummer.Tests.Consumption.Fields
 	// - names against every literal, requirement and handler blocks against their consumer
 	public static class FieldReaders
 	{
-		// One data file as Load merges it: top-level, or a pack file merged into its base.
-		public sealed class DataFile
-		{
-			public DataFile(string path, string baseFileName)
-			{
-				FilePath = path;
-				BaseFileName = baseFileName;
-			}
-
-			public string FilePath { get; }
-
-			public string BaseFileName { get; }
-
-			public string Label => FilePath.Substring(DataPaths.ChummerDataDir.Length + 1).Replace('\\', '/');
-		}
-
-		public static IReadOnlyList<DataFile> DataFiles => CachedDataFiles.Value;
-
-		private static readonly Lazy<IReadOnlyList<DataFile>> CachedDataFiles =
-			new Lazy<IReadOnlyList<DataFile>>(() => Directory
-				.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-				.OrderBy(path => path, StringComparer.Ordinal)
-				.Select(path => new DataFile(path, Path.GetFileName(path)))
-				.Concat(CustomContent.PairedPackFiles()
-					.Select(pack => new DataFile(pack.FilePath, pack.BaseFileNames.Single())))
-				.ToArray());
-
 		// One element name in one data file, with the path of its first occurrence.
 		public sealed class ElementName
 		{
@@ -379,8 +351,6 @@ namespace Chummer.Tests.Consumption.Fields
 			"selectskillgroup", "swapskillattribute",
 		};
 
-		public const string HandlerConsumerFile = "clsImprovement.cs";
-
 		public enum BlockReach
 		{
 			// - the first block of its name below a root CreateImprovements walks
@@ -497,8 +467,10 @@ namespace Chummer.Tests.Consumption.Fields
 			new Lazy<IReadOnlyList<HandlerBranch>>(() =>
 			{
 				string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-					.Single(path => Path.GetFileName(path) == HandlerConsumerFile));
-				return IndexedHandlers.Select(handler => BranchOf(handler, HandlerConsumerFile, lines)).ToArray();
+					.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
+				return IndexedHandlers
+					.Select(handler => BranchOf(handler, BonusVocabulary.HandlerConsumerFile, lines))
+					.ToArray();
 			});
 
 		public static IEnumerable<HandlerField> UnreadHandlerFields(IEnumerable<HandlerField> fields,
@@ -547,7 +519,7 @@ namespace Chummer.Tests.Consumption.Fields
 				List<ElementName> names = new List<ElementName>();
 				List<RequirementUse> uses = new List<RequirementUse>();
 				List<HandlerField> fields = new List<HandlerField>();
-				foreach (DataFile file in DataFiles)
+				foreach (DataPaths.DataFile file in DataPaths.DataFilesWithPacks)
 				{
 					XmlDocument document = Xml.Load(file.FilePath);
 					names.AddRange(ElementNamesIn(file.Label, document));

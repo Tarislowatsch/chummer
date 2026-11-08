@@ -7,102 +7,12 @@ using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Rulebook
 {
-	// - the shipped packs under data/custom content/, checked as XmlManager.Load would merge them
-	// - Load reads data/ itself only: a pack takes effect once its files are copied there
-	// - reparsed per check, not cached: pack files are tiny
+	// - the packs' content, checked as XmlManager.Load would merge it (discovery: PackFiles)
 	public static class CustomContent
 	{
-		public const string CustomPrefix = "custom";
-
-		public const string OverridePrefix = "override";
-
-		public static string CustomContentDir => Path.Combine(DataPaths.ChummerDataDir, "custom content");
-
-		// - clsXmlManager.cs:155 and :337 skip both merges for this one file
-		private const string FileWithoutPackMerge = "improvements.xml";
-
-		public sealed class PackFile
-		{
-			public PackFile(string filePath, string prefix, IReadOnlyList<string> baseFileNames)
-			{
-				FilePath = filePath;
-				Prefix = prefix;
-				BaseFileNames = baseFileNames;
-			}
-
-			public string FilePath { get; }
-
-			public string FileName => Path.GetFileName(FilePath);
-
-			public string PackName => Path.GetFileName(Path.GetDirectoryName(FilePath));
-
-			// - null when the name starts with neither prefix: Load would never pick the file up
-			public string Prefix { get; }
-
-			public bool IsOverride => string.Equals(Prefix, OverridePrefix, StringComparison.Ordinal);
-
-			// - more than one would merge the file into several documents
-			public IReadOnlyList<string> BaseFileNames { get; }
-
-			// - the contracts' rule tables are keyed by it: a pack shares its base file's rules
-			public string BaseFileName => BaseFileNames.Single();
-
-			public string BaseFilePath => Path.Combine(DataPaths.ChummerDataDir, BaseFileName);
-		}
-
-		public static IReadOnlyList<PackFile> PackFiles => CachedPackFiles.Value;
-
-		private static readonly Lazy<IReadOnlyList<PackFile>> CachedPackFiles =
-			new Lazy<IReadOnlyList<PackFile>>(DiscoverPackFiles);
-
-		private static IReadOnlyList<PackFile> DiscoverPackFiles()
-		{
-			string[] baseFileNames = Directory
-				.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-				.Select(Path.GetFileName)
-				.ToArray();
-
-			return Directory.EnumerateFiles(CustomContentDir, "*.xml", SearchOption.AllDirectories)
-				.OrderBy(path => path, StringComparer.Ordinal)
-				.Select(path => Classify(path, baseFileNames))
-				.ToArray();
-		}
-
-		// - public so the detection tests can drive it with made-up names
-		// - mirrors Load's globs "custom*_<base>" and "override*_<base>" (clsXmlManager.cs:158, :340)
-		// - case-insensitive like Directory.GetFiles on Windows
-		public static PackFile Classify(string path, IEnumerable<string> baseFileNames)
-		{
-			string fileName = Path.GetFileName(path);
-			string prefix = new[] { CustomPrefix, OverridePrefix }
-				.FirstOrDefault(candidate => fileName.StartsWith(candidate, StringComparison.OrdinalIgnoreCase));
-
-			string[] bases = prefix == null
-				? new string[0]
-				: baseFileNames
-					.Where(baseName => !string.Equals(baseName, FileWithoutPackMerge, StringComparison.OrdinalIgnoreCase))
-					.Where(baseName => fileName.Length >= prefix.Length + 1 + baseName.Length
-						&& fileName.EndsWith("_" + baseName, StringComparison.OrdinalIgnoreCase))
-					.OrderBy(baseName => baseName, StringComparer.Ordinal)
-					.ToArray();
-
-			return new PackFile(path, prefix, bases);
-		}
-
-		// - every check below needs a base file: an unpaired file fails the pairing guard instead
-		public static IEnumerable<PackFile> PairedPackFiles()
-		{
-			return PackFiles.Where(file => file.Prefix != null && file.BaseFileNames.Count == 1);
-		}
-
-		public static IEnumerable<object[]> PairedPackFileCases()
-		{
-			return PairedPackFiles().Select(file => new object[] { file.FilePath });
-		}
-
 		public static IEnumerable<object[]> PackXmlWithSchemaFiles()
 		{
-			return PairedPackFiles()
+			return PackFiles.Paired()
 				.Select(file => new { file.FilePath, XsdPath = Path.ChangeExtension(file.BaseFilePath, ".xsd") })
 				.Where(pair => File.Exists(pair.XsdPath))
 				.Select(pair => new object[] { pair.FilePath, pair.XsdPath });
@@ -110,20 +20,15 @@ namespace Chummer.Tests.Rulebook
 
 		public static IEnumerable<object[]> PackFilesCitingBooks()
 		{
-			return PairedPackFiles()
+			return PackFiles.Paired()
 				.Where(file => BookReferences.In(Xml.Load(file.FilePath)).Count > 0)
 				.Select(file => new object[] { file.FilePath });
 		}
 
-		public static PackFile PackFileFor(string path)
-		{
-			return PackFiles.Single(file => string.Equals(file.FilePath, path, StringComparison.Ordinal));
-		}
-
 		// - per pack, not across packs: a user copies in only the packs they want
-		public static IReadOnlyCollection<string> BookCodesVisibleTo(PackFile file)
+		public static IReadOnlyCollection<string> BookCodesVisibleTo(PackFiles.PackFile file)
 		{
-			IEnumerable<string> packCodes = PairedPackFiles()
+			IEnumerable<string> packCodes = PackFiles.Paired()
 				.Where(other => string.Equals(other.PackName, file.PackName, StringComparison.Ordinal)
 					&& !other.IsOverride
 					&& string.Equals(other.BaseFileNames[0], "books.xml", StringComparison.Ordinal))
@@ -170,7 +75,7 @@ namespace Chummer.Tests.Rulebook
 		// - base file + lookup -> the distinct contents the given overrides would write there
 		// - one content is harmless however many files carry it, two make load order decide
 		public static IEnumerable<KeyValuePair<string, string[]>> ConflictingOverrides(
-			IEnumerable<KeyValuePair<PackFile, XmlDocument>> overrides)
+			IEnumerable<KeyValuePair<PackFiles.PackFile, XmlDocument>> overrides)
 		{
 			return overrides
 				.SelectMany(pair => NamedItemsIn(pair.Value)
@@ -185,7 +90,7 @@ namespace Chummer.Tests.Rulebook
 		// - frmSelectWeapon.cs:47-62 lists every <category> node without deduplicating
 		// - the pack's copy lacks the translation: Load applies it before merging packs
 		// - override files are exempt: their blocks are never merged
-		public static IEnumerable<string> RedeclaredCategories(PackFile file, XmlDocument pack)
+		public static IEnumerable<string> RedeclaredCategories(PackFiles.PackFile file, XmlDocument pack)
 		{
 			if (file.IsOverride)
 				return Enumerable.Empty<string>();
@@ -202,7 +107,8 @@ namespace Chummer.Tests.Rulebook
 		// - custom entries the base already names: Load drops them (clsXmlManager.cs:354-357)
 		// - override entries the base does not name: Load ignores them (clsXmlManager.cs:169)
 		// - one function for both: the same lookup, read with opposite expectations
-		public static IEnumerable<PackItem> ItemsLoadDiscards(PackFile file, XmlDocument pack, XmlDocument baseDocument)
+		public static IEnumerable<PackItem> ItemsLoadDiscards(PackFiles.PackFile file, XmlDocument pack,
+			XmlDocument baseDocument)
 		{
 			return NamedItemsIn(pack)
 				.Where(item => (baseDocument.SelectSingleNode(item.XPath) != null) != file.IsOverride);
@@ -211,7 +117,7 @@ namespace Chummer.Tests.Rulebook
 		// - Load appends a custom file's <categories> next to the base block, pickers read both
 		// - an override file's blocks are never merged (clsXmlManager.cs:164-171 needs a <name>)
 		public static IReadOnlyDictionary<string, IReadOnlyCollection<string>> CategoryDeclarationsVisibleTo(
-			PackFile file, XmlDocument pack)
+			PackFiles.PackFile file, XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> baseBlocks =
 				CategoryDeclarations.For(file.BaseFilePath);
@@ -229,7 +135,7 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		// - scope resolved against the base file name: overrides and exemptions apply unchanged
-		public static IEnumerable<CategoryDeclarations.CategoryUsage> UndeclaredCategoryUsages(PackFile file,
+		public static IEnumerable<CategoryDeclarations.CategoryUsage> UndeclaredCategoryUsages(PackFiles.PackFile file,
 			XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations =

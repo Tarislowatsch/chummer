@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
 using Chummer.Tests.Consumption.Expressions;
-using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Bonus
@@ -221,7 +220,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				XPathNavigator nav = new XmlDocument().CreateNavigator();
 				XPathExpression expression = nav.Compile(value.Replace("Rating", rating.ToString(threadCulture)));
 				decimal number = Convert.ToDecimal(Convert.ToString(nav.Evaluate(expression), threadCulture),
-					ExpressionChecks.ApplicationCulture);
+					Cultures.Application);
 				return Convert.ToInt32(Math.Floor(number));
 			}
 
@@ -336,7 +335,7 @@ namespace Chummer.Tests.Consumption.Bonus
 					int english;
 					try
 					{
-						english = convert(attribute, ExpressionChecks.ApplicationCulture);
+						english = convert(attribute, Cultures.Application);
 					}
 					catch (Exception exception)
 					{
@@ -497,7 +496,7 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		private static readonly Lazy<BonusValueCheck> CachedCorpus = new Lazy<BonusValueCheck>(() =>
 		{
-			BonusValueCheck[] checks = FieldReaders.DataFiles.Select(file =>
+			BonusValueCheck[] checks = DataPaths.DataFilesWithPacks.Select(file =>
 			{
 				XmlDocument document = Xml.Load(file.FilePath);
 				return CheckIn(file.Label, file.BaseFileName, document);
@@ -668,7 +667,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls = new Lazy<IReadOnlyList<Call>>(() =>
 		{
 			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == FieldReaders.HandlerConsumerFile));
+				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
 			return CallsIn(lines, BonusVocabulary.HandledTagsIn(lines));
 		});
 
@@ -676,7 +675,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		public static IReadOnlyDictionary<string, string> BranchFingerprints(IEnumerable<string> handlers)
 		{
 			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == FieldReaders.HandlerConsumerFile));
+				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
 			return handlers.ToDictionary(handler => handler, handler => SourceLines.Fingerprint(
 					BonusVocabulary.HandlerBlock(handler, lines).Block.Code
 						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))

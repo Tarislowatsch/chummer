@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields

@@ -27,7 +27,8 @@ namespace Chummer.Tests.Localization
 		[Fact]
 		public void EveryEnglishEntryHasKeyAndText()
 		{
-			string[] incomplete = UiStringKeys.EntriesMissingKeyOrText(UiStringKeys.LoadEnglish()).ToArray();
+			string[] incomplete = UiStringKeys.EntriesMissingKeyOrText(Xml.Load(DataPaths.EnglishLanguageFile))
+				.ToArray();
 
 			FailureReport.AssertNone("These en-us.xml entries lack <key> or <text>", incomplete);
 		}

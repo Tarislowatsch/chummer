@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -89,11 +90,11 @@ namespace Chummer.Tests.Consumption.Expressions
 			else if (cost.StartsWith("FixedValues"))
 			{
 				string[] values = cost.Replace("FixedValues(", string.Empty).Replace(")", string.Empty).Split(',');
-				Convert.ToInt32(values[rating - 1], ExpressionChecks.ApplicationCulture);
+				Convert.ToInt32(values[rating - 1], Cultures.Application);
 			}
 			else if (cost.StartsWith("*"))
 			{
-				Convert.ToDouble(cost.Replace("*", string.Empty), ExpressionChecks.ApplicationCulture);
+				Convert.ToDouble(cost.Replace("*", string.Empty), Cultures.Application);
 			}
 			else
 			{
@@ -153,7 +154,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				string expression = ByRating(cost, cost3, cost6, cost10, rating);
 				Convert.ToInt32(Math.Ceiling(Convert.ToDouble(
 					ExpressionChecks.Evaluate(expression.Replace("Rating", rating.ToString())),
-					ExpressionChecks.ApplicationCulture)));
+					Cultures.Application)));
 			}
 			else if (cost != string.Empty)
 			{
@@ -184,7 +185,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Replace("Accel(Running)", StandIn)
 				.Replace("Accel", StandIn);
 
-			Convert.ToInt32(ExpressionChecks.Evaluate(expression), ExpressionChecks.ApplicationCulture);
+			Convert.ToInt32(ExpressionChecks.Evaluate(expression), Cultures.Application);
 			Convert.ToInt32(ExpressionChecks.EvaluateToString(expression));
 		}
 
@@ -196,7 +197,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - Convert.ToDouble(Evaluate(...).ToString(), en-US), rounded up, as ArmorMod writes it
 		private static void CeilingOf(string evaluated)
 		{
-			Convert.ToInt32(Math.Ceiling(Convert.ToDouble(evaluated, ExpressionChecks.ApplicationCulture)));
+			Convert.ToInt32(Math.Ceiling(Convert.ToDouble(evaluated, Cultures.Application)));
 		}
 
 		// - the Variable(min-max) / Variable(min+) parse four Creates repeat verbatim

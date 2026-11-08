@@ -16,6 +16,8 @@ namespace Chummer.Tests.Kernel
 
 		public static string ChummerLangDir => Path.Combine(RepoRoot, "Chummer", "lang");
 
+		public static string EnglishLanguageFile => Path.Combine(ChummerLangDir, "en-us.xml");
+
 		public static string ChummerSheetsDir => Path.Combine(RepoRoot, "Chummer", "sheets");
 
 		// - one MemberData entry per file: a bad file fails its own case, not the whole directory
@@ -91,13 +93,44 @@ namespace Chummer.Tests.Kernel
 				.Select(href => Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stylesheetPath), href.Value)));
 		}
 
+		// - data/*.xml without the packs, the files XmlManager loads by name
+		public static IEnumerable<string> TopLevelRuleXmlFiles()
+		{
+			return Directory.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+				.OrderBy(path => path, StringComparer.Ordinal);
+		}
+
+		// One data file as Load merges it: top-level, or a pack file merged into its base.
+		public sealed class DataFile
+		{
+			public DataFile(string path, string baseFileName)
+			{
+				FilePath = path;
+				BaseFileName = baseFileName;
+			}
+
+			public string FilePath { get; }
+
+			public string BaseFileName { get; }
+
+			public string Label => FilePath.Substring(ChummerDataDir.Length + 1).Replace('\\', '/');
+		}
+
+		public static IReadOnlyList<DataFile> DataFilesWithPacks => CachedDataFilesWithPacks.Value;
+
+		private static readonly Lazy<IReadOnlyList<DataFile>> CachedDataFilesWithPacks =
+			new Lazy<IReadOnlyList<DataFile>>(() => TopLevelRuleXmlFiles()
+				.Select(path => new DataFile(path, Path.GetFileName(path)))
+				.Concat(PackFiles.Paired()
+					.Select(pack => new DataFile(pack.FilePath, pack.BaseFileNames.Single())))
+				.ToArray());
+
 		// - File.Exists pairing lets character.xsd and improvements.xml drop out on their own
 		// - top-level only: pack files pair with their base file's schema, see CustomContent
 		// - the exact-count guard in DataPathsTests makes a silently dropped pair fail loudly
 		public static IEnumerable<object[]> TopLevelRuleXmlWithSchemaFiles()
 		{
-			return Directory.EnumerateFiles(ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-				.OrderBy(path => path, StringComparer.Ordinal)
+			return TopLevelRuleXmlFiles()
 				.Select(path => new { XmlPath = path, XsdPath = Path.ChangeExtension(path, ".xsd") })
 				.Where(pair => File.Exists(pair.XsdPath))
 				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });

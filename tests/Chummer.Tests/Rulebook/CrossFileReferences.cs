@@ -252,7 +252,7 @@ namespace Chummer.Tests.Rulebook
 
 		public static IEnumerable<object[]> PackRuleIds()
 		{
-			return CustomContent.PairedPackFiles()
+			return PackFiles.Paired()
 				.SelectMany(file => PackChecksIn(file.FilePath)
 					.Select(check => new object[] { file.FilePath, check.Rule.Id }));
 		}
@@ -267,12 +267,12 @@ namespace Chummer.Tests.Rulebook
 		// - override files add no name: they rewrite a base entry's content
 		private static IEnumerable<ReferenceCheck> PackChecksIn(string packPath)
 		{
-			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
+			PackFiles.PackFile file = PackFiles.For(packPath);
 			ILookup<string, Reference> references = ReferencesIn(file.BaseFileName, Xml.Load(packPath), Rules)
 				.ToLookup(reference => reference.RuleId, StringComparer.Ordinal);
 			ILookup<string, TargetKeys> targetKeys = RuleCorpus.Files
 				.SelectMany(top => top.CrossFileTargetKeys)
-				.Concat(CustomContent.PairedPackFiles()
+				.Concat(PackFiles.Paired()
 					.Where(other => string.Equals(other.PackName, file.PackName, StringComparison.Ordinal)
 						&& !other.IsOverride)
 					.SelectMany(other => TargetKeysIn(other.BaseFileName, Xml.Load(other.FilePath), Rules)))

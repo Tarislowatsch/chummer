@@ -258,7 +258,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ScansTheMeasuredDataFiles()
 		{
-			Assert.Equal(50, FieldReaders.DataFiles.Count);
+			Assert.Equal(50, DataPaths.DataFilesWithPacks.Count);
 		}
 	}
 }

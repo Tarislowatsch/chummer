@@ -11,7 +11,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void AFractionPrintedInTheGermanCultureParsesTenfold()
 		{
-			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, ExpressionChecks.ApplicationCulture));
+			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.Application));
 			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, BonusValues.LocalCulture));
 		}
 
