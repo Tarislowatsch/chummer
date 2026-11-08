@@ -250,7 +250,7 @@ namespace Chummer.Tests.Consumption.Fields
 					.Select(field => branch.Handler + "/" + field))
 				.ToArray();
 
-			FailureReport.AssertNone("The indexer pattern misses", missed);
+			FailureReport.AssertNoneInFull("The indexer pattern misses", missed);
 		}
 	}
 }

@@ -35,7 +35,7 @@ namespace Chummer.Tests.Localization
 					+ " (declared as " + (assignment.DeclaredType ?? "?") + ")")
 				.ToArray();
 
-			FailureReport.AssertNone("These tag writes have no WinForms type to match against the lookups", unresolved);
+			FailureReport.AssertNoneInFull("These tag writes have no WinForms type to match against the lookups", unresolved);
 		}
 
 		// - a computed tag skips the key check: only run-time data may be computed

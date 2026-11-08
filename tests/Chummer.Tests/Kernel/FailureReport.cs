@@ -26,7 +26,7 @@ namespace Chummer.Tests.Kernel
 				Assert.Fail(Build(headline, findings, describe));
 		}
 
-		// - for edits to this project's own lists and pins: a cut list hides edits still due
+		// - for edits to this project's own lists, pins and scans: a cut list hides edits still due
 		public static void AssertNoneInFull(string headline, IReadOnlyList<string> edits)
 		{
 			if (edits.Count > 0)
