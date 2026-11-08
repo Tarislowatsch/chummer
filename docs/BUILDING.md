@@ -202,6 +202,38 @@ A genuine `AnyCPU` configuration is not offered because the application hosts
 the Internet Explorer ActiveX `WebBrowser` control and is 32-bit in practice.
 That belongs with P6-13.
 
+## Running the tests
+
+There are two test projects under `tests/`:
+
+| Project | What it checks | Build with |
+| --- | --- | --- |
+| `Chummer.Tests` | the data files, as plain XML, without referencing the application | `dotnet test` on its own |
+| `Chummer.GoldenMaster.Tests` | loads and prints every fixture character through `Chummer.exe` | MSBuild first |
+
+The golden master project references `Chummer.csproj`, and `dotnet build`
+cannot compile that (see above). So build the solution with MSBuild, then run
+the tests without rebuilding:
+
+```
+msbuild ChummerCS.sln -restore /p:Configuration=Debug /p:Platform=x86
+dotnet test tests/Chummer.GoldenMaster.Tests/Chummer.GoldenMaster.Tests.csproj --no-build
+```
+
+Build the solution, not the project on its own. With `/p:Platform=x86`, a
+project-only build writes to `bin\x86\…`, and `--no-build` then silently runs
+the previous output from `bin\Debug\net48`.
+
+The test process gets a sandbox, set up in `AppHost.cs`:
+
+- `Application.StartupPath` is redirected to the test output directory, which
+  holds the application's `data`, `lang` and `settings`. Otherwise it points into
+  the dotnet SDK, where the test host lives.
+- `HKEY_CURRENT_USER` is mapped to an empty volatile key, so your own Chummer
+  settings, such as the language, do not reach the test. That key,
+  `Software\Chummer.GoldenMaster.Sandbox`, stays in your real registry until you
+  log off.
+
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) builds on

@@ -46,6 +46,11 @@ jobs:
       - name: Run tests
         run: dotnet test tests/Chummer.Tests/Chummer.Tests.csproj --configuration ${{ matrix.configuration }} --no-build --no-restore
 
+      # - loads and prints every fixture character through the application (~40 s)
+      # - --no-build is required: dotnet build cannot compile Chummer's resources
+      - name: Run golden master tests
+        run: dotnet test tests/Chummer.GoldenMaster.Tests/Chummer.GoldenMaster.Tests.csproj --configuration ${{ matrix.configuration }} --no-build --no-restore
+
       # Verifies the build output can actually start. Every entry is read from
       # Application.StartupPath at run time, so a missing one is a broken build
       # even though the compiler is happy. See docs/BUILDING.md.

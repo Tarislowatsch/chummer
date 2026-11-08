@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- - own project: Chummer.Tests stays free of an application reference -->
+  <!-- - build with msbuild: dotnet build cannot compile Chummer's resources (docs/BUILDING.md) -->
+
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <!-- Chummer is x86 only: an AnyCPU host cannot load it. -->
+    <PlatformTarget>x86</PlatformTarget>
+    <IsPackable>false</IsPackable>
+    <RootNamespace>Chummer.GoldenMaster.Tests</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Also copies Chummer's data, lang and settings content into this output directory. -->
+    <ProjectReference Include="..\..\Chummer\Chummer.csproj" />
+    <!-- Only for Application.StartupPath. -->
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- XmlManager finds custom data only in its data directory. -->
+    <Content Include="..\fixtures\characters\10 Mercs\custom_*.xml" Link="data\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
