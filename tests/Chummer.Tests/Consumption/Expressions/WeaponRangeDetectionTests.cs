@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -33,13 +34,13 @@ namespace Chummer.Tests.Consumption.Expressions
 		public void FindsASetRangeLiteral()
 		{
 			Assert.Equal(new[] { "Aerodynamic Grenades" },
-				WeaponRanges.SetRangeLiteralsIn(new[] { "objWeapon.SetRange(\"Aerodynamic Grenades\");" }));
+				WeaponRanges.SetRangeLiteralsIn(SourceLines.Of(new[] { "objWeapon.SetRange(\"Aerodynamic Grenades\");" })));
 		}
 
 		[Fact]
 		public void IgnoresACommentedOutSetRange()
 		{
-			Assert.Empty(WeaponRanges.SetRangeLiteralsIn(new[] { "// objWeapon.SetRange(\"Old\");" }));
+			Assert.Empty(WeaponRanges.SetRangeLiteralsIn(SourceLines.Of(new[] { "// objWeapon.SetRange(\"Old\");" })));
 		}
 	}
 }

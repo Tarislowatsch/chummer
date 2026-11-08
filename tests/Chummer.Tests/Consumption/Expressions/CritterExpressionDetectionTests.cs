@@ -47,7 +47,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 			Assert.Equal(
 				new[] { "objXmlMetatype[\"bodmin\"].InnerText", "objXmlGear.Attributes[\"rating\"].InnerText" },
-				CritterExpressions.ArgumentsIn(source));
+				CritterExpressions.ArgumentsIn(SourceLines.Of(source)));
 		}
 
 		[Fact]

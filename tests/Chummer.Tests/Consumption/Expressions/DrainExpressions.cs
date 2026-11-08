@@ -84,10 +84,10 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - consecutive lines with at least one attribute Replace form one chain
 		// - GetString resolves through en-us.xml, the language the tests replay
 		// - public so the detection tests can drive it with hand-built source
-		public static IEnumerable<Chain> ChainsIn(string fileName, string[] lines,
+		public static IEnumerable<Chain> ChainsIn(string fileName, SourceLines source,
 			IReadOnlyDictionary<string, string> english)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			List<string> codes = new List<string>();
 			int start = -1;
 
@@ -123,21 +123,21 @@ namespace Chummer.Tests.Consumption.Expressions
 		{
 			IReadOnlyDictionary<string, string> english = EnglishStrings();
 
-			return DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => ChainsIn(Path.GetFileName(path), File.ReadAllLines(path), english))
+			return SourceCorpus.Files
+				.SelectMany(file => ChainsIn(file.Name, file.Source, english))
 				.ToArray();
 		}
 
 		// - "file:line" of every ["drain"] read, the source of both the node and the label route
 		public static IEnumerable<string> DrainReadSites()
 		{
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string[] code = SourceLines.Of(File.ReadAllLines(path)).Code;
+				string[] code = file.Source.Code;
 				for (int i = 0; i < code.Length; i++)
 				{
 					if (code[i].Contains("[\"drain\"]"))
-						yield return Path.GetFileName(path) + ":" + (i + 1);
+						yield return file.Name + ":" + (i + 1);
 				}
 			}
 		}

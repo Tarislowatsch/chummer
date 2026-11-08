@@ -62,9 +62,9 @@ namespace Chummer.Tests.Localization
 
 		// - public so the detection tests can drive it with hand-built source
 		// - comments stripped first: a commented-out call is not a call
-		public static IEnumerable<Call> CallsIn(string fileName, string[] lines)
+		public static IEnumerable<Call> CallsIn(string fileName, SourceLines source)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			Regex call = string.Equals(fileName, LanguageManagerFile, StringComparison.Ordinal)
 				? BareCall
 				: QualifiedCall;
@@ -109,8 +109,8 @@ namespace Chummer.Tests.Localization
 		public static IReadOnlyList<Call> AllCalls => CachedCalls.Value;
 
 		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls =
-			new Lazy<IReadOnlyList<Call>>(() => DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => CallsIn(Path.GetFileName(path), File.ReadAllLines(path)))
+			new Lazy<IReadOnlyList<Call>>(() => SourceCorpus.Files
+				.SelectMany(file => CallsIn(file.Name, file.Source))
 				.ToArray());
 
 		private static readonly Regex Literal = new Regex(@"^""([^""\\]*)""$");
@@ -185,7 +185,7 @@ namespace Chummer.Tests.Localization
 			// clsUnique.cs:7271
 			Form("\"String_\" + _objContactType.ToString()", "String_", "",
 				"enum ContactType in clsUnique.cs",
-				() => EnumMembers(File.ReadAllText(Path.Combine(DataPaths.RepoRoot, "Chummer", "clsUnique.cs")),
+				() => EnumMembers(string.Join("\n", SourceCorpus.File("clsUnique.cs").Lines),
 					"ContactType")),
 			// - both inside a try that falls back to the raw value
 			Form("\"String_Attribute\" + _strExtra + \"Short\"", "String_Attribute", "Short",

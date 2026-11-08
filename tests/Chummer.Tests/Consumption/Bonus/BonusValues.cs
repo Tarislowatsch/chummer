@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -538,14 +537,14 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		// - public so the detection tests can drive it with hand-built source
 		// - the innermost branch wins: a block nested in another is the one that guards the call
-		public static IReadOnlyList<Call> CallsIn(string[] lines, IEnumerable<string> handlers)
+		public static IReadOnlyList<Call> CallsIn(SourceLines source, IEnumerable<string> handlers)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			string[] masked = MaskLiterals(code);
 			(string Handler, int Start, int Length)[] branches = handlers
 				.Select(handler =>
 				{
-					(int start, SourceLines block, string unused) = BonusVocabulary.HandlerBlock(handler, lines);
+					(int start, SourceLines block, string unused) = BonusVocabulary.HandlerBlock(handler, source);
 					return (handler, start, block.Code.Length);
 				})
 				.ToArray();
@@ -666,18 +665,16 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls = new Lazy<IReadOnlyList<Call>>(() =>
 		{
-			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
-			return CallsIn(lines, BonusVocabulary.HandledTagsIn(lines));
+			SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
+			return CallsIn(source, BonusVocabulary.HandledTagsIn(source));
 		});
 
 		// - "handler" -> hash of its branch, comment-free and whitespace-collapsed
 		public static IReadOnlyDictionary<string, string> BranchFingerprints(IEnumerable<string> handlers)
 		{
-			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
+			SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
 			return handlers.ToDictionary(handler => handler, handler => SourceLines.Fingerprint(
-					BonusVocabulary.HandlerBlock(handler, lines).Block.Code
+					BonusVocabulary.HandlerBlock(handler, source).Block.Code
 						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
 						.Where(line => line.Length > 0)),
 				StringComparer.Ordinal);

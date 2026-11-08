@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -124,9 +123,9 @@ namespace Chummer.Tests.Consumption.Fields
 		private static readonly Regex NameComparison = new Regex(@"(?<![\w@.\-])name\s*=(?!=)");
 
 		// - public so the detection tests can drive it with hand-built source
-		public static IEnumerable<Lookup> LookupsIn(string fileName, string[] lines)
+		public static IEnumerable<Lookup> LookupsIn(string fileName, SourceLines source)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 
 			for (int i = 0; i < code.Length; i++)
 			{
@@ -306,8 +305,8 @@ namespace Chummer.Tests.Consumption.Fields
 		public static IReadOnlyList<Lookup> All => Cached.Value;
 
 		private static readonly Lazy<IReadOnlyList<Lookup>> Cached =
-			new Lazy<IReadOnlyList<Lookup>>(() => DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => LookupsIn(System.IO.Path.GetFileName(path), File.ReadAllLines(path)))
+			new Lazy<IReadOnlyList<Lookup>>(() => SourceCorpus.Files
+				.SelectMany(file => LookupsIn(file.Name, file.Source))
 				.ToArray());
 
 		// One string literal anywhere in the code.
@@ -326,9 +325,9 @@ namespace Chummer.Tests.Consumption.Fields
 			public string Text { get; }
 		}
 
-		public static IEnumerable<Literal> LiteralsIn(string fileName, string[] lines)
+		public static IEnumerable<Literal> LiteralsIn(string fileName, SourceLines source)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			for (int i = 0; i < code.Length; i++)
 			{
 				foreach (Token token in Tokenize(code[i]).Where(token => token.IsLiteral))
@@ -350,8 +349,8 @@ namespace Chummer.Tests.Consumption.Fields
 		public static IReadOnlyList<Literal> AllLiterals => CachedLiterals.Value;
 
 		private static readonly Lazy<IReadOnlyList<Literal>> CachedLiterals =
-			new Lazy<IReadOnlyList<Literal>>(() => DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => LiteralsIn(System.IO.Path.GetFileName(path), File.ReadAllLines(path)))
+			new Lazy<IReadOnlyList<Literal>>(() => SourceCorpus.Files
+				.SelectMany(file => LiteralsIn(file.Name, file.Source))
 				.ToArray());
 	}
 }

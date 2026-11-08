@@ -8,7 +8,7 @@ namespace Chummer.Tests.Kernel
 {
 	// - a commented-out read must not count: that would hide what the code really does
 	// - Bare also drops literals: a "{0}" placeholder must not move the brace depth
-	internal sealed class SourceLines
+	public sealed class SourceLines
 	{
 		public SourceLines(string[] code, string[] bare)
 		{

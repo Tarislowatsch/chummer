@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -212,14 +211,13 @@ namespace Chummer.Tests.Consumption.Fields
 
 		// - public so the detection tests can drive it with hand-built source
 		// - NameDispatch takes the loop that follows the one literal equal to the group
-		public static IReadOnlyCollection<string> TagsReadBy(RequirementReader reader, string[] lines)
+		public static IReadOnlyCollection<string> TagsReadBy(RequirementReader reader, SourceLines source)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			if (reader.Style == ReadStyle.PathLiterals)
 			{
 				string prefix = reader.Group + "/";
 				return new HashSet<string>(
-					NameLookups.LiteralsIn(reader.ConsumerFile, lines)
+					NameLookups.LiteralsIn(reader.ConsumerFile, source)
 						.Where(literal => literal.Text.StartsWith(prefix, StringComparison.Ordinal))
 						.Select(literal => Identifier.Match(literal.Text.Substring(prefix.Length)).Value)
 						.Where(tag => tag.Length > 0),
@@ -251,13 +249,8 @@ namespace Chummer.Tests.Consumption.Fields
 
 		private static readonly Lazy<IReadOnlyDictionary<RequirementReader, IReadOnlyCollection<string>>> CachedTags =
 			new Lazy<IReadOnlyDictionary<RequirementReader, IReadOnlyCollection<string>>>(() =>
-			{
-				// - Single: a file name shared by two folders must not pick a consumer silently
-				ILookup<string, string> sources = DataPaths.ApplicationSourceFiles()
-					.ToLookup(Path.GetFileName, StringComparer.Ordinal);
-				return Readers.ToDictionary(reader => reader,
-					reader => TagsReadBy(reader, File.ReadAllLines(sources[reader.ConsumerFile].Single())));
-			});
+				Readers.ToDictionary(reader => reader,
+					reader => TagsReadBy(reader, SourceCorpus.File(reader.ConsumerFile).Source)));
 
 		// One child of a requirement group, or of the block itself when it has no group.
 		public sealed class RequirementUse
@@ -433,9 +426,9 @@ namespace Chummer.Tests.Consumption.Fields
 		}
 
 		// - public so the detection tests can drive it with hand-built source
-		public static HandlerBranch BranchOf(string handler, string fileName, string[] lines)
+		public static HandlerBranch BranchOf(string handler, string fileName, SourceLines source)
 		{
-			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBlock(handler, lines);
+			(int start, SourceLines block, string parameter) = BonusVocabulary.HandlerBlock(handler, source);
 			// - block and field each by indexer or by SelectSingleNode/SelectNodes
 			// - a path like "handler/field" is left to the literal guard
 			string name = Regex.Escape(handler);
@@ -449,7 +442,7 @@ namespace Chummer.Tests.Consumption.Fields
 			string[] sites = Enumerable.Range(start + 1, block.Code.Length)
 				.Select(line => fileName + ":" + line).ToArray();
 			return new HandlerBranch(handler,
-				NameLookups.LiteralsIn(fileName, lines).Where(literal => sites.Contains(literal.Site)).ToArray(),
+				NameLookups.LiteralsIn(fileName, source).Where(literal => sites.Contains(literal.Site)).ToArray(),
 				new HashSet<string>(
 					block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).Select(match => match.Groups["field"].Value),
 					StringComparer.Ordinal),
@@ -466,10 +459,9 @@ namespace Chummer.Tests.Consumption.Fields
 		private static readonly Lazy<IReadOnlyList<HandlerBranch>> CachedBranches =
 			new Lazy<IReadOnlyList<HandlerBranch>>(() =>
 			{
-				string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-					.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
+				SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
 				return IndexedHandlers
-					.Select(handler => BranchOf(handler, BonusVocabulary.HandlerConsumerFile, lines))
+					.Select(handler => BranchOf(handler, BonusVocabulary.HandlerConsumerFile, source))
 					.ToArray();
 			});
 

@@ -178,9 +178,9 @@ namespace Chummer.Tests.Consumption.Expressions
 			Dictionary<string, string> fingerprints = keys.Distinct(StringComparer.Ordinal)
 				.ToDictionary(key => key, key => "(missing)", StringComparer.Ordinal);
 
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				SourceLines source = SourceLines.Of(File.ReadAllLines(path));
+				SourceLines source = file.Source;
 				string className = null;
 
 				for (int i = 0; i < source.Code.Length; i++)
@@ -214,10 +214,9 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		// - "Class.Member" of the last declaration above each line, null before the first
 		// - a constructor matches no declaration: its lines count to the member above
-		public static string[] EnclosingMembers(string[] lines)
+		public static string[] EnclosingMembers(SourceLines source)
 		{
-			SourceLines source = SourceLines.Of(lines);
-			string[] members = new string[lines.Length];
+			string[] members = new string[source.Code.Length];
 			string className = null;
 			string member = null;
 

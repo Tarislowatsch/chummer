@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -67,20 +66,17 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		public const string HandlerConsumerFile = "clsImprovement.cs";
 
-		private static readonly string ImprovementManagerSource =
-			Path.Combine(DataPaths.RepoRoot, "Chummer", HandlerConsumerFile);
-
 		public static IReadOnlyCollection<string> CreateImprovementsTags => CachedCreateImprovementsTags.Value;
 
 		public static IReadOnlyCollection<string> EnabledTabs => CachedEnabledTabs.Value;
 
 		private static readonly Lazy<IReadOnlyCollection<string>> CachedCreateImprovementsTags =
 			new Lazy<IReadOnlyCollection<string>>(
-				() => HandledTagsIn(File.ReadAllLines(ImprovementManagerSource)));
+				() => HandledTagsIn(SourceCorpus.File(HandlerConsumerFile).Source));
 
 		private static readonly Lazy<IReadOnlyCollection<string>> CachedEnabledTabs =
 			new Lazy<IReadOnlyCollection<string>>(
-				() => EnabledTabsIn(File.ReadAllLines(ImprovementManagerSource)));
+				() => EnabledTabsIn(SourceCorpus.File(HandlerConsumerFile).Source));
 
 		public static IReadOnlyCollection<string> VocabularyFor(Consumer consumer)
 		{
@@ -184,9 +180,9 @@ namespace Chummer.Tests.Consumption.Bonus
 		}
 
 		// - the block behind NodeExists(<bonus>, "handler"), with its 0-based first line in the file
-		internal static (int Start, SourceLines Block, string Parameter) HandlerBlock(string handler, string[] lines)
+		internal static (int Start, SourceLines Block, string Parameter) HandlerBlock(string handler, SourceLines source)
 		{
-			SourceLines body = CreateImprovementsBody(lines, out string parameter, out int bodyStart);
+			SourceLines body = CreateImprovementsBody(source, out string parameter, out int bodyStart);
 			Regex check = NodeExistsCheck(parameter, Regex.Escape(handler));
 			int start = Array.FindIndex(body.Code, line => check.IsMatch(line));
 			if (start < 0)
@@ -200,9 +196,9 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		// - public so the detection tests can drive it with hand-built source
 		// - matched over the joined body: a call broken across lines still counts
-		public static IReadOnlyCollection<string> HandledTagsIn(string[] lines)
+		public static IReadOnlyCollection<string> HandledTagsIn(SourceLines source)
 		{
-			SourceLines body = CreateImprovementsBody(lines, out string parameter, out _);
+			SourceLines body = CreateImprovementsBody(source, out string parameter, out _);
 			Regex check = NodeExistsCheck(parameter, @"([^""]+)");
 
 			return new HashSet<string>(
@@ -211,9 +207,9 @@ namespace Chummer.Tests.Consumption.Bonus
 		}
 
 		// - only the case labels inside the enabletab branch, not other switches in the method
-		public static IReadOnlyCollection<string> EnabledTabsIn(string[] lines)
+		public static IReadOnlyCollection<string> EnabledTabsIn(SourceLines source)
 		{
-			SourceLines body = CreateImprovementsBody(lines, out string parameter, out _);
+			SourceLines body = CreateImprovementsBody(source, out string parameter, out _);
 			Regex check = NodeExistsCheck(parameter, "enabletab");
 			Regex label = new Regex(@"\bcase\s+""([^""]+)""\s*:");
 
@@ -233,9 +229,8 @@ namespace Chummer.Tests.Consumption.Bonus
 		}
 
 		// - throws rather than returns empty: no method would make every data tag look unhandled
-		private static SourceLines CreateImprovementsBody(string[] lines, out string parameter, out int start)
+		private static SourceLines CreateImprovementsBody(SourceLines source, out string parameter, out int start)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			int[] signatures = Enumerable.Range(0, source.Code.Length)
 				.Where(i => CreateImprovementsSignature.IsMatch(source.Code[i]))
 				.ToArray();
@@ -255,7 +250,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		// - blind spot: matches any .Bonus read, not one on a vehicle mod specifically
 		public static IReadOnlyList<string> VehicleModTagsNoLongerRead()
 		{
-			string[] sources = DataPaths.ApplicationSourceFiles().Select(File.ReadAllText).ToArray();
+			string[] sources = SourceCorpus.Files.Select(file => string.Join("\n", file.Lines)).ToArray();
 
 			return VehicleModTags
 				.Where(tag =>

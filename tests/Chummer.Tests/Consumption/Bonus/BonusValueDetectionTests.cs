@@ -214,7 +214,7 @@ namespace Chummer.Tests.Consumption.Bonus
 					"13 b | Pick(nodBonus, \"b\"), intRating",
 					"16 (no branch) | nodBonus[\"stray\"].InnerText, intRating",
 				},
-				BonusValues.CallsIn(Source, new[] { "reach", "armor", "b" })
+				BonusValues.CallsIn(SourceLines.Of(Source), new[] { "reach", "armor", "b" })
 					.Select(call => call.Line + " " + call.Key));
 		}
 

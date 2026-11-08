@@ -82,13 +82,13 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			FieldReaders.RequirementReader reader = Reader("required/allof", FieldReaders.ReadStyle.PathLiterals);
 
-			Assert.Equal(new[] { "metatype", "quality" }, FieldReaders.TagsReadBy(reader, new[]
+			Assert.Equal(new[] { "metatype", "quality" }, FieldReaders.TagsReadBy(reader, SourceLines.Of(new[]
 			{
 				"a.SelectNodes(\"required/allof/quality\");",
 				"a.SelectNodes(\"required/allof/metatype[. = \\\"\" + x + \"\\\"]\");",
 				"a.SelectNodes(\"required/oneof/echo\");",
 				"// a.SelectNodes(\"required/allof/power\");",
-			}).OrderBy(tag => tag));
+			})).OrderBy(tag => tag));
 		}
 
 		[Fact]
@@ -96,7 +96,7 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			FieldReaders.RequirementReader reader = Reader("required/oneof", FieldReaders.ReadStyle.NameDispatch);
 
-			Assert.Equal(new[] { "ess", "quality" }, FieldReaders.TagsReadBy(reader, new[]
+			Assert.Equal(new[] { "ess", "quality" }, FieldReaders.TagsReadBy(reader, SourceLines.Of(new[]
 			{
 				"list = node.SelectNodes(\"required/oneof\");",
 				"foreach (XmlNode group in list)",
@@ -113,7 +113,7 @@ namespace Chummer.Tests.Consumption.Fields
 				"{",
 				"	if (group.Name == \"metatype\") { }",
 				"}",
-			}).OrderBy(tag => tag));
+			})).OrderBy(tag => tag));
 		}
 
 		// - a longer literal like "required/oneof[contains(...)]" is no group selection
@@ -124,7 +124,7 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			FieldReaders.RequirementReader reader = Reader("required/oneof", FieldReaders.ReadStyle.NameDispatch);
 
-			Assert.Throws<System.InvalidOperationException>(() => FieldReaders.TagsReadBy(reader, new[] { line }));
+			Assert.Throws<System.InvalidOperationException>(() => FieldReaders.TagsReadBy(reader, SourceLines.Of(new[] { line })));
 		}
 
 		[Theory]
@@ -252,7 +252,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ABranchReadsOnlyTheIndexedFieldsInsideIt()
 		{
-			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", SourceLines.Of(HandlerSource));
 
 			Assert.Equal(new[] { "name" }, branch.Fields);
 			Assert.Equal(new[] { "x.cs:3", "x.cs:5", "x.cs:5", "x.cs:5", "x.cs:7" },
@@ -277,7 +277,7 @@ namespace Chummer.Tests.Consumption.Fields
 				"}",
 			};
 
-			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("conditionmonitor", "x.cs", source);
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("conditionmonitor", "x.cs", SourceLines.Of(source));
 
 			Assert.Equal(new[] { "attribute", "mode", "physical", "stun" },
 				branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
@@ -287,7 +287,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void AFieldLiteralTheIndexerMissesIsUnextracted()
 		{
-			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", SourceLines.Of(HandlerSource));
 
 			Assert.Equal(new[] { "val" },
 				FieldReaders.UnextractedFields(branch, new[] { "name", "min", "max", "val" }));
@@ -296,8 +296,8 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void AHandlerLiteralOutsideTheBranchIsReported()
 		{
-			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
-			NameLookups.Literal[] literals = NameLookups.LiteralsIn("x.cs", HandlerSource)
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", SourceLines.Of(HandlerSource));
+			NameLookups.Literal[] literals = NameLookups.LiteralsIn("x.cs", SourceLines.Of(HandlerSource))
 				.Concat(new[] { new NameLookups.Literal("y.cs:1", "bonus/addattribute/val") })
 				.ToArray();
 
@@ -323,7 +323,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ABranchDispatchesOnTheComparedValues()
 		{
-			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", HandlerSource);
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("addattribute", "x.cs", SourceLines.Of(HandlerSource));
 
 			Assert.Equal(new[] { "MAG" }, Assert.Single(branch.Dispatch, entry => entry.Key == "name").Value);
 		}
@@ -365,7 +365,7 @@ namespace Chummer.Tests.Consumption.Fields
 		public void AHandlerWithoutABranchThrows()
 		{
 			Assert.Throws<System.InvalidOperationException>(
-				() => FieldReaders.BranchOf("addskill", "x.cs", HandlerSource));
+				() => FieldReaders.BranchOf("addskill", "x.cs", SourceLines.Of(HandlerSource)));
 		}
 
 		private static FieldReaders.RequirementReader Reader(string group, FieldReaders.ReadStyle style)

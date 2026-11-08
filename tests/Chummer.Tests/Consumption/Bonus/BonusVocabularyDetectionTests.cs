@@ -109,7 +109,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    if (NodeExists(nodBonus, \"elsewhere\")) { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		// A check on some other node is not a dispatch on the bonus root.
@@ -123,7 +123,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    if (NodeExists(objChild, \"name\")) { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		// - an unbalanced brace in a literal must not end the method early
@@ -138,7 +138,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    if (NodeExists(nodBonus, \"specificskill\")) { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		// A disabled check would otherwise mark its tag handled while nothing reads it.
@@ -154,7 +154,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    if (NodeExists(nodBonus, \"specificskill\")) { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		[Fact]
@@ -169,7 +169,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    if (NodeExists(nodBonus, \"specificskill\")) { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		// A "//" inside a string literal must not cut the rest of the line off as a comment.
@@ -184,7 +184,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"}");
 
 			Assert.Equal(new[] { "selectskill", "specificskill" },
-				BonusVocabulary.HandledTagsIn(source).OrderBy(tag => tag, StringComparer.Ordinal));
+				BonusVocabulary.HandledTagsIn(SourceLines.Of(source)).OrderBy(tag => tag, StringComparer.Ordinal));
 		}
 
 		[Fact]
@@ -198,7 +198,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    { }",
 				"}");
 
-			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(source));
+			Assert.Equal(new[] { "specificskill" }, BonusVocabulary.HandledTagsIn(SourceLines.Of(source)));
 		}
 
 		[Fact]
@@ -214,14 +214,14 @@ namespace Chummer.Tests.Consumption.Bonus
 				"    switch (strOther) { case \"unrelated\": break; }",
 				"}");
 
-			Assert.Equal(new[] { "magician" }, BonusVocabulary.EnabledTabsIn(source));
+			Assert.Equal(new[] { "magician" }, BonusVocabulary.EnabledTabsIn(SourceLines.Of(source)));
 		}
 
 		[Fact]
 		public void MissingCreateImprovementsThrows()
 		{
 			Assert.Throws<InvalidOperationException>(
-				() => BonusVocabulary.HandledTagsIn(Source("public void Other(XmlNode nodBonus) { }")));
+				() => BonusVocabulary.HandledTagsIn(SourceLines.Of(Source("public void Other(XmlNode nodBonus) { }"))));
 		}
 
 		private static string[] UnhandledIn(string fileName, XmlDocument document)

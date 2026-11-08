@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -127,10 +126,10 @@ namespace Chummer.Tests.Consumption.Fields
 			Dictionary<string, IReadOnlyList<ConvertedField>> fields =
 				new Dictionary<string, IReadOnlyList<ConvertedField>>(StringComparer.Ordinal);
 
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
 				foreach (KeyValuePair<string, IReadOnlyList<ConvertedField>> entry
-					in ConvertedFieldsIn(File.ReadAllLines(path)))
+					in ConvertedFieldsIn(file.Source))
 				{
 					if (fields.ContainsKey(entry.Key))
 					{
@@ -149,9 +148,8 @@ namespace Chummer.Tests.Consumption.Fields
 		// - public so the detection tests can drive it with hand-built source
 		// - matched over the joined body: a call broken across lines still counts
 		public static IReadOnlyDictionary<string, IReadOnlyList<ConvertedField>> ConvertedFieldsIn(
-			string[] lines)
+			SourceLines source)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			string joined = string.Join("\n", source.Code);
 			Dictionary<string, IReadOnlyList<ConvertedField>> fields =
 				new Dictionary<string, IReadOnlyList<ConvertedField>>(StringComparer.Ordinal);

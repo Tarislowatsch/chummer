@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -249,14 +248,14 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			List<string> sites = new List<string>();
 
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string source = File.ReadAllText(path);
+				string source = string.Join("\n", file.Lines);
 
 				foreach (Match match in EntityCreateSignature.Matches(source))
 				{
 					int line = 1 + source.Take(match.Index).Count(character => character == '\n');
-					sites.Add(Path.GetFileName(path) + ":" + line);
+					sites.Add(file.Name + ":" + line);
 				}
 			}
 
@@ -270,9 +269,9 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			Dictionary<string, string> fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
 
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				foreach (KeyValuePair<string, string> entry in FingerprintsIn(File.ReadAllLines(path)))
+				foreach (KeyValuePair<string, string> entry in FingerprintsIn(file.Lines))
 					AddFingerprint(fingerprints, entry.Key, entry.Value);
 			}
 

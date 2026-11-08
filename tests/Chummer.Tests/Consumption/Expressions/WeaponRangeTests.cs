@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml;
 using Chummer.Tests.Kernel;
@@ -86,8 +85,8 @@ namespace Chummer.Tests.Consumption.Expressions
 			HashSet<string> categories = new HashSet<string>(
 				WeaponRanges.Rows(WeaponRanges.Load()).Select(WeaponRanges.CategoryOf), StringComparer.Ordinal);
 
-			string[] literals = DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => WeaponRanges.SetRangeLiteralsIn(File.ReadAllLines(path)))
+			string[] literals = SourceCorpus.Files
+				.SelectMany(file => WeaponRanges.SetRangeLiteralsIn(file.Source))
 				.ToArray();
 
 			// - an empty extraction would make the check vacuous
