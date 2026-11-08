@@ -20,8 +20,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static XmlDocument Load()
 		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(Path.Combine(DataPaths.ChummerDataDir, "ranges.xml"));
+			XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "ranges.xml"));
 			return document;
 		}
 

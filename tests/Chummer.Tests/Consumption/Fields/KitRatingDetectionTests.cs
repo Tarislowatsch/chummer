@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 using Xunit;
 
@@ -35,14 +36,7 @@ namespace Chummer.Tests.Consumption.Fields
 			Assert.Equal(KitRatings.Outcome.NoTarget, KitRatings.OutcomeOf(LimitFor("pack gear"), null, "9", null));
 		}
 
-		private static XmlDocument Load(string xml)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(xml);
-			return document;
-		}
-
-		private static readonly XmlDocument GearFile = Load("<chummer><gears>"
+		private static readonly XmlDocument GearFile = Xml.Parse("<chummer><gears>"
 			+ "<gear><name>Tool</name><category>A</category><rating>1</rating></gear>"
 			+ "<gear><name>Tool</name><category>B</category><rating>2</rating></gear>"
 			+ "</gears></chummer>");
@@ -54,7 +48,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData("<gear><name>Tool</name><category>C</category></gear>", null)]
 		public void TheTargetIsTheItemTheConsumerFinds(string entry, string expectedRating)
 		{
-			XmlNode reference = Load(entry).DocumentElement;
+			XmlNode reference = Xml.Parse(entry).DocumentElement;
 
 			Assert.Equal(expectedRating,
 				CrossFileReferences.TargetOf(LimitFor("pack gear").Rule, reference, file => GearFile)?["rating"]?.InnerText);

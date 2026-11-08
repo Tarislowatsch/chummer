@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -34,8 +35,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static ExpressionChecks.ExpressionFailure[] FailuresOf(string xml)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<cyberwares>" + xml + "</cyberwares>");
+			XmlDocument document = Xml.Parse("<cyberwares>" + xml + "</cyberwares>");
 			return ExpressionChecks.FailuresIn(EssExpressions.Rules.First(rule => rule.Entity == "Cyberware"),
 				document.DocumentElement.ChildNodes.Cast<XmlNode>()).ToArray();
 		}

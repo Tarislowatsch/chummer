@@ -106,8 +106,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void EveryChildGearCapacityOverrideParses()
 		{
-			XmlDocument document = new XmlDocument();
-			document.Load(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"));
+			XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"));
 			string[] capacities = document.SelectNodes("//usegear[capacity]").Cast<XmlNode>()
 				.Select(child => "[" + child["capacity"].InnerText + "]")
 				.ToArray();
@@ -157,8 +156,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			Dictionary<string, int> actual = CapacityExpressions.Rules.ToDictionary(rule => rule.Id, rule =>
 			{
-				XmlDocument document = new XmlDocument();
-				document.Load(Path.Combine(DataPaths.ChummerDataDir, entities[rule.Entity].FileName));
+				XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, entities[rule.Entity].FileName));
 				return document.SelectNodes(entities[rule.Entity].ItemXPath).Cast<XmlNode>()
 					.Count(item => item[rule.Field] != null);
 			}, StringComparer.Ordinal);

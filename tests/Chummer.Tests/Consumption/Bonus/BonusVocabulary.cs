@@ -125,7 +125,7 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		public static IReadOnlyList<BonusTag> BonusTagsInPack(string packPath)
 		{
-			return BonusTagsIn(CustomContent.PackFileFor(packPath).BaseFileName, CustomContent.Load(packPath));
+			return BonusTagsIn(CustomContent.PackFileFor(packPath).BaseFileName, Xml.Load(packPath));
 		}
 
 		// - public so the detection tests can drive it with hand-built XML

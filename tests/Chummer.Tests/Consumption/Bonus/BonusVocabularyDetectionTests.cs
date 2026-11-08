@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Bonus
@@ -46,7 +47,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void VehicleModBonusIsCheckedAgainstTheVehicleVocabulary()
 		{
-			XmlDocument document = Doc("<chummer><mods><mod><name>Gecko Tips</name><bonus><speed>2</speed></bonus></mod></mods></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><mods><mod><name>Gecko Tips</name><bonus><speed>2</speed></bonus></mod></mods></chummer>");
 
 			Assert.Equal(BonusVocabulary.Consumer.VehicleMod,
 				BonusVocabulary.BonusTagsIn("vehicles.xml", document).Single().Consumer);
@@ -56,7 +57,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void SamePathOutsideVehiclesXmlGoesToCreateImprovements()
 		{
-			XmlDocument document = Doc("<chummer><mods><mod><name>Gel Packs</name><bonus><speed>2</speed></bonus></mod></mods></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><mods><mod><name>Gel Packs</name><bonus><speed>2</speed></bonus></mod></mods></chummer>");
 
 			Assert.Equal(BonusVocabulary.Consumer.CreateImprovements,
 				BonusVocabulary.BonusTagsIn("armor.xml", document).Single().Consumer);
@@ -66,7 +67,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void OtherBonusInVehiclesXmlGoesToCreateImprovements()
 		{
-			XmlDocument document = Doc("<chummer><vehicles><vehicle><name>Dodge Scoot</name><bonus><speed>2</speed></bonus></vehicle></vehicles></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><vehicles><vehicle><name>Dodge Scoot</name><bonus><speed>2</speed></bonus></vehicle></vehicles></chummer>");
 
 			Assert.Equal(BonusVocabulary.Consumer.CreateImprovements,
 				BonusVocabulary.BonusTagsIn("vehicles.xml", document).Single().Consumer);
@@ -82,7 +83,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void CustomImprovementTemplatesAreChecked()
 		{
-			XmlDocument document = Doc("<chummer><improvements><improvement><name>Skill</name><internal>specificskil</internal></improvement></improvements></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><improvements><improvement><name>Skill</name><internal>specificskil</internal></improvement></improvements></chummer>");
 
 			Assert.Equal(new[] { "specificskil" }, UnhandledIn("improvements.xml", document));
 		}
@@ -238,15 +239,8 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		private static XmlDocument Item(string bonus)
 		{
-			return Doc("<chummer><qualities><quality><name>Allergy</name>" + bonus
+			return Xml.Parse("<chummer><qualities><quality><name>Allergy</name>" + bonus
 				+ "</quality></qualities></chummer>");
-		}
-
-		private static XmlDocument Doc(string xml)
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.LoadXml(xml);
-			return document;
 		}
 
 		private static string[] Source(params string[] lines)

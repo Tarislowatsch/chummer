@@ -339,7 +339,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - only rules that reach an entry, as for the required-field contracts
 		private static IEnumerable<ExpressionCheck> PackChecksIn(string packPath)
 		{
-			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, CustomContent.Load(packPath),
+			return ChecksIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath, Xml.Load(packPath),
 					AllRules)
 				.Where(check => check.ItemCount > 0);
 		}

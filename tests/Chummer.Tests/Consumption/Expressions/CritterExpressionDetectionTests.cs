@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -59,8 +60,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void AFailureNamesTheMetatypeTheElementAndTheLowestForce()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(
+			XmlDocument document = Xml.Parse(
 				"<chummer><metatypes><metatype><name>Sprite</name><bodmin>F</bodmin>"
 				+ "<complexforms><complexform rating=\"F/2\">Cascading</complexform></complexforms>"
 				+ "</metatype></metatypes></chummer>");

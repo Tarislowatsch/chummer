@@ -153,7 +153,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(pack => pack.FilePath));
 
 			return files
-				.SelectMany(path => CustomContent.Load(path).SelectNodes("/chummer/traditions/tradition/drain")
+				.SelectMany(path => Xml.Load(path).SelectNodes("/chummer/traditions/tradition/drain")
 					.Cast<XmlNode>())
 				.Select(drain => drain.InnerText)
 				.Distinct(StringComparer.Ordinal);

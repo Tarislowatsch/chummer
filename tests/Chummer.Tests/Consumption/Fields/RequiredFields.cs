@@ -227,7 +227,7 @@ namespace Chummer.Tests.Consumption.Fields
 		private static IEnumerable<RequiredFieldContract> PackContractsIn(string packPath)
 		{
 			return ContractsIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath,
-					CustomContent.Load(packPath))
+					Xml.Load(packPath))
 				.Where(contract => contract.ItemCount > 0);
 		}
 

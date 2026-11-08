@@ -21,8 +21,7 @@ namespace Chummer.Tests.Localization
 		private static readonly Lazy<IReadOnlyList<string>> CachedEnglishKeys =
 			new Lazy<IReadOnlyList<string>>(() =>
 			{
-				XmlDocument document = new XmlDocument { XmlResolver = null };
-				document.Load(EnglishFile);
+				XmlDocument document = Xml.Load(EnglishFile);
 				return document.SelectNodes("/chummer/strings/string/key").Cast<XmlNode>()
 					.Select(key => key.InnerText)
 					.ToArray();
@@ -41,9 +40,7 @@ namespace Chummer.Tests.Localization
 
 		public static XmlDocument LoadEnglish()
 		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(EnglishFile);
-			return document;
+			return Xml.Load(EnglishFile);
 		}
 
 		// One GetString call, with its argument as written.
@@ -235,7 +232,7 @@ namespace Chummer.Tests.Localization
 				.Concat(CustomContent.PairedPackFiles()
 					.Where(pack => string.Equals(pack.BaseFileName, fileName, StringComparison.Ordinal))
 					.Select(pack => pack.FilePath))
-				.SelectMany(path => CustomContent.Load(path).SelectNodes(xpath).Cast<XmlNode>());
+				.SelectMany(path => Xml.Load(path).SelectNodes(xpath).Cast<XmlNode>());
 		}
 
 		// - public so the detection tests can drive it with hand-built source

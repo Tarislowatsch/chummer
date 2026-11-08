@@ -499,8 +499,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		{
 			BonusValueCheck[] checks = FieldReaders.DataFiles.Select(file =>
 			{
-				XmlDocument document = new XmlDocument();
-				document.Load(file.FilePath);
+				XmlDocument document = Xml.Load(file.FilePath);
 				return CheckIn(file.Label, file.BaseFileName, document);
 			}).ToArray();
 

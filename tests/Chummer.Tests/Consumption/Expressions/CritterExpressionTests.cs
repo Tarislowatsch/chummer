@@ -37,7 +37,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.ToArray();
 
 			CritterExpressions.Failure[] failures = CritterExpressions.DataFiles()
-				.SelectMany(path => CritterExpressions.FailuresIn(Path.GetFileName(path), CustomContent.Load(path), xpaths))
+				.SelectMany(path => CritterExpressions.FailuresIn(Path.GetFileName(path), Xml.Load(path), xpaths))
 				.ToArray();
 
 			string[] differences = failures

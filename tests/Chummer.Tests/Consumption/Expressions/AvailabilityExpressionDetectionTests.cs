@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -161,8 +162,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static XmlNode Item(string itemXml)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(itemXml);
+			XmlDocument document = Xml.Parse(itemXml);
 			return document.DocumentElement;
 		}
 	}

@@ -268,14 +268,14 @@ namespace Chummer.Tests.Rulebook
 		private static IEnumerable<ReferenceCheck> PackChecksIn(string packPath)
 		{
 			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
-			ILookup<string, Reference> references = ReferencesIn(file.BaseFileName, CustomContent.Load(packPath), Rules)
+			ILookup<string, Reference> references = ReferencesIn(file.BaseFileName, Xml.Load(packPath), Rules)
 				.ToLookup(reference => reference.RuleId, StringComparer.Ordinal);
 			ILookup<string, TargetKeys> targetKeys = RuleCorpus.Files
 				.SelectMany(top => top.CrossFileTargetKeys)
 				.Concat(CustomContent.PairedPackFiles()
 					.Where(other => string.Equals(other.PackName, file.PackName, StringComparison.Ordinal)
 						&& !other.IsOverride)
-					.SelectMany(other => TargetKeysIn(other.BaseFileName, CustomContent.Load(other.FilePath), Rules)))
+					.SelectMany(other => TargetKeysIn(other.BaseFileName, Xml.Load(other.FilePath), Rules)))
 				.ToLookup(keys => keys.RuleId, StringComparer.Ordinal);
 
 			return Rules

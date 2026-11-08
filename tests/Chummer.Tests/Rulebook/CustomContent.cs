@@ -9,6 +9,7 @@ namespace Chummer.Tests.Rulebook
 {
 	// - the shipped packs under data/custom content/, checked as XmlManager.Load would merge them
 	// - Load reads data/ itself only: a pack takes effect once its files are copied there
+	// - reparsed per check, not cached: pack files are tiny
 	public static class CustomContent
 	{
 		public const string CustomPrefix = "custom";
@@ -110,7 +111,7 @@ namespace Chummer.Tests.Rulebook
 		public static IEnumerable<object[]> PackFilesCitingBooks()
 		{
 			return PairedPackFiles()
-				.Where(file => BookReferences.In(Load(file.FilePath)).Count > 0)
+				.Where(file => BookReferences.In(Xml.Load(file.FilePath)).Count > 0)
 				.Select(file => new object[] { file.FilePath });
 		}
 
@@ -126,7 +127,7 @@ namespace Chummer.Tests.Rulebook
 				.Where(other => string.Equals(other.PackName, file.PackName, StringComparison.Ordinal)
 					&& !other.IsOverride
 					&& string.Equals(other.BaseFileNames[0], "books.xml", StringComparison.Ordinal))
-				.SelectMany(books => Load(books.FilePath).SelectNodes("/chummer/books/book/code").Cast<XmlNode>())
+				.SelectMany(books => Xml.Load(books.FilePath).SelectNodes("/chummer/books/book/code").Cast<XmlNode>())
 				.Select(code => code.InnerText);
 
 			return new HashSet<string>(BookReferences.BookCodes.Concat(packCodes), StringComparer.Ordinal);
@@ -258,14 +259,6 @@ namespace Chummer.Tests.Rulebook
 		{
 			IReadOnlyCollection<string> values;
 			return blocks.TryGetValue(block, out values) ? values : Enumerable.Empty<string>();
-		}
-
-		// - reparsed per check, not cached: pack files are tiny
-		public static XmlDocument Load(string path)
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(path);
-			return document;
 		}
 	}
 }

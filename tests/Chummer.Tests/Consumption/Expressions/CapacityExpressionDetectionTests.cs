@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -95,8 +96,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		private static System.Collections.Generic.IReadOnlyList<ExpressionChecks.ExpressionFailure> Failures(
 			string entity, string itemXml)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(itemXml);
+			XmlDocument document = Xml.Parse(itemXml);
 			return ExpressionChecks.FailuresIn(
 				CapacityExpressions.Rules.First(rule => rule.Entity == entity), new XmlNode[] { document.DocumentElement });
 		}

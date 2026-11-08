@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -329,8 +330,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 		private static XmlDocument Document()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<chummer><metatypes><metatype><name>Wolf</name><essmax>6</essmax>"
+			XmlDocument document = Xml.Parse("<chummer><metatypes><metatype><name>Wolf</name><essmax>6</essmax>"
 				+ "<skills><knowledge>Tracks</knowledge><knowledge rating=\"x\">Calls</knowledge></skills>"
 				+ "<powers><power>Claws</power><power rating=\"2\">Fangs</power></powers>"
 				+ "</metatype></metatypes></chummer>");
@@ -360,8 +360,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 		private static XmlDocument KitDocument()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<chummer><packs><pack><name>Kit</name>"
+			XmlDocument document = Xml.Parse("<chummer><packs><pack><name>Kit</name>"
 				+ "<attributes><bod>4</bod><!-- note --><agi>x</agi></attributes>"
 				+ "<skills><skill><name>A</name><rating>3</rating><rating>9</rating></skill><skill><name>B</name></skill></skills>"
 				+ "<gears><gear><rating>2</rating><gears><gear><rating>5</rating></gear></gears></gear></gears>"

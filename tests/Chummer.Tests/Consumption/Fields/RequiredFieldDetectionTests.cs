@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -58,7 +59,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void TheThreeGearRulesPartitionTheCollection()
 		{
-			XmlDocument document = Document(
+			XmlDocument document = Xml.Parse(
 				"<chummer><gears>"
 				+ "<gear><name>Meta Link</name><category>Commlink</category></gear>"
 				+ "<gear><name>Iris Orb</name><category>Commlink Operating System</category></gear>"
@@ -77,7 +78,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void TheUsegearRuleReachesNestedChildren()
 		{
-			XmlDocument document = Document(
+			XmlDocument document = Xml.Parse(
 				"<chummer><gears><gear><name>Suite</name><gears>"
 				+ "<usegear><name>Analyze</name><category>Matrix Programs</category></usegear>"
 				+ "<usegear><name>Browse</name><category>Matrix Programs</category>"
@@ -98,7 +99,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void TheChildGearRuleStopsAtTheFirstLevel()
 		{
-			XmlDocument document = Document(
+			XmlDocument document = Xml.Parse(
 				"<chummer><gears><gear><name>Suite</name><gears>"
 				+ "<gear><name>Analyze</name><category>Matrix Programs</category></gear>"
 				+ "<gear><name>Browse</name><category>Matrix Programs</category>"
@@ -140,7 +141,7 @@ namespace Chummer.Tests.Consumption.Fields
 		public void ATopLevelEntryWithoutANameIsReportedAsUnnamed()
 		{
 			RequiredFields.MissingField missing = RequiredFields.MissingFieldsIn(
-					Document("<gear><avail>4</avail></gear>").DocumentElement, new[] { "name" })
+					Xml.Parse("<gear><avail>4</avail></gear>").DocumentElement, new[] { "name" })
 				.Single();
 
 			Assert.Equal("(unnamed)", missing.ItemName);
@@ -152,7 +153,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ANamelessNestedReferenceIsAttributedToTheEntryHoldingIt()
 		{
-			XmlDocument document = Document(
+			XmlDocument document = Xml.Parse(
 				"<chummer><gears><gear><name>Suite: Basic</name>"
 				+ "<gears><usegear><category>Matrix Programs</category></usegear></gears>"
 				+ "</gear></gears></chummer>");
@@ -342,7 +343,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 		private static string[] AbsentFieldsIn(string itemXml, params string[] requiredFields)
 		{
-			return RequiredFields.MissingFieldsIn(Document(itemXml).DocumentElement, requiredFields)
+			return RequiredFields.MissingFieldsIn(Xml.Parse(itemXml).DocumentElement, requiredFields)
 				.Select(missing => missing.Field)
 				.ToArray();
 		}
@@ -350,21 +351,13 @@ namespace Chummer.Tests.Consumption.Fields
 		// Mirrors the shape weapons.xml uses for a built-in accessory.
 		private static XmlDocument WeaponsDocument(string referencedAccessory)
 		{
-			return Document(
+			return Xml.Parse(
 				"<chummer>"
 				+ "<weapons><weapon><name>Ares Predator</name>"
 				+ "<accessories><accessory>" + referencedAccessory + "</accessory></accessories>"
 				+ "</weapon></weapons>"
 				+ "<accessories><accessory><name>Smartgun System</name></accessory></accessories>"
 				+ "</chummer>");
-		}
-
-		private static XmlDocument Document(string xml)
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.LoadXml(xml);
-
-			return document;
 		}
 	}
 }

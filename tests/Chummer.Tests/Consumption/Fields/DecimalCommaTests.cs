@@ -12,7 +12,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[MemberData(nameof(DataPaths.RuleXmlFiles), MemberType = typeof(DataPaths))]
 		public void NoValueReadsAsANumberThroughAComma(string path)
 		{
-			string[] findings = DecimalCommas.CommaNumbersIn(CustomContent.Load(path)).ToArray();
+			string[] findings = DecimalCommas.CommaNumbersIn(Xml.Load(path)).ToArray();
 
 			Assert.True(findings.Length == 0, FailureReport.Build(
 				path + " has values that en-US reads with the comma as a thousands separator",

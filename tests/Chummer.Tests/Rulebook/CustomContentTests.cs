@@ -47,7 +47,7 @@ namespace Chummer.Tests.Rulebook
 			CustomContent.PackFile file = CustomContent.PackFileFor(packPath);
 
 			var unknown = BookReferences
-				.Undeclared(BookReferences.In(CustomContent.Load(packPath)),
+				.Undeclared(BookReferences.In(Xml.Load(packPath)),
 					CustomContent.BookCodesVisibleTo(file))
 				.GroupBy(reference => reference.Code, StringComparer.Ordinal)
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
@@ -101,7 +101,7 @@ namespace Chummer.Tests.Rulebook
 		{
 			string[] duplicated = CustomContent.PairedPackFiles()
 				.Where(file => !file.IsOverride)
-				.SelectMany(file => CustomContent.NamedItemsIn(CustomContent.Load(file.FilePath))
+				.SelectMany(file => CustomContent.NamedItemsIn(Xml.Load(file.FilePath))
 					.Select(item => new { Key = file.BaseFileNames[0] + item.XPath, Source = file.PackName + "/" + file.FileName }))
 				.GroupBy(entry => entry.Key, StringComparer.Ordinal)
 				.Where(group => group.Count() > 1)
@@ -120,7 +120,7 @@ namespace Chummer.Tests.Rulebook
 			string[] conflicting = CustomContent.ConflictingOverrides(CustomContent.PairedPackFiles()
 					.Where(file => file.IsOverride)
 					.Select(file => new KeyValuePair<CustomContent.PackFile, XmlDocument>(
-						file, CustomContent.Load(file.FilePath))))
+						file, Xml.Load(file.FilePath))))
 				.Select(entry => entry.Key + " in " + string.Join(", ", entry.Value))
 				.ToArray();
 
@@ -133,7 +133,7 @@ namespace Chummer.Tests.Rulebook
 		public void NoCustomFileRedeclaresABaseCategory()
 		{
 			string[] redeclared = CustomContent.PairedPackFiles()
-				.SelectMany(file => CustomContent.RedeclaredCategories(file, CustomContent.Load(file.FilePath))
+				.SelectMany(file => CustomContent.RedeclaredCategories(file, Xml.Load(file.FilePath))
 					.Select(entry => file.PackName + "/" + file.FileName + ": " + entry))
 				.ToArray();
 
@@ -177,16 +177,16 @@ namespace Chummer.Tests.Rulebook
 
 		private static IEnumerable<string> DiscardedEntries(CustomContent.PackFile file)
 		{
-			XmlDocument baseDocument = CustomContent.Load(file.BaseFilePath);
+			XmlDocument baseDocument = Xml.Load(file.BaseFilePath);
 
-			return CustomContent.ItemsLoadDiscards(file, CustomContent.Load(file.FilePath), baseDocument)
+			return CustomContent.ItemsLoadDiscards(file, Xml.Load(file.FilePath), baseDocument)
 				.Select(item => file.FileName + "/" + item.Collection + "/" + item.Name);
 		}
 
 		// - key is <pack file>/<collection>/<category>, value the entry's name for the message
 		private static IEnumerable<KeyValuePair<string, string>> UndeclaredCategories(CustomContent.PackFile file)
 		{
-			return CustomContent.UndeclaredCategoryUsages(file, CustomContent.Load(file.FilePath))
+			return CustomContent.UndeclaredCategoryUsages(file, Xml.Load(file.FilePath))
 				.Select(usage => new KeyValuePair<string, string>(
 					file.FileName + "/" + usage.CollectionName + "/" + usage.Category, usage.ItemName));
 		}

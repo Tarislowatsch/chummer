@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Rulebook
@@ -105,7 +106,7 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void RedeclaredCategoriesFindsOnlyValuesTheBaseDeclares()
 		{
-			XmlDocument pack = Xml(
+			XmlDocument pack = Xml.Parse(
 				"<chummer><categories><category>Ammunition</category><category>Made Up</category></categories></chummer>");
 
 			Assert.Equal(new[] { "categories/Ammunition" },
@@ -118,19 +119,19 @@ namespace Chummer.Tests.Rulebook
 		{
 			return new KeyValuePair<CustomContent.PackFile, XmlDocument>(
 				new CustomContent.PackFile(@"C:\pack\" + fileName, "override", new[] { "gear.xml" }),
-				Xml("<chummer><gears><gear>" + item + "</gear></gears></chummer>"));
+				Xml.Parse("<chummer><gears><gear>" + item + "</gear></gears></chummer>"));
 		}
 
 		private static string[] DiscardedNames(string prefix)
 		{
-			return CustomContent.ItemsLoadDiscards(PackFile(prefix), Xml(Pack), Xml(Base))
+			return CustomContent.ItemsLoadDiscards(PackFile(prefix), Xml.Parse(Pack), Xml.Parse(Base))
 				.Select(item => item.Name)
 				.ToArray();
 		}
 
 		private static string[] UndeclaredCategories(string prefix)
 		{
-			return CustomContent.UndeclaredCategoryUsages(PackFile(prefix), Xml(Pack))
+			return CustomContent.UndeclaredCategoryUsages(PackFile(prefix), Xml.Parse(Pack))
 				.Select(usage => usage.Category)
 				.ToArray();
 		}
@@ -139,13 +140,6 @@ namespace Chummer.Tests.Rulebook
 		private static CustomContent.PackFile PackFile(string prefix)
 		{
 			return new CustomContent.PackFile(@"C:\pack\" + prefix + "_test_gear.xml", prefix, new[] { "gear.xml" });
-		}
-
-		private static XmlDocument Xml(string text)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(text);
-			return document;
 		}
 	}
 }

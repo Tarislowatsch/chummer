@@ -54,8 +54,7 @@ namespace Chummer.Tests.Presentation
 
 		private static string[] IncludedPaths(string text)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(text);
+			XmlDocument document = Xml.Parse(text);
 			return DataPaths.IncludedStylesheetPaths(Sheet, document).ToArray();
 		}
 	}

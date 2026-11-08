@@ -16,7 +16,7 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			string[] failures = LoaderConversions.Corpora
 				.SelectMany(corpus => corpus.Files().SelectMany(path => LoaderConversions.FailuresIn(Path.GetFileName(path),
-					CustomContent.Load(path), corpus, LoaderConversions.ApplicationConversions)))
+					Xml.Load(path), corpus, LoaderConversions.ApplicationConversions)))
 				.ToArray();
 
 			Assert.True(failures.Length == 0,
@@ -132,7 +132,7 @@ namespace Chummer.Tests.Consumption.Fields
 					group =>
 					{
 						LoaderConversions.Conversion first = group.First();
-						return first.Corpus.Files().Sum(file => LoaderConversions.ValuesIn(CustomContent.Load(file),
+						return first.Corpus.Files().Sum(file => LoaderConversions.ValuesIn(Xml.Load(file),
 							first.Corpus.ItemXPath, first.Path, first.Form, group.Any(conversion => !conversion.Guarded)).Count());
 					},
 					StringComparer.Ordinal);

@@ -549,8 +549,7 @@ namespace Chummer.Tests.Consumption.Fields
 				List<HandlerField> fields = new List<HandlerField>();
 				foreach (DataFile file in DataFiles)
 				{
-					XmlDocument document = new XmlDocument();
-					document.Load(file.FilePath);
+					XmlDocument document = Xml.Load(file.FilePath);
 					names.AddRange(ElementNamesIn(file.Label, document));
 					uses.AddRange(RequirementUsesIn(file.Label, file.BaseFileName, document));
 					fields.AddRange(HandlerFieldsIn(file.Label, file.BaseFileName, document, IndexedHandlers));

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Xml;
 using System.Xml.Xsl;
 using Chummer.Tests.Kernel;
 using Xunit;
@@ -24,7 +23,7 @@ namespace Chummer.Tests.Presentation
 		public void EveryPartialSheetIsIncludedBySomeSheet()
 		{
 			string[] included = DataPaths.StylesheetFiles()
-				.SelectMany(path => DataPaths.IncludedStylesheetPaths(path, Load(path)))
+				.SelectMany(path => DataPaths.IncludedStylesheetPaths(path, Xml.Load(path)))
 				.ToArray();
 
 			string[] orphaned = DataPaths.PartialStylesheets()
@@ -34,13 +33,6 @@ namespace Chummer.Tests.Presentation
 			Assert.True(orphaned.Length == 0,
 				"These partial sheets are included by no sheet, so nothing compiles them:\n  "
 				+ string.Join("\n  ", orphaned));
-		}
-
-		private static XmlDocument Load(string path)
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(path);
-			return document;
 		}
 	}
 }

@@ -93,12 +93,7 @@ namespace Chummer.Tests.Kernel
 				.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
 				.OrderBy(path => path, StringComparer.Ordinal))
 			{
-				XmlDocument document = new XmlDocument
-				{
-					// - matches the XmlReader tests' default: two loaders must not disagree here
-					XmlResolver = null
-				};
-				document.Load(xmlPath);
+				XmlDocument document = Xml.Load(xmlPath);
 
 				XmlElement root = document.DocumentElement;
 				if (root == null)
