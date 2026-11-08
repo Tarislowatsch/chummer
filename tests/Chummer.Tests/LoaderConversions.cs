@@ -8,9 +8,9 @@ using System.Xml;
 
 namespace Chummer.Tests
 {
-	// - fields a critter, vessel or quality loader converts directly, outside ExpressionToString
-	// - a non-number or a missing unguarded attribute throws into the UI
-	public static class CritterConversions
+	// - fields a critter, vessel, quality or kit loader converts directly, outside ExpressionToString
+	// - a non-number or a missing unguarded attribute or element throws into the UI
+	public static class LoaderConversions
 	{
 		public enum Form
 		{
@@ -52,7 +52,9 @@ namespace Chummer.Tests
 
 		public static readonly Corpus Qualities = new Corpus("qualities", new[] { "qualities.xml" }, "/chummer/qualities/quality");
 
-		public static IReadOnlyList<Corpus> Corpora => new[] { Critters, Vessels, Qualities };
+		public static readonly Corpus Kits = new Corpus("kits", new[] { "packs.xml" }, "/chummer/packs/pack");
+
+		public static IReadOnlyList<Corpus> Corpora => new[] { Critters, Vessels, Qualities, Kits };
 
 		// A root variable: an item of its corpus, or a node at a fixed path below one.
 		public sealed class Root
@@ -72,14 +74,17 @@ namespace Chummer.Tests
 			public string LoopPath { get; }
 		}
 
-		// Code that loads such an item: a whole file, or one method of a larger form.
+		// Code that loads such an item: a whole file, one method of a larger form, or one case of it.
 		public sealed class Scope
 		{
-			public Scope(string file, string method, IReadOnlyDictionary<string, Root> roots)
+			public Scope(string file, string method, IReadOnlyDictionary<string, Root> roots, string caseLabel = null,
+				IReadOnlyCollection<string> foreign = null)
 			{
 				File = file;
 				Method = method;
 				Roots = roots;
+				CaseLabel = caseLabel;
+				Foreign = foreign ?? new string[0];
 			}
 
 			public string File { get; }
@@ -88,6 +93,12 @@ namespace Chummer.Tests
 			public string Method { get; }
 
 			public IReadOnlyDictionary<string, Root> Roots { get; }
+
+			// - a switch case of the method: its root is bound by the case label, not by a loop
+			public string CaseLabel { get; }
+
+			// - variables holding another file's nodes: skipped by name, any other unbound read throws
+			public IReadOnlyCollection<string> Foreign { get; }
 		}
 
 		public static readonly IReadOnlyDictionary<string, Root> CritterRoots =
@@ -112,6 +123,19 @@ namespace Chummer.Tests
 				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objSelected", new Root(Vessels, "") } }),
 			new Scope("frmCareer.cs", "cmdAddQuality_Click", QualityRoots),
 			new Scope("frmCreate.cs", "cmdAddQuality_Click", QualityRoots),
+			new Scope("frmCreate.cs", "AddPACKSKit",
+				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlKit", new Root(Kits, "") } },
+				foreign: new[] { "objXmlPowerNode" }),
+
+			// - reached from every kit gear list: a superset of its callers' paths, checked strictly
+			new Scope("frmCreate.cs", "AddPACKSGear",
+				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlGear", new Root(Kits, ".//gears/gear") } }),
+			new Scope("frmSelectPACKSKit.cs", "lstKits_SelectedIndexChanged",
+				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlItem", new Root(Kits, "attributes") } },
+				"attributes"),
+			new Scope("frmSelectPACKSKit.cs", "lstKits_SelectedIndexChanged",
+				new Dictionary<string, Root>(StringComparer.Ordinal) { { "objXmlItem", new Root(Kits, "selectmartialart") } },
+				"selectmartialart"),
 		};
 
 		// One direct conversion, with the data it reads relative to an item of its corpus.
@@ -180,17 +204,22 @@ namespace Chummer.Tests
 		// - an ExpressionToString argument is CritterExpressions' business
 		private static readonly Regex NodeRead = new Regex(@"^(\w+)(?:\[""|\.Attributes\b|\.InnerText\b)", RegexOptions.Compiled);
 
-		private static readonly Regex AttributeRead = new Regex(@"^(\w+)\.Attributes\[""(\w+)""\]\.InnerText$", RegexOptions.Compiled);
+		// - over a node's children: "x in p[\"name\"]" or "x in p.ChildNodes"
+		// - the loop guard ignores these: they carry no literal path to search for
+		private static readonly Regex ChildLoop = new Regex(
+			@"\bforeach\s*\(\s*XmlNode\s+(\w+)\s+in\s+(\w+)(?:\[""(\w+)""\]|\.ChildNodes)\s*\)", RegexOptions.Compiled);
 
-		private static readonly Regex FieldRead = new Regex(
-			@"^(\w+)\[""(\w+)""\]\.InnerText(?:\.Substring\((\w+),1\))?$", RegexOptions.Compiled);
+		// - steps of indexers, then an attribute, the node's own text or the digit before D6
+		private static readonly Regex Read = new Regex(
+			@"^(?<v>\w+)(?<steps>(?:\[""\w+""\])*)(?:\.Attributes\[""(?<a>\w+)""\])?\.InnerText(?:\.Substring\((?<i>\w+),1\))?$",
+			RegexOptions.Compiled);
 
 		// - the scope's lines and the index of its first line in the file
-		private static (string[] Code, int Offset) Extent(Scope scope, string[] lines)
+		private static (SourceLines Source, int Offset) Extent(Scope scope, string[] lines)
 		{
 			SourceLines source = SourceLines.Of(lines);
 			if (scope.Method == null)
-				return (source.Code, 0);
+				return (source, 0);
 
 			Regex declaration = new Regex(@"^\s*(?:(?:private|public|protected|internal|static|override|async)\s+)+[\w<>\[\],\s]+\s"
 				+ Regex.Escape(scope.Method) + @"\s*\(");
@@ -198,14 +227,41 @@ namespace Chummer.Tests
 			if (start < 0)
 				throw new InvalidOperationException(scope.File + " has no method " + scope.Method + ": update Scopes.");
 
-			return (source.BlockFrom(start).Code, start);
+			SourceLines method = source.BlockFrom(start);
+			return scope.CaseLabel == null ? (method, start) : CaseOf(scope, method, start);
+		}
+
+		// - from the label to the next label or the switch's end, at the label's indentation
+		private static (SourceLines Source, int Offset) CaseOf(Scope scope, SourceLines method, int offset)
+		{
+			Regex label = new Regex(@"^(\s*)case\s+""" + Regex.Escape(scope.CaseLabel) + @"""\s*:\s*$");
+			int at = Array.FindIndex(method.Code, line => label.IsMatch(line));
+			if (at < 0)
+				throw new InvalidOperationException(scope.File + " " + scope.Method + " has no case " + scope.CaseLabel + ": update Scopes.");
+
+			int indent = label.Match(method.Code[at]).Groups[1].Length;
+			int end = at + 1;
+			while (end < method.Code.Length && !EndsCase(method.Code[end], indent))
+				end++;
+
+			int count = end - at - 1;
+			return (new SourceLines(method.Code.Skip(at + 1).Take(count).ToArray(), method.Bare.Skip(at + 1).Take(count).ToArray()),
+				offset + at + 1);
+		}
+
+		private static bool EndsCase(string line, int indent)
+		{
+			int own = line.Length - line.TrimStart().Length;
+			string text = line.Trim();
+			return (own == indent && Regex.IsMatch(text, @"^(?:case\b|default\s*:)")) || (own < indent && text.StartsWith("}"));
 		}
 
 		// - public so the detection tests can drive it with hand-built source
 		// - a node read in a shape this scan does not know throws instead of dropping out
 		public static IReadOnlyList<Conversion> ConversionsIn(Scope scope, string[] lines)
 		{
-			(string[] code, int offset) = Extent(scope, lines);
+			(SourceLines source, int offset) = Extent(scope, lines);
+			string[] code = source.Code;
 			Dictionary<string, Root> bound = new Dictionary<string, Root>(StringComparer.Ordinal);
 			List<Conversion> conversions = new List<Conversion>();
 
@@ -224,6 +280,16 @@ namespace Chummer.Tests
 					}
 				}
 
+				foreach (Match loop in ChildLoop.Matches(code[i]))
+				{
+					Root parent;
+					if (scope.Roots.TryGetValue(loop.Groups[2].Value, out parent) || bound.TryGetValue(loop.Groups[2].Value, out parent))
+					{
+						string children = loop.Groups[3].Success ? loop.Groups[3].Value + "/*" : "*";
+						bound[loop.Groups[1].Value] = new Root(parent.Corpus, Join(parent.Prefix, children));
+					}
+				}
+
 				foreach (Match start in Start.Matches(code[i]))
 				{
 					string site = scope.File + ":" + (offset + i + 1);
@@ -233,12 +299,13 @@ namespace Chummer.Tests
 						throw Unknown(site, code[i].Substring(start.Index));
 
 					argument = Regex.Replace(argument, @"\s+", "");
-					if (!NodeRead.IsMatch(argument))
+					Match read = NodeRead.Match(argument);
+					if (!read.Success || scope.Foreign.Contains(read.Groups[1].Value, StringComparer.Ordinal))
 						continue;
 					if (!IntegerConversions.Contains(start.Groups[1].Value, StringComparer.Ordinal))
 						throw Unknown(site, start.Groups[1].Value + "(" + argument + ")");
 
-					conversions.Add(Understand(site, argument, scope.Roots, bound, code, i, start.Index));
+					conversions.Add(Understand(site, argument, scope.Roots, bound, source, i, start.Index));
 				}
 			}
 
@@ -246,37 +313,75 @@ namespace Chummer.Tests
 		}
 
 		private static Conversion Understand(string site, string argument, IReadOnlyDictionary<string, Root> roots,
-			IReadOnlyDictionary<string, Root> bound, string[] code, int line, int column)
+			IReadOnlyDictionary<string, Root> bound, SourceLines source, int line, int column)
 		{
+			Match read = Read.Match(argument);
 			Root holder;
-			Match attribute = AttributeRead.Match(argument);
-			if (attribute.Success && bound.TryGetValue(attribute.Groups[1].Value, out holder))
+			if (!read.Success || !(roots.TryGetValue(read.Groups["v"].Value, out holder) || bound.TryGetValue(read.Groups["v"].Value, out holder)))
+				throw Unknown(site, argument);
+
+			string[] steps = Regex.Matches(read.Groups["steps"].Value, @"\w+").Cast<Match>().Select(step => step.Value).ToArray();
+			string path = Join(holder.Prefix, string.Join("/", steps));
+			string node = read.Groups["v"].Value + read.Groups["steps"].Value;
+
+			// - a node's own text only under a child loop: ValuesIn reads each child there
+			if (steps.Length == 0 && !read.Groups["a"].Success)
 			{
-				// - a null check ending in another statement guards nothing
-				string guard = @"\bif\s*\(\s*" + Regex.Escape(attribute.Groups[1].Value) + @"\.Attributes\[""" + attribute.Groups[2].Value
-					+ @"""\]\s*!=\s*null\s*\)";
-				bool guarded = Regex.Matches(code[line], guard).Cast<Match>().Any(check => GuardsColumn(check, code[line], column))
-					|| (line > 0 && Regex.IsMatch(code[line - 1], "^\\s*" + guard + "\\s*$"));
-				return new Conversion(site, holder.Corpus, Join(holder.Prefix, "@" + attribute.Groups[2].Value), Form.Whole, guarded,
-					holder.LoopPath);
+				if (!path.EndsWith("*", StringComparison.Ordinal) || read.Groups["i"].Success)
+					throw Unknown(site, argument);
+				return new Conversion(site, holder.Corpus, path, Form.Whole, false, holder.LoopPath);
 			}
 
-			Match field = FieldRead.Match(argument);
-			if (field.Success && (roots.TryGetValue(field.Groups[1].Value, out holder) || bound.TryGetValue(field.Groups[1].Value, out holder)))
+			if (read.Groups["a"].Success)
 			{
-				if (!field.Groups[3].Success)
-					return new Conversion(site, holder.Corpus, Join(holder.Prefix, field.Groups[2].Value), Form.Whole, false,
-						holder.LoopPath);
-
-				// - the index must be the one frmMetatype computes, not any Substring(x, 1)
-				Regex index = new Regex(@"\b" + Regex.Escape(field.Groups[3].Value) + @"\s*=\s*" + Regex.Escape(field.Groups[1].Value)
-					+ @"\[""" + field.Groups[2].Value + @"""\]\.InnerText\.IndexOf\(\s*""D6""\s*\)\s*-\s*1\s*;");
-				if (code.Take(line).Any(earlier => index.IsMatch(earlier)))
-					return new Conversion(site, holder.Corpus, Join(holder.Prefix, field.Groups[2].Value), Form.DigitBeforeD6, false,
-						holder.LoopPath);
+				if (read.Groups["i"].Success)
+					throw Unknown(site, argument);
+				node += ".Attributes[\"" + read.Groups["a"].Value + "\"]";
+				path = Join(path, "@" + read.Groups["a"].Value);
 			}
 
-			throw Unknown(site, argument);
+			if (!read.Groups["i"].Success)
+				return new Conversion(site, holder.Corpus, path, Form.Whole, IsGuarded(node, source, line, column), holder.LoopPath);
+
+			// - the index must be the one frmMetatype computes, not any Substring(x, 1)
+			Regex index = new Regex(@"\b" + Regex.Escape(read.Groups["i"].Value) + @"\s*=\s*" + Regex.Escape(node)
+				+ @"\.InnerText\.IndexOf\(\s*""D6""\s*\)\s*-\s*1\s*;");
+			if (!source.Code.Take(line).Any(earlier => index.IsMatch(earlier)))
+				throw Unknown(site, argument);
+
+			return new Conversion(site, holder.Corpus, path, Form.DigitBeforeD6, false, holder.LoopPath);
+		}
+
+		// - an if on the line before, directly before on its line, or opening a block around it
+		private static bool IsGuarded(string node, SourceLines source, int line, int column)
+		{
+			string[] code = source.Code;
+			string guard = @"\bif\s*\(\s*" + Regex.Escape(node) + @"\s*!=\s*null\s*\)";
+			return Regex.Matches(code[line], guard).Cast<Match>().Any(check => GuardsColumn(check, code[line], column))
+				|| (line > 0 && Regex.IsMatch(code[line - 1], "^\\s*" + guard + "\\s*$"))
+				|| EnclosingHeaders(source, line).Any(header => Regex.IsMatch(header, "^\\s*" + guard + "\\s*\\{?\\s*$"));
+		}
+
+		// - the code before each "{" that opens a block around this line, innermost first
+		// - an else or a "} else {" line is its own header: it guards nothing
+		private static IEnumerable<string> EnclosingHeaders(SourceLines source, int line)
+		{
+			int depth = 0;
+			for (int at = line - 1; at >= 0; at--)
+			{
+				string bare = source.Bare[at];
+				for (int i = bare.Length - 1; i >= 0; i--)
+				{
+					if (bare[i] == '}')
+						depth++;
+					else if (bare[i] == '{' && depth-- == 0)
+					{
+						depth = 0;
+						bool alone = bare.Trim() == "{";
+						yield return alone && at > 0 ? source.Code[at - 1] : source.Code[at];
+					}
+				}
+			}
 		}
 
 		// - the check ends before the conversion, and no statement or block closes in between
@@ -312,7 +417,7 @@ namespace Chummer.Tests
 
 		private static string Join(string parent, string child)
 		{
-			return parent.Length == 0 ? child : parent + "/" + child;
+			return parent.Length == 0 ? child : child.Length == 0 ? parent : parent + "/" + child;
 		}
 
 		// - "file:line path": a loop outside every scope whose body converts a read of its variable
@@ -365,31 +470,45 @@ namespace Chummer.Tests
 
 		private static (int First, int Last) RangeOf(Scope scope, string[] lines)
 		{
-			(string[] code, int offset) = Extent(scope, lines);
+			(SourceLines source, int offset) = Extent(scope, lines);
+			string[] code = source.Code;
 			return (offset, offset + code.Length - 1);
 		}
 
-		// - a missing required attribute comes back with a null value
+		// - a missing required attribute or element comes back with a null value
+		// - an element is read as the indexer does: the first child of that name
 		public static IEnumerable<(XmlNode Item, string Value)> ValuesIn(XmlDocument document, string itemXPath,
 			string path, Form form, bool required)
 		{
-			int at = path.IndexOf("@", StringComparison.Ordinal);
-			string elementPath = at < 0 ? path : at == 0 ? "." : path.Substring(0, at - 1);
-			string attribute = at < 0 ? null : path.Substring(at + 1);
+			int split = path.LastIndexOf('/');
+			string holderPath = split < 0 ? "." : path.Substring(0, split);
+			string last = path.Substring(split + 1);
 
 			foreach (XmlNode item in document.SelectNodes(itemXPath).Cast<XmlNode>())
 			{
-				foreach (XmlElement holder in item.SelectNodes(elementPath).OfType<XmlElement>())
+				foreach (XmlElement holder in item.SelectNodes(holderPath).OfType<XmlElement>())
 				{
-					string value = attribute == null ? holder.InnerText : holder.GetAttributeNode(attribute)?.Value;
-					if (value == null && !required)
-						continue;
-					if (form == Form.DigitBeforeD6 && value != null && value.IndexOf("D6", StringComparison.Ordinal) < 0)
-						continue;
+					foreach (string value in ValuesOf(holder, last))
+					{
+						if (value == null && !required)
+							continue;
+						if (form == Form.DigitBeforeD6 && value != null && value.IndexOf("D6", StringComparison.Ordinal) < 0)
+							continue;
 
-					yield return (item, value);
+						yield return (item, value);
+					}
 				}
 			}
+		}
+
+		private static IEnumerable<string> ValuesOf(XmlElement holder, string last)
+		{
+			// - every child node, as "foreach (XmlNode x in parent)" visits it: a comment converts too
+			if (last == "*")
+				return holder.ChildNodes.Cast<XmlNode>().Where(child => !(child is XmlWhitespace)).Select(child => child.InnerText);
+			if (last.StartsWith("@", StringComparison.Ordinal))
+				return new[] { holder.GetAttributeNode(last.Substring(1))?.Value };
+			return new[] { holder[last]?.InnerText };
 		}
 
 		// - null when the loader converts the value cleanly
