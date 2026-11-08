@@ -20,12 +20,9 @@ namespace Chummer.Tests.Localization
 			UiTagKeys.Assignment[] missing = UiTagKeys.MissingKeys(UiTagKeys.AllAssignments,
 				UiTagKeys.AllClassBases, UiStringKeys.EnglishKeys).ToArray();
 
-			if (missing.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					missing.Length + " tag(s) are looked up but en-us.xml does not declare them",
-					missing, assignment => assignment.Site + " " + assignment.Receiver + " '" + assignment.Value + "'"));
-			}
+			FailureReport.AssertNone(
+				missing.Length + " tag(s) are looked up but en-us.xml does not declare them",
+				missing, assignment => assignment.Site + " " + assignment.Receiver + " '" + assignment.Value + "'");
 		}
 
 		// - an unresolved type would drop out of the check above unseen
@@ -38,9 +35,7 @@ namespace Chummer.Tests.Localization
 					+ " (declared as " + (assignment.DeclaredType ?? "?") + ")")
 				.ToArray();
 
-			Assert.True(unresolved.Length == 0,
-				"These tag writes have no WinForms type to match against the lookups:\n  "
-				+ string.Join("\n  ", unresolved));
+			FailureReport.AssertNone("These tag writes have no WinForms type to match against the lookups", unresolved);
 		}
 
 		// - a computed tag skips the key check: only run-time data may be computed
@@ -52,8 +47,7 @@ namespace Chummer.Tests.Localization
 				.Select(assignment => assignment.Site + " " + assignment.Receiver)
 				.ToArray();
 
-			Assert.True(computed.Length == 0,
-				"These designer tags are not string literals:\n  " + string.Join("\n  ", computed));
+			FailureReport.AssertNone("These designer tags are not string literals", computed);
 		}
 
 		// - run-time ids and objects stay allowed, a key built from a literal does not
@@ -65,9 +59,7 @@ namespace Chummer.Tests.Localization
 				.Select(assignment => assignment.Site + " " + assignment.Receiver + " = " + assignment.Expression)
 				.ToArray();
 
-			Assert.True(composed.Length == 0,
-				"These tags build a key the check cannot read. Write it as one literal:\n  "
-				+ string.Join("\n  ", composed));
+			FailureReport.AssertNone("These tags build a key the check cannot read. Write it as one literal", composed);
 		}
 
 		// - exact counts: a tag that newly escapes every lookup must be a deliberate choice

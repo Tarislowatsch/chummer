@@ -25,11 +25,8 @@ namespace Chummer.Tests.Consumption.Bonus
 				.Where(failure => !KnownFailures.ContainsKey(failure.Key))
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(unexpected.Length + " bonus value(s) ValueToInt or its branch fails on",
-					unexpected, failure => failure.Key + " at rating " + failure.Rating + ": " + failure.Error));
-			}
+			FailureReport.AssertNone(unexpected.Length + " bonus value(s) ValueToInt or its branch fails on",
+				unexpected, failure => failure.Key + " at rating " + failure.Rating + ": " + failure.Error);
 		}
 
 		[Fact]
@@ -186,9 +183,9 @@ namespace Chummer.Tests.Consumption.Bonus
 					+ ", pinned as " + (PinnedFingerprints.ContainsKey(key) ? PinnedFingerprints[key] : "nothing"))
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
-				"This code changed since its port was written. Re-read it, fix the port, then update the hash:\n  "
-				+ string.Join("\n  ", drifted));
+			FailureReport.AssertNone(
+				"This code changed since its port was written. Re-read it, fix the port, then update the hash",
+				drifted);
 		}
 
 		// - a green run proves nothing if a path reaches no value

@@ -30,11 +30,8 @@ namespace Chummer.Tests.Kernel
 				.OrderBy(type => type.FullName, StringComparer.Ordinal)
 				.ToArray();
 
-			if (misplaced.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(misplaced.Length + " type(s) outside a leaf context namespace",
-					misplaced, type => type.FullName));
-			}
+			FailureReport.AssertNone(misplaced.Length + " type(s) outside a leaf context namespace",
+				misplaced, type => type.FullName);
 
 			// - exact, one per folder with files: an empty or partial scan cannot pass
 			// - bumping it is only correct for a deliberate new folder

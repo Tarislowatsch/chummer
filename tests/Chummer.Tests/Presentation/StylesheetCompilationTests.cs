@@ -30,9 +30,8 @@ namespace Chummer.Tests.Presentation
 				.Where(partial => !included.Contains(partial, StringComparer.OrdinalIgnoreCase))
 				.ToArray();
 
-			Assert.True(orphaned.Length == 0,
-				"These partial sheets are included by no sheet, so nothing compiles them:\n  "
-				+ string.Join("\n  ", orphaned));
+			FailureReport.AssertNone(
+				"These partial sheets are included by no sheet, so nothing compiles them", orphaned);
 		}
 	}
 }

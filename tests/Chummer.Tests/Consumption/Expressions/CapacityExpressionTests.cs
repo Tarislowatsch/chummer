@@ -30,15 +30,12 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static void AssertPasses(ExpressionChecks.ExpressionCheck check)
 		{
-			if (check.Failures.Count > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
-						+ " value(s) a capacity calculator or its consumer fails on",
-					check.Failures,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
+					+ " value(s) a capacity calculator or its consumer fails on",
+				check.Failures,
+				failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
+					+ failure.Rating + ": " + failure.Error);
 		}
 
 		// - key "file Class.Member": literals "capacity" or "armorcapacity" in that member
@@ -127,7 +124,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				})
 				.ToArray();
 
-			Assert.True(failures.Length == 0, "Unparsable child capacities:\n  " + string.Join("\n  ", failures));
+			FailureReport.AssertNone("Unparsable child capacities", failures);
 		}
 
 		// - a green run proves nothing if a rule reaches no value: Gear skips an absent field

@@ -20,8 +20,7 @@ namespace Chummer.Tests.Localization
 				.Select(group => group.Key)
 				.ToArray();
 
-			Assert.True(repeated.Length == 0,
-				"en-us.xml declares these keys more than once:\n  " + string.Join("\n  ", repeated));
+			FailureReport.AssertNone("en-us.xml declares these keys more than once", repeated);
 		}
 
 		// - the same catch exits the application when an entry lacks <key> or <text>
@@ -30,8 +29,7 @@ namespace Chummer.Tests.Localization
 		{
 			string[] incomplete = UiStringKeys.EntriesMissingKeyOrText(UiStringKeys.LoadEnglish()).ToArray();
 
-			Assert.True(incomplete.Length == 0,
-				"These en-us.xml entries lack <key> or <text>:\n  " + string.Join("\n  ", incomplete));
+			FailureReport.AssertNone("These en-us.xml entries lack <key> or <text>", incomplete);
 		}
 
 		[Fact]
@@ -44,12 +42,9 @@ namespace Chummer.Tests.Localization
 				.Where(call => call.Key != null && !keys.Contains(call.Key))
 				.ToArray();
 
-			if (missing.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					missing.Length + " GetString call(s) name a key en-us.xml does not declare",
-					missing, call => call.Site + " '" + call.Key + "'"));
-			}
+			FailureReport.AssertNone(
+				missing.Length + " GetString call(s) name a key en-us.xml does not declare",
+				missing, call => call.Site + " '" + call.Key + "'");
 		}
 
 		public static IEnumerable<object[]> CheckedComposedForms()
@@ -71,9 +66,8 @@ namespace Chummer.Tests.Localization
 
 			string[] missing = UiStringKeys.MissingKeys(form, values, UiStringKeys.EnglishKeys).ToArray();
 
-			Assert.True(missing.Length == 0,
-				"Keys built by " + argument + " from " + form.Source + " are missing from en-us.xml:\n  "
-				+ string.Join("\n  ", missing));
+			FailureReport.AssertNone(
+				"Keys built by " + argument + " from " + form.Source + " are missing from en-us.xml", missing);
 		}
 
 		// - the table is hand-written: a new composed call would otherwise go unchecked
@@ -90,10 +84,9 @@ namespace Chummer.Tests.Localization
 				.Select(call => call.Site + " " + call.Argument)
 				.ToArray();
 
-			Assert.True(unclassified.Length == 0,
+			FailureReport.AssertNone(
 				"These GetString calls build their key in a way " + nameof(UiStringKeys.ComposedForms)
-				+ " does not know. Trace where the value comes from and add a form:\n  "
-				+ string.Join("\n  ", unclassified));
+				+ " does not know. Trace where the value comes from and add a form", unclassified);
 		}
 
 		[Fact]
@@ -107,9 +100,8 @@ namespace Chummer.Tests.Localization
 				.Select(form => form.Argument)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"No call uses these forms any more, remove them from " + nameof(UiStringKeys.ComposedForms)
-				+ ":\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNone(
+				"No call uses these forms any more, remove them from " + nameof(UiStringKeys.ComposedForms), stale);
 		}
 	}
 }

@@ -67,15 +67,12 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					source + " has " + unexpected.Length + " " + check.Rule.Id
-						+ " value(s) that " + check.Rule.Consumer + " cannot find",
-					unexpected,
-					group => Entry(group.First()) + "  (" + group.Count() + "x, e.g. '"
-						+ group.First().ItemName + "')"));
-			}
+			FailureReport.AssertNone(
+				source + " has " + unexpected.Length + " " + check.Rule.Id
+					+ " value(s) that " + check.Rule.Consumer + " cannot find",
+				unexpected,
+				group => Entry(group.First()) + "  (" + group.Count() + "x, e.g. '"
+					+ group.First().ItemName + "')");
 		}
 
 		// Same reason the duplicate allowlist has a staleness check: see NameUniquenessTests.
@@ -90,9 +87,8 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These references resolve (or are gone) and must be removed from "
-				+ nameof(KnownUnresolvedReferences) + ":\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNone("These references resolve (or are gone) and must be removed from "
+				+ nameof(KnownUnresolvedReferences), stale);
 		}
 
 		// - a mistyped source path selects nothing: its theory case passes unchecked
@@ -105,8 +101,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(vacant.Length == 0,
-				"These rules check nothing:\n  " + string.Join("\n  ", vacant));
+			FailureReport.AssertNone("These rules check nothing", vacant);
 		}
 
 		// - catches a consumer removed or renamed, not a lookup condition changed around the snippet
@@ -118,8 +113,7 @@ namespace Chummer.Tests.Rulebook
 				.Select(rule => rule.Id + ": " + rule.Consumer + " no longer contains " + rule.Reads)
 				.ToArray();
 
-			Assert.True(missing.Length == 0,
-				"Re-read these consumers and fix or drop their rules:\n  " + string.Join("\n  ", missing));
+			FailureReport.AssertNone("Re-read these consumers and fix or drop their rules", missing);
 		}
 
 		// - per rule: a total would hide one rule losing what another gains
@@ -242,8 +236,7 @@ namespace Chummer.Tests.Rulebook
 					+ " }, // pinned " + (PinnedReferenceCounts.ContainsKey(id) ? PinnedReferenceCounts[id].ToString() : "none"))
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
-				"These rules check a different number of references than pinned:\n  " + string.Join("\n  ", drifted));
+			FailureReport.AssertNone("These rules check a different number of references than pinned", drifted);
 		}
 
 		// - summed over all packs: the case pin only notices a rule losing its last reference

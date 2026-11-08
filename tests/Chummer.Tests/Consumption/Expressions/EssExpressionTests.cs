@@ -24,15 +24,12 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static void AssertParses(ExpressionChecks.ExpressionCheck check)
 		{
-			if (check.Failures.Count > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
-						+ " value(s) CalculatedESS throws on",
-					check.Failures,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
+					+ " value(s) CalculatedESS throws on",
+				check.Failures,
+				failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
+					+ failure.Rating + ": " + failure.Error);
 		}
 	}
 }

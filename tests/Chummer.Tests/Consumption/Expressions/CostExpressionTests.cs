@@ -42,15 +42,12 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Where(failure => !known.Contains(failure.Key))
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + check.Rule.Id
-						+ " value(s) its calculator throws on",
-					unexpected,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + check.Rule.Id
+					+ " value(s) its calculator throws on",
+				unexpected,
+				failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
+					+ failure.Rating + ": " + failure.Error);
 		}
 
 		// - a fixed entry left on the list would let the same value come back unnoticed
@@ -64,9 +61,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(key => entry.Key + ": " + key))
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These known cost failures no longer fail. Delete them from the list:\n  "
-				+ string.Join("\n  ", stale));
+			FailureReport.AssertNone("These known cost failures no longer fail. Delete them from the list", stale);
 		}
 
 		private static IReadOnlyCollection<string> KnownFailuresFor(string id)

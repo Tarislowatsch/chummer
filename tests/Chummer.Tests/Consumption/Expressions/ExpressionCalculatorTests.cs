@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Chummer.Tests.Consumption.Fields;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -65,9 +66,9 @@ namespace Chummer.Tests.Consumption.Expressions
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
+			FailureReport.AssertNone(
 				"These calculators changed since their port was written. Re-read each one, fix its "
-				+ "port, then update the hash:\n  " + string.Join("\n  ", drifted));
+				+ "port, then update the hash", drifted);
 		}
 
 		// - a pin without a port would keep watching a member nothing replays any more

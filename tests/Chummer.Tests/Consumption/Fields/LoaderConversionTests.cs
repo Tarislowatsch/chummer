@@ -19,8 +19,7 @@ namespace Chummer.Tests.Consumption.Fields
 					Xml.Load(path), corpus, LoaderConversions.ApplicationConversions)))
 				.ToArray();
 
-			Assert.True(failures.Length == 0,
-				FailureReport.Build("Values a loader converts directly", failures, line => line));
+			FailureReport.AssertNone("Values a loader converts directly", failures);
 		}
 
 		// - key "file corpus: path": a new conversion or a dropped null check fails here first

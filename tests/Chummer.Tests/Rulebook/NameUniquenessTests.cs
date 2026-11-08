@@ -46,16 +46,13 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(pair => pair.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(xmlPath) + " has " + unexpected.Length
-						+ " duplicate name(s) in <" + collectionName + "> (key: "
-						+ string.Join(" + ", NameUniqueness.RuleCollectionFor(xmlPath, collectionName).KeyFields)
-						+ ")",
-					unexpected,
-					pair => "'" + Display(pair.Key) + "' appears " + pair.Value + " times"));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(xmlPath) + " has " + unexpected.Length
+					+ " duplicate name(s) in <" + collectionName + "> (key: "
+					+ string.Join(" + ", NameUniqueness.RuleCollectionFor(xmlPath, collectionName).KeyFields)
+					+ ")",
+				unexpected,
+				pair => "'" + Display(pair.Key) + "' appears " + pair.Value + " times");
 		}
 
 		// - a stale entry would silently cover a future duplicate of the same name
@@ -76,9 +73,8 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These entries are no longer duplicates in the data and must be removed from "
-				+ nameof(KnownDuplicates) + ":\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNone("These entries are no longer duplicates in the data and must be removed from "
+				+ nameof(KnownDuplicates), stale);
 		}
 
 		private static IEnumerable<KeyValuePair<string, int>> DuplicateKeyCounts(

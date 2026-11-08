@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using Xunit;
 
@@ -43,6 +44,20 @@ namespace Chummer.Tests.Kernel
 				finding => finding);
 
 			Assert.EndsWith("\n  ... and 37 more", message);
+		}
+
+		[Fact]
+		public void AssertNoneIsSilentWithoutFindings()
+		{
+			FailureReport.AssertNone("nothing", new string[0]);
+		}
+
+		[Fact]
+		public void AssertNoneFailsWithTheBuiltReport()
+		{
+			Exception failure = Assert.ThrowsAny<Exception>(() => FailureReport.AssertNone("one thing", new[] { "a" }));
+
+			Assert.Equal("one thing:\n  a", failure.Message);
 		}
 
 		// The truncation notice must not count as a finding line.

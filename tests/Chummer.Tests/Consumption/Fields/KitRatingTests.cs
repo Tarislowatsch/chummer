@@ -36,8 +36,8 @@ namespace Chummer.Tests.Consumption.Fields
 				.Where(finding => IsDefect(finding) && !KnownExcessRatings.Contains(finding.Key))
 				.ToArray();
 
-			Assert.True(unexpected.Length == 0,
-				FailureReport.Build("Kit ratings above their item's maximum", unexpected, finding => finding.Description));
+			FailureReport.AssertNone(
+				"Kit ratings above their item's maximum", unexpected, finding => finding.Description);
 		}
 
 		[Fact]
@@ -50,9 +50,8 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These ratings fit (or are gone) and must be removed from " + nameof(KnownExcessRatings) + ":\n  "
-				+ string.Join("\n  ", stale));
+			FailureReport.AssertNone(
+				"These ratings fit (or are gone) and must be removed from " + nameof(KnownExcessRatings), stale);
 		}
 
 		// - key "rule: outcome": a list gone vacant or a lookup gone blind fails here

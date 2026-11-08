@@ -14,9 +14,9 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			string[] findings = DecimalCommas.CommaNumbersIn(Xml.Load(path)).ToArray();
 
-			Assert.True(findings.Length == 0, FailureReport.Build(
+			FailureReport.AssertNone(
 				path + " has values that en-US reads with the comma as a thousands separator",
-				findings, finding => finding));
+				findings);
 		}
 	}
 }

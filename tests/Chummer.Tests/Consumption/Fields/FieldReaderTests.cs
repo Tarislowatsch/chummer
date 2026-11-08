@@ -95,7 +95,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(reader => reader.Key + " (" + reader.Consumer + ")")
 				.ToArray();
 
-			Assert.True(vacant.Length == 0, "These readers match nothing:\n  " + string.Join("\n  ", vacant));
+			FailureReport.AssertNone("These readers match nothing", vacant);
 		}
 
 		// - a new consumer would leave the pinned findings standing while the code already reads them
@@ -107,8 +107,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
 				.ToArray();
 
-			Assert.True(unlisted.Length == 0, "Add a reader or a known extra reader for:\n  "
-				+ string.Join("\n  ", unlisted));
+			FailureReport.AssertNone("Add a reader or a known extra reader for", unlisted);
 		}
 
 		[Fact]
@@ -119,7 +118,7 @@ namespace Chummer.Tests.Consumption.Fields
 					.Select(mention => literal.File + " " + mention.Display)), StringComparer.Ordinal);
 			string[] stale = FieldReaders.KnownExtraReaders.Keys.Where(key => !read.Contains(key)).ToArray();
 
-			Assert.True(stale.Length == 0, "Remove from KnownExtraReaders:\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNone("Remove from KnownExtraReaders", stale);
 		}
 
 		[Fact]
@@ -130,7 +129,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(reader => reader.Key + ": " + reader.Consumer)
 				.ToArray();
 
-			Assert.True(moved.Length == 0, "Re-read these consumers and fix the line:\n  " + string.Join("\n  ", moved));
+			FailureReport.AssertNone("Re-read these consumers and fix the line", moved);
 		}
 
 		// - key "file handler/field": the field has no effect on the character
@@ -220,7 +219,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(line => line, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(unhandled.Length == 0, "No comparison in the branch matches:\n  " + string.Join("\n  ", unhandled));
+			FailureReport.AssertNone("No comparison in the branch matches", unhandled);
 		}
 
 		// - key "file text": a line number would break on every unrelated edit above it
@@ -251,7 +250,7 @@ namespace Chummer.Tests.Consumption.Fields
 					.Select(field => branch.Handler + "/" + field))
 				.ToArray();
 
-			Assert.True(missed.Length == 0, "The indexer pattern misses:\n  " + string.Join("\n  ", missed));
+			FailureReport.AssertNone("The indexer pattern misses", missed);
 		}
 
 		// - top-level files plus every pack file Load would merge

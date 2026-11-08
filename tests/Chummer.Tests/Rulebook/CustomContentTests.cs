@@ -36,8 +36,7 @@ namespace Chummer.Tests.Rulebook
 						: "[" + string.Join(", ", file.BaseFileNames) + "]"))
 				.ToArray();
 
-			Assert.True(unpaired.Length == 0,
-				"These pack files do not pair with exactly one base data file:\n  " + string.Join("\n  ", unpaired));
+			FailureReport.AssertNone("These pack files do not pair with exactly one base data file", unpaired);
 		}
 
 		[Theory]
@@ -53,15 +52,12 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unknown.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					file.PackName + "/" + file.FileName + " cites " + unknown.Length
-						+ " book code(s) that neither books.xml nor the pack declares",
-					unknown,
-					group => "'" + group.Key + "' used by " + group.Count()
-						+ " entries, e.g. '" + group.First().ItemName + "'"));
-			}
+			FailureReport.AssertNone(
+				file.PackName + "/" + file.FileName + " cites " + unknown.Length
+					+ " book code(s) that neither books.xml nor the pack declares",
+				unknown,
+				group => "'" + group.Key + "' used by " + group.Count()
+					+ " entries, e.g. '" + group.First().ItemName + "'");
 		}
 
 		[Theory]
@@ -74,14 +70,10 @@ namespace Chummer.Tests.Rulebook
 				.Where(entry => !KnownDiscardedEntries.Contains(entry))
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					file.PackName + "/" + file.FileName + " has " + unexpected.Length + " entr(ies) Load would "
-						+ (file.IsOverride ? "ignore: no base entry has the name" : "drop: a base entry has the name"),
-					unexpected,
-					entry => entry));
-			}
+			FailureReport.AssertNone(
+				file.PackName + "/" + file.FileName + " has " + unexpected.Length + " entr(ies) Load would "
+					+ (file.IsOverride ? "ignore: no base entry has the name" : "drop: a base entry has the name"),
+				unexpected);
 		}
 
 		[Fact]
@@ -109,8 +101,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(duplicated.Length == 0,
-				"These custom entries are defined more than once:\n  " + string.Join("\n  ", duplicated));
+			FailureReport.AssertNone("These custom entries are defined more than once", duplicated);
 		}
 
 		// - the audio/vision pack ships alternatives that overlap on 3 entries, with equal content
@@ -124,9 +115,8 @@ namespace Chummer.Tests.Rulebook
 				.Select(entry => entry.Key + " in " + string.Join(", ", entry.Value))
 				.ToArray();
 
-			Assert.True(conflicting.Length == 0,
-				"These base entries get different content from different override files, "
-				+ "so load order decides:\n  " + string.Join("\n  ", conflicting));
+			FailureReport.AssertNone("These base entries get different content from different override files, "
+				+ "so load order decides", conflicting);
 		}
 
 		[Fact]
@@ -137,9 +127,8 @@ namespace Chummer.Tests.Rulebook
 					.Select(entry => file.PackName + "/" + file.FileName + ": " + entry))
 				.ToArray();
 
-			Assert.True(redeclared.Length == 0,
-				"These pack categories are already declared by the base file and would be listed "
-				+ "twice:\n  " + string.Join("\n  ", redeclared));
+			FailureReport.AssertNone("These pack categories are already declared by the base file and would be listed "
+				+ "twice", redeclared);
 		}
 
 		[Theory]
@@ -154,15 +143,12 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					file.PackName + "/" + file.FileName + " uses " + unexpected.Length
-						+ " category value(s) that neither " + file.BaseFileNames[0] + " nor the pack declares",
-					unexpected,
-					group => "'" + group.Key + "' on " + group.Count()
-						+ " entries, e.g. '" + group.First().Value + "'"));
-			}
+			FailureReport.AssertNone(
+				file.PackName + "/" + file.FileName + " uses " + unexpected.Length
+					+ " category value(s) that neither " + file.BaseFileNames[0] + " nor the pack declares",
+				unexpected,
+				group => "'" + group.Key + "' on " + group.Count()
+					+ " entries, e.g. '" + group.First().Value + "'");
 		}
 
 		[Fact]
@@ -197,9 +183,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These entries are no longer defects and must be removed from " + listName + ":\n  "
-				+ string.Join("\n  ", stale));
+			FailureReport.AssertNone("These entries are no longer defects and must be removed from " + listName, stale);
 		}
 	}
 }

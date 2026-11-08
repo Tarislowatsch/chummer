@@ -35,15 +35,12 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unconvertible.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + entity + " values that "
-						+ NumericFields.CreateClassOf(entity) + ".Create cannot convert",
-					unconvertible,
-					group => "<" + group.Key + "> fails on " + group.Count() + " entries, e.g. '"
-						+ group.First().ItemName + "' = \"" + group.First().Value + "\""));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(check.FilePath) + " has " + entity + " values that "
+					+ NumericFields.CreateClassOf(entity) + ".Create cannot convert",
+				unconvertible,
+				group => "<" + group.Key + "> fails on " + group.Count() + " entries, e.g. '"
+					+ group.First().ItemName + "' = \"" + group.First().Value + "\"");
 		}
 
 		// - a scan gone blind reads zero fields and turns every case above green

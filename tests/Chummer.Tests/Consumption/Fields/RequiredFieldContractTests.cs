@@ -39,15 +39,12 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (absent.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(contract.FilePath) + " has " + entity + " entries missing "
-						+ absent.Length + " field(s) that " + entity + ".Create reads unguarded",
-					absent,
-					group => "<" + group.Key + "> absent from " + group.Count()
-						+ " entries, e.g. '" + group.First().ItemName + "'"));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(contract.FilePath) + " has " + entity + " entries missing "
+					+ absent.Length + " field(s) that " + entity + ".Create reads unguarded",
+				absent,
+				group => "<" + group.Key + "> absent from " + group.Count()
+					+ " entries, e.g. '" + group.First().ItemName + "'");
 		}
 
 		// - a Create changing underneath its rule is drift no check over the table or the data can see
@@ -94,13 +91,11 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
-				"These Create methods changed the elements they read, so the rules derived from "
+			FailureReport.AssertNone("These Create methods changed the elements they read, so the rules derived from "
 				+ "them in " + nameof(RequiredFields) + "." + nameof(RequiredFields.Rules)
 				+ " and the diverted values in " + nameof(NumericFields)
 				+ " may no longer describe them. Re-read each one, fix "
-				+ "its rule and diversions, then update the hash:\n  "
-				+ string.Join("\n  ", drifted));
+				+ "its rule and diversions, then update the hash", drifted);
 		}
 
 		// - a pin deleted by hand leaves its class unwatched by the drift check
@@ -113,9 +108,8 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(className => className, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(unpinned.Length == 0,
-				"These Create methods have no pinned fingerprint, so the drift check does not "
-				+ "watch them:\n  " + string.Join("\n  ", unpinned));
+			FailureReport.AssertNone("These Create methods have no pinned fingerprint, so the drift check does not "
+				+ "watch them", unpinned);
 		}
 
 		// - an overlap or a gap checks a gear entry against the wrong Create's contract or against none

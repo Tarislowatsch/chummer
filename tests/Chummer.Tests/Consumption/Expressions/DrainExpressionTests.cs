@@ -31,8 +31,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				}
 			}
 
-			Assert.True(failures.Count == 0,
-				FailureReport.Build("These drains break where they are evaluated", failures, failure => failure));
+			FailureReport.AssertNone("These drains break where they are evaluated", failures);
 		}
 
 		// - a consumer missing from the table would keep its codes unchecked
@@ -51,8 +50,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Concat(listed.Except(found, StringComparer.Ordinal).Select(site => "no chain at " + site))
 				.ToArray();
 
-			Assert.True(differences.Length == 0,
-				FailureReport.Build("Attribute chains and the consumer table disagree", differences, line => line));
+			FailureReport.AssertNone("Attribute chains and the consumer table disagree", differences);
 		}
 
 		// - each read feeds either PrintToStream or a label the form chains evaluate
