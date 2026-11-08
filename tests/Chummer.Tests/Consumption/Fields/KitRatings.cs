@@ -154,7 +154,7 @@ namespace Chummer.Tests.Consumption.Fields
 				XmlDocument document;
 				if (!documents.TryGetValue(fileName, out document))
 				{
-					document = CustomContent.Load(Path.Combine(DataPaths.ChummerDataDir, fileName));
+					document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, fileName));
 					documents.Add(fileName, document);
 				}
 

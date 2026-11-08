@@ -1,4 +1,5 @@
 ﻿using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -31,8 +32,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void BothLeavesAndAttributesAreScanned()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(
+			XmlDocument document = Xml.Parse(
 				"<chummer><grades><grade><name>Alpha</name><ess>0,8</ess></grade></grades>"
 				+ "<powers><power cost=\"0,5\"><name>Claws</name></power></powers></chummer>");
 

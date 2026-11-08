@@ -152,12 +152,9 @@ namespace Chummer.Tests.Localization
 				.OrderBy(entry => entry.Display, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					language + " has " + unexpected.Length + " translation(s) that XmlManager.Load drops",
-					unexpected, entry => entry.Display));
-			}
+			FailureReport.AssertNone(
+				language + " has " + unexpected.Length + " translation(s) that XmlManager.Load drops",
+				unexpected, entry => entry.Display);
 		}
 
 		// - no allowlist: a crash takes the whole data file down for that language
@@ -170,8 +167,7 @@ namespace Chummer.Tests.Localization
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(crashing.Length == 0,
-				"XmlManager.Load throws on these translations:\n  " + string.Join("\n  ", crashing));
+			FailureReport.AssertNone("XmlManager.Load throws on these translations", crashing);
 		}
 
 		// Same reason the duplicate allowlist has a staleness check: see NameUniquenessTests.
@@ -186,9 +182,8 @@ namespace Chummer.Tests.Localization
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These translations apply (or are gone) and must be removed from "
-				+ nameof(KnownDroppedTranslations) + ":\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNoneInFull("These translations apply (or are gone) and must be removed from "
+				+ nameof(KnownDroppedTranslations), stale);
 		}
 
 		// - updating the hash is only correct after re-reading Load and fixing the port
@@ -244,8 +239,7 @@ namespace Chummer.Tests.Localization
 					+ " }, // pinned " + (PinnedEntryCounts.ContainsKey(key) ? PinnedEntryCounts[key].ToString() : "none"))
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
-				"These languages check a different number of translations than pinned:\n  " + string.Join("\n  ", drifted));
+			FailureReport.AssertNoneInFull("These languages check a different number of translations than pinned", drifted);
 		}
 	}
 }

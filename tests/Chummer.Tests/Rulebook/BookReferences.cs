@@ -34,8 +34,7 @@ namespace Chummer.Tests.Rulebook
 
 		private static IReadOnlyCollection<string> LoadBookCodes()
 		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(Path.Combine(DataPaths.ChummerDataDir, "books.xml"));
+			XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "books.xml"));
 
 			return new HashSet<string>(
 				document.SelectNodes("/chummer/books/book/code").Cast<XmlNode>()

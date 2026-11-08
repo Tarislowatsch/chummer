@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Rulebook
@@ -100,7 +101,7 @@ namespace Chummer.Tests.Rulebook
 				});
 
 			IReadOnlyList<CrossFileReferences.Reference> references = CrossFileReferences.ReferencesIn("source.xml",
-				Document("<chummer><qualities><quality><name>Q</name><required><metatype>Kitsune</metatype>"
+				Xml.Parse("<chummer><qualities><quality><name>Q</name><required><metatype>Kitsune</metatype>"
 					+ "</required></quality></qualities></chummer>"), new[] { rule });
 			IReadOnlyList<IReadOnlyList<string>> definitions = new[]
 				{
@@ -145,7 +146,7 @@ namespace Chummer.Tests.Rulebook
 		public void NestedReferenceIsAttributedToTheNearestNamedElement()
 		{
 			CrossFileReferences.ReferenceRule rule = Rule(Target("critterpowers.xml", "/chummer/powers/power"));
-			XmlDocument critters = Document("<chummer><metatypes><metatype><name>Dwarf</name><metavariants>"
+			XmlDocument critters = Xml.Parse("<chummer><metatypes><metatype><name>Dwarf</name><metavariants>"
 				+ "<metavariant><name>Gnome</name><powers><power>Fear</power></powers></metavariant>"
 				+ "</metavariants></metatype></metatypes></chummer>");
 
@@ -161,7 +162,7 @@ namespace Chummer.Tests.Rulebook
 		public void NameElementReferenceIsAttributedToItsGrandparent()
 		{
 			CrossFileReferences.ReferenceRule rule = Rule(Target("armor.xml", "/chummer/mods/mod"));
-			XmlDocument armor = Document("<chummer><armors><armor><name>Armor Jacket</name>"
+			XmlDocument armor = Xml.Parse("<chummer><armors><armor><name>Armor Jacket</name>"
 				+ "<mods><name>Fire Resistance</name></mods></armor></armors></chummer>");
 
 			CrossFileReferences.Reference reference = CrossFileReferences
@@ -178,7 +179,7 @@ namespace Chummer.Tests.Rulebook
 				Rule(Target("weapons.xml", "/chummer/weapons/weapon")), "//addweapon");
 
 			Assert.Empty(CrossFileReferences.ReferencesIn("other.xml",
-				Document("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
+				Xml.Parse("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
 		}
 
 		// - the shape of the bonus rules
@@ -189,7 +190,7 @@ namespace Chummer.Tests.Rulebook
 				CrossFileReferences.AnyFile, "//addweapon", ByText(), new[] { Target("weapons.xml", "/x") });
 
 			Assert.Single(CrossFileReferences.ReferencesIn("other.xml",
-				Document("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
+				Xml.Parse("<chummer><gears><gear><addweapon>X</addweapon></gear></gears></chummer>"), new[] { rule }));
 		}
 
 		// - the shape of the excludecategory rules
@@ -220,7 +221,7 @@ namespace Chummer.Tests.Rulebook
 		public void BonusReferenceIsAttributedToTheItemCarryingTheBonus()
 		{
 			CrossFileReferences.ReferenceRule rule = Rule(Target("skills.xml", "/chummer/skills/skill"));
-			XmlDocument qualities = Document("<chummer><qualities><quality><name>First Impression</name><bonus>"
+			XmlDocument qualities = Xml.Parse("<chummer><qualities><quality><name>First Impression</name><bonus>"
 				+ "<skillcategory><name>Social Active</name><exclude>Intimidation</exclude></skillcategory>"
 				+ "</bonus></quality></qualities></chummer>");
 
@@ -236,7 +237,7 @@ namespace Chummer.Tests.Rulebook
 		{
 			CrossFileReferences.ReferenceRule rule = Rule(Target("weapons.xml", "/chummer/weapons/weapon"));
 
-			Assert.Empty(CrossFileReferences.TargetKeysIn("gear.xml", Document(Weapons), new[] { rule }));
+			Assert.Empty(CrossFileReferences.TargetKeysIn("gear.xml", Xml.Parse(Weapons), new[] { rule }));
 		}
 
 		private static string[] UnresolvedKeys(CrossFileReferences.ReferenceRule rule, SourceSpec source,
@@ -254,7 +255,7 @@ namespace Chummer.Tests.Rulebook
 		private static IReadOnlyList<IReadOnlyList<string>> KeysIn(CrossFileReferences.ReferenceRule rule,
 			string fileName, string xml)
 		{
-			return CrossFileReferences.TargetKeysIn(fileName, Document(xml), new[] { rule })
+			return CrossFileReferences.TargetKeysIn(fileName, Xml.Parse(xml), new[] { rule })
 				.SelectMany(keys => keys.Keys)
 				.ToArray();
 		}
@@ -274,7 +275,7 @@ namespace Chummer.Tests.Rulebook
 
 		private static SourceSpec Source(string entry, string xPath = "//addweapon")
 		{
-			return new SourceSpec(Document("<chummer><entries>" + entry + "</entries></chummer>"), xPath);
+			return new SourceSpec(Xml.Parse("<chummer><entries>" + entry + "</entries></chummer>"), xPath);
 		}
 
 		private static CrossFileReferences.ReferenceRule Rule(CrossFileReferences.Target target,
@@ -319,13 +320,6 @@ namespace Chummer.Tests.Rulebook
 		private static string Metatype(string name)
 		{
 			return "<chummer><metatypes><metatype><name>" + name + "</name></metatype></metatypes></chummer>";
-		}
-
-		private static XmlDocument Document(string xml)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(xml);
-			return document;
 		}
 	}
 }

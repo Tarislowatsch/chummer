@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -37,7 +36,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.ToArray();
 
 			CritterExpressions.Failure[] failures = CritterExpressions.DataFiles()
-				.SelectMany(path => CritterExpressions.FailuresIn(Path.GetFileName(path), CustomContent.Load(path), xpaths))
+				.SelectMany(path => CritterExpressions.FailuresIn(Path.GetFileName(path), Xml.Load(path), xpaths))
 				.ToArray();
 
 			string[] differences = failures
@@ -48,8 +47,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(known => "no longer fails, drop it from KnownFailures: " + known))
 				.ToArray();
 
-			Assert.True(differences.Length == 0,
-				FailureReport.Build("Critter forms and KnownFailures disagree", differences, line => line));
+			FailureReport.AssertNoneInFull("Critter forms and KnownFailures disagree", differences);
 		}
 
 		// - a caller reading a new field would otherwise stay unchecked
@@ -59,7 +57,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			IReadOnlyList<string> arguments = CritterExpressions.ApplicationArguments();
 
 			string[] unmapped = arguments.Where(argument => !CritterExpressions.XPathsFor(argument).Any()).ToArray();
-			Assert.True(unmapped.Length == 0, "No data mapped for: " + string.Join(", ", unmapped));
+			FailureReport.AssertNoneInFull("No data mapped for", unmapped);
 			Assert.Empty(CritterExpressions.LoopArguments.Keys.Except(arguments, StringComparer.Ordinal));
 		}
 
@@ -92,9 +90,9 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Select(entry => entry.Key + " now hashes to " + entry.Value)
 				.ToArray();
 
-			Assert.True(drifted.Length == 0,
-				"Pinned as " + PinnedFingerprint + ". Re-read each copy, fix CritterExpressions, then update the hash:\n  "
-				+ string.Join("\n  ", drifted));
+			FailureReport.AssertNoneInFull(
+				"Pinned as " + PinnedFingerprint + ". Re-read each copy, fix CritterExpressions, then update the hash",
+				drifted);
 		}
 	}
 }

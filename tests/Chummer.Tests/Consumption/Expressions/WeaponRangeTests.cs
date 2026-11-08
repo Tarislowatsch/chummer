@@ -22,8 +22,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Select(group => group.Key)
 				.ToArray();
 
-			Assert.True(repeated.Length == 0,
-				"ranges.xml declares these categories more than once:\n  " + string.Join("\n  ", repeated));
+			FailureReport.AssertNone("ranges.xml declares these categories more than once", repeated);
 		}
 
 		[Fact]
@@ -35,8 +34,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(band => WeaponRanges.CategoryOf(row) + " lacks <" + band + ">"))
 				.ToArray();
 
-			Assert.True(incomplete.Length == 0,
-				"These ranges.xml rows show -1 for a band:\n  " + string.Join("\n  ", incomplete));
+			FailureReport.AssertNone("These ranges.xml rows show -1 for a band", incomplete);
 		}
 
 		// - two attribute values: a formula that only breaks on one is still caught
@@ -66,8 +64,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			}
 
 			Assert.True(rows.Length >= 30, "Only " + rows.Length + " ranges.xml rows found, expected at least 30.");
-			Assert.True(failures.Count == 0,
-				"These ranges.xml formulas throw in Weapon.Range:\n  " + string.Join("\n  ", failures));
+			FailureReport.AssertNone("These ranges.xml formulas throw in Weapon.Range", failures);
 		}
 
 		// - updating the hash is only correct after re-reading Range and fixing the port

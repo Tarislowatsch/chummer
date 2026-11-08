@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Bonus
 {
@@ -66,8 +65,10 @@ namespace Chummer.Tests.Consumption.Bonus
 		// - not //bonus: specificskill and friends carry a <bonus> value field of their own
 		public const string BonusRootXPath = "//bonus[not(ancestor::bonus)]";
 
+		public const string HandlerConsumerFile = "clsImprovement.cs";
+
 		private static readonly string ImprovementManagerSource =
-			Path.Combine(DataPaths.RepoRoot, "Chummer", "clsImprovement.cs");
+			Path.Combine(DataPaths.RepoRoot, "Chummer", HandlerConsumerFile);
 
 		public static IReadOnlyCollection<string> CreateImprovementsTags => CachedCreateImprovementsTags.Value;
 
@@ -118,14 +119,14 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		public static IEnumerable<object[]> PackFilesWithBonuses()
 		{
-			return CustomContent.PairedPackFiles()
+			return PackFiles.Paired()
 				.Where(file => BonusTagsInPack(file.FilePath).Count > 0)
 				.Select(file => new object[] { file.FilePath });
 		}
 
 		public static IReadOnlyList<BonusTag> BonusTagsInPack(string packPath)
 		{
-			return BonusTagsIn(CustomContent.PackFileFor(packPath).BaseFileName, CustomContent.Load(packPath));
+			return BonusTagsIn(PackFiles.For(packPath).BaseFileName, Xml.Load(packPath));
 		}
 
 		// - public so the detection tests can drive it with hand-built XML

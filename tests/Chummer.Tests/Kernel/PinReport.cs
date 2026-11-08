@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Xunit;
 
 namespace Chummer.Tests.Kernel
 {
@@ -26,8 +25,7 @@ namespace Chummer.Tests.Kernel
 					+ ", found " + (entry.Actual ?? "nothing"))
 				.ToArray();
 
-			if (differences.Length > 0)
-				Assert.Fail(FailureReport.Build(headline + " differ from the pinned list", differences, line => line));
+			FailureReport.AssertNoneInFull(headline + " differ from the pinned list", differences);
 		}
 
 		private static string Describe<TValue>(IReadOnlyDictionary<string, TValue> values, string key)

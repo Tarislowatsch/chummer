@@ -22,15 +22,12 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unknown.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(xmlPath) + " cites " + unknown.Length
-						+ " book code(s) that books.xml does not declare",
-					unknown,
-					group => "'" + group.Key + "' used by " + group.Count()
-						+ " entries, e.g. '" + group.First().ItemName + "'"));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(xmlPath) + " cites " + unknown.Length
+					+ " book code(s) that books.xml does not declare",
+				unknown,
+				group => "'" + group.Key + "' used by " + group.Count()
+					+ " entries, e.g. '" + group.First().ItemName + "'");
 		}
 	}
 }

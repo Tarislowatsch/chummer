@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Localization
 {
@@ -13,16 +12,13 @@ namespace Chummer.Tests.Localization
 	// - an unknown key throws KeyNotFoundException: most calls have no try
 	public static class UiStringKeys
 	{
-		public static string EnglishFile => Path.Combine(DataPaths.ChummerLangDir, "en-us.xml");
-
 		// - every <key>, duplicates kept: the dictionary's Add throws on a repeat
 		public static IReadOnlyList<string> EnglishKeys => CachedEnglishKeys.Value;
 
 		private static readonly Lazy<IReadOnlyList<string>> CachedEnglishKeys =
 			new Lazy<IReadOnlyList<string>>(() =>
 			{
-				XmlDocument document = new XmlDocument { XmlResolver = null };
-				document.Load(EnglishFile);
+				XmlDocument document = Xml.Load(DataPaths.EnglishLanguageFile);
 				return document.SelectNodes("/chummer/strings/string/key").Cast<XmlNode>()
 					.Select(key => key.InnerText)
 					.ToArray();
@@ -37,13 +33,6 @@ namespace Chummer.Tests.Localization
 				.Where(item => item.entry["key"] == null || item.entry["text"] == null)
 				.Select(item => "string #" + (item.index + 1) + " (key '"
 					+ (item.entry["key"]?.InnerText ?? "(none)") + "')");
-		}
-
-		public static XmlDocument LoadEnglish()
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(EnglishFile);
-			return document;
 		}
 
 		// One GetString call, with its argument as written.
@@ -219,7 +208,7 @@ namespace Chummer.Tests.Localization
 
 		private static IEnumerable<string> AllDataValues(string xpath)
 		{
-			return Directory.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
+			return DataPaths.TopLevelRuleXmlFiles()
 				.SelectMany(path => DataValues(Path.GetFileName(path), xpath));
 		}
 
@@ -232,10 +221,10 @@ namespace Chummer.Tests.Localization
 		private static IEnumerable<XmlNode> Nodes(string fileName, string xpath)
 		{
 			return new[] { Path.Combine(DataPaths.ChummerDataDir, fileName) }
-				.Concat(CustomContent.PairedPackFiles()
+				.Concat(PackFiles.Paired()
 					.Where(pack => string.Equals(pack.BaseFileName, fileName, StringComparison.Ordinal))
 					.Select(pack => pack.FilePath))
-				.SelectMany(path => CustomContent.Load(path).SelectNodes(xpath).Cast<XmlNode>());
+				.SelectMany(path => Xml.Load(path).SelectNodes(xpath).Cast<XmlNode>());
 		}
 
 		// - public so the detection tests can drive it with hand-built source

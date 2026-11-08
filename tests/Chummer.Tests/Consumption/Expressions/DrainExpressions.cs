@@ -6,8 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Localization;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -117,7 +115,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static IReadOnlyDictionary<string, string> EnglishStrings()
 		{
-			return UiStringKeys.LoadEnglish().SelectNodes("/chummer/strings/string").Cast<XmlNode>()
+			return Xml.Load(DataPaths.EnglishLanguageFile).SelectNodes("/chummer/strings/string").Cast<XmlNode>()
 				.ToDictionary(entry => entry["key"].InnerText, entry => entry["text"].InnerText, StringComparer.Ordinal);
 		}
 
@@ -148,12 +146,12 @@ namespace Chummer.Tests.Consumption.Expressions
 		public static IEnumerable<string> DrainValuesFor(string dataFile)
 		{
 			IEnumerable<string> files = new[] { Path.Combine(DataPaths.ChummerDataDir, dataFile) }
-				.Concat(CustomContent.PackFiles
+				.Concat(PackFiles.All
 					.Where(pack => pack.BaseFileNames.Contains(dataFile, StringComparer.Ordinal))
 					.Select(pack => pack.FilePath));
 
 			return files
-				.SelectMany(path => CustomContent.Load(path).SelectNodes("/chummer/traditions/tradition/drain")
+				.SelectMany(path => Xml.Load(path).SelectNodes("/chummer/traditions/tradition/drain")
 					.Cast<XmlNode>())
 				.Select(drain => drain.InnerText)
 				.Distinct(StringComparer.Ordinal);

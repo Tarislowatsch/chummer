@@ -60,16 +60,13 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(xmlPath) + " uses " + unexpected.Length
-						+ " category value(s) in <" + collectionName + "> that <"
-						+ contract.DeclarationBlock + "> does not declare",
-					unexpected,
-					group => "'" + group.Key + "' on " + group.Count()
-						+ " entries, e.g. '" + group.First().ItemName + "'"));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(xmlPath) + " uses " + unexpected.Length
+					+ " category value(s) in <" + collectionName + "> that <"
+					+ contract.DeclarationBlock + "> does not declare",
+				unexpected,
+				group => "'" + group.Key + "' on " + group.Count()
+					+ " entries, e.g. '" + group.First().ItemName + "'");
 		}
 
 		// Same reason the duplicate allowlist has a staleness check: see NameUniquenessTests.
@@ -92,9 +89,8 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These categories are declared (or no longer used) and must be removed from "
-				+ nameof(KnownUndeclaredCategories) + ":\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNoneInFull("These categories are declared (or no longer used) and must be removed from "
+				+ nameof(KnownUndeclaredCategories), stale);
 		}
 
 		// - a renamed collection leaves its hand-written exemption applying to nothing
@@ -109,9 +105,8 @@ namespace Chummer.Tests.Rulebook
 				.Where(key => !known.Contains(key))
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These category scope exceptions name a (file, collection) that carries no "
-				+ "<category> any more:\n  " + string.Join("\n  ", stale));
+			FailureReport.AssertNoneInFull("These category scope exceptions name a (file, collection) that carries no "
+				+ "<category> any more", stale);
 		}
 
 		// Deferred categories are copied verbatim from the failure output into the list.

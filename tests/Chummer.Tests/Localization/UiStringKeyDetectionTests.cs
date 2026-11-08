@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Localization
@@ -10,8 +11,7 @@ namespace Chummer.Tests.Localization
 		[Fact]
 		public void EntriesMissingKeyOrTextFindsBothGaps()
 		{
-			XmlDocument language = new XmlDocument();
-			language.LoadXml("<chummer><strings>"
+			XmlDocument language = Xml.Parse("<chummer><strings>"
 				+ "<string><key>A</key><text>a</text></string>"
 				+ "<string><key>B</key></string>"
 				+ "<string><text>c</text></string>"

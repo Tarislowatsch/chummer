@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -17,9 +18,8 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(lookup => lookup.Site + " " + lookup.Path)
 				.ToArray();
 
-			Assert.True(unanchored.Length == 0,
-				"These lookups match a name in any collection, so a same-named item elsewhere can answer:\n  "
-				+ string.Join("\n  ", unanchored));
+			FailureReport.AssertNone(
+				"These lookups match a name in any collection, so a same-named item elsewhere can answer", unanchored);
 		}
 
 		// - exact per file: a generic variable name like strXPath must not admit a new path elsewhere

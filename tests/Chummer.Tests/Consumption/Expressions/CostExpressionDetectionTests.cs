@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -103,8 +104,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static IReadOnlyList<ExpressionChecks.ExpressionFailure> FailuresFor(string entity, string itemXml)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(itemXml);
+			XmlDocument document = Xml.Parse(itemXml);
 
 			ExpressionChecks.ExpressionRule rule = CostExpressions.Rules.Single(candidate => candidate.Entity == entity);
 			return ExpressionChecks.FailuresIn(rule, new XmlNode[] { document.DocumentElement });

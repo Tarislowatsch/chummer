@@ -17,7 +17,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.RuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryCapacityPassesItsCalculatorsAndConsumers(string id)
 		{
-			AssertPasses(ExpressionChecks.CheckFor(id));
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.CheckFor(id),
+				"a capacity calculator or its consumer fails on");
 		}
 
 		[Theory]
@@ -25,20 +26,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.PackRuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryPackCapacityPassesItsCalculatorsAndConsumers(string packPath, string id)
 		{
-			AssertPasses(ExpressionChecks.PackCheckFor(packPath, id));
-		}
-
-		private static void AssertPasses(ExpressionChecks.ExpressionCheck check)
-		{
-			if (check.Failures.Count > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
-						+ " value(s) a capacity calculator or its consumer fails on",
-					check.Failures,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.PackCheckFor(packPath, id),
+				"a capacity calculator or its consumer fails on");
 		}
 
 		// - key "file Class.Member": literals "capacity" or "armorcapacity" in that member
@@ -106,8 +95,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void EveryChildGearCapacityOverrideParses()
 		{
-			XmlDocument document = new XmlDocument();
-			document.Load(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"));
+			XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "gear.xml"));
 			string[] capacities = document.SelectNodes("//usegear[capacity]").Cast<XmlNode>()
 				.Select(child => "[" + child["capacity"].InnerText + "]")
 				.ToArray();
@@ -128,7 +116,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				})
 				.ToArray();
 
-			Assert.True(failures.Length == 0, "Unparsable child capacities:\n  " + string.Join("\n  ", failures));
+			FailureReport.AssertNone("Unparsable child capacities", failures);
 		}
 
 		// - a green run proves nothing if a rule reaches no value: Gear skips an absent field
@@ -157,8 +145,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.ToDictionary(rule => rule.Entity, StringComparer.Ordinal);
 			Dictionary<string, int> actual = CapacityExpressions.Rules.ToDictionary(rule => rule.Id, rule =>
 			{
-				XmlDocument document = new XmlDocument();
-				document.Load(Path.Combine(DataPaths.ChummerDataDir, entities[rule.Entity].FileName));
+				XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, entities[rule.Entity].FileName));
 				return document.SelectNodes(entities[rule.Entity].ItemXPath).Cast<XmlNode>()
 					.Count(item => item[rule.Field] != null);
 			}, StringComparer.Ordinal);

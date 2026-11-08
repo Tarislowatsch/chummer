@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -223,8 +224,7 @@ namespace Chummer.Tests.Consumption.Fields
 		private static IReadOnlyList<string> UnconvertibleIn(string className, string itemXml,
 			NumericFields.ConvertedField field)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(itemXml);
+			XmlDocument document = Xml.Parse(itemXml);
 
 			return NumericFields
 				.UnconvertibleValuesIn(new XmlNode[] { document.DocumentElement }, className, new[] { field })

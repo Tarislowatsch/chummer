@@ -34,15 +34,12 @@ namespace Chummer.Tests.Consumption.Bonus
 				.OrderBy(group => group.Key, StringComparer.Ordinal)
 				.ToArray();
 
-			if (unhandled.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(xmlPath) + " uses " + unhandled.Length
-						+ " bonus tag(s) that no code path reads, so they silently grant nothing",
-					unhandled,
-					group => group.Key + " on " + group.Count() + " entries, e.g. '"
-						+ group.First().ItemName + "'"));
-			}
+			FailureReport.AssertNone(
+				Path.GetFileName(xmlPath) + " uses " + unhandled.Length
+					+ " bonus tag(s) that no code path reads, so they silently grant nothing",
+				unhandled,
+				group => group.Key + " on " + group.Count() + " entries, e.g. '"
+					+ group.First().ItemName + "'");
 		}
 
 		// - a missing tag fails loudly, an over-reaching extractor would hide one

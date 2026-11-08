@@ -91,7 +91,7 @@ namespace Chummer.Tests.Localization
 				if (!english.ContainsKey(fileName))
 				{
 					english[fileName] = IsDataFile(fileName)
-						? Load(Path.Combine(DataPaths.ChummerDataDir, fileName))
+						? Xml.Load(Path.Combine(DataPaths.ChummerDataDir, fileName))
 						: null;
 				}
 
@@ -99,7 +99,7 @@ namespace Chummer.Tests.Localization
 			};
 
 			return Directory.EnumerateFiles(LanguageDir, "*" + LanguageDataSuffix)
-				.ToDictionary(LanguageOf, path => EntriesIn(LanguageOf(path), Load(path), englishFor),
+				.ToDictionary(LanguageOf, path => EntriesIn(LanguageOf(path), Xml.Load(path), englishFor),
 					StringComparer.Ordinal);
 		}
 
@@ -277,13 +277,6 @@ namespace Chummer.Tests.Localization
 		private static string Decoded(XmlNode name)
 		{
 			return name.InnerXml.Replace("&amp;", "&");
-		}
-
-		private static XmlDocument Load(string path)
-		{
-			XmlDocument document = new XmlDocument { XmlResolver = null };
-			document.Load(path);
-			return document;
 		}
 	}
 }

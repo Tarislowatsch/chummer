@@ -1,6 +1,4 @@
-﻿using System.IO;
-using Chummer.Tests.Kernel;
-using Xunit;
+﻿using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -13,27 +11,14 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.RuleIds), "avail", MemberType = typeof(ExpressionChecks))]
 		public void EveryAvailabilityParsesInItsCalculator(string id)
 		{
-			AssertParses(ExpressionChecks.CheckFor(id));
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.CheckFor(id), "its calculator throws on");
 		}
 
 		[Theory]
 		[MemberData(nameof(ExpressionChecks.PackRuleIds), "avail", MemberType = typeof(ExpressionChecks))]
 		public void EveryPackAvailabilityParsesInItsCalculator(string packPath, string id)
 		{
-			AssertParses(ExpressionChecks.PackCheckFor(packPath, id));
-		}
-
-		private static void AssertParses(ExpressionChecks.ExpressionCheck check)
-		{
-			if (check.Failures.Count > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
-						+ " value(s) its calculator throws on",
-					check.Failures,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.PackCheckFor(packPath, id), "its calculator throws on");
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Rulebook
@@ -18,7 +19,7 @@ namespace Chummer.Tests.Rulebook
 		[InlineData("custom_rigger_critterpowers.xml", "custom", "critterpowers.xml")]
 		public void ClassifyPairsAFileTheWayLoadsGlobDoes(string fileName, string prefix, string baseFile)
 		{
-			CustomContent.PackFile file = CustomContent.Classify(@"C:\pack\" + fileName, BaseFiles);
+			PackFiles.PackFile file = PackFiles.Classify(@"C:\pack\" + fileName, BaseFiles);
 
 			Assert.Equal(prefix, file.Prefix);
 			Assert.Equal(new[] { baseFile }, file.BaseFileNames);
@@ -27,19 +28,19 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void ClassifyLeavesAFileWithoutPrefixUnpaired()
 		{
-			Assert.Null(CustomContent.Classify(@"C:\pack\mypack_gear.xml", BaseFiles).Prefix);
+			Assert.Null(PackFiles.Classify(@"C:\pack\mypack_gear.xml", BaseFiles).Prefix);
 		}
 
 		[Fact]
 		public void ClassifyNeverPairsWithImprovements()
 		{
-			Assert.Empty(CustomContent.Classify(@"C:\pack\custom_mypack_improvements.xml", BaseFiles).BaseFileNames);
+			Assert.Empty(PackFiles.Classify(@"C:\pack\custom_mypack_improvements.xml", BaseFiles).BaseFileNames);
 		}
 
 		[Fact]
 		public void ClassifyReportsEveryBaseAnAmbiguousNameMatches()
 		{
-			CustomContent.PackFile file = CustomContent.Classify(
+			PackFiles.PackFile file = PackFiles.Classify(
 				@"C:\pack\custom_extra_gear.xml", new[] { "gear.xml", "extra_gear.xml" });
 
 			Assert.Equal(new[] { "extra_gear.xml", "gear.xml" }, file.BaseFileNames);
@@ -105,7 +106,7 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void RedeclaredCategoriesFindsOnlyValuesTheBaseDeclares()
 		{
-			XmlDocument pack = Xml(
+			XmlDocument pack = Xml.Parse(
 				"<chummer><categories><category>Ammunition</category><category>Made Up</category></categories></chummer>");
 
 			Assert.Equal(new[] { "categories/Ammunition" },
@@ -113,39 +114,32 @@ namespace Chummer.Tests.Rulebook
 			Assert.Empty(CustomContent.RedeclaredCategories(PackFile("override"), pack));
 		}
 
-		private static KeyValuePair<CustomContent.PackFile, XmlDocument> Override(
+		private static KeyValuePair<PackFiles.PackFile, XmlDocument> Override(
 			string fileName, string item)
 		{
-			return new KeyValuePair<CustomContent.PackFile, XmlDocument>(
-				new CustomContent.PackFile(@"C:\pack\" + fileName, "override", new[] { "gear.xml" }),
-				Xml("<chummer><gears><gear>" + item + "</gear></gears></chummer>"));
+			return new KeyValuePair<PackFiles.PackFile, XmlDocument>(
+				new PackFiles.PackFile(@"C:\pack\" + fileName, "override", new[] { "gear.xml" }),
+				Xml.Parse("<chummer><gears><gear>" + item + "</gear></gears></chummer>"));
 		}
 
 		private static string[] DiscardedNames(string prefix)
 		{
-			return CustomContent.ItemsLoadDiscards(PackFile(prefix), Xml(Pack), Xml(Base))
+			return CustomContent.ItemsLoadDiscards(PackFile(prefix), Xml.Parse(Pack), Xml.Parse(Base))
 				.Select(item => item.Name)
 				.ToArray();
 		}
 
 		private static string[] UndeclaredCategories(string prefix)
 		{
-			return CustomContent.UndeclaredCategoryUsages(PackFile(prefix), Xml(Pack))
+			return CustomContent.UndeclaredCategoryUsages(PackFile(prefix), Xml.Parse(Pack))
 				.Select(usage => usage.Category)
 				.ToArray();
 		}
 
 		// - paired with the real gear.xml: the declarations come from the cached base parse
-		private static CustomContent.PackFile PackFile(string prefix)
+		private static PackFiles.PackFile PackFile(string prefix)
 		{
-			return new CustomContent.PackFile(@"C:\pack\" + prefix + "_test_gear.xml", prefix, new[] { "gear.xml" });
-		}
-
-		private static XmlDocument Xml(string text)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(text);
-			return document;
+			return new PackFiles.PackFile(@"C:\pack\" + prefix + "_test_gear.xml", prefix, new[] { "gear.xml" });
 		}
 	}
 }

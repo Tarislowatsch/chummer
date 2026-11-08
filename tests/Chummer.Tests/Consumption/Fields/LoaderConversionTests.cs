@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -16,11 +15,10 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			string[] failures = LoaderConversions.Corpora
 				.SelectMany(corpus => corpus.Files().SelectMany(path => LoaderConversions.FailuresIn(Path.GetFileName(path),
-					CustomContent.Load(path), corpus, LoaderConversions.ApplicationConversions)))
+					Xml.Load(path), corpus, LoaderConversions.ApplicationConversions)))
 				.ToArray();
 
-			Assert.True(failures.Length == 0,
-				FailureReport.Build("Values a loader converts directly", failures, line => line));
+			FailureReport.AssertNone("Values a loader converts directly", failures);
 		}
 
 		// - key "file corpus: path": a new conversion or a dropped null check fails here first
@@ -132,7 +130,7 @@ namespace Chummer.Tests.Consumption.Fields
 					group =>
 					{
 						LoaderConversions.Conversion first = group.First();
-						return first.Corpus.Files().Sum(file => LoaderConversions.ValuesIn(CustomContent.Load(file),
+						return first.Corpus.Files().Sum(file => LoaderConversions.ValuesIn(Xml.Load(file),
 							first.Corpus.ItemXPath, first.Path, first.Form, group.Any(conversion => !conversion.Guarded)).Count());
 					},
 					StringComparer.Ordinal);

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -12,11 +11,11 @@ namespace Chummer.Tests.Consumption.Fields
 		[MemberData(nameof(DataPaths.RuleXmlFiles), MemberType = typeof(DataPaths))]
 		public void NoValueReadsAsANumberThroughAComma(string path)
 		{
-			string[] findings = DecimalCommas.CommaNumbersIn(CustomContent.Load(path)).ToArray();
+			string[] findings = DecimalCommas.CommaNumbersIn(Xml.Load(path)).ToArray();
 
-			Assert.True(findings.Length == 0, FailureReport.Build(
+			FailureReport.AssertNone(
 				path + " has values that en-US reads with the comma as a thousands separator",
-				findings, finding => finding));
+				findings);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Localization
@@ -116,7 +117,7 @@ namespace Chummer.Tests.Localization
 		public void BlockForAFileTheDataLacksIsDroppedOnce()
 		{
 			TranslationReferences.Entry block = TranslationReferences.EntriesIn("de",
-				Document("<chummer><chummer file=\"gone.xml\"><gears><gear><name>X</name><translate>Y</translate>"
+				Xml.Parse("<chummer><chummer file=\"gone.xml\"><gears><gear><name>X</name><translate>Y</translate>"
 					+ "</gear></gears></chummer></chummer>"), fileName => null)
 				.Single();
 
@@ -221,17 +222,10 @@ namespace Chummer.Tests.Localization
 		private static IReadOnlyList<TranslationReferences.Entry> Entries(string fileName, string englishXml,
 			string blockXml)
 		{
-			XmlDocument english = Document(englishXml);
-			XmlDocument language = Document("<chummer><chummer file=\"" + fileName + "\">" + blockXml + "</chummer></chummer>");
+			XmlDocument english = Xml.Parse(englishXml);
+			XmlDocument language = Xml.Parse("<chummer><chummer file=\"" + fileName + "\">" + blockXml + "</chummer></chummer>");
 
 			return TranslationReferences.EntriesIn("de", language, name => name == fileName ? english : null);
-		}
-
-		private static XmlDocument Document(string xml)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(xml);
-			return document;
 		}
 	}
 }

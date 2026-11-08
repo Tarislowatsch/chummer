@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Chummer.Tests.Kernel;
 using Xunit;
@@ -25,7 +24,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.RuleIds), "cost", MemberType = typeof(ExpressionChecks))]
 		public void EveryCostParsesInItsCalculator(string id)
 		{
-			AssertParses(ExpressionChecks.CheckFor(id), KnownFailuresFor(id));
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.CheckFor(id), "its calculator throws on",
+				KnownFailuresFor(id));
 		}
 
 		// - no allowlist: the known failures above are base entries
@@ -33,24 +33,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.PackRuleIds), "cost", MemberType = typeof(ExpressionChecks))]
 		public void EveryPackCostParsesInItsCalculator(string packPath, string id)
 		{
-			AssertParses(ExpressionChecks.PackCheckFor(packPath, id), new string[0]);
-		}
-
-		private static void AssertParses(ExpressionChecks.ExpressionCheck check, IReadOnlyCollection<string> known)
-		{
-			ExpressionChecks.ExpressionFailure[] unexpected = check.Failures
-				.Where(failure => !known.Contains(failure.Key))
-				.ToArray();
-
-			if (unexpected.Length > 0)
-			{
-				Assert.Fail(FailureReport.Build(
-					Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + check.Rule.Id
-						+ " value(s) its calculator throws on",
-					unexpected,
-					failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-						+ failure.Rating + ": " + failure.Error));
-			}
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.PackCheckFor(packPath, id), "its calculator throws on");
 		}
 
 		// - a fixed entry left on the list would let the same value come back unnoticed
@@ -64,9 +47,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(key => entry.Key + ": " + key))
 				.ToArray();
 
-			Assert.True(stale.Length == 0,
-				"These known cost failures no longer fail. Delete them from the list:\n  "
-				+ string.Join("\n  ", stale));
+			FailureReport.AssertNoneInFull("These known cost failures no longer fail. Delete them from the list", stale);
 		}
 
 		private static IReadOnlyCollection<string> KnownFailuresFor(string id)

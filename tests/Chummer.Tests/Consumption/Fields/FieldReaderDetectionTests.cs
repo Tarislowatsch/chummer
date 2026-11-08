@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -18,7 +19,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ANameSpelledByNoLiteralIsUnread()
 		{
-			XmlDocument document = Document("<chummer><mods><mod><name>A</name><bodymin>2</bodymin></mod>"
+			XmlDocument document = Xml.Parse("<chummer><mods><mod><name>A</name><bodymin>2</bodymin></mod>"
 				+ "<mod><name>B</name><bodymin>3</bodymin></mod></mods></chummer>");
 
 			FieldReaders.ElementName unread = Assert.Single(FieldReaders.UnreadNames(
@@ -33,7 +34,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void RequirementUsesKeepGroupDirectChildAndBareText()
 		{
-			XmlDocument document = Document("<chummer><spells><spell><name>S</name><required>"
+			XmlDocument document = Xml.Parse("<chummer><spells><spell><name>S</name><required>"
 				+ "<allof><metamagic>Geomancy</metamagic><!-- note --></allof>"
 				+ "<bodymin>2</bodymin>loose</required></spell></spells></chummer>");
 
@@ -51,7 +52,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void ATagReadForAnotherFileStaysUnread()
 		{
-			XmlDocument document = Document("<chummer><metamagics><metamagic><name>M</name><required>"
+			XmlDocument document = Xml.Parse("<chummer><metamagics><metamagic><name>M</name><required>"
 				+ "<oneof><quality>Q</quality></oneof></required></metamagic></metamagics></chummer>");
 			FieldReaders.RequirementReader powers = new FieldReaders.RequirementReader(
 				"powers.xml", "powers/power", "required/oneof", "frmSelectPower.cs:1", FieldReaders.ReadStyle.PathLiterals);
@@ -66,7 +67,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void APackUseMatchesTheReaderOfItsBaseFile()
 		{
-			XmlDocument document = Document("<chummer><powers><power><name>P</name><required>"
+			XmlDocument document = Xml.Parse("<chummer><powers><power><name>P</name><required>"
 				+ "<oneof><quality>Q</quality></oneof></required></power></powers></chummer>");
 			FieldReaders.RequirementReader powers = new FieldReaders.RequirementReader(
 				"powers.xml", "powers/power", "required/oneof", "frmSelectPower.cs:1", FieldReaders.ReadStyle.PathLiterals);
@@ -203,7 +204,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void HandlerFieldsKeepTheirReachFromTheConsumersView()
 		{
-			XmlDocument document = Document("<chummer><qualities><quality><bonus>"
+			XmlDocument document = Xml.Parse("<chummer><qualities><quality><bonus>"
 				+ "<addattribute><name>MAG</name><min>1</min></addattribute>"
 				+ "<addattribute><name>RES</name>loose</addattribute>"
 				+ "</bonus></quality><quality><bonus><specificskill><bonus>"
@@ -227,7 +228,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void AHandlerBlockOnAVehicleModIsOutsideTheRoots()
 		{
-			XmlDocument document = Document("<chummer><mods><mod><bonus>"
+			XmlDocument document = Xml.Parse("<chummer><mods><mod><bonus>"
 				+ "<addattribute><name>MAG</name></addattribute></bonus></mod></mods></chummer>");
 
 			Assert.Equal("v.xml addattribute/name (OutsideRoot)", Assert.Single(
@@ -347,7 +348,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void AHandlerFieldKeepsItsValueAsTheBranchComparesIt()
 		{
-			XmlDocument document = Document("<chummer><qualities><quality><bonus>"
+			XmlDocument document = Xml.Parse("<chummer><qualities><quality><bonus>"
 				+ "<addattribute><name>RES</name></addattribute></bonus></quality></qualities></chummer>");
 
 			Assert.Equal("RES", Assert.Single(
@@ -370,13 +371,6 @@ namespace Chummer.Tests.Consumption.Fields
 		private static FieldReaders.RequirementReader Reader(string group, FieldReaders.ReadStyle style)
 		{
 			return new FieldReaders.RequirementReader("qualities.xml", "qualities/quality", group, "frmSelectQuality.cs:1", style);
-		}
-
-		private static XmlDocument Document(string xml)
-		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(xml);
-			return document;
 		}
 	}
 }

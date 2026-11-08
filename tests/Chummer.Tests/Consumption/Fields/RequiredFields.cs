@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Fields
 {
@@ -212,7 +211,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 		public static IEnumerable<object[]> PackEntities()
 		{
-			return CustomContent.PairedPackFiles()
+			return PackFiles.Paired()
 				.SelectMany(file => PackContractsIn(file.FilePath))
 				.Select(contract => new object[] { contract.FilePath, contract.Rule.Entity });
 		}
@@ -226,8 +225,8 @@ namespace Chummer.Tests.Consumption.Fields
 		// - only rules that reach an entry: the rest would be always-green cases
 		private static IEnumerable<RequiredFieldContract> PackContractsIn(string packPath)
 		{
-			return ContractsIn(CustomContent.PackFileFor(packPath).BaseFileName, packPath,
-					CustomContent.Load(packPath))
+			return ContractsIn(PackFiles.For(packPath).BaseFileName, packPath,
+					Xml.Load(packPath))
 				.Where(contract => contract.ItemCount > 0);
 		}
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -17,7 +18,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[InlineData("FixedValues(0.1,0.25,0.5)", 2, "0.25")]
 		public void CalculatesTheShapesTheDataUses(string ess, int rating, string expected)
 		{
-			Assert.Equal(decimal.Parse(expected, ExpressionChecks.ApplicationCulture), EssExpressions.Calculate(ess, rating));
+			Assert.Equal(decimal.Parse(expected, Cultures.Application), EssExpressions.Calculate(ess, rating));
 		}
 
 		[Fact]
@@ -34,8 +35,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		private static ExpressionChecks.ExpressionFailure[] FailuresOf(string xml)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<cyberwares>" + xml + "</cyberwares>");
+			XmlDocument document = Xml.Parse("<cyberwares>" + xml + "</cyberwares>");
 			return ExpressionChecks.FailuresIn(EssExpressions.Rules.First(rule => rule.Entity == "Cyberware"),
 				document.DocumentElement.ChildNodes.Cast<XmlNode>()).ToArray();
 		}

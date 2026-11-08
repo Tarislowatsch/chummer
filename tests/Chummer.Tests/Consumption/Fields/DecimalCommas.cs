@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.Linq;
 using System.Xml;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -20,9 +19,9 @@ namespace Chummer.Tests.Consumption.Fields
 
 			decimal asDecimal;
 			double asDouble;
-			return decimal.TryParse(value, NumberStyles.Number, ExpressionChecks.ApplicationCulture, out asDecimal)
+			return decimal.TryParse(value, NumberStyles.Number, Cultures.Application, out asDecimal)
 				|| double.TryParse(value, NumberStyles.Float | NumberStyles.AllowThousands,
-					ExpressionChecks.ApplicationCulture, out asDouble);
+					Cultures.Application, out asDouble);
 		}
 
 		// - leaf elements and attributes: frmSelectCritterPower.cs:483 converts an attribute

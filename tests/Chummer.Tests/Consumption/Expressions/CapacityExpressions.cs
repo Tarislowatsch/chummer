@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -133,7 +134,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		private static string EvaluateToString(XPathExpression expression)
 		{
 			return Convert.ToString(new XmlDocument().CreateNavigator().Evaluate(expression),
-				ExpressionChecks.ApplicationCulture);
+				Cultures.Application);
 		}
 
 		// - the "/[" branch shared by ArmorMod, Cyberware and both Gear calculators
@@ -232,7 +233,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				bool squareBrackets = capacity.Contains('[');
 				string expression = squareBrackets ? StripBrackets(capacity) : capacity;
 				decimal number = Convert.ToDecimal(new XmlDocument().CreateNavigator().Evaluate(Compile(expression, rating)),
-					ExpressionChecks.ApplicationCulture);
+					Cultures.Application);
 				string result = Math.Max(1, Convert.ToInt32(Math.Floor(number))).ToString();
 				return squareBrackets ? "[" + result + "]" : result;
 			}
@@ -258,7 +259,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 			string expression = capacity.Contains('[') ? StripBrackets(capacity) : capacity;
 			string result = EvaluateToString(Compile(expression.Replace("/", " div "), rating));
-			return Convert.ToInt32(Math.Ceiling(Convert.ToDouble(result, ExpressionChecks.ApplicationCulture)));
+			return Convert.ToInt32(Math.Ceiling(Convert.ToDouble(result, Cultures.Application)));
 		}
 
 		// - Armor.CapacityRemaining (clsEquipment.cs:1945, :1963) deducts mods and gear alike
@@ -383,7 +384,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 				string result = EvaluateToString(compiled);
 				if (result.Contains('.'))
-					Convert.ToInt32(Math.Floor(Convert.ToDecimal(result, ExpressionChecks.ApplicationCulture)));
+					Convert.ToInt32(Math.Floor(Convert.ToDecimal(result, Cultures.Application)));
 			}
 			catch (ExpressionChecks.SilentlyDiscarded)
 			{

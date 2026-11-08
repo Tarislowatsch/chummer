@@ -89,16 +89,9 @@ namespace Chummer.Tests.Kernel
 		{
 			List<RuleFile> files = new List<RuleFile>();
 
-			foreach (string xmlPath in Directory
-				.EnumerateFiles(DataPaths.ChummerDataDir, "*.xml", SearchOption.TopDirectoryOnly)
-				.OrderBy(path => path, StringComparer.Ordinal))
+			foreach (string xmlPath in DataPaths.TopLevelRuleXmlFiles())
 			{
-				XmlDocument document = new XmlDocument
-				{
-					// - matches the XmlReader tests' default: two loaders must not disagree here
-					XmlResolver = null
-				};
-				document.Load(xmlPath);
+				XmlDocument document = Xml.Load(xmlPath);
 
 				XmlElement root = document.DocumentElement;
 				if (root == null)

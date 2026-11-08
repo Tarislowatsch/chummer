@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Xml;
 using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Bonus
@@ -10,7 +11,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void AFractionPrintedInTheGermanCultureParsesTenfold()
 		{
-			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, ExpressionChecks.ApplicationCulture));
+			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.Application));
 			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, BonusValues.LocalCulture));
 		}
 
@@ -38,8 +39,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void AnOwnerWithoutANumericRatingIsReplayedFromZeroToTheLimit()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<power><name>P</name><levels>yes</levels><bonus><reach>1</reach></bonus></power>");
+			XmlDocument document = Xml.Parse("<power><name>P</name><levels>yes</levels><bonus><reach>1</reach></bonus></power>");
 
 			Assert.Equal(Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1),
 				BonusValues.RatingsOf(document.SelectSingleNode("power/bonus")));
@@ -167,8 +167,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void AVehicleModBonusIsNotReplayed()
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<chummer><mods><mod><name>M</name><bonus><reach>x</reach></bonus></mod></mods></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><mods><mod><name>M</name><bonus><reach>x</reach></bonus></mod></mods></chummer>");
 
 			Assert.Empty(BonusValues.CheckIn("vehicles.xml", "vehicles.xml", document).Failures);
 		}
@@ -221,8 +220,7 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		private static BonusValues.BonusValueCheck Check(string item)
 		{
-			XmlDocument document = new XmlDocument();
-			document.LoadXml("<chummer><items>" + item + "</items></chummer>");
+			XmlDocument document = Xml.Parse("<chummer><items>" + item + "</items></chummer>");
 			return BonusValues.CheckIn("test.xml", "test.xml", document);
 		}
 

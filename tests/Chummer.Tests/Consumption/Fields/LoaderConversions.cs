@@ -6,7 +6,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using Chummer.Tests.Kernel;
-using Chummer.Tests.Rulebook;
 
 namespace Chummer.Tests.Consumption.Fields
 {
@@ -41,7 +40,7 @@ namespace Chummer.Tests.Consumption.Fields
 			public IEnumerable<string> Files()
 			{
 				return BaseFiles.Select(file => System.IO.Path.Combine(DataPaths.ChummerDataDir, file))
-					.Concat(CustomContent.PackFiles
+					.Concat(PackFiles.All
 						.Where(pack => pack.BaseFileNames.Intersect(BaseFiles, StringComparer.Ordinal).Any())
 						.Select(pack => pack.FilePath));
 			}
