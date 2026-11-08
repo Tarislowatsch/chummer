@@ -1,0 +1,9 @@
+<Project>
+
+  <!-- - every test project under tests/ shares one runsettings file -->
+  <!-- - wired in through MSBuild: CI, the CLI and VS all read it -->
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildThisFileDirectory).runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+</Project>
