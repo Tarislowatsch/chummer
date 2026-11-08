@@ -286,15 +286,28 @@ namespace Chummer.Tests
 			IEnumerable<Reference> references, IReadOnlyList<IReadOnlyList<string>> definitions)
 		{
 			return references
-				.Where(reference => !definitions.Any(definition => Matches(rule, reference, definition)))
+				.Where(reference => !definitions.Any(definition => Matches(rule, reference.Values, definition)))
 				.ToArray();
 		}
 
-		private static bool Matches(ReferenceRule rule, Reference reference, IReadOnlyList<string> definition)
+		// - the item the consumer's lookup finds: first target in order, first item in document order
+		// - null when it misses: resolving is EveryReferenceResolves' business
+		public static XmlNode TargetOf(ReferenceRule rule, XmlNode reference, Func<string, XmlDocument> load)
+		{
+			if (rule.ListSeparator != null)
+				throw new ArgumentException("A list rule has no single target: " + rule.Id);
+
+			string[] values = rule.KeyFields.Select(field => ValueOf(reference, field.Source)).ToArray();
+			return rule.Targets
+				.SelectMany(target => load(target.FileName).SelectNodes(target.ItemXPath).Cast<XmlNode>())
+				.FirstOrDefault(item => Matches(rule, values, rule.KeyFields.Select(field => ValueOf(item, field.Target)).ToArray()));
+		}
+
+		private static bool Matches(ReferenceRule rule, IReadOnlyList<string> values, IReadOnlyList<string> definition)
 		{
 			for (int index = 0; index < rule.KeyFields.Count; index++)
 			{
-				string value = reference.Values[index];
+				string value = values[index];
 				if (value == null)
 				{
 					if (!rule.KeyFields[index].Optional)
@@ -696,9 +709,14 @@ namespace Chummer.Tests
 				"ConvertToCyberwareGrade(objXmlBioware[\"grade\"]",
 				"packs.xml", "/chummer/packs/pack/biowares/bioware/grade", BiowareGrades),
 			// - AddPACKSGear narrows by category only when the entry has one
+			// - every gear list it is called on, each with its recursion into child gear
 			Rule("pack gear", "frmCreate.cs:22872",
 				"objXmlGear[\"category\"] != null",
-				"packs.xml", "/chummer/packs/pack/gears//gear", Gear,
+				"packs.xml", "/chummer/packs/pack/gears//gear | /chummer/packs/pack/armors/armor/gears//gear"
+					+ " | /chummer/packs/pack/weapons/weapon/accessories/accessory/gears//gear"
+					+ " | /chummer/packs/pack/cyberwares/cyberware/gears//gear"
+					+ " | /chummer/packs/pack/cyberwares/cyberware/cyberwares/cyberware/gears//gear"
+					+ " | /chummer/packs/pack/vehicles/vehicle/gears/gear/gears//gear", Gear,
 				new[] { new KeyField("name", "name", false), new KeyField("category", "category", true) }),
 			Rule("pack vehicles", "frmCreate.cs:21282",
 				"objXmlKit.SelectNodes(\"vehicles/vehicle\")",
