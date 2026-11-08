@@ -32,7 +32,6 @@ namespace Chummer.GoldenMaster.Tests
 		// - no BOM: frmViewer's preamble is not part of the print
 		public static string Print(string relativePath)
 		{
-			AppHost.Ensure();
 			Character character = new Character();
 			character.FileName = Path.Combine(CharactersDir, relativePath);
 			if (!character.Load())

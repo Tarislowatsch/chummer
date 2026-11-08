@@ -234,6 +234,18 @@ The test process gets a sandbox, set up in `AppHost.cs`:
   `Software\Chummer.GoldenMaster.Sandbox`, stays in your real registry until you
   log off.
 
+xUnit builds the sandbox once, before the first test of the `AppHost`
+collection runs. Every test class in the project must carry
+`[Collection(AppHost.Collection)]`. `EveryTestClassJoinsTheAppHostCollection`
+fails for any test class without that attribute. Being one collection also
+means the classes do not run in parallel, which the process-wide state
+requires.
+
+The collection does not cover theory data. xUnit evaluates `MemberData` and
+`ClassData` during discovery, before any fixture exists, so a data source must
+not touch a Chummer type. It may list fixture files, but it must not load a
+character. No test catches a data source that does.
+
 ## Continuous integration
 
 [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) builds on
