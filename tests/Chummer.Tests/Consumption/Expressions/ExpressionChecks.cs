@@ -320,6 +320,23 @@ namespace Chummer.Tests.Consumption.Expressions
 				() => RuleCorpus.Files.SelectMany(file => file.ExpressionChecks)
 					.ToDictionary(check => check.Rule.Id, StringComparer.Ordinal));
 
+		// - failsOn names the code that throws, e.g. "CalculatedESS throws on"
+		// - known: failure keys an allowlist accepts, null for none
+		public static void AssertNoFailures(ExpressionCheck check, string failsOn,
+			IReadOnlyCollection<string> known = null)
+		{
+			ExpressionFailure[] unexpected = check.Failures
+				.Where(failure => known == null || !known.Contains(failure.Key))
+				.ToArray();
+
+			FailureReport.AssertNone(
+				Path.GetFileName(check.FilePath) + " has " + unexpected.Length + " " + check.Rule.Id
+					+ " value(s) " + failsOn,
+				unexpected,
+				failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
+					+ failure.Rating + ": " + failure.Error);
+		}
+
 		public static IEnumerable<object[]> PackRuleIds(string field)
 		{
 			return AllPackChecks

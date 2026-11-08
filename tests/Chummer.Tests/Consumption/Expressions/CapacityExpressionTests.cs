@@ -17,7 +17,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.RuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryCapacityPassesItsCalculatorsAndConsumers(string id)
 		{
-			AssertPasses(ExpressionChecks.CheckFor(id));
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.CheckFor(id),
+				"a capacity calculator or its consumer fails on");
 		}
 
 		[Theory]
@@ -25,17 +26,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		[MemberData(nameof(ExpressionChecks.PackRuleIds), "armorcapacity", MemberType = typeof(ExpressionChecks))]
 		public void EveryPackCapacityPassesItsCalculatorsAndConsumers(string packPath, string id)
 		{
-			AssertPasses(ExpressionChecks.PackCheckFor(packPath, id));
-		}
-
-		private static void AssertPasses(ExpressionChecks.ExpressionCheck check)
-		{
-			FailureReport.AssertNone(
-				Path.GetFileName(check.FilePath) + " has " + check.Failures.Count + " " + check.Rule.Id
-					+ " value(s) a capacity calculator or its consumer fails on",
-				check.Failures,
-				failure => "'" + failure.ItemName + "' = \"" + failure.Value + "\" at rating "
-					+ failure.Rating + ": " + failure.Error);
+			ExpressionChecks.AssertNoFailures(ExpressionChecks.PackCheckFor(packPath, id),
+				"a capacity calculator or its consumer fails on");
 		}
 
 		// - key "file Class.Member": literals "capacity" or "armorcapacity" in that member
