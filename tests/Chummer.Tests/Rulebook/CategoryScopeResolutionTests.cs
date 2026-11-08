@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Chummer.Tests.Rulebook
 {
-	// - the scope count next door moves for any reason and names no rule
+	// - the scope count in DataPathsTests moves for any reason and names no rule
 	// - the missing-block throw is unreachable through the real data
 	// - each outcome is driven through injected declarations, not the cached corpus
 	public class CategoryScopeResolutionTests

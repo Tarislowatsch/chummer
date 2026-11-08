@@ -69,7 +69,7 @@ namespace Chummer.Tests.Rulebook
 
 		// - one implementation for the real files and the hand-built cases that prove it works
 		// - ordinal and verbatim: Options.BookXPath() (clsOptions.cs:2086-2090) compares exactly
-		// - the set is rebuilt here so a caller's comparer cannot defeat the test next door
+		// - the set is rebuilt here so a caller's comparer cannot loosen the comparison
 		public static IEnumerable<BookReference> Undeclared(
 			IEnumerable<BookReference> references, IEnumerable<string> declaredCodes)
 		{

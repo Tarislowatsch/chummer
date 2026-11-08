@@ -86,7 +86,7 @@ namespace Chummer.Tests.Kernel
 			Assert.Equal(26, DataPaths.TopLevelRuleXmlWithSchemaFiles().Count());
 		}
 
-		// - the allowlist guard next door notices a dropped file for only 8 of the 42 collections
+		// - NameUniquenessTests' allowlist guard catches a dropped file in only 8 of 42 collections
 		// - a discovery gap would leave spells.xml or qualities.xml unchecked while staying green
 		// - bumping the number is only correct for a deliberate new collection wrapper
 		[Fact]
