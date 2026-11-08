@@ -38,10 +38,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			public IEnumerable<string> Files()
 			{
-				return BaseFiles.Select(file => System.IO.Path.Combine(DataPaths.ChummerDataDir, file))
-					.Concat(PackFiles.All
-						.Where(pack => pack.BaseFileNames.Intersect(BaseFiles, StringComparer.Ordinal).Any())
-						.Select(pack => pack.FilePath));
+				return DataPaths.FilesWithPacks(BaseFiles.ToArray());
 			}
 		}
 

@@ -217,13 +217,9 @@ namespace Chummer.Tests.Localization
 			return Nodes(fileName, xpath).Select(node => node.InnerText);
 		}
 
-		// - the base file plus every pack file Load would merge into it once copied in
 		private static IEnumerable<XmlNode> Nodes(string fileName, string xpath)
 		{
-			return new[] { Path.Combine(DataPaths.ChummerDataDir, fileName) }
-				.Concat(PackFiles.Paired()
-					.Where(pack => string.Equals(pack.BaseFileName, fileName, StringComparison.Ordinal))
-					.Select(pack => pack.FilePath))
+			return DataPaths.FilesWithPacks(fileName)
 				.SelectMany(path => Xml.Load(path).SelectNodes(xpath).Cast<XmlNode>());
 		}
 

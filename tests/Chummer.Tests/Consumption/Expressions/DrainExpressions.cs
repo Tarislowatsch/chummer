@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -145,12 +144,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - the merged view: a pack's traditions join the base file's
 		public static IEnumerable<string> DrainValuesFor(string dataFile)
 		{
-			IEnumerable<string> files = new[] { Path.Combine(DataPaths.ChummerDataDir, dataFile) }
-				.Concat(PackFiles.All
-					.Where(pack => pack.BaseFileNames.Contains(dataFile, StringComparer.Ordinal))
-					.Select(pack => pack.FilePath));
-
-			return files
+			return DataPaths.FilesWithPacks(dataFile)
 				.SelectMany(path => Xml.Load(path).SelectNodes("/chummer/traditions/tradition/drain")
 					.Cast<XmlNode>())
 				.Select(drain => drain.InnerText)

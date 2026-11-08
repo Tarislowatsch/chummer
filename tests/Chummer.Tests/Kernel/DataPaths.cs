@@ -118,6 +118,14 @@ namespace Chummer.Tests.Kernel
 
 		public static IReadOnlyList<DataFile> DataFilesWithPacks => CachedDataFilesWithPacks.Value;
 
+		// - the merged view Load builds: the base files plus every pack paired with one of them
+		public static IEnumerable<string> FilesWithPacks(params string[] baseFileNames)
+		{
+			return DataFilesWithPacks
+				.Where(file => baseFileNames.Contains(file.BaseFileName, StringComparer.Ordinal))
+				.Select(file => file.FilePath);
+		}
+
 		private static readonly Lazy<IReadOnlyList<DataFile>> CachedDataFilesWithPacks =
 			new Lazy<IReadOnlyList<DataFile>>(() => TopLevelRuleXmlFiles()
 				.Select(path => new DataFile(path, Path.GetFileName(path)))

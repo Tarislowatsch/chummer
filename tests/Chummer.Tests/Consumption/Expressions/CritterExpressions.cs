@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -73,12 +72,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static IEnumerable<string> DataFiles()
 		{
-			string[] baseFiles = { "metatypes.xml", "critters.xml" };
-
-			return baseFiles.Select(file => Path.Combine(DataPaths.ChummerDataDir, file))
-				.Concat(PackFiles.All
-					.Where(pack => pack.BaseFileNames.Intersect(baseFiles, StringComparer.Ordinal).Any())
-					.Select(pack => pack.FilePath));
+			return DataPaths.FilesWithPacks("metatypes.xml", "critters.xml");
 		}
 
 		public sealed class Failure
