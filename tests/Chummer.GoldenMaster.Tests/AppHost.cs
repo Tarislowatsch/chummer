@@ -6,27 +6,19 @@ using System.Windows.Forms;
 
 namespace Chummer.GoldenMaster.Tests
 {
-	// - every test calls Ensure before it touches a Chummer type
+	// - xUnit builds this before the first test class of the collection runs
 	// - GlobalOptions reads the registry and StartupPath once, in its static constructor
-	public static class AppHost
+	public sealed class AppHost
 	{
+		public const string Collection = "AppHost";
 		public const string SandboxKey = @"Software\Chummer.GoldenMaster.Sandbox";
-
-		private static readonly object _lock = new object();
-		private static bool _ready;
 
 		public static string AppDirectory => AppDomain.CurrentDomain.BaseDirectory.TrimEnd(Path.DirectorySeparatorChar);
 
-		public static void Ensure()
+		public AppHost()
 		{
-			lock (_lock)
-			{
-				if (_ready)
-					return;
-				IsolateCurrentUserRegistry();
-				RedirectStartupPath();
-				_ready = true;
-			}
+			IsolateCurrentUserRegistry();
+			RedirectStartupPath();
 		}
 
 		// - StartupPath is the test host's directory inside the dotnet SDK

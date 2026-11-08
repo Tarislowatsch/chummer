@@ -6,6 +6,7 @@ using Xunit;
 
 namespace Chummer.GoldenMaster.Tests
 {
+	[Collection(AppHost.Collection)]
 	public class PrintTests
 	{
 		// - fixtures whose print throws today, with the exception type

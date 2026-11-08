@@ -1,16 +1,20 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Windows.Forms;
 using Microsoft.Win32;
 using Xunit;
 
 namespace Chummer.GoldenMaster.Tests
 {
+	[Collection(AppHost.Collection)]
 	public class AppHostTests
 	{
 		[Fact]
 		public void StartupPathIsTheTestOutputDirectory()
 		{
-			AppHost.Ensure();
 			Assert.Equal(AppHost.AppDirectory, Application.StartupPath);
 		}
 
@@ -29,7 +33,6 @@ namespace Chummer.GoldenMaster.Tests
 		[Fact]
 		public void CurrentUserRegistryIsTheEmptySandbox()
 		{
-			AppHost.Ensure();
 			using (RegistryKey key = Registry.CurrentUser.OpenSubKey("Software"))
 				Assert.Null(key);
 		}
@@ -37,8 +40,36 @@ namespace Chummer.GoldenMaster.Tests
 		[Fact]
 		public void LanguageIsTheBuiltInDefault()
 		{
-			AppHost.Ensure();
 			Assert.Equal("en-us", GlobalOptions.Instance.Language);
+		}
+
+		// A class outside the collection may touch Chummer before the host exists.
+		[Fact]
+		public void EveryTestClassJoinsTheAppHostCollection()
+		{
+			// xUnit also runs static classes (abstract sealed) and non-public facts.
+			List<Type> testClasses = typeof(AppHost).Assembly.GetTypes()
+				.Where(type => type.IsClass && (!type.IsAbstract || type.IsSealed))
+				.Where(type => type.GetMethods(AnyMethod).Any(method => method.IsDefined(typeof(FactAttribute), true)))
+				.ToList();
+
+			// An empty scan would pass vacuously.
+			Assert.Contains(typeof(AppHostTests), testClasses);
+			Assert.Contains(typeof(PrintTests), testClasses);
+			List<string> outside = testClasses
+				.Where(type => CollectionOf(type) != AppHost.Collection)
+				.Select(type => type.FullName)
+				.ToList();
+			Assert.Empty(outside);
+		}
+
+		private const BindingFlags AnyMethod = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static;
+
+		private static string CollectionOf(Type type)
+		{
+			CustomAttributeData collection = type.GetCustomAttributesData()
+				.SingleOrDefault(data => data.AttributeType == typeof(CollectionAttribute));
+			return collection == null ? null : collection.ConstructorArguments[0].Value as string;
 		}
 	}
 }
