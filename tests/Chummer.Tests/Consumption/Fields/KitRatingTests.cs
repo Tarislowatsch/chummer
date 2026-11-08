@@ -50,7 +50,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"These ratings fit (or are gone) and must be removed from " + nameof(KnownExcessRatings), stale);
 		}
 

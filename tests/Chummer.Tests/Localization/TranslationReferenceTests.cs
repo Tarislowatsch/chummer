@@ -182,7 +182,7 @@ namespace Chummer.Tests.Localization
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These translations apply (or are gone) and must be removed from "
+			FailureReport.AssertNoneInFull("These translations apply (or are gone) and must be removed from "
 				+ nameof(KnownDroppedTranslations), stale);
 		}
 
@@ -239,7 +239,7 @@ namespace Chummer.Tests.Localization
 					+ " }, // pinned " + (PinnedEntryCounts.ContainsKey(key) ? PinnedEntryCounts[key].ToString() : "none"))
 				.ToArray();
 
-			FailureReport.AssertNone("These languages check a different number of translations than pinned", drifted);
+			FailureReport.AssertNoneInFull("These languages check a different number of translations than pinned", drifted);
 		}
 	}
 }

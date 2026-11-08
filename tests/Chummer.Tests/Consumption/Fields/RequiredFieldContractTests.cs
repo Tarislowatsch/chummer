@@ -91,7 +91,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These Create methods changed the elements they read, so the rules derived from "
+			FailureReport.AssertNoneInFull("These Create methods changed the elements they read, so the rules derived from "
 				+ "them in " + nameof(RequiredFields) + "." + nameof(RequiredFields.Rules)
 				+ " and the diverted values in " + nameof(NumericFields)
 				+ " may no longer describe them. Re-read each one, fix "
@@ -108,7 +108,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.OrderBy(className => className, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These Create methods have no pinned fingerprint, so the drift check does not "
+			FailureReport.AssertNoneInFull("These Create methods have no pinned fingerprint, so the drift check does not "
 				+ "watch them", unpinned);
 		}
 

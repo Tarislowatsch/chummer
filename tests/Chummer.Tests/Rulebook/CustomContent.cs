@@ -8,6 +8,7 @@ using Chummer.Tests.Kernel;
 namespace Chummer.Tests.Rulebook
 {
 	// - the packs' content, checked as XmlManager.Load would merge it (discovery: PackFiles)
+	// - each check reparses its pack, not cached: pack files are tiny
 	public static class CustomContent
 	{
 		public static IEnumerable<object[]> PackXmlWithSchemaFiles()

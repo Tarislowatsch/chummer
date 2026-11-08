@@ -47,7 +47,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(known => "no longer fails, drop it from KnownFailures: " + known))
 				.ToArray();
 
-			FailureReport.AssertNone("Critter forms and KnownFailures disagree", differences);
+			FailureReport.AssertNoneInFull("Critter forms and KnownFailures disagree", differences);
 		}
 
 		// - a caller reading a new field would otherwise stay unchecked
@@ -57,7 +57,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			IReadOnlyList<string> arguments = CritterExpressions.ApplicationArguments();
 
 			string[] unmapped = arguments.Where(argument => !CritterExpressions.XPathsFor(argument).Any()).ToArray();
-			FailureReport.AssertNone("No data mapped for", unmapped);
+			FailureReport.AssertNoneInFull("No data mapped for", unmapped);
 			Assert.Empty(CritterExpressions.LoopArguments.Keys.Except(arguments, StringComparer.Ordinal));
 		}
 
@@ -90,7 +90,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Select(entry => entry.Key + " now hashes to " + entry.Value)
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"Pinned as " + PinnedFingerprint + ". Re-read each copy, fix CritterExpressions, then update the hash",
 				drifted);
 		}

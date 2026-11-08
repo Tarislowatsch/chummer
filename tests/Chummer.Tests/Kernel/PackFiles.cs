@@ -7,7 +7,6 @@ namespace Chummer.Tests.Kernel
 {
 	// - the shipped packs under data/custom content/, paired as XmlManager.Load would pair them
 	// - Load reads data/ itself only: a pack takes effect once its files are copied there
-	// - reparsed per check, not cached: pack files are tiny
 	public static class PackFiles
 	{
 		public const string CustomPrefix = "custom";

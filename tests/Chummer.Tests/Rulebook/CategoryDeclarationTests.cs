@@ -89,7 +89,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These categories are declared (or no longer used) and must be removed from "
+			FailureReport.AssertNoneInFull("These categories are declared (or no longer used) and must be removed from "
 				+ nameof(KnownUndeclaredCategories), stale);
 		}
 
@@ -105,7 +105,7 @@ namespace Chummer.Tests.Rulebook
 				.Where(key => !known.Contains(key))
 				.ToArray();
 
-			FailureReport.AssertNone("These category scope exceptions name a (file, collection) that carries no "
+			FailureReport.AssertNoneInFull("These category scope exceptions name a (file, collection) that carries no "
 				+ "<category> any more", stale);
 		}
 

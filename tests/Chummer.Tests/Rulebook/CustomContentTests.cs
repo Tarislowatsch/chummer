@@ -183,7 +183,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These entries are no longer defects and must be removed from " + listName, stale);
+			FailureReport.AssertNoneInFull("These entries are no longer defects and must be removed from " + listName, stale);
 		}
 	}
 }

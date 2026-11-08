@@ -122,7 +122,7 @@ namespace Chummer.Tests.Kernel
 			new Lazy<IReadOnlyList<DataFile>>(() => TopLevelRuleXmlFiles()
 				.Select(path => new DataFile(path, Path.GetFileName(path)))
 				.Concat(PackFiles.Paired()
-					.Select(pack => new DataFile(pack.FilePath, pack.BaseFileNames.Single())))
+					.Select(pack => new DataFile(pack.FilePath, pack.BaseFileName)))
 				.ToArray());
 
 		// - File.Exists pairing lets character.xsd and improvements.xml drop out on their own

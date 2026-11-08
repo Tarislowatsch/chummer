@@ -66,7 +66,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"These calculators changed since their port was written. Re-read each one, fix its "
 				+ "port, then update the hash", drifted);
 		}

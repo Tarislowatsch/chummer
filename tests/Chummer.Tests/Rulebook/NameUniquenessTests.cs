@@ -73,7 +73,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These entries are no longer duplicates in the data and must be removed from "
+			FailureReport.AssertNoneInFull("These entries are no longer duplicates in the data and must be removed from "
 				+ nameof(KnownDuplicates), stale);
 		}
 

@@ -87,7 +87,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These references resolve (or are gone) and must be removed from "
+			FailureReport.AssertNoneInFull("These references resolve (or are gone) and must be removed from "
 				+ nameof(KnownUnresolvedReferences), stale);
 		}
 
@@ -101,7 +101,7 @@ namespace Chummer.Tests.Rulebook
 				.OrderBy(entry => entry, StringComparer.Ordinal)
 				.ToArray();
 
-			FailureReport.AssertNone("These rules check nothing", vacant);
+			FailureReport.AssertNoneInFull("These rules check nothing", vacant);
 		}
 
 		// - catches a consumer removed or renamed, not a lookup condition changed around the snippet
@@ -113,7 +113,7 @@ namespace Chummer.Tests.Rulebook
 				.Select(rule => rule.Id + ": " + rule.Consumer + " no longer contains " + rule.Reads)
 				.ToArray();
 
-			FailureReport.AssertNone("Re-read these consumers and fix or drop their rules", missing);
+			FailureReport.AssertNoneInFull("Re-read these consumers and fix or drop their rules", missing);
 		}
 
 		// - per rule: a total would hide one rule losing what another gains
@@ -236,7 +236,7 @@ namespace Chummer.Tests.Rulebook
 					+ " }, // pinned " + (PinnedReferenceCounts.ContainsKey(id) ? PinnedReferenceCounts[id].ToString() : "none"))
 				.ToArray();
 
-			FailureReport.AssertNone("These rules check a different number of references than pinned", drifted);
+			FailureReport.AssertNoneInFull("These rules check a different number of references than pinned", drifted);
 		}
 
 		// - summed over all packs: the case pin only notices a rule losing its last reference

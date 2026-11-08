@@ -85,7 +85,7 @@ namespace Chummer.Tests.Localization
 				.Select(call => call.Site + " " + call.Argument)
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"These GetString calls build their key in a way " + nameof(UiStringKeys.ComposedForms)
 				+ " does not know. Trace where the value comes from and add a form", unclassified);
 		}
@@ -101,7 +101,7 @@ namespace Chummer.Tests.Localization
 				.Select(form => form.Argument)
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"No call uses these forms any more, remove them from " + nameof(UiStringKeys.ComposedForms), stale);
 		}
 	}

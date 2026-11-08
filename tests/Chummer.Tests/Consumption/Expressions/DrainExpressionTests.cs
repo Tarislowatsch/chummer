@@ -50,7 +50,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				.Concat(listed.Except(found, StringComparer.Ordinal).Select(site => "no chain at " + site))
 				.ToArray();
 
-			FailureReport.AssertNone("Attribute chains and the consumer table disagree", differences);
+			FailureReport.AssertNoneInFull("Attribute chains and the consumer table disagree", differences);
 		}
 
 		// - each read feeds either PrintToStream or a label the form chains evaluate

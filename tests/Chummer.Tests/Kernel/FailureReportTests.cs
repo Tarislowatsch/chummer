@@ -1,6 +1,6 @@
-using System;
 using System.Linq;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Chummer.Tests.Kernel
 {
@@ -55,9 +55,25 @@ namespace Chummer.Tests.Kernel
 		[Fact]
 		public void AssertNoneFailsWithTheBuiltReport()
 		{
-			Exception failure = Assert.ThrowsAny<Exception>(() => FailureReport.AssertNone("one thing", new[] { "a" }));
+			FailException failure = Assert.Throws<FailException>(() => FailureReport.AssertNone("one thing", new[] { "a" }));
 
 			Assert.Equal("one thing:\n  a", failure.Message);
+		}
+
+		[Fact]
+		public void AssertNoneInFullIsSilentWithoutEdits()
+		{
+			FailureReport.AssertNoneInFull("nothing", new string[0]);
+		}
+
+		[Fact]
+		public void AssertNoneInFullListsEveryEditPastTheLimit()
+		{
+			FailException failure = Assert.Throws<FailException>(() =>
+				FailureReport.AssertNoneInFull("many", Findings(FailureReport.MaxLines + 37)));
+
+			Assert.Equal(FailureReport.MaxLines + 37, CountLines(failure.Message));
+			Assert.DoesNotContain("more", failure.Message);
 		}
 
 		// The truncation notice must not count as a finding line.

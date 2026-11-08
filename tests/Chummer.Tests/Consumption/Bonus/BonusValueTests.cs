@@ -183,7 +183,7 @@ namespace Chummer.Tests.Consumption.Bonus
 					+ ", pinned as " + (PinnedFingerprints.ContainsKey(key) ? PinnedFingerprints[key] : "nothing"))
 				.ToArray();
 
-			FailureReport.AssertNone(
+			FailureReport.AssertNoneInFull(
 				"This code changed since its port was written. Re-read it, fix the port, then update the hash",
 				drifted);
 		}

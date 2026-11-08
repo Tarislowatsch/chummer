@@ -95,7 +95,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(reader => reader.Key + " (" + reader.Consumer + ")")
 				.ToArray();
 
-			FailureReport.AssertNone("These readers match nothing", vacant);
+			FailureReport.AssertNoneInFull("These readers match nothing", vacant);
 		}
 
 		// - a new consumer would leave the pinned findings standing while the code already reads them
@@ -107,7 +107,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(literal => literal.Site + " \"" + literal.Text + "\"")
 				.ToArray();
 
-			FailureReport.AssertNone("Add a reader or a known extra reader for", unlisted);
+			FailureReport.AssertNoneInFull("Add a reader or a known extra reader for", unlisted);
 		}
 
 		[Fact]
@@ -118,7 +118,7 @@ namespace Chummer.Tests.Consumption.Fields
 					.Select(mention => literal.File + " " + mention.Display)), StringComparer.Ordinal);
 			string[] stale = FieldReaders.KnownExtraReaders.Keys.Where(key => !read.Contains(key)).ToArray();
 
-			FailureReport.AssertNone("Remove from KnownExtraReaders", stale);
+			FailureReport.AssertNoneInFull("Remove from KnownExtraReaders", stale);
 		}
 
 		[Fact]
@@ -129,7 +129,7 @@ namespace Chummer.Tests.Consumption.Fields
 				.Select(reader => reader.Key + ": " + reader.Consumer)
 				.ToArray();
 
-			FailureReport.AssertNone("Re-read these consumers and fix the line", moved);
+			FailureReport.AssertNoneInFull("Re-read these consumers and fix the line", moved);
 		}
 
 		// - key "file handler/field": the field has no effect on the character

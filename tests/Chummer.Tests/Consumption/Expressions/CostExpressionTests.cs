@@ -47,7 +47,7 @@ namespace Chummer.Tests.Consumption.Expressions
 					.Select(key => entry.Key + ": " + key))
 				.ToArray();
 
-			FailureReport.AssertNone("These known cost failures no longer fail. Delete them from the list", stale);
+			FailureReport.AssertNoneInFull("These known cost failures no longer fail. Delete them from the list", stale);
 		}
 
 		private static IReadOnlyCollection<string> KnownFailuresFor(string id)

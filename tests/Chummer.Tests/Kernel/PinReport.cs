@@ -25,7 +25,7 @@ namespace Chummer.Tests.Kernel
 					+ ", found " + (entry.Actual ?? "nothing"))
 				.ToArray();
 
-			FailureReport.AssertNone(headline + " differ from the pinned list", differences);
+			FailureReport.AssertNoneInFull(headline + " differ from the pinned list", differences);
 		}
 
 		private static string Describe<TValue>(IReadOnlyDictionary<string, TValue> values, string key)
