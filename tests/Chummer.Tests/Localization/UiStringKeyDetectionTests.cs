@@ -18,7 +18,7 @@ namespace Chummer.Tests.Localization
 				+ "</strings></chummer>");
 
 			Assert.Equal(new[] { "string #2 (key 'B')", "string #3 (key '(none)')" },
-				UiStringKeys.EntriesMissingKeyOrText(language));
+				UiStringKeys.EntriesMissingKeyOrText(EnglishStrings.EntriesIn(language)));
 		}
 
 		private static string[] Arguments(string fileName, params string[] lines)

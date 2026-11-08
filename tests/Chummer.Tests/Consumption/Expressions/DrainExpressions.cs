@@ -112,18 +112,10 @@ namespace Chummer.Tests.Consumption.Expressions
 			}
 		}
 
-		public static IReadOnlyDictionary<string, string> EnglishStrings()
-		{
-			return Xml.Load(DataPaths.EnglishLanguageFile).SelectNodes("/chummer/strings/string").Cast<XmlNode>()
-				.ToDictionary(entry => entry["key"].InnerText, entry => entry["text"].InnerText, StringComparer.Ordinal);
-		}
-
 		public static IReadOnlyList<Chain> ApplicationChains()
 		{
-			IReadOnlyDictionary<string, string> english = EnglishStrings();
-
 			return SourceCorpus.Files
-				.SelectMany(file => ChainsIn(file.Name, file.Source, english))
+				.SelectMany(file => ChainsIn(file.Name, file.Source, EnglishStrings.TextByKey))
 				.ToArray();
 		}
 

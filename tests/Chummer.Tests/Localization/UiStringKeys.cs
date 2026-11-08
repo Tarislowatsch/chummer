@@ -16,23 +16,18 @@ namespace Chummer.Tests.Localization
 		public static IReadOnlyList<string> EnglishKeys => CachedEnglishKeys.Value;
 
 		private static readonly Lazy<IReadOnlyList<string>> CachedEnglishKeys =
-			new Lazy<IReadOnlyList<string>>(() =>
-			{
-				XmlDocument document = Xml.Load(DataPaths.EnglishLanguageFile);
-				return document.SelectNodes("/chummer/strings/string/key").Cast<XmlNode>()
-					.Select(key => key.InnerText)
-					.ToArray();
-			});
+			new Lazy<IReadOnlyList<string>>(() => EnglishStrings.All
+				.Where(entry => entry.Key != null)
+				.Select(entry => entry.Key)
+				.ToArray());
 
 		// - RefreshStrings reads objNode["key"] and objNode["text"] unguarded (clsLanguageManager.cs:139-140)
 		// - public so the detection tests can drive it with hand-built XML
-		public static IEnumerable<string> EntriesMissingKeyOrText(XmlDocument language)
+		public static IEnumerable<string> EntriesMissingKeyOrText(IEnumerable<EnglishStrings.Entry> entries)
 		{
-			return language.SelectNodes("/chummer/strings/string").Cast<XmlNode>()
-				.Select((entry, index) => new { entry, index })
-				.Where(item => item.entry["key"] == null || item.entry["text"] == null)
-				.Select(item => "string #" + (item.index + 1) + " (key '"
-					+ (item.entry["key"]?.InnerText ?? "(none)") + "')");
+			return entries
+				.Where(entry => entry.Key == null || entry.Text == null)
+				.Select(entry => "string #" + entry.Number + " (key '" + (entry.Key ?? "(none)") + "')");
 		}
 
 		// One GetString call, with its argument as written.
