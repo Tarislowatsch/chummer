@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
+using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 

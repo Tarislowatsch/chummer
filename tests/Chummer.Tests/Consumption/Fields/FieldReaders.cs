@@ -8,7 +8,7 @@ using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - a field no code reads does nothing, yet the data still states a rule
 	// - names against every literal, requirement and handler blocks against their consumer

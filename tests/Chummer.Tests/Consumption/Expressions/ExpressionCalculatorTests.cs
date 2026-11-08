@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Consumption.Fields;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions

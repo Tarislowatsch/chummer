@@ -4,7 +4,7 @@ using System.Linq;
 using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - an unguarded Convert on a bad value closes the app, nothing upstream catches it
 	// - inside a Create's empty catch the same value turns into 0 without a word

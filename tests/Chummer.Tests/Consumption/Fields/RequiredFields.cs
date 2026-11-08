@@ -7,7 +7,7 @@ using System.Xml;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - a field a Create dereferences unguarded is a crash on the click that adds its entry
 	public static class RequiredFields

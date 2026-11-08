@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
 using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Bonus

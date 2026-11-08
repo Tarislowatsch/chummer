@@ -5,7 +5,7 @@ using System.Xml;
 using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - every Convert.ToDecimal/ToDouble on data passes en-US, where a comma groups thousands
 	// - "0,5" converts without a throw, to 5

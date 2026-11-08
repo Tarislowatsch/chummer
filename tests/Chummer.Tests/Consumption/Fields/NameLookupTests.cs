@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - deliberately no allowlist: every name lookup is anchored today
 	// - covers XPath lookups only, in-memory name comparisons are not surveyed

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Chummer.Tests.Consumption;
 using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Consumption.Expressions;
+using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Localization;
 using Chummer.Tests.Rulebook;
 using Xunit;

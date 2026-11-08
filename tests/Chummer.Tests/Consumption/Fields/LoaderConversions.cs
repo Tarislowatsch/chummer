@@ -8,7 +8,7 @@ using System.Xml;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - fields a critter, vessel, quality or kit loader converts directly, outside ExpressionToString
 	// - a non-number or a missing unguarded attribute or element throws into the UI

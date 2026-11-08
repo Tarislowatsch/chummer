@@ -8,7 +8,7 @@ using System.Xml;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - a Create passes these values straight to Convert: a non-number throws or turns into 0
 	// - the field list is read off the source: only the diversions need judgement

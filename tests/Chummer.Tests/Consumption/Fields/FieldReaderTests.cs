@@ -4,7 +4,7 @@ using System.Linq;
 using Chummer.Tests.Kernel;
 using Xunit;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	public class FieldReaderTests
 	{

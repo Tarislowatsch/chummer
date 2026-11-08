@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
+using Chummer.Tests.Consumption.Fields;
 using Chummer.Tests.Kernel;
 using Xunit;
 

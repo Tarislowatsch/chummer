@@ -7,7 +7,7 @@ using System.Xml;
 using Chummer.Tests.Kernel;
 using Chummer.Tests.Rulebook;
 
-namespace Chummer.Tests.Consumption
+namespace Chummer.Tests.Consumption.Fields
 {
 	// - Create takes the kit rating past the Rating setter's cap
 	// - a rating above the item's maximum shows up in the tree, the save and the print
