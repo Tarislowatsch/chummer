@@ -199,6 +199,110 @@ namespace Chummer.Tests
 			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(renamed, FormSource));
 		}
 
+		private static readonly LoaderConversions.Scope KitScope = new LoaderConversions.Scope("k.cs", null,
+			new Dictionary<string, LoaderConversions.Root> { { "objXmlKit", new LoaderConversions.Root(LoaderConversions.Kits, "") } },
+			foreign: new[] { "objXmlPowerNode" });
+
+		private static readonly string[] KitSource =
+		{
+			"foreach (XmlNode objXmlAttribute in objXmlKit[\"attributes\"])",
+			"	a = Convert.ToInt32(objXmlAttribute.InnerText);",
+			"foreach (XmlNode objXmlChild in objXmlKit.ChildNodes)",
+			"	a = Convert.ToInt32(objXmlChild.InnerText);",
+			"if (objXmlKit[\"selectmartialart\"].Attributes[\"rating\"] != null)",
+			"	a = Convert.ToInt32(objXmlKit[\"selectmartialart\"].Attributes[\"rating\"].InnerText);",
+			"foreach (XmlNode objXmlPower in objXmlKit.SelectNodes(\"powers/power\"))",
+			"{",
+			"	if (objXmlPower[\"rating\"] != null)",
+			"		a = Convert.ToInt32(objXmlPower[\"rating\"].InnerText);",
+			"	p = Convert.ToDecimal(objXmlPowerNode[\"points\"].InnerText, c);",
+			"	l = Convert.ToInt32(objXmlPowerNode[\"levels\"].InnerText);",
+			"}",
+		};
+
+		[Fact]
+		public void KitShapesResolveToTheirPaths()
+		{
+			Assert.Equal(
+				new[]
+				{
+					"k.cs:2 kits: attributes/*",
+					"k.cs:4 kits: *",
+					"k.cs:6 kits: selectmartialart/@rating (if present)",
+					"k.cs:10 kits: powers/power/rating (if present)",
+				},
+				Describe(LoaderConversions.ConversionsIn(KitScope, KitSource)));
+		}
+
+		// - only a child loop's variable is read as a whole: elsewhere ValuesIn could not say which node
+		[Theory]
+		[InlineData("foreach (XmlNode objXmlPower in objXmlKit.SelectNodes(\"powers/power\")) a = Convert.ToInt32(objXmlPower.InnerText);")]
+		[InlineData("a = Convert.ToInt32(objXmlKit.InnerText);")]
+		[InlineData("a = Convert.ToInt32(objXmlOther[\"levels\"].InnerText);")]
+		public void ANodeReadAsAWholeOutsideAChildLoopThrows(string line)
+		{
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(KitScope, new[] { line }));
+		}
+
+		// - an else, a "} else {" or a block closed before the conversion guards nothing
+		[Theory]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null)", "{", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, true)]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null) {", "	foo();", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, true)]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null)", "{", "	if (b)", "	{", "	}", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, true)]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null)", "{", "}", "a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);" }, false)]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null)", "{", "}", "else", "{", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, false)]
+		[InlineData(new[] { "if (objXmlKit[\"nuyenbp\"] != null) {", "} else {", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, false)]
+		[InlineData(new[] { "if (objXmlKit[\"skills\"] != null)", "{", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, false)]
+		public void AnIfOpeningABlockAroundTheConversionGuardsIt(string[] source, bool guarded)
+		{
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(KitScope, source)).Guarded);
+		}
+
+		private static readonly string[] SwitchSource =
+		{
+			"private void lstKits_SelectedIndexChanged(object sender, EventArgs e)",
+			"{",
+			"	foreach (XmlNode objXmlItem in objXmlPack.ChildNodes)",
+			"	{",
+			"		switch (objXmlItem.Name)",
+			"		{",
+			"			case \"attributes\":",
+			"				foreach (XmlNode objXmlAttribute in objXmlItem.ChildNodes)",
+			"					a = Convert.ToInt32(objXmlAttribute.InnerText);",
+			"				break;",
+			"			case \"nuyenbp\":",
+			"				a = Convert.ToInt32(objXmlItem.InnerText);",
+			"				break;",
+			"		}",
+			"	}",
+			"	a = Convert.ToInt32(objXmlItem[\"rating\"].InnerText);",
+			"}",
+		};
+
+		private static LoaderConversions.Scope CaseScope(string label)
+		{
+			return new LoaderConversions.Scope("s.cs", "lstKits_SelectedIndexChanged",
+				new Dictionary<string, LoaderConversions.Root>
+				{
+					{ "objXmlItem", new LoaderConversions.Root(LoaderConversions.Kits, label) },
+				},
+				label);
+		}
+
+		// - the label binds the root: lines of other cases and after the switch stay out
+		[Fact]
+		public void ACaseScopeScansOnlyItsCase()
+		{
+			Assert.Equal(new[] { "s.cs:9 kits: attributes/*" },
+				Describe(LoaderConversions.ConversionsIn(CaseScope("attributes"), SwitchSource)));
+		}
+
+		[Fact]
+		public void AMissingCaseThrows()
+		{
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(CaseScope("gone"), SwitchSource));
+		}
+
 		// - counted only outside the scanned lines, for a read of its own loop variable
 		[Fact]
 		public void AnUnscannedLoopIsOneThatConvertsItsOwnVariable()
@@ -250,6 +354,48 @@ namespace Chummer.Tests
 		public void TheDigitFormSkipsAValueWithoutD6()
 		{
 			Assert.Empty(LoaderConversions.ValuesIn(Document(), Metatypes, "essmax", LoaderConversions.Form.DigitBeforeD6, false));
+		}
+
+		private const string Packs = "/chummer/packs/pack";
+
+		private static XmlDocument KitDocument()
+		{
+			XmlDocument document = new XmlDocument();
+			document.LoadXml("<chummer><packs><pack><name>Kit</name>"
+				+ "<attributes><bod>4</bod><!-- note --><agi>x</agi></attributes>"
+				+ "<skills><skill><name>A</name><rating>3</rating><rating>9</rating></skill><skill><name>B</name></skill></skills>"
+				+ "<gears><gear><rating>2</rating><gears><gear><rating>5</rating></gear></gears></gear></gears>"
+				+ "</pack></packs></chummer>");
+			return document;
+		}
+
+		// - the indexer reads the first child of that name, a missing one is an unguarded crash
+		[Fact]
+		public void AnElementIsReadAsTheIndexerReadsIt()
+		{
+			Assert.Equal(new[] { "3", "(none)" },
+				LoaderConversions.ValuesIn(KitDocument(), Packs, "skills/skill/rating", LoaderConversions.Form.Whole, true)
+					.Select(found => found.Value ?? "(none)"));
+			Assert.Equal(new[] { "3" },
+				LoaderConversions.ValuesIn(KitDocument(), Packs, "skills/skill/rating", LoaderConversions.Form.Whole, false)
+					.Select(found => found.Value));
+		}
+
+		// - the comment too: frmSelectPACKSKit converts every child it visits
+		[Fact]
+		public void AChildPathReadsEveryChildNode()
+		{
+			Assert.Equal(new[] { "4", " note ", "x" },
+				LoaderConversions.ValuesIn(KitDocument(), Packs, "attributes/*", LoaderConversions.Form.Whole, true)
+					.Select(found => found.Value));
+		}
+
+		[Fact]
+		public void ADescendantPathReachesNestedGear()
+		{
+			Assert.Equal(new[] { "2", "5" },
+				LoaderConversions.ValuesIn(KitDocument(), Packs, ".//gears/gear/rating", LoaderConversions.Form.Whole, false)
+					.Select(found => found.Value));
 		}
 
 		[Fact]
