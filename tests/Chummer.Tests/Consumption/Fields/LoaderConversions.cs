@@ -38,7 +38,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			public IEnumerable<string> Files()
 			{
-				return DataPaths.FilesWithPacks(BaseFiles.ToArray());
+				return DataPaths.FilesWithPacks(BaseFiles);
 			}
 		}
 

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Consumption.Expressions;
@@ -164,6 +165,12 @@ namespace Chummer.Tests.Kernel
 		public void DataFilesWithPacksFindsEveryDataFile()
 		{
 			Assert.Equal(50, DataPaths.DataFilesWithPacks.Count);
+		}
+
+		[Fact]
+		public void FilesWithPacksRejectsAMisspelledBaseFile()
+		{
+			Assert.Throws<FileNotFoundException>(() => DataPaths.FilesWithPacks("metatypes.xml", "Critters.xml"));
 		}
 
 		// - derivable: every pack file, since each base file it pairs with has a schema

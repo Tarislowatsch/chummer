@@ -118,12 +118,24 @@ namespace Chummer.Tests.Kernel
 
 		public static IReadOnlyList<DataFile> DataFilesWithPacks => CachedDataFilesWithPacks.Value;
 
-		// - the merged view Load builds: the base files plus every pack paired with one of them
-		public static IEnumerable<string> FilesWithPacks(params string[] baseFileNames)
+		public static IReadOnlyList<string> FilesWithPacks(params string[] baseFileNames)
 		{
+			return FilesWithPacks((IEnumerable<string>)baseFileNames);
+		}
+
+		// - the merged view Load builds: the base files plus every pack paired with one of them
+		// - throws on a missing base file: an empty view would leave its theories green on zero cases
+		public static IReadOnlyList<string> FilesWithPacks(IEnumerable<string> baseFileNames)
+		{
+			string[] names = baseFileNames.ToArray();
+			string missing = names.FirstOrDefault(name => !DataFilesWithPacks.Any(file => file.BaseFileName == name));
+			if (missing != null)
+				throw new FileNotFoundException("No data file " + missing + " under Chummer/data", missing);
+
 			return DataFilesWithPacks
-				.Where(file => baseFileNames.Contains(file.BaseFileName, StringComparer.Ordinal))
-				.Select(file => file.FilePath);
+				.Where(file => names.Contains(file.BaseFileName, StringComparer.Ordinal))
+				.Select(file => file.FilePath)
+				.ToArray();
 		}
 
 		private static readonly Lazy<IReadOnlyList<DataFile>> CachedDataFilesWithPacks =
