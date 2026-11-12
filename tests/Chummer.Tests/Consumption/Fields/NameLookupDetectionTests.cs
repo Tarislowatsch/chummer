@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Fields
@@ -8,7 +9,7 @@ namespace Chummer.Tests.Consumption.Fields
 	{
 		private static NameLookups.Lookup Single(string line)
 		{
-			return NameLookups.LookupsIn("frmX.cs", new[] { line }).Single();
+			return NameLookups.LookupsIn("frmX.cs", SourceLines.Of(new[] { line })).Single();
 		}
 
 		[Fact]
@@ -81,7 +82,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[Fact]
 		public void IgnoresACommentedOutLookup()
 		{
-			Assert.Empty(NameLookups.LookupsIn("frmX.cs", new[] { "// x = d.SelectSingleNode(\"//gear[name = 'A']\");" }));
+			Assert.Empty(NameLookups.LookupsIn("frmX.cs", SourceLines.Of(new[] { "// x = d.SelectSingleNode(\"//gear[name = 'A']\");" })));
 		}
 
 		[Theory]
@@ -90,7 +91,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData("s = \"/chummer/skills/skill[skillname = 'A']\";")]
 		public void IgnoresWhatIsNoNameComparison(string line)
 		{
-			Assert.Empty(NameLookups.LookupsIn("frmX.cs", new[] { line }));
+			Assert.Empty(NameLookups.LookupsIn("frmX.cs", SourceLines.Of(new[] { line })));
 		}
 
 		[Theory]

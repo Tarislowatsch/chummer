@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -39,10 +38,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			public IEnumerable<string> Files()
 			{
-				return BaseFiles.Select(file => System.IO.Path.Combine(DataPaths.ChummerDataDir, file))
-					.Concat(PackFiles.All
-						.Where(pack => pack.BaseFileNames.Intersect(BaseFiles, StringComparer.Ordinal).Any())
-						.Select(pack => pack.FilePath));
+				return DataPaths.FilesWithPacks(BaseFiles);
 			}
 		}
 
@@ -181,10 +177,9 @@ namespace Chummer.Tests.Consumption.Fields
 				.SelectMany(scope => ConversionsIn(scope, SourceOf(scope.File)))
 				.ToArray());
 
-		private static string[] SourceOf(string fileName)
+		private static SourceLines SourceOf(string fileName)
 		{
-			return File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => string.Equals(System.IO.Path.GetFileName(path), fileName, StringComparison.Ordinal)));
+			return SourceCorpus.File(fileName).Source;
 		}
 
 		private static readonly Regex Start = new Regex(@"\b(Convert\.To\w+|\w+\.(?:Try)?Parse)\(", RegexOptions.Compiled);
@@ -216,9 +211,8 @@ namespace Chummer.Tests.Consumption.Fields
 			RegexOptions.Compiled);
 
 		// - the scope's lines and the index of its first line in the file
-		private static (SourceLines Source, int Offset) Extent(Scope scope, string[] lines)
+		private static (SourceLines Source, int Offset) Extent(Scope scope, SourceLines source)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			if (scope.Method == null)
 				return (source, 0);
 
@@ -259,10 +253,10 @@ namespace Chummer.Tests.Consumption.Fields
 
 		// - public so the detection tests can drive it with hand-built source
 		// - a node read in a shape this scan does not know throws instead of dropping out
-		public static IReadOnlyList<Conversion> ConversionsIn(Scope scope, string[] lines)
+		public static IReadOnlyList<Conversion> ConversionsIn(Scope scope, SourceLines source)
 		{
-			(SourceLines source, int offset) = Extent(scope, lines);
-			string[] code = source.Code;
+			(SourceLines scoped, int offset) = Extent(scope, source);
+			string[] code = scoped.Code;
 			Dictionary<string, Root> bound = new Dictionary<string, Root>(StringComparer.Ordinal);
 			List<Conversion> conversions = new List<Conversion>();
 
@@ -306,7 +300,7 @@ namespace Chummer.Tests.Consumption.Fields
 					if (!IntegerConversions.Contains(start.Groups[1].Value, StringComparer.Ordinal))
 						throw Unknown(site, start.Groups[1].Value + "(" + argument + ")");
 
-					conversions.Add(Understand(site, argument, scope.Roots, bound, source, i, start.Index));
+					conversions.Add(Understand(site, argument, scope.Roots, bound, scoped, i, start.Index));
 				}
 			}
 
@@ -423,10 +417,9 @@ namespace Chummer.Tests.Consumption.Fields
 
 		// - "file:line path": a loop outside every scope whose body converts a read of its variable
 		// - a new loader of the same data shows up here instead of hiding
-		public static IEnumerable<string> UnscannedLoops(string fileName, string[] lines, IReadOnlyCollection<string> paths,
+		public static IEnumerable<string> UnscannedLoops(string fileName, SourceLines source, IReadOnlyCollection<string> paths,
 			IEnumerable<(int First, int Last)> scanned)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			(int First, int Last)[] ranges = scanned.ToArray();
 
 			for (int i = 0; i < source.Code.Length; i++)
@@ -456,23 +449,22 @@ namespace Chummer.Tests.Consumption.Fields
 			string[] paths = ApplicationConversions.Select(conversion => conversion.LoopPath).Where(path => path != null)
 				.Distinct(StringComparer.Ordinal).ToArray();
 
-			return DataPaths.ApplicationSourceFiles()
-				.SelectMany(path =>
+			return SourceCorpus.Files
+				.SelectMany(file =>
 				{
-					string fileName = System.IO.Path.GetFileName(path);
-					string[] lines = File.ReadAllLines(path);
+					string fileName = file.Name;
 					IEnumerable<(int, int)> scanned = Scopes
 						.Where(scope => string.Equals(scope.File, fileName, StringComparison.Ordinal))
-						.Select(scope => RangeOf(scope, lines));
-					return UnscannedLoops(fileName, lines, paths, scanned);
+						.Select(scope => RangeOf(scope, file.Source));
+					return UnscannedLoops(fileName, file.Source, paths, scanned);
 				})
 				.ToArray();
 		}
 
-		private static (int First, int Last) RangeOf(Scope scope, string[] lines)
+		private static (int First, int Last) RangeOf(Scope scope, SourceLines source)
 		{
-			(SourceLines source, int offset) = Extent(scope, lines);
-			string[] code = source.Code;
+			(SourceLines scoped, int offset) = Extent(scope, source);
+			string[] code = scoped.Code;
 			return (offset, offset + code.Length - 1);
 		}
 

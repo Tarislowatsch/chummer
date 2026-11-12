@@ -18,19 +18,19 @@ namespace Chummer.Tests.Localization
 				+ "</strings></chummer>");
 
 			Assert.Equal(new[] { "string #2 (key 'B')", "string #3 (key '(none)')" },
-				UiStringKeys.EntriesMissingKeyOrText(language));
+				UiStringKeys.EntriesMissingKeyOrText(EnglishStrings.EntriesIn(language)));
 		}
 
 		private static string[] Arguments(string fileName, params string[] lines)
 		{
-			return UiStringKeys.CallsIn(fileName, lines).Select(call => call.Argument).ToArray();
+			return UiStringKeys.CallsIn(fileName, SourceLines.Of(lines)).Select(call => call.Argument).ToArray();
 		}
 
 		[Fact]
 		public void FindsAQualifiedCallAndItsLine()
 		{
 			UiStringKeys.Call call = UiStringKeys.CallsIn("frmX.cs",
-				new[] { "", "x = LanguageManager.Instance.GetString(\"Label_A\");" }).Single();
+				SourceLines.Of(new[] { "", "x = LanguageManager.Instance.GetString(\"Label_A\");" })).Single();
 
 			Assert.Equal("frmX.cs:2", call.Site);
 			Assert.Equal("\"Label_A\"", call.Argument);

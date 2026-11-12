@@ -250,15 +250,7 @@ namespace Chummer.Tests.Consumption.Fields
 					.Select(field => branch.Handler + "/" + field))
 				.ToArray();
 
-			FailureReport.AssertNone("The indexer pattern misses", missed);
-		}
-
-		// - top-level files plus every pack file Load would merge
-		// - bumping the number is only correct for a deliberately added or removed data file
-		[Fact]
-		public void ScansTheMeasuredDataFiles()
-		{
-			Assert.Equal(50, DataPaths.DataFilesWithPacks.Count);
+			FailureReport.AssertNoneInFull("The indexer pattern misses", missed);
 		}
 	}
 }

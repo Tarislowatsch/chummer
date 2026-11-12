@@ -20,8 +20,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static XmlDocument Load()
 		{
-			XmlDocument document = Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "ranges.xml"));
-			return document;
+			return Xml.Load(Path.Combine(DataPaths.ChummerDataDir, "ranges.xml"));
 		}
 
 		public static IEnumerable<XmlNode> Rows(XmlDocument ranges)
@@ -50,9 +49,9 @@ namespace Chummer.Tests.Consumption.Expressions
 		private static readonly Regex SetRangeLiteral = new Regex(@"\.SetRange\(""([^""\\]*)""\)");
 
 		// - public so the detection tests can drive it with hand-built source
-		public static IEnumerable<string> SetRangeLiteralsIn(string[] lines)
+		public static IEnumerable<string> SetRangeLiteralsIn(SourceLines source)
 		{
-			return SourceLines.Of(lines).Code
+			return source.Code
 				.SelectMany(line => SetRangeLiteral.Matches(line).Cast<Match>())
 				.Select(match => match.Groups[1].Value);
 		}

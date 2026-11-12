@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 
 namespace Chummer.Tests.Consumption.Bonus
@@ -21,11 +19,6 @@ namespace Chummer.Tests.Consumption.Bonus
 			"ImprovementManager.ValueToInt",
 			"ImprovementManager.NodeExists",
 		};
-
-		// - ValueToInt prints the XPath result in the thread culture: the app never sets one
-		// - the parse back is en-US: under de-DE "1,5" reads as 15
-		// - GetCultureInfo ignores this machine's overrides of its own culture
-		public static readonly CultureInfo LocalCulture = CultureInfo.GetCultureInfo("de-DE");
 
 		// - stand-ins for the character's TotalValue: no bonus value names an attribute today
 		// - 0 is a mundane's MAG, an odd value exposes a fraction
@@ -342,11 +335,12 @@ namespace Chummer.Tests.Consumption.Bonus
 						throw new ReadFailed(path, value, exception);
 					}
 
+					// - ValueToInt prints in the thread culture, then parses back as en-US: "1,5" reads as 15
 					// - "0,333…" reads as 333333333333333 and overflows: still the culture, not the data
 					string local;
 					try
 					{
-						int number = convert(attribute, LocalCulture);
+						int number = convert(attribute, Cultures.German);
 						local = number == english ? null : "gives " + number;
 					}
 					catch (Exception exception)
@@ -377,15 +371,10 @@ namespace Chummer.Tests.Consumption.Bonus
 				if (max <= 0)
 					return new[] { 0 };
 
-				int min = ExpressionChecks.MinimumRating(owner["minrating"]?.InnerText);
-
-				return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExpressionChecks.ExhaustiveRatingLimit) - min + 1))
-					.Concat(new[] { max })
-					.Distinct()
-					.ToArray();
+				return Ratings.Sweep(Ratings.Minimum(owner["minrating"]?.InnerText), max);
 			}
 
-			return Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1).ToArray();
+			return Enumerable.Range(0, Ratings.ExhaustiveLimit + 1).ToArray();
 		}
 
 		public sealed class BonusValueFailure
@@ -452,7 +441,7 @@ namespace Chummer.Tests.Consumption.Bonus
 			{
 				IReadOnlyList<int> ratings = RatingsOf(root);
 				string itemName = RuleCorpus.ItemLabel(root.ParentNode);
-				if (ratings[ratings.Count - 1] > ExpressionChecks.ExhaustiveRatingLimit)
+				if (ratings[ratings.Count - 1] > Ratings.ExhaustiveLimit)
 					cutShort.Add(file + ": " + itemName + " (" + ratings[ratings.Count - 1] + ")");
 
 				foreach (string handler in ReplayedHandlers.Where(handler => NodeExists(root, handler)))
@@ -538,14 +527,14 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		// - public so the detection tests can drive it with hand-built source
 		// - the innermost branch wins: a block nested in another is the one that guards the call
-		public static IReadOnlyList<Call> CallsIn(string[] lines, IEnumerable<string> handlers)
+		public static IReadOnlyList<Call> CallsIn(SourceLines source, IEnumerable<string> handlers)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			string[] masked = MaskLiterals(code);
 			(string Handler, int Start, int Length)[] branches = handlers
 				.Select(handler =>
 				{
-					(int start, SourceLines block, string unused) = BonusVocabulary.HandlerBlock(handler, lines);
+					(int start, SourceLines block, string unused) = BonusVocabulary.HandlerBlock(handler, source);
 					return (handler, start, block.Code.Length);
 				})
 				.ToArray();
@@ -666,21 +655,16 @@ namespace Chummer.Tests.Consumption.Bonus
 
 		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls = new Lazy<IReadOnlyList<Call>>(() =>
 		{
-			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
-			return CallsIn(lines, BonusVocabulary.HandledTagsIn(lines));
+			SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
+			return CallsIn(source, BonusVocabulary.HandledTagsIn(source));
 		});
 
 		// - "handler" -> hash of its branch, comment-free and whitespace-collapsed
 		public static IReadOnlyDictionary<string, string> BranchFingerprints(IEnumerable<string> handlers)
 		{
-			string[] lines = File.ReadAllLines(DataPaths.ApplicationSourceFiles()
-				.Single(path => Path.GetFileName(path) == BonusVocabulary.HandlerConsumerFile));
-			return handlers.ToDictionary(handler => handler, handler => SourceLines.Fingerprint(
-					BonusVocabulary.HandlerBlock(handler, lines).Block.Code
-						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
-						.Where(line => line.Length > 0)),
-				StringComparer.Ordinal);
+			SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
+			return handlers.ToDictionary(handler => handler,
+				handler => BonusVocabulary.HandlerBlock(handler, source).Block.CodeFingerprint(), StringComparer.Ordinal);
 		}
 	}
 }

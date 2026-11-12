@@ -235,7 +235,7 @@ namespace Chummer.Tests.Consumption.Fields
 		private static IReadOnlyDictionary<string, IReadOnlyList<NumericFields.ConvertedField>> ConvertedFieldsIn(
 			params string[] lines)
 		{
-			return NumericFields.ConvertedFieldsIn(lines);
+			return NumericFields.ConvertedFieldsIn(SourceLines.Of(lines));
 		}
 
 		private static IEnumerable<string> FieldsOf(string className,

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -113,11 +112,10 @@ namespace Chummer.Tests.Localization
 
 		// - public so the detection tests can drive it with hand-built source
 		// - companion is the other half of a partial class: designer fields serve the code file
-		public static IEnumerable<Assignment> AssignmentsIn(string fileName, string[] lines, string[] companion)
+		public static IEnumerable<Assignment> AssignmentsIn(string fileName, SourceLines source, SourceLines companion)
 		{
-			SourceLines source = SourceLines.Of(lines);
 			string[] code = source.Code;
-			string[] other = SourceLines.Of(companion).Bare;
+			string[] other = companion.Bare;
 			string className = source.Bare.Concat(other).Select(line => PartialClass.Match(line))
 				.FirstOrDefault(match => match.Success)?.Groups[1].Value;
 
@@ -246,23 +244,23 @@ namespace Chummer.Tests.Localization
 		public static IReadOnlyList<Assignment> AllAssignments => CachedAssignments.Value;
 
 		private static readonly Lazy<IReadOnlyList<Assignment>> CachedAssignments =
-			new Lazy<IReadOnlyList<Assignment>>(() => DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => AssignmentsIn(Path.GetFileName(path), File.ReadAllLines(path),
-					CompanionOf(path)))
+			new Lazy<IReadOnlyList<Assignment>>(() => SourceCorpus.Files
+				.SelectMany(file => AssignmentsIn(file.Name, file.Source,
+					CompanionOf(file.Path)))
 				.ToArray());
 
-		private static string[] CompanionOf(string path)
+		private static SourceLines CompanionOf(string path)
 		{
 			string other = path.EndsWith(".Designer.cs", StringComparison.Ordinal)
 				? path.Substring(0, path.Length - ".Designer.cs".Length) + ".cs"
 				: path.Substring(0, path.Length - ".cs".Length) + ".Designer.cs";
-			return File.Exists(other) ? File.ReadAllLines(other) : new string[0];
+			return SourceCorpus.At(other)?.Source ?? SourceLines.Of(new string[0]);
 		}
 
 		public static IReadOnlyDictionary<string, string> AllClassBases => CachedClassBases.Value;
 
 		private static readonly Lazy<IReadOnlyDictionary<string, string>> CachedClassBases =
 			new Lazy<IReadOnlyDictionary<string, string>>(() => ClassBasesIn(
-				DataPaths.ApplicationSourceFiles().Select(File.ReadAllText)));
+				SourceCorpus.Files.Select(file => file.Source.JoinedCode)));
 	}
 }

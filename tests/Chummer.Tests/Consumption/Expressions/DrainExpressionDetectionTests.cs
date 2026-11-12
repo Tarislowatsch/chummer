@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Kernel;
 using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
@@ -28,7 +29,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				"t = t.Replace(\"STR\", e);",
 			};
 
-			DrainExpressions.Chain[] chains = DrainExpressions.ChainsIn("x.cs", source, English).ToArray();
+			DrainExpressions.Chain[] chains = DrainExpressions.ChainsIn("x.cs", SourceLines.Of(source), English).ToArray();
 
 			Assert.Equal(new[] { "x.cs:1", "x.cs:5" }, chains.Select(chain => chain.Site));
 			Assert.Equal(new[] { "BOD", "WIL", "CHA", "MAG" }, chains[0].Codes);
@@ -44,7 +45,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				"// s = s.Replace(\"RES\", b);",
 			};
 
-			Assert.Equal(new[] { "WIL" }, DrainExpressions.ChainsIn("x.cs", source, English).Single().Codes);
+			Assert.Equal(new[] { "WIL" }, DrainExpressions.ChainsIn("x.cs", SourceLines.Of(source), English).Single().Codes);
 		}
 
 		[Theory]

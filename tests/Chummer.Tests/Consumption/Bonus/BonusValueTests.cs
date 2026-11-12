@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -9,7 +8,7 @@ namespace Chummer.Tests.Consumption.Bonus
 {
 	public class BonusValueTests
 	{
-		// - code defect, not data: ValueToInt prints in the thread culture, see BonusValues.LocalCulture
+		// - code defect, not data: ValueToInt prints in the thread culture, see BonusValues.ConvertEach
 		// - fixing ValueToInt empties this list, the data stays as it is
 		private static readonly IReadOnlyDictionary<string, string> KnownFailures =
 			new Dictionary<string, string>(StringComparer.Ordinal)
@@ -171,7 +170,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void NoPortedCodeChangedSinceItWasRead()
 		{
-			Dictionary<string, string> actual = ExpressionChecks.CalculatorFingerprints(BonusValues.Calculators)
+			Dictionary<string, string> actual = SourceMembers.Fingerprints(BonusValues.Calculators)
 				.Concat(BonusValues.BranchFingerprints(BonusValues.PortedBranches.Keys))
 				.ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal);
 

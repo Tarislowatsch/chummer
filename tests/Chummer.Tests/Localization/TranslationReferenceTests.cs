@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -192,7 +191,7 @@ namespace Chummer.Tests.Localization
 		[Fact]
 		public void TranslationPassUnchangedSinceItsPortWasWritten()
 		{
-			string actual = ExpressionChecks.CalculatorFingerprints(new[] { "XmlManager.Load" })["XmlManager.Load"];
+			string actual = SourceMembers.Fingerprints(new[] { "XmlManager.Load" })["XmlManager.Load"];
 
 			Assert.True(actual == PinnedLoadFingerprint,
 				"XmlManager.Load now hashes to " + actual + ", pinned as " + PinnedLoadFingerprint

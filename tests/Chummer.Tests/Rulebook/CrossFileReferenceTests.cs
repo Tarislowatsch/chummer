@@ -270,8 +270,8 @@ namespace Chummer.Tests.Rulebook
 		// - every consumer sits directly in Chummer/, where several subfolders reuse file names
 		private static string CodeOf(string fileName)
 		{
-			string path = Path.Combine(DataPaths.RepoRoot, "Chummer", fileName);
-			return File.Exists(path) ? string.Join("\n", SourceLines.Of(File.ReadAllLines(path)).Code) : "";
+			SourceCorpus.SourceFile file = SourceCorpus.At(Path.Combine(DataPaths.RepoRoot, "Chummer", fileName));
+			return file == null ? "" : file.Source.JoinedCode;
 		}
 
 		private static IEnumerable<string> VacanciesOf(CrossFileReferences.ReferenceCheck check)

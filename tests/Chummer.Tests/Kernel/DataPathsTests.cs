@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Consumption.Expressions;
@@ -156,6 +157,20 @@ namespace Chummer.Tests.Kernel
 		public void PackFilesFindsEveryShippedPackFile()
 		{
 			Assert.Equal(23, PackFiles.All.Count);
+		}
+
+		// - top-level files plus every pack file Load would merge
+		// - bumping the number is only correct for a deliberately added or removed data file
+		[Fact]
+		public void DataFilesWithPacksFindsEveryDataFile()
+		{
+			Assert.Equal(50, DataPaths.DataFilesWithPacks.Count);
+		}
+
+		[Fact]
+		public void FilesWithPacksRejectsAMisspelledBaseFile()
+		{
+			Assert.Throws<FileNotFoundException>(() => DataPaths.FilesWithPacks("metatypes.xml", "Critters.xml"));
 		}
 
 		// - derivable: every pack file, since each base file it pairs with has a schema

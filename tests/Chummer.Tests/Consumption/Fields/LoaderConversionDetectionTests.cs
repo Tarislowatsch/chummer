@@ -45,7 +45,7 @@ namespace Chummer.Tests.Consumption.Fields
 					"x.cs:9 critters: skills/knowledge/@rating",
 					"x.cs:11 critters: essmax (digit before D6)",
 				},
-				Describe(LoaderConversions.ConversionsIn(WholeFile, LoaderSource)));
+				Describe(LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(LoaderSource))));
 		}
 
 		[Theory]
@@ -61,7 +61,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData("a = Convert.ToByte(objXmlMetatype[\"essmax\"].InnerText);")]
 		public void AConversionOfAnUnknownShapeThrows(string line)
 		{
-			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, new[] { line }));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(new[] { line })));
 		}
 
 		[Theory]
@@ -70,7 +70,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData("a = Int32.Parse(objXmlMetatype[\"essmax\"].InnerText);")]
 		public void AnIntegerConversionIsUnderstood(string line)
 		{
-			Assert.Equal("critters: essmax", Assert.Single(LoaderConversions.ConversionsIn(WholeFile, new[] { line })).Description);
+			Assert.Equal("critters: essmax", Assert.Single(LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(new[] { line }))).Description);
 		}
 
 		// - a later rebinding of any shape must not inherit the earlier binding
@@ -92,7 +92,7 @@ namespace Chummer.Tests.Consumption.Fields
 				"	a = Convert.ToInt32(objXmlPower.Attributes[\"points\"].InnerText);",
 			};
 
-			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, source));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(source)));
 		}
 
 		[Theory]
@@ -108,7 +108,7 @@ namespace Chummer.Tests.Consumption.Fields
 				"		intRating = Convert.ToInt32(objXmlPower.Attributes[\"rating\"].InnerText);",
 			};
 
-			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(source))).Guarded);
 		}
 
 		// - the if must directly precede the conversion: no statement may end in between
@@ -127,7 +127,7 @@ namespace Chummer.Tests.Consumption.Fields
 				"	" + line,
 			};
 
-			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(source))).Guarded);
 		}
 
 		[Fact]
@@ -141,7 +141,7 @@ namespace Chummer.Tests.Consumption.Fields
 			};
 
 			Assert.Equal(new[] { "x.cs:2 critters: skills/knowledge/@rating" },
-				Describe(LoaderConversions.ConversionsIn(WholeFile, source)));
+				Describe(LoaderConversions.ConversionsIn(WholeFile, SourceLines.Of(source))));
 		}
 
 		private static readonly string[] FormSource =
@@ -189,7 +189,7 @@ namespace Chummer.Tests.Consumption.Fields
 					"f.cs:9 vessels: bodmin",
 					"f.cs:12 vessels: powers/power/@rating (if present)",
 				},
-				Describe(LoaderConversions.ConversionsIn(PossessScope, FormSource)));
+				Describe(LoaderConversions.ConversionsIn(PossessScope, SourceLines.Of(FormSource))));
 		}
 
 		[Fact]
@@ -197,7 +197,7 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			LoaderConversions.Scope renamed = new LoaderConversions.Scope("f.cs", "mnuGone_Click", PossessScope.Roots);
 
-			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(renamed, FormSource));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(renamed, SourceLines.Of(FormSource)));
 		}
 
 		private static readonly LoaderConversions.Scope KitScope = new LoaderConversions.Scope("k.cs", null,
@@ -232,7 +232,7 @@ namespace Chummer.Tests.Consumption.Fields
 					"k.cs:6 kits: selectmartialart/@rating (if present)",
 					"k.cs:10 kits: powers/power/rating (if present)",
 				},
-				Describe(LoaderConversions.ConversionsIn(KitScope, KitSource)));
+				Describe(LoaderConversions.ConversionsIn(KitScope, SourceLines.Of(KitSource))));
 		}
 
 		// - only a child loop's variable is read as a whole: elsewhere ValuesIn could not say which node
@@ -242,7 +242,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData("a = Convert.ToInt32(objXmlOther[\"levels\"].InnerText);")]
 		public void ANodeReadAsAWholeOutsideAChildLoopThrows(string line)
 		{
-			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(KitScope, new[] { line }));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(KitScope, SourceLines.Of(new[] { line })));
 		}
 
 		// - an else, a "} else {" or a block closed before the conversion guards nothing
@@ -256,7 +256,7 @@ namespace Chummer.Tests.Consumption.Fields
 		[InlineData(new[] { "if (objXmlKit[\"skills\"] != null)", "{", "	a = Convert.ToInt32(objXmlKit[\"nuyenbp\"].InnerText);", "}" }, false)]
 		public void AnIfOpeningABlockAroundTheConversionGuardsIt(string[] source, bool guarded)
 		{
-			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(KitScope, source)).Guarded);
+			Assert.Equal(guarded, Assert.Single(LoaderConversions.ConversionsIn(KitScope, SourceLines.Of(source))).Guarded);
 		}
 
 		private static readonly string[] SwitchSource =
@@ -295,13 +295,13 @@ namespace Chummer.Tests.Consumption.Fields
 		public void ACaseScopeScansOnlyItsCase()
 		{
 			Assert.Equal(new[] { "s.cs:9 kits: attributes/*" },
-				Describe(LoaderConversions.ConversionsIn(CaseScope("attributes"), SwitchSource)));
+				Describe(LoaderConversions.ConversionsIn(CaseScope("attributes"), SourceLines.Of(SwitchSource))));
 		}
 
 		[Fact]
 		public void AMissingCaseThrows()
 		{
-			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(CaseScope("gone"), SwitchSource));
+			Assert.Throws<InvalidOperationException>(() => LoaderConversions.ConversionsIn(CaseScope("gone"), SourceLines.Of(SwitchSource)));
 		}
 
 		// - counted only outside the scanned lines, for a read of its own loop variable
@@ -309,7 +309,7 @@ namespace Chummer.Tests.Consumption.Fields
 		public void AnUnscannedLoopIsOneThatConvertsItsOwnVariable()
 		{
 			Assert.Equal(new[] { "f.cs:16 powers/power" },
-				LoaderConversions.UnscannedLoops("f.cs", FormSource, new[] { "powers/power" }, new[] { (6, 12) }));
+				LoaderConversions.UnscannedLoops("f.cs", SourceLines.Of(FormSource), new[] { "powers/power" }, new[] { (6, 12) }));
 		}
 
 		[Theory]

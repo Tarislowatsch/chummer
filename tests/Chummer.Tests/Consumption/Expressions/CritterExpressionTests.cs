@@ -83,7 +83,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[Fact]
 		public void ExpressionToStringUnchangedSinceItsPortWasWritten()
 		{
-			IReadOnlyDictionary<string, string> actual = ExpressionChecks.CalculatorFingerprints(CritterExpressions.Calculators);
+			IReadOnlyDictionary<string, string> actual = SourceMembers.Fingerprints(CritterExpressions.Calculators);
 
 			string[] drifted = actual
 				.Where(entry => !string.Equals(entry.Value, PinnedFingerprint, StringComparison.Ordinal))

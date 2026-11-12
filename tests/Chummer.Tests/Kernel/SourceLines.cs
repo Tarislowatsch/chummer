@@ -3,21 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Chummer.Tests.Kernel
 {
 	// - a commented-out read must not count: that would hide what the code really does
 	// - Bare also drops literals: a "{0}" placeholder must not move the brace depth
-	internal sealed class SourceLines
+	public sealed class SourceLines
 	{
 		public SourceLines(string[] code, string[] bare)
 		{
 			Code = code;
 			Bare = bare;
+			joinedCode = new Lazy<string>(() => string.Join("\n", Code));
 		}
 
 		// Comments removed, literals kept: tag and field names are literals.
 		public string[] Code { get; }
+
+		// - Code as one string for multi-line regexes, joined once per instance
+		public string JoinedCode => joinedCode.Value;
+
+		private readonly Lazy<string> joinedCode;
 
 		public string[] Bare { get; }
 
@@ -138,6 +145,14 @@ namespace Chummer.Tests.Kernel
 			return new SourceLines(
 				Code.Skip(start).Take(count).ToArray(),
 				Bare.Skip(start).Take(count).ToArray());
+		}
+
+		// - whitespace-collapsed: a reindent must not move a pinned hash
+		public string CodeFingerprint()
+		{
+			return Fingerprint(Code
+				.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
+				.Where(line => line.Length > 0));
 		}
 
 		internal static string Fingerprint(IEnumerable<string> lines)

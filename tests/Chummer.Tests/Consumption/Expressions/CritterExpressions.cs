@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -43,9 +42,9 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		// - the first argument as written, whitespace collapsed
 		// - public so the detection tests can drive it with hand-built source
-		public static IEnumerable<string> ArgumentsIn(string[] lines)
+		public static IEnumerable<string> ArgumentsIn(SourceLines source)
 		{
-			return SourceLines.Of(lines).Code
+			return source.Code
 				.SelectMany(line => Call.Matches(line).Cast<Match>())
 				.Select(match => Regex.Replace(match.Groups[1].Value.Trim(), @"\s+", " "))
 				.Where(argument => !argument.StartsWith("string ", StringComparison.Ordinal));
@@ -53,8 +52,8 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static IReadOnlyList<string> ApplicationArguments()
 		{
-			return DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => ArgumentsIn(File.ReadAllLines(path)))
+			return SourceCorpus.Files
+				.SelectMany(file => ArgumentsIn(file.Source))
 				.Distinct(StringComparer.Ordinal)
 				.OrderBy(argument => argument, StringComparer.Ordinal)
 				.ToArray();
@@ -73,12 +72,7 @@ namespace Chummer.Tests.Consumption.Expressions
 
 		public static IEnumerable<string> DataFiles()
 		{
-			string[] baseFiles = { "metatypes.xml", "critters.xml" };
-
-			return baseFiles.Select(file => Path.Combine(DataPaths.ChummerDataDir, file))
-				.Concat(PackFiles.All
-					.Where(pack => pack.BaseFileNames.Intersect(baseFiles, StringComparer.Ordinal).Any())
-					.Select(pack => pack.FilePath));
+			return DataPaths.FilesWithPacks("metatypes.xml", "critters.xml");
 		}
 
 		public sealed class Failure

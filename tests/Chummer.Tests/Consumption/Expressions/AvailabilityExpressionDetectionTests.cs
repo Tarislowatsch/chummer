@@ -107,7 +107,7 @@ namespace Chummer.Tests.Consumption.Expressions
 		[InlineData("3", 3)]
 		public void TheMinimumRatingIsTakenAsTheDialogsTakeIt(string minText, int expected)
 		{
-			Assert.Equal(expected, ExpressionChecks.MinimumRating(minText));
+			Assert.Equal(expected, Ratings.Minimum(minText));
 		}
 
 		// - above the limit the sweep stops, the top end is still replayed
@@ -117,8 +117,8 @@ namespace Chummer.Tests.Consumption.Expressions
 			IReadOnlyList<int> ratings =
 				ExpressionChecks.RatingsOf("Gear", Item("<gear><rating>1000000</rating></gear>"));
 
-			Assert.Equal(ExpressionChecks.ExhaustiveRatingLimit + 1, ratings.Count);
-			Assert.Equal(ExpressionChecks.ExhaustiveRatingLimit, ratings[ratings.Count - 2]);
+			Assert.Equal(Ratings.ExhaustiveLimit + 1, ratings.Count);
+			Assert.Equal(Ratings.ExhaustiveLimit, ratings[ratings.Count - 2]);
 			Assert.Equal(1000000, ratings[ratings.Count - 1]);
 		}
 

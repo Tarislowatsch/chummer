@@ -72,16 +72,14 @@ namespace Chummer.Tests.Consumption.Expressions
 		public void EveryCapacityReadSitsInAKnownMember()
 		{
 			Dictionary<string, int> actual = new Dictionary<string, int>(StringComparer.Ordinal);
-			foreach (string path in DataPaths.ApplicationSourceFiles())
+			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string[] lines = File.ReadAllLines(path);
-				string[] members = ExpressionChecks.EnclosingMembers(lines);
-				string file = Path.GetFileName(path);
-				foreach (NameLookups.Literal literal in NameLookups.LiteralsIn(file, lines)
+				string[] members = SourceMembers.EnclosingMembers(file.Source);
+				foreach (NameLookups.Literal literal in NameLookups.LiteralsIn(file.Name, file.Source)
 					.Where(literal => literal.Text == "capacity" || literal.Text == "armorcapacity"))
 				{
 					int line = int.Parse(literal.Site.Substring(literal.Site.LastIndexOf(':') + 1));
-					string key = file + " " + (members[line - 1] ?? "(no member)");
+					string key = file.Name + " " + (members[line - 1] ?? "(no member)");
 					actual[key] = actual.TryGetValue(key, out int count) ? count + 1 : 1;
 				}
 			}

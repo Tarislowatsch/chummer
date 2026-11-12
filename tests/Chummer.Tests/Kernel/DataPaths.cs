@@ -118,6 +118,26 @@ namespace Chummer.Tests.Kernel
 
 		public static IReadOnlyList<DataFile> DataFilesWithPacks => CachedDataFilesWithPacks.Value;
 
+		public static IReadOnlyList<string> FilesWithPacks(params string[] baseFileNames)
+		{
+			return FilesWithPacks((IEnumerable<string>)baseFileNames);
+		}
+
+		// - the merged view Load builds: the base files plus every pack paired with one of them
+		// - throws on a missing base file: an empty view would leave its theories green on zero cases
+		public static IReadOnlyList<string> FilesWithPacks(IEnumerable<string> baseFileNames)
+		{
+			string[] names = baseFileNames.ToArray();
+			string missing = names.FirstOrDefault(name => !DataFilesWithPacks.Any(file => file.BaseFileName == name));
+			if (missing != null)
+				throw new FileNotFoundException("No data file " + missing + " under Chummer/data", missing);
+
+			return DataFilesWithPacks
+				.Where(file => names.Contains(file.BaseFileName, StringComparer.Ordinal))
+				.Select(file => file.FilePath)
+				.ToArray();
+		}
+
 		private static readonly Lazy<IReadOnlyList<DataFile>> CachedDataFilesWithPacks =
 			new Lazy<IReadOnlyList<DataFile>>(() => TopLevelRuleXmlFiles()
 				.Select(path => new DataFile(path, Path.GetFileName(path)))
@@ -134,17 +154,6 @@ namespace Chummer.Tests.Kernel
 				.Select(path => new { XmlPath = path, XsdPath = Path.ChangeExtension(path, ".xsd") })
 				.Where(pair => File.Exists(pair.XsdPath))
 				.Select(pair => new object[] { pair.XmlPath, pair.XsdPath });
-		}
-
-		// - obj/ is generated and absent from a fresh clone: results would differ between here and CI
-		internal static IEnumerable<string> ApplicationSourceFiles()
-		{
-			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
-
-			return Directory
-				.EnumerateFiles(Path.Combine(RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
-				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
-				.OrderBy(path => path, StringComparer.Ordinal);
 		}
 
 		private static string FindRepoRoot()

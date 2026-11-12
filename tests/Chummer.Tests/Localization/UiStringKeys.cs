@@ -16,23 +16,18 @@ namespace Chummer.Tests.Localization
 		public static IReadOnlyList<string> EnglishKeys => CachedEnglishKeys.Value;
 
 		private static readonly Lazy<IReadOnlyList<string>> CachedEnglishKeys =
-			new Lazy<IReadOnlyList<string>>(() =>
-			{
-				XmlDocument document = Xml.Load(DataPaths.EnglishLanguageFile);
-				return document.SelectNodes("/chummer/strings/string/key").Cast<XmlNode>()
-					.Select(key => key.InnerText)
-					.ToArray();
-			});
+			new Lazy<IReadOnlyList<string>>(() => EnglishStrings.All
+				.Where(entry => entry.Key != null)
+				.Select(entry => entry.Key)
+				.ToArray());
 
 		// - RefreshStrings reads objNode["key"] and objNode["text"] unguarded (clsLanguageManager.cs:139-140)
 		// - public so the detection tests can drive it with hand-built XML
-		public static IEnumerable<string> EntriesMissingKeyOrText(XmlDocument language)
+		public static IEnumerable<string> EntriesMissingKeyOrText(IEnumerable<EnglishStrings.Entry> entries)
 		{
-			return language.SelectNodes("/chummer/strings/string").Cast<XmlNode>()
-				.Select((entry, index) => new { entry, index })
-				.Where(item => item.entry["key"] == null || item.entry["text"] == null)
-				.Select(item => "string #" + (item.index + 1) + " (key '"
-					+ (item.entry["key"]?.InnerText ?? "(none)") + "')");
+			return entries
+				.Where(entry => entry.Key == null || entry.Text == null)
+				.Select(entry => "string #" + entry.Number + " (key '" + (entry.Key ?? "(none)") + "')");
 		}
 
 		// One GetString call, with its argument as written.
@@ -62,9 +57,9 @@ namespace Chummer.Tests.Localization
 
 		// - public so the detection tests can drive it with hand-built source
 		// - comments stripped first: a commented-out call is not a call
-		public static IEnumerable<Call> CallsIn(string fileName, string[] lines)
+		public static IEnumerable<Call> CallsIn(string fileName, SourceLines source)
 		{
-			string[] code = SourceLines.Of(lines).Code;
+			string[] code = source.Code;
 			Regex call = string.Equals(fileName, LanguageManagerFile, StringComparison.Ordinal)
 				? BareCall
 				: QualifiedCall;
@@ -109,8 +104,8 @@ namespace Chummer.Tests.Localization
 		public static IReadOnlyList<Call> AllCalls => CachedCalls.Value;
 
 		private static readonly Lazy<IReadOnlyList<Call>> CachedCalls =
-			new Lazy<IReadOnlyList<Call>>(() => DataPaths.ApplicationSourceFiles()
-				.SelectMany(path => CallsIn(Path.GetFileName(path), File.ReadAllLines(path)))
+			new Lazy<IReadOnlyList<Call>>(() => SourceCorpus.Files
+				.SelectMany(file => CallsIn(file.Name, file.Source))
 				.ToArray());
 
 		private static readonly Regex Literal = new Regex(@"^""([^""\\]*)""$");
@@ -185,7 +180,7 @@ namespace Chummer.Tests.Localization
 			// clsUnique.cs:7271
 			Form("\"String_\" + _objContactType.ToString()", "String_", "",
 				"enum ContactType in clsUnique.cs",
-				() => EnumMembers(File.ReadAllText(Path.Combine(DataPaths.RepoRoot, "Chummer", "clsUnique.cs")),
+				() => EnumMembers(SourceCorpus.File("clsUnique.cs").Source.JoinedCode,
 					"ContactType")),
 			// - both inside a try that falls back to the raw value
 			Form("\"String_Attribute\" + _strExtra + \"Short\"", "String_Attribute", "Short",
@@ -217,13 +212,9 @@ namespace Chummer.Tests.Localization
 			return Nodes(fileName, xpath).Select(node => node.InnerText);
 		}
 
-		// - the base file plus every pack file Load would merge into it once copied in
 		private static IEnumerable<XmlNode> Nodes(string fileName, string xpath)
 		{
-			return new[] { Path.Combine(DataPaths.ChummerDataDir, fileName) }
-				.Concat(PackFiles.Paired()
-					.Where(pack => string.Equals(pack.BaseFileName, fileName, StringComparison.Ordinal))
-					.Select(pack => pack.FilePath))
+			return DataPaths.FilesWithPacks(fileName)
 				.SelectMany(path => Xml.Load(path).SelectNodes(xpath).Cast<XmlNode>());
 		}
 

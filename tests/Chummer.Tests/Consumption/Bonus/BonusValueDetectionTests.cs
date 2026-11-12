@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Xml;
-using Chummer.Tests.Consumption.Expressions;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -12,7 +11,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		public void AFractionPrintedInTheGermanCultureParsesTenfold()
 		{
 			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.Application));
-			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, BonusValues.LocalCulture));
+			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.German));
 		}
 
 		[Fact]
@@ -41,7 +40,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		{
 			XmlDocument document = Xml.Parse("<power><name>P</name><levels>yes</levels><bonus><reach>1</reach></bonus></power>");
 
-			Assert.Equal(Enumerable.Range(0, ExpressionChecks.ExhaustiveRatingLimit + 1),
+			Assert.Equal(Enumerable.Range(0, Ratings.ExhaustiveLimit + 1),
 				BonusValues.RatingsOf(document.SelectSingleNode("power/bonus")));
 		}
 
@@ -70,7 +69,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void TheGermanCultureIgnoresThisMachinesOverrides()
 		{
-			Assert.False(BonusValues.LocalCulture.UseUserOverride);
+			Assert.False(Cultures.German.UseUserOverride);
 		}
 
 		[Fact]
@@ -214,7 +213,7 @@ namespace Chummer.Tests.Consumption.Bonus
 					"13 b | Pick(nodBonus, \"b\"), intRating",
 					"16 (no branch) | nodBonus[\"stray\"].InnerText, intRating",
 				},
-				BonusValues.CallsIn(Source, new[] { "reach", "armor", "b" })
+				BonusValues.CallsIn(SourceLines.Of(Source), new[] { "reach", "armor", "b" })
 					.Select(call => call.Line + " " + call.Key));
 		}
 

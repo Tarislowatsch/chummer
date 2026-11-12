@@ -280,7 +280,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			Assert.Equal(
 				FingerprintOf("_name = objXmlSample[\"name\"].InnerText;"),
-				RequiredFields.FingerprintsIn(lines)["Sample"]);
+				RequiredFields.FingerprintsIn(SourceLines.Of(lines))["Sample"]);
 		}
 
 		// - a second Create in one class would silently shadow the first under the pinned table's key
@@ -301,7 +301,7 @@ namespace Chummer.Tests.Consumption.Fields
 			};
 
 			InvalidOperationException error = Assert.Throws<InvalidOperationException>(
-				() => RequiredFields.FingerprintsIn(lines));
+				() => RequiredFields.FingerprintsIn(SourceLines.Of(lines)));
 
 			Assert.Contains("Sample", error.Message);
 		}
@@ -319,7 +319,7 @@ namespace Chummer.Tests.Consumption.Fields
 			lines.Add("	}");
 			lines.Add("}");
 
-			return RequiredFields.FingerprintsIn(lines.ToArray())["Sample"];
+			return RequiredFields.FingerprintsIn(SourceLines.Of(lines.ToArray()))["Sample"];
 		}
 
 		// Runs the real rule, not a copy: the XPath under test is the one the suite uses.

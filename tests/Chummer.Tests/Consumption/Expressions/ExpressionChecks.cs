@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.XPath;
 using Chummer.Tests.Consumption.Fields;
@@ -82,7 +81,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				CutShort = cutShort;
 			}
 
-			// - entries rated above ExhaustiveRatingLimit, replayed at the top end only
+			// - entries rated above Ratings.ExhaustiveLimit, replayed at the top end only
 			public IReadOnlyList<string> CutShort { get; }
 
 			public ExpressionRule Rule { get; }
@@ -117,11 +116,6 @@ namespace Chummer.Tests.Consumption.Expressions
 				{ "TechProgram", new[] { "maxrating", null } },
 			};
 
-		// - every rating up to here is replayed, no assumption about the expressions needed
-		// - above it only the top end: credsticks reach 1000000, a full sweep would take minutes
-		public const int ExhaustiveRatingLimit = 100;
-
-		// - min..max, cut at the limit, plus max itself
 		public static IReadOnlyList<int> RatingsOf(string entity, XmlNode item)
 		{
 			string[] fields;
@@ -140,21 +134,7 @@ namespace Chummer.Tests.Consumption.Expressions
 			if (max <= 0)
 				return new[] { 0 };
 
-			int min = MinimumRating(fields[1] == null ? null : item[fields[1]]?.InnerText);
-
-			return Enumerable.Range(min, Math.Max(0, Math.Min(max, ExhaustiveRatingLimit) - min + 1))
-				.Concat(new[] { max })
-				.Distinct()
-				.ToArray();
-		}
-
-		// - the dialogs take minrating as is, 0 included (frmSelectGear.cs:1097), 1 without one
-		// - a negative one would be no rating at all: it counts as 0
-		public static int MinimumRating(string minText)
-		{
-			return int.TryParse(minText, NumberStyles.Integer, CultureInfo.InvariantCulture, out int declared)
-				? Math.Max(0, declared)
-				: 1;
+			return Ratings.Sweep(Ratings.Minimum(fields[1] == null ? null : item[fields[1]]?.InnerText), max);
 		}
 
 		// - "entity: name (rating)" for every entry whose range the sweep cuts short
@@ -162,87 +142,10 @@ namespace Chummer.Tests.Consumption.Expressions
 		{
 			return items
 				.Select(item => new { Item = item, Ratings = RatingsOf(entity, item) })
-				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > ExhaustiveRatingLimit)
+				.Where(entry => entry.Ratings[entry.Ratings.Count - 1] > Ratings.ExhaustiveLimit)
 				.Select(entry => entity + ": " + RuleCorpus.ItemLabel(entry.Item) + " ("
 					+ entry.Ratings[entry.Ratings.Count - 1] + ")");
 		}
-
-		private static readonly Regex AnyClass =
-			new Regex(@"^\s*public\s+(?:(?:sealed|partial|abstract)\s+)*class\s+(\w+)", RegexOptions.Compiled);
-
-		// - "Class.Member" -> hash of the member's comment-free body, for every key asked for
-		// - a port is only as good as its last reading: a changed hash means read it again
-		// - a key that matches nothing maps to "(missing)" and fails the pin
-		public static IReadOnlyDictionary<string, string> CalculatorFingerprints(IEnumerable<string> keys)
-		{
-			Dictionary<string, string> fingerprints = keys.Distinct(StringComparer.Ordinal)
-				.ToDictionary(key => key, key => "(missing)", StringComparer.Ordinal);
-
-			foreach (string path in DataPaths.ApplicationSourceFiles())
-			{
-				SourceLines source = SourceLines.Of(File.ReadAllLines(path));
-				string className = null;
-
-				for (int i = 0; i < source.Code.Length; i++)
-				{
-					Match declaration = AnyClass.Match(source.Code[i]);
-					if (declaration.Success)
-					{
-						className = declaration.Groups[1].Value;
-						continue;
-					}
-
-					Match member = MemberDeclaration.Match(source.Code[i]);
-					if (className == null || !member.Success)
-						continue;
-
-					string key = className + "." + member.Groups[1].Value;
-					if (!fingerprints.ContainsKey(key))
-						continue;
-
-					if (fingerprints[key] != "(missing)")
-						throw new InvalidOperationException(key + " is declared twice, so its port is ambiguous.");
-
-					fingerprints[key] = SourceLines.Fingerprint(source.BlockFrom(i).Code
-						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
-						.Where(line => line.Length > 0));
-				}
-			}
-
-			return fingerprints;
-		}
-
-		// - "Class.Member" of the last declaration above each line, null before the first
-		// - a constructor matches no declaration: its lines count to the member above
-		public static string[] EnclosingMembers(string[] lines)
-		{
-			SourceLines source = SourceLines.Of(lines);
-			string[] members = new string[lines.Length];
-			string className = null;
-			string member = null;
-
-			for (int i = 0; i < source.Code.Length; i++)
-			{
-				Match declaration = AnyClass.Match(source.Code[i]);
-				if (declaration.Success)
-				{
-					className = declaration.Groups[1].Value;
-					member = null;
-				}
-				else if (MemberDeclaration.Match(source.Code[i]) is Match match && match.Success && className != null)
-				{
-					member = className + "." + match.Groups[1].Value;
-				}
-
-				members[i] = member;
-			}
-
-			return members;
-		}
-
-		private static readonly Regex MemberDeclaration = new Regex(
-			@"^\s*(?:public|private|protected|internal)\s+(?:(?:static|virtual|override|new)\s+)*[\w<>\[\]]+\s+(\w+)\s*(?:\(|$)",
-			RegexOptions.Compiled);
 
 		// - the same two calls every calculator makes on a throwaway document
 		public static object Evaluate(string expression)
