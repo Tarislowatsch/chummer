@@ -47,7 +47,7 @@ namespace Chummer.Tests.Kernel
 				ContextDependencies.Cycles(ContextEdges()).ToArray());
 		}
 
-		// - exact: a new edge is a design decision, and an empty scan cannot pass
+		// - exact: a new edge is a design decision
 		// - edges only, no files: a new test file on a known edge needs no bump
 		private static readonly string[] PinnedContextEdges =
 		{
@@ -69,7 +69,7 @@ namespace Chummer.Tests.Kernel
 					.ToArray());
 		}
 
-		// - the kernel still imports contexts: RuleCorpus until registration, DataPathsTests until the pins move
+		// - kernel imports left: RuleCorpus until registration, DataPathsTests until the pins move
 		// - pinned per file so the list can only shrink
 		private static readonly IReadOnlyDictionary<string, string> PinnedKernelImports =
 			new Dictionary<string, string>(StringComparer.Ordinal)

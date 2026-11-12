@@ -26,6 +26,9 @@ namespace Chummer.Tests.Kernel
 
 		public static IReadOnlyList<SourceFile> Files => CachedFiles.Value;
 
+		// - the test project's own source, for the context graph
+		public static IReadOnlyList<SourceFile> TestProjectFiles => CachedTestProjectFiles.Value;
+
 		// - Single: a file name shared by two folders must not pick a consumer silently
 		public static SourceFile File(string name)
 		{
@@ -44,20 +47,23 @@ namespace Chummer.Tests.Kernel
 
 		// - lexed once: about twenty scans walk the whole tree
 		private static readonly Lazy<IReadOnlyList<SourceFile>> CachedFiles =
-			new Lazy<IReadOnlyList<SourceFile>>(() => ApplicationSourceFiles()
-				.Select(path => new SourceFile(path, SourceLines.Of(System.IO.File.ReadAllLines(path))))
-				.ToArray());
+			new Lazy<IReadOnlyList<SourceFile>>(() => Lex("Chummer"));
+
+		private static readonly Lazy<IReadOnlyList<SourceFile>> CachedTestProjectFiles =
+			new Lazy<IReadOnlyList<SourceFile>>(() => Lex(Path.Combine("tests", "Chummer.Tests")));
 
 		// - private: a scan that lists the files itself would read and lex them a second time
 		// - obj/ is generated and absent from a fresh clone: results would differ between here and CI
-		private static IEnumerable<string> ApplicationSourceFiles()
+		private static IReadOnlyList<SourceFile> Lex(string projectDir)
 		{
 			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
 
 			return Directory
-				.EnumerateFiles(Path.Combine(DataPaths.RepoRoot, "Chummer"), "*.cs", SearchOption.AllDirectories)
+				.EnumerateFiles(Path.Combine(DataPaths.RepoRoot, projectDir), "*.cs", SearchOption.AllDirectories)
 				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
-				.OrderBy(path => path, StringComparer.Ordinal);
+				.OrderBy(path => path, StringComparer.Ordinal)
+				.Select(path => new SourceFile(path, SourceLines.Of(System.IO.File.ReadAllLines(path))))
+				.ToArray();
 		}
 
 		private static readonly Lazy<IReadOnlyDictionary<string, SourceFile>> CachedFilesByPath =

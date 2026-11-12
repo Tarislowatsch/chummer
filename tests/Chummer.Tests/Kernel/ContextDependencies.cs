@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Chummer.Tests.Kernel
 {
-	// - edges from using lines and qualified names: a sibling context is reachable no other way
+	// - edges from using lines and dotted names, resolved against the enclosing namespace
 	// - an unused using counts too: it would hide a real edge added later
 	public static class ContextDependencies
 	{
@@ -32,24 +31,56 @@ namespace Chummer.Tests.Kernel
 
 		private static readonly Regex Namespace = new Regex(@"^\s*namespace\s+([\w.]+)");
 
-		private static readonly Regex Reference = new Regex(@"\bChummer\.Tests\.([\w.]+)");
+		private static readonly Regex DottedName = new Regex(@"(?<![\w.])([A-Za-z_]\w*(?:\.\w+)+)");
+
+		// - a using inside the namespace block may name a sibling with one bare segment
+		private static readonly Regex UsingDirective = new Regex(@"^\s*using\s+(?:static\s+)?(?:\w+\s*=\s*)?([\w.]+)\s*;");
 
 		// - public so the detection tests can drive it with hand-built source
 		// - the longest known context wins: Consumption.Fields, not Consumption
 		public static IEnumerable<Edge> EdgesIn(string file, SourceLines source, IReadOnlyCollection<string> contexts)
 		{
-			string from = source.Code.Select(line => Namespace.Match(line)).Where(match => match.Success)
-				.Select(match => ContextOf(match.Groups[1].Value, contexts)).FirstOrDefault();
+			string enclosing = source.Code.Select(line => Namespace.Match(line)).Where(match => match.Success)
+				.Select(match => match.Groups[1].Value).FirstOrDefault();
+			string from = enclosing == null ? null : ContextOf(enclosing, contexts);
 			if (from == null)
 				return Enumerable.Empty<Edge>();
 
+			HashSet<string> namespaces = new HashSet<string>(contexts
+				.SelectMany(context => NamespacesAlong(Prefix + context)), StringComparer.Ordinal);
+
 			return source.Bare
-				.SelectMany(line => Reference.Matches(line).Cast<Match>())
-				.Select(match => ContextOf(Prefix + match.Groups[1].Value, contexts))
+				.SelectMany(line => DottedName.Matches(line).Cast<Match>().Concat(UsingDirective.Matches(line).Cast<Match>()))
+				.Select(match => Resolve(match.Groups[1].Value, enclosing, namespaces))
+				.Where(name => name != null)
+				.Select(name => ContextOf(name, contexts))
 				.Where(to => to != null && to != from)
 				.Distinct(StringComparer.Ordinal)
 				.Select(to => new Edge(file, from, to))
 				.ToArray();
+		}
+
+		// - "A.B.C" -> "A", "A.B", "A.B.C"
+		private static IEnumerable<string> NamespacesAlong(string name)
+		{
+			string[] segments = name.Split('.');
+			return Enumerable.Range(1, segments.Length).Select(count => string.Join(".", segments.Take(count)));
+		}
+
+		// - the first segment is looked up from the innermost namespace outwards, members ignored
+		// - a same-named member can only add an edge
+		// - "Expressions.X" inside Consumption.Bonus names Consumption.Expressions
+		private static string Resolve(string name, string enclosing, ISet<string> namespaces)
+		{
+			string first = name.Split('.')[0];
+			for (string scope = enclosing; ; scope = scope.Substring(0, Math.Max(0, scope.LastIndexOf('.'))))
+			{
+				string prefix = scope.Length == 0 ? "" : scope + ".";
+				if (namespaces.Contains(prefix + first))
+					return prefix + name;
+				if (scope.Length == 0)
+					return null;
+			}
 		}
 
 		private static string ContextOf(string name, IReadOnlyCollection<string> contexts)
@@ -104,12 +135,6 @@ namespace Chummer.Tests.Kernel
 
 		private static readonly Lazy<IReadOnlyList<Edge>> CachedEdges = new Lazy<IReadOnlyList<Edge>>(() =>
 		{
-			string generated = Path.DirectorySeparatorChar + "obj" + Path.DirectorySeparatorChar;
-			string[] files = Directory
-				.EnumerateFiles(Path.Combine(DataPaths.RepoRoot, "tests", "Chummer.Tests"), "*.cs", SearchOption.AllDirectories)
-				.Where(path => path.IndexOf(generated, StringComparison.Ordinal) < 0)
-				.OrderBy(path => path, StringComparer.Ordinal)
-				.ToArray();
 			string[] contexts = typeof(ContextDependencies).Assembly.GetTypes()
 				.Select(type => type.Namespace)
 				.Where(name => name != null && name.StartsWith(Prefix, StringComparison.Ordinal))
@@ -117,8 +142,8 @@ namespace Chummer.Tests.Kernel
 				.Distinct(StringComparer.Ordinal)
 				.ToArray();
 
-			return files
-				.SelectMany(path => EdgesIn(Path.GetFileName(path), SourceLines.Of(File.ReadAllLines(path)), contexts))
+			return SourceCorpus.TestProjectFiles
+				.SelectMany(file => EdgesIn(file.Name, file.Source, contexts))
 				.ToArray();
 		});
 	}

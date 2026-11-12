@@ -27,6 +27,28 @@ namespace Chummer.Tests.Kernel
 		}
 
 		[Fact]
+		public void ANameRelativeToTheEnclosingNamespaceIsAnEdge()
+		{
+			Assert.Equal(new[] { "Consumption.Fields", "Rulebook" },
+				TargetsOf("namespace Chummer.Tests.Consumption.Bonus",
+					"{ var x = Fields.FieldReaders.All; var y = Rulebook.NameUniqueness.Rules; }"));
+		}
+
+		[Fact]
+		public void ABareUsingInsideTheNamespaceIsAnEdge()
+		{
+			Assert.Equal(new[] { "Consumption.Fields" },
+				TargetsOf("namespace Chummer.Tests.Consumption.Bonus", "{", "using Fields;", "}"));
+		}
+
+		[Fact]
+		public void ADottedNameOutsideTheTestNamespacesIsNoEdge()
+		{
+			Assert.Empty(TargetsOf("namespace Chummer.Tests.Kernel",
+				"{ var x = Path.Combine(a, b); var y = System.IO.File.Exists(c); var z = Chummer.XmlManager.Load(d); }"));
+		}
+
+		[Fact]
 		public void CommentsLiteralsAndTheOwnContextAreNoEdges()
 		{
 			Assert.Empty(TargetsOf(
