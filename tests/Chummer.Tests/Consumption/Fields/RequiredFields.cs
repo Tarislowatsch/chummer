@@ -250,7 +250,7 @@ namespace Chummer.Tests.Consumption.Fields
 
 			foreach (SourceCorpus.SourceFile file in SourceCorpus.Files)
 			{
-				string source = string.Join("\n", file.Source.Code);
+				string source = file.Source.JoinedCode;
 
 				foreach (Match match in EntityCreateSignature.Matches(source))
 				{
@@ -285,7 +285,7 @@ namespace Chummer.Tests.Consumption.Fields
 			Dictionary<string, string> fingerprints = new Dictionary<string, string>(StringComparer.Ordinal);
 
 			// - joined first: a broken-after-the-paren signature must match, as in the sites scan
-			string joined = string.Join("\n", source.Code);
+			string joined = source.JoinedCode;
 
 			foreach (Match signature in EntityCreateSignature.Matches(joined))
 			{

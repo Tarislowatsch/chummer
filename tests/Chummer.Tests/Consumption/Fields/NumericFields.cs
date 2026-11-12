@@ -150,7 +150,7 @@ namespace Chummer.Tests.Consumption.Fields
 		public static IReadOnlyDictionary<string, IReadOnlyList<ConvertedField>> ConvertedFieldsIn(
 			SourceLines source)
 		{
-			string joined = string.Join("\n", source.Code);
+			string joined = source.JoinedCode;
 			Dictionary<string, IReadOnlyList<ConvertedField>> fields =
 				new Dictionary<string, IReadOnlyList<ConvertedField>>(StringComparer.Ordinal);
 
@@ -164,7 +164,7 @@ namespace Chummer.Tests.Consumption.Fields
 				}
 
 				string className = RequiredFields.ClassNameAbove(source.Code, line);
-				string body = string.Join("\n", source.BlockFrom(line).Code);
+				string body = source.BlockFrom(line).JoinedCode;
 				IReadOnlyList<ConvertedField> converted =
 					ConvertedFieldsInBody(className, body, signature.Groups[1].Value);
 

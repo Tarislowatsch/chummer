@@ -48,9 +48,7 @@ namespace Chummer.Tests.Kernel
 					if (fingerprints[key] != "(missing)")
 						throw new InvalidOperationException(key + " is declared twice, so its port is ambiguous.");
 
-					fingerprints[key] = SourceLines.Fingerprint(source.BlockFrom(i).Code
-						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
-						.Where(line => line.Length > 0));
+					fingerprints[key] = source.BlockFrom(i).CodeFingerprint();
 				}
 			}
 

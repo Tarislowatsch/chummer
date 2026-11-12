@@ -271,7 +271,7 @@ namespace Chummer.Tests.Rulebook
 		private static string CodeOf(string fileName)
 		{
 			SourceCorpus.SourceFile file = SourceCorpus.At(Path.Combine(DataPaths.RepoRoot, "Chummer", fileName));
-			return file == null ? "" : string.Join("\n", file.Source.Code);
+			return file == null ? "" : file.Source.JoinedCode;
 		}
 
 		private static IEnumerable<string> VacanciesOf(CrossFileReferences.ReferenceCheck check)

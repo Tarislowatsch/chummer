@@ -663,11 +663,8 @@ namespace Chummer.Tests.Consumption.Bonus
 		public static IReadOnlyDictionary<string, string> BranchFingerprints(IEnumerable<string> handlers)
 		{
 			SourceLines source = SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source;
-			return handlers.ToDictionary(handler => handler, handler => SourceLines.Fingerprint(
-					BonusVocabulary.HandlerBlock(handler, source).Block.Code
-						.Select(line => Regex.Replace(line.Trim(), @"\s+", " "))
-						.Where(line => line.Length > 0)),
-				StringComparer.Ordinal);
+			return handlers.ToDictionary(handler => handler,
+				handler => BonusVocabulary.HandlerBlock(handler, source).Block.CodeFingerprint(), StringComparer.Ordinal);
 		}
 	}
 }

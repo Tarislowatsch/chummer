@@ -29,7 +29,7 @@ namespace Chummer.Tests.Kernel
 		// - Single: a file name shared by two folders must not pick a consumer silently
 		public static SourceFile File(string name)
 		{
-			SourceFile[] matches = Files.Where(file => file.Name == name).ToArray();
+			SourceFile[] matches = CachedFilesByName.Value[name].ToArray();
 			if (matches.Length != 1)
 				throw new InvalidOperationException("Expected one " + name + " under Chummer/, found " + matches.Length);
 
@@ -63,5 +63,8 @@ namespace Chummer.Tests.Kernel
 		private static readonly Lazy<IReadOnlyDictionary<string, SourceFile>> CachedFilesByPath =
 			new Lazy<IReadOnlyDictionary<string, SourceFile>>(
 				() => CachedFiles.Value.ToDictionary(file => file.Path, StringComparer.Ordinal));
+
+		private static readonly Lazy<ILookup<string, SourceFile>> CachedFilesByName =
+			new Lazy<ILookup<string, SourceFile>>(() => CachedFiles.Value.ToLookup(file => file.Name, StringComparer.Ordinal));
 	}
 }

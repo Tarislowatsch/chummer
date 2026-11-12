@@ -202,7 +202,7 @@ namespace Chummer.Tests.Consumption.Bonus
 			Regex check = NodeExistsCheck(parameter, @"([^""]+)");
 
 			return new HashSet<string>(
-				check.Matches(string.Join("\n", body.Code)).Cast<Match>().Select(match => match.Groups[1].Value),
+				check.Matches(body.JoinedCode).Cast<Match>().Select(match => match.Groups[1].Value),
 				StringComparer.Ordinal);
 		}
 
@@ -218,7 +218,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				return new HashSet<string>(StringComparer.Ordinal);
 
 			return new HashSet<string>(
-				label.Matches(string.Join("\n", body.BlockFrom(start).Code)).Cast<Match>()
+				label.Matches(body.BlockFrom(start).JoinedCode).Cast<Match>()
 					.Select(match => match.Groups[1].Value),
 				StringComparer.Ordinal);
 		}
@@ -250,7 +250,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		// - blind spot: matches any .Bonus read, not one on a vehicle mod specifically
 		public static IReadOnlyList<string> VehicleModTagsNoLongerRead()
 		{
-			string[] sources = SourceCorpus.Files.Select(file => string.Join("\n", file.Source.Code)).ToArray();
+			string[] sources = SourceCorpus.Files.Select(file => file.Source.JoinedCode).ToArray();
 
 			return VehicleModTags
 				.Where(tag =>
