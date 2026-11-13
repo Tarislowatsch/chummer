@@ -66,7 +66,6 @@
 			this.mnuToolsDiceRoller = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.mnuToolsUpdate = new System.Windows.Forms.ToolStripMenuItem();
 			this.mnuToolsOmae = new System.Windows.Forms.ToolStripMenuItem();
 			this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -433,7 +432,6 @@
             this.mnuToolsDiceRoller,
             this.toolStripSeparator5,
             this.optionsToolStripMenuItem,
-            this.mnuToolsUpdate,
             this.mnuToolsOmae});
 			this.toolsMenu.Name = "toolsMenu";
 			this.toolsMenu.Size = new System.Drawing.Size(48, 20);
@@ -463,15 +461,6 @@
 			this.optionsToolStripMenuItem.Tag = "Menu_Main_Options";
 			this.optionsToolStripMenuItem.Text = "&Options";
 			this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
-			// 
-			// mnuToolsUpdate
-			// 
-			this.mnuToolsUpdate.Image = global::Chummer.Properties.Resources.server_lightning;
-			this.mnuToolsUpdate.Name = "mnuToolsUpdate";
-			this.mnuToolsUpdate.Size = new System.Drawing.Size(171, 22);
-			this.mnuToolsUpdate.Tag = "Menu_Main_Update";
-			this.mnuToolsUpdate.Text = "Check for Updates";
-			this.mnuToolsUpdate.Click += new System.EventHandler(this.mnuToolsUpdate_Click);
 			// 
 			// mnuToolsOmae
 			// 
@@ -724,7 +713,6 @@
 		private System.Windows.Forms.ToolStripButton printPreviewToolStripButton;
 		private System.Windows.Forms.ToolStripButton helpToolStripButton;
 		private System.Windows.Forms.ToolTip toolTip;
-		private System.Windows.Forms.ToolStripMenuItem mnuToolsUpdate;
 		private System.Windows.Forms.ToolStripButton tsbSave;
 		private System.Windows.Forms.ToolStripMenuItem mnuHelpRevisionHistory;
 		private System.Windows.Forms.ToolStripMenuItem mnuNewCritter;

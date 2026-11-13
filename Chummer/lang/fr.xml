@@ -597,10 +597,6 @@
 			<text>&amp;Options</text>
 		</string>
 		<string>
-			<key>Menu_Main_Update</key>
-			<text>&amp;Mises à jour</text>
-		</string>
-		<string>
 			<key>Menu_Main_Omae</key>
 			<text>Omae</text>
 		</string>
@@ -4945,10 +4941,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<text>Nuyen par PC :</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_AutomaticUpdates</key>
-			<text>Mises à jour automatiques</text>
-		</string>
-		<string>
 			<key>Checkbox_Options_ConfirmDelete</key>
 			<text>Demander confirmation avant d'effacer un article</text>
 		</string>
@@ -6157,51 +6149,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 		<string>
 			<key>Label_Week</key>
 			<text>Semaine :</text>
-		</string>
-		<!-- Update Window -->
-		<string>
-			<key>Title_Update</key>
-			<text>Mises à jour de Chummer</text>
-		</string>
-		<string>
-			<key>Button_Update_DownloadSelectedUpdates</key>
-			<text>&amp;Télécharger les mises à jour sélectionnées</text>
-		</string>
-		<string>
-			<key>Button_Update_SelectAll</key>
-			<text>Tout &amp;sélectionner</text>
-		</string>
-		<string>
-			<key>Button_Update_RestartChummer</key>
-			<text>Redémarrer Chummer</text>
-		</string>
-		<string>
-			<key>Label_Update_OverallProgress</key>
-			<text>Progress. Gén. :</text>
-		</string>
-		<string>
-			<key>Label_Update_FileProgress</key>
-			<text>Progress. Fichier :</text>
-		</string>
-		<string>
-			<key>Label_Update_DownloadComplete</key>
-			<text>Téléchargement terminé</text>
-		</string>
-		<string>
-			<key>Message_Update_NoUpdatesSelected</key>
-			<text>Pas de mises à jour sélectionnées.</text>
-		</string>
-		<string>
-			<key>Message_Update_CannotConnect</key>
-			<text>Impossible de trouver les données de mises à jour. Veuillez réessayer plus tard.</text>
-		</string>
-		<string>
-			<key>Message_Update_NoNewUpdates</key>
-			<text>Pas de nouvelles mises à jour disponibles pour le moment.</text>
-		</string>
-		<string>
-			<key>Message_Update_MultipleInstances</key>
-			<text>Chummer ne peut pas être mis à jour lorqu'il y a plus d'une instance de l'application en cours d'exécution. Veuillez fermer les autres instances de Chummer et exécutez la mise à jour de nouveau.</text>
 		</string>
 		<!-- Character Viewer Window -->
 		<string>

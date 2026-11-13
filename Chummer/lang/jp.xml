@@ -603,10 +603,6 @@
 			<text>オプション (&amp;O)</text>
 		</string>
 		<string>
-			<key>Menu_Main_Update</key>
-			<text>アップデートを確認</text>
-		</string>
-		<string>
 			<key>Menu_Main_Omae</key>
 			<text>Omae キャラクター交換</text>
 		</string>
@@ -4962,10 +4958,6 @@
 			<text>1BPあたりの新円:</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_AutomaticUpdates</key>
-			<text>自動的にアップデート</text>
-		</string>
-		<string>
 			<key>Checkbox_Options_LocalisedUpdatesOnly</key>
 			<text>選択した言語のアップデートのみをダウンロードする</text>
 		</string>
@@ -6202,51 +6194,6 @@
 		<string>
 			<key>Label_Week</key>
 			<text>週:</text>
-		</string>
-		<!-- Update Window -->
-		<string>
-			<key>Title_Update</key>
-			<text>Chummer アップデート</text>
-		</string>
-		<string>
-			<key>Button_Update_DownloadSelectedUpdates</key>
-			<text>選択したアップデートをダウンロード (&amp;D)</text>
-		</string>
-		<string>
-			<key>Button_Update_SelectAll</key>
-			<text>すべて選択 (&amp;A)</text>
-		</string>
-		<string>
-			<key>Button_Update_RestartChummer</key>
-			<text>Chummer を再起動</text>
-		</string>
-		<string>
-			<key>Label_Update_OverallProgress</key>
-			<text>全体の進行度:</text>
-		</string>
-		<string>
-			<key>Label_Update_FileProgress</key>
-			<text>ファイルの進行度:</text>
-		</string>
-		<string>
-			<key>Label_Update_DownloadComplete</key>
-			<text>ダウンロード完了</text>
-		</string>
-		<string>
-			<key>Message_Update_NoUpdatesSelected</key>
-			<text>アップデートが選択されていません.</text>
-		</string>
-		<string>
-			<key>Message_Update_CannotConnect</key>
-			<text>アップデート情報が取得できません. 後でやり直してください.</text>
-		</string>
-		<string>
-			<key>Message_Update_NoNewUpdates</key>
-			<text>現在, 新しいアップデートはありません.</text>
-		</string>
-		<string>
-			<key>Message_Update_MultipleInstances</key>
-			<text>Chummer が複数起動しているため, アップデートできません. 他のウィンドウを閉じてから再度アップデートしてください.</text>
 		</string>
 		<!-- Character Viewer Window -->
 		<string>

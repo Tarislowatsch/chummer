@@ -540,10 +540,6 @@
 			<text>Optionen</text>
 		</string>
 		<string>
-			<key>Menu_Main_Update</key>
-			<text>Nach Updates suchen</text>
-		</string>
-		<string>
 			<key>Menu_Main_Omae</key>
 			<text>Omae</text>
 		</string>
@@ -4148,10 +4144,6 @@
 			<text>Nuyen pro Generierungspunkt:</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_AutomaticUpdates</key>
-			<text>Automatische Updates</text>
-		</string>
-		<string>
 			<key>Checkbox_Options_ConfirmDelete</key>
 			<text>Um Bestätigung fragen beim Entfernen von Gegenständen</text>
 		</string>
@@ -5005,46 +4997,6 @@
 		<string>
 			<key>Label_SellItem_SellItemFor</key>
 			<text>Verkaufe Gegenstand für</text>
-		</string>
-		<string>
-			<key>Title_Update</key>
-			<text>Chummer aktualisieren</text>
-		</string>
-		<string>
-			<key>Button_Update_DownloadSelectedUpdates</key>
-			<text>&amp; Ausgewählte Updates herunterladen</text>
-		</string>
-		<string>
-			<key>Button_Update_SelectAll</key>
-			<text>Alles auswählen</text>
-		</string>
-		<string>
-			<key>Button_Update_RestartChummer</key>
-			<text>Chummer neu starten</text>
-		</string>
-		<string>
-			<key>Label_Update_OverallProgress</key>
-			<text>Gesamtfortschritt:</text>
-		</string>
-		<string>
-			<key>Label_Update_FileProgress</key>
-			<text>Dateifortschritt:</text>
-		</string>
-		<string>
-			<key>Label_Update_DownloadComplete</key>
-			<text>Download abgeschlossen</text>
-		</string>
-		<string>
-			<key>Message_Update_NoUpdatesSelected</key>
-			<text>Keine Updates ausgewählt.</text>
-		</string>
-		<string>
-			<key>Message_Update_CannotConnect</key>
-			<text>Updateinformationen konnten nicht erlangt werden. Bitte versuchen Sie es später erneut.</text>
-		</string>
-		<string>
-			<key>Message_Update_NoNewUpdates</key>
-			<text>Zur Zeit sind keine neuen Updates verfügbar.</text>
 		</string>
 		<string>
 			<key>Title_CharacterViewer</key>
@@ -6556,10 +6508,6 @@
 		<string>
 			<key>MessageTitle_Options_RestoreDefaults</key>
 			<text>Auf Standard zurücksetzen</text>
-		</string>
-		<string>
-			<key>Message_Update_MultipleInstances</key>
-			<text>Chummer kann ein vorhandenes Update nicht einspielen während mehrere Instanzen des Programmes laufen. Bitte schließen sie die anderen Instanzen und führen sie das Update noch einmal aus.</text>
 		</string>
 		<!-- Version 453 -->
 		<string>

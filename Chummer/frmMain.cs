@@ -17,15 +17,6 @@ namespace Chummer
 			InitializeComponent();
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, this);
 
-			// If Automatic Updates are enabled, check for updates immediately.
-			if (GlobalOptions.Instance.AutomaticUpdate)
-			{
-				frmUpdate frmAutoUpdate = new frmUpdate();
-				frmAutoUpdate.SilentMode = true;
-				frmAutoUpdate.Visible = false;
-				frmAutoUpdate.ShowDialog(this);
-			}
-
 			GlobalOptions.Instance.MRUChanged += PopulateMRU;
 
 			// Delete the old executable if it exists (created by the update process).
@@ -118,12 +109,6 @@ namespace Chummer
 		{
 			frmOptions frmOptions = new frmOptions();
 			frmOptions.ShowDialog(this);
-		}
-
-		private void mnuToolsUpdate_Click(object sender, EventArgs e)
-		{
-			frmUpdate frmUpdateApp = new frmUpdate();
-			frmUpdateApp.ShowDialog(this);
 		}
 
 		private void aboutToolStripMenuItem_Click(object sender, EventArgs e)

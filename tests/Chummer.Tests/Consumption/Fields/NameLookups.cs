@@ -336,14 +336,13 @@ namespace Chummer.Tests.Consumption.Fields
 		}
 
 		// - "file literal" -> count of "/*" steps that carry no name filter
-		// - each walks every collection of a file on purpose: load, merge, kit editor, manifest
+		// - each walks every collection of a file on purpose: load, merge, kit editor
 		public static readonly IReadOnlyDictionary<string, int> KnownWildcardLiterals =
 			new Dictionary<string, int>(StringComparer.Ordinal)
 			{
 				{ "clsXmlManager.cs /chummer/*", 3 },
 				{ "frmCreatePACKSKit.cs /chummer/*", 1 },
 				{ "frmSelectPACKSKit.cs /chummer/packs/*", 1 },
-				{ "frmUpdate.cs /manifest/*", 1 },
 			};
 
 		public static IReadOnlyList<Literal> AllLiterals => CachedLiterals.Value;

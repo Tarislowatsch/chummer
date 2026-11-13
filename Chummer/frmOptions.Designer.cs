@@ -86,7 +86,6 @@
 			this.lblKarmaSpecialization = new System.Windows.Forms.Label();
 			this.chkPrintSkillsWithZeroRating = new System.Windows.Forms.CheckBox();
 			this.chkMoreLethalGameplay = new System.Windows.Forms.CheckBox();
-			this.chkAutomaticUpdate = new System.Windows.Forms.CheckBox();
 			this.chkSpiritForceBasedOnTotalMAG = new System.Windows.Forms.CheckBox();
 			this.chkSkillDefaultingIncludesModifiers = new System.Windows.Forms.CheckBox();
 			this.lblNuyenPerBP = new System.Windows.Forms.Label();
@@ -880,17 +879,6 @@
 			this.chkMoreLethalGameplay.Text = "More Lethal Gameplay";
 			this.chkMoreLethalGameplay.UseVisualStyleBackColor = true;
 			// 
-			// chkAutomaticUpdate
-			// 
-			this.chkAutomaticUpdate.AutoSize = true;
-			this.chkAutomaticUpdate.Location = new System.Drawing.Point(9, 107);
-			this.chkAutomaticUpdate.Name = "chkAutomaticUpdate";
-			this.chkAutomaticUpdate.Size = new System.Drawing.Size(116, 17);
-			this.chkAutomaticUpdate.TabIndex = 4;
-			this.chkAutomaticUpdate.Tag = "Checkbox_Options_AutomaticUpdates";
-			this.chkAutomaticUpdate.Text = "Automatic Updates";
-			this.chkAutomaticUpdate.UseVisualStyleBackColor = true;
-			// 
 			// chkSpiritForceBasedOnTotalMAG
 			// 
 			this.chkSpiritForceBasedOnTotalMAG.AutoSize = true;
@@ -1078,7 +1066,6 @@
 			this.tabGlobal.Controls.Add(this.cmdVerify);
 			this.tabGlobal.Controls.Add(this.cmdVerifyData);
 			this.tabGlobal.Controls.Add(this.chkSingleDiceRoller);
-			this.tabGlobal.Controls.Add(this.chkAutomaticUpdate);
 			this.tabGlobal.Controls.Add(this.chkStartupFullscreen);
 			this.tabGlobal.Location = new System.Drawing.Point(4, 22);
 			this.tabGlobal.Name = "tabGlobal";
@@ -3234,7 +3221,6 @@
 		private System.Windows.Forms.Label lblKarmaInitiation;
 		private System.Windows.Forms.CheckBox chkPrintSkillsWithZeroRating;
 		private System.Windows.Forms.CheckBox chkMoreLethalGameplay;
-		private System.Windows.Forms.CheckBox chkAutomaticUpdate;
 		private System.Windows.Forms.CheckBox chkSpiritForceBasedOnTotalMAG;
 		private System.Windows.Forms.CheckBox chkSkillDefaultingIncludesModifiers;
 		private System.Windows.Forms.Label lblNuyenPerBP;

@@ -83,7 +83,6 @@ namespace Chummer
 
 		private frmMain _frmMainForm;
 
-		private static bool _blnAutomaticUpdate = false;
 		private static bool _blnLocalisedUpdatesOnly = false;
 		private static bool _blnStartupFullscreen = false;
 		private static bool _blnSingleDiceRoller = true;
@@ -112,15 +111,6 @@ namespace Chummer
 		{
 			if (!Directory.Exists(Path.Combine(Application.StartupPath, "settings")))
 				Directory.CreateDirectory(Path.Combine(Application.StartupPath, "settings"));
-
-			// Automatic Update.
-			try
-			{
-				_blnAutomaticUpdate = Convert.ToBoolean(Registry.CurrentUser.CreateSubKey("Software\\Chummer").GetValue("autoupdate").ToString());
-			}
-			catch
-			{
-			}
 
 			// Whether or not the app should only download localised files in the user's selected language.
 			try
@@ -259,21 +249,6 @@ namespace Chummer
 		#endregion
 
 		#region Properties
-		/// <summary>
-		/// Whether or not Automatic Updates are enabled.
-		/// </summary>
-		public bool AutomaticUpdate
-		{
-			get
-			{
-				return _blnAutomaticUpdate;
-			}
-			set
-			{
-				_blnAutomaticUpdate = value;
-			}
-		}
-
 		/// <summary>
 		/// Whether or not the app should only download localised files in the user's selected language.
 		/// </summary>
