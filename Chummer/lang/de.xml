@@ -6568,10 +6568,6 @@
 			<text>Fehlschalg</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_LocalisedUpdatesOnly</key>
-			<text>Lade Aktualisierungen nur in der von mir gewählten Sprache.</text>
-		</string>
-		<string>
 			<key>Checkbox_Option_PrintToFileFirst</key>
 			<text>Linux Druckfehler-Fix nutzen.</text>
 		</string>

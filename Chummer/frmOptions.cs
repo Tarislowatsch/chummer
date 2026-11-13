@@ -109,16 +109,6 @@ namespace Chummer
 			if (cboSetting.SelectedIndex == -1)
 				cboSetting.SelectedIndex = 0;
 			
-			bool blnLocalisedUpdatesOnly = false;
-			try
-			{
-				blnLocalisedUpdatesOnly = GlobalOptions.Instance.LocalisedUpdatesOnly;
-			}
-			catch
-			{
-			}
-			chkLocalisedUpdatesOnly.Checked = blnLocalisedUpdatesOnly;
-
 			bool blnStartupFullscreen = false;
 			try
 			{
@@ -1632,7 +1622,6 @@ namespace Chummer
 		private void SaveRegistrySettings()
 		{
 			// Set Registry values.
-			GlobalOptions.Instance.LocalisedUpdatesOnly = chkLocalisedUpdatesOnly.Checked;
 			GlobalOptions.Instance.Language = cboLanguage.SelectedValue.ToString();
 			GlobalOptions.Instance.StartupFullscreen = chkStartupFullscreen.Checked;
 			GlobalOptions.Instance.SingleDiceRoller = chkSingleDiceRoller.Checked;
@@ -1641,7 +1630,6 @@ namespace Chummer
 			GlobalOptions.Instance.PrintToFileFirst = chkPrintToFileFirst.Checked;
 			GlobalOptions.Instance.PDFAppPath = txtPDFAppPath.Text;
 			RegistryKey objRegistry = Registry.CurrentUser.CreateSubKey("Software\\Chummer");
-			objRegistry.SetValue("localisedupdatesonly", chkLocalisedUpdatesOnly.Checked.ToString());
 			objRegistry.SetValue("language", cboLanguage.SelectedValue.ToString());
 			objRegistry.SetValue("startupfullscreen", chkStartupFullscreen.Checked.ToString());
 			objRegistry.SetValue("singlediceroller", chkSingleDiceRoller.Checked.ToString());

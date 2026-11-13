@@ -100,7 +100,6 @@
 			this.tabGeneral = new System.Windows.Forms.TabPage();
 			this.tabControl2 = new System.Windows.Forms.TabControl();
 			this.tabGlobal = new System.Windows.Forms.TabPage();
-			this.chkLocalisedUpdatesOnly = new System.Windows.Forms.CheckBox();
 			this.chkDatesIncludeTime = new System.Windows.Forms.CheckBox();
 			this.cmdPDFTest = new System.Windows.Forms.Button();
 			this.nudPDFOffset = new System.Windows.Forms.NumericUpDown();
@@ -1048,7 +1047,6 @@
 			// tabGlobal
 			// 
 			this.tabGlobal.BackColor = System.Drawing.SystemColors.Control;
-			this.tabGlobal.Controls.Add(this.chkLocalisedUpdatesOnly);
 			this.tabGlobal.Controls.Add(this.chkDatesIncludeTime);
 			this.tabGlobal.Controls.Add(this.cmdPDFTest);
 			this.tabGlobal.Controls.Add(this.nudPDFOffset);
@@ -1074,17 +1072,6 @@
 			this.tabGlobal.TabIndex = 0;
 			this.tabGlobal.Tag = "Tab_Options_Global";
 			this.tabGlobal.Text = "Global";
-			// 
-			// chkLocalisedUpdatesOnly
-			// 
-			this.chkLocalisedUpdatesOnly.AutoSize = true;
-			this.chkLocalisedUpdatesOnly.Location = new System.Drawing.Point(9, 130);
-			this.chkLocalisedUpdatesOnly.Name = "chkLocalisedUpdatesOnly";
-			this.chkLocalisedUpdatesOnly.Size = new System.Drawing.Size(254, 17);
-			this.chkLocalisedUpdatesOnly.TabIndex = 19;
-			this.chkLocalisedUpdatesOnly.Tag = "Checkbox_Options_LocalisedUpdatesOnly";
-			this.chkLocalisedUpdatesOnly.Text = "Only download updates in my selected language";
-			this.chkLocalisedUpdatesOnly.UseVisualStyleBackColor = true;
 			// 
 			// chkDatesIncludeTime
 			// 
@@ -3414,7 +3401,6 @@
 		private System.Windows.Forms.CheckBox chkBreakSkillGroupsInCreateMode;
 		private System.Windows.Forms.CheckBox chkExtendAnyDetectionSpell;
 		private System.Windows.Forms.CheckBox chkPrintToFileFirst;
-		private System.Windows.Forms.CheckBox chkLocalisedUpdatesOnly;
 		private System.Windows.Forms.CheckBox chkSpecialKarmaCost;
 	}
 }

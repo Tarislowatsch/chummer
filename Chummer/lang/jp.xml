@@ -4958,10 +4958,6 @@
 			<text>1BPあたりの新円:</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_LocalisedUpdatesOnly</key>
-			<text>選択した言語のアップデートのみをダウンロードする</text>
-		</string>
-		<string>
 			<key>Checkbox_Options_ConfirmDelete</key>
 			<text>アイテムの削除時に確認する</text>
 		</string>
