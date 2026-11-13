@@ -15,7 +15,8 @@ namespace Chummer.GoldenMaster.Tests
 		// - the test still fails: an accepting run is never green
 		public const string AcceptVariable = "CHUMMER_ACCEPT_PRINTS";
 
-		private const int MaxShownLineLength = 200;
+		private const int ShownContext = 60;
+		private const int ShownLength = 160;
 
 		private static readonly UTF8Encoding NoBom = new UTF8Encoding(false);
 
@@ -70,7 +71,7 @@ namespace Chummer.GoldenMaster.Tests
 					+ "\nIf the change is intended, run with " + AcceptVariable + "=1 and review it with git diff.");
 		}
 
-		private static string FirstDifference(string expected, string actual)
+		internal static string FirstDifference(string expected, string actual)
 		{
 			string[] expectedLines = expected.Split('\n');
 			string[] actualLines = actual.Split('\n');
@@ -78,18 +79,32 @@ namespace Chummer.GoldenMaster.Tests
 			while (line < expectedLines.Length && line < actualLines.Length && expectedLines[line] == actualLines[line])
 				line++;
 
-			return "First difference in line " + (line + 1) + ":"
-				+ "\nexpected: " + Shown(expectedLines, line)
-				+ "\nactual:   " + Shown(actualLines, line);
+			string expectedLine = line < expectedLines.Length ? expectedLines[line] : null;
+			string actualLine = line < actualLines.Length ? actualLines[line] : null;
+			int column = FirstDifferingColumn(expectedLine ?? "", actualLine ?? "");
+			int start = Math.Max(0, column - ShownContext);
+			return "First difference in line " + (line + 1) + ", column " + (column + 1) + ":"
+				+ "\nexpected: " + Window(expectedLine, start)
+				+ "\nactual:   " + Window(actualLine, start);
 		}
 
-		// Mugshot lines run to 200 KB.
-		private static string Shown(string[] lines, int line)
+		private static int FirstDifferingColumn(string expected, string actual)
 		{
-			if (line >= lines.Length)
+			int column = 0;
+			while (column < expected.Length && column < actual.Length && expected[column] == actual[column])
+				column++;
+			return column;
+		}
+
+		// - a window around the column: mugshot lines run to 184 KB
+		// - tabs shown as \t: an indentation change must stay visible
+		private static string Window(string line, int start)
+		{
+			if (line == null)
 				return "(end of print)";
-			string text = lines[line].Trim();
-			return text.Length <= MaxShownLineLength ? text : text.Substring(0, MaxShownLineLength) + " ...";
+			int length = Math.Min(ShownLength, Math.Max(0, line.Length - start));
+			string window = start < line.Length ? line.Substring(start, length) : "";
+			return (start > 0 ? "..." : "") + window.Replace("\t", "\\t") + (start + length < line.Length ? "..." : "");
 		}
 	}
 }

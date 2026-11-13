@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml;
@@ -15,13 +16,13 @@ namespace Chummer.GoldenMaster.Tests
 		[Fact]
 		public void BaselinesExistForExactlyThePrintingFixtures()
 		{
-			Assert.Equal(Fixtures.RelativePaths().Where(path => !PrintTests.KnownPrintFailures.ContainsKey(path)), Baselines.FixturesWithBaseline(Fixtures.Baseline));
+			AssertSameFixtures(Fixtures.RelativePaths().Where(path => !PrintTests.KnownPrintFailures.ContainsKey(path)), Baselines.FixturesWithBaseline(Fixtures.Baseline));
 		}
 
 		[Fact]
 		public void GermanBaselinesExistForExactlyTheGermanSubset()
 		{
-			Assert.Equal(Fixtures.GermanSubset.OrderBy(path => path, StringComparer.Ordinal), Baselines.FixturesWithBaseline(Fixtures.German));
+			AssertSameFixtures(Fixtures.GermanSubset, Baselines.FixturesWithBaseline(Fixtures.German));
 		}
 
 		[Fact]
@@ -36,6 +37,38 @@ namespace Chummer.GoldenMaster.Tests
 			string print = Fixtures.Print(MultiLineFixture);
 			Assert.True(print.Contains("\r\n"), MultiLineFixture + " lost its multi-line text: pick another fixture.");
 			Assert.Equal(TextNodes(print), TextNodes(Baselines.Format(print)));
+		}
+
+		[Fact]
+		public void DifferenceShowsTheColumnInALongLine()
+		{
+			string line = new string('A', 1000);
+			string message = Baselines.FirstDifference("<a>\n" + line + "B\n", "<a>\n" + line + "C\n");
+			Assert.Contains("line 2, column 1001", message);
+			Assert.Contains("AB", message);
+			Assert.Contains("AC", message);
+		}
+
+		[Fact]
+		public void DifferenceShowsAnIndentationChange()
+		{
+			string message = Baselines.FirstDifference("\t<b />", "\t\t<b />");
+			Assert.Contains("expected: \\t<b />", message);
+			Assert.Contains("actual:   \\t\\t<b />", message);
+		}
+
+		// One line per missing and per orphaned baseline, not only the first.
+		private static void AssertSameFixtures(IEnumerable<string> expected, IEnumerable<string> actual)
+		{
+			string[] missing = expected.Except(actual, StringComparer.Ordinal).ToArray();
+			string[] orphaned = actual.Except(expected, StringComparer.Ordinal).ToArray();
+			Assert.True(missing.Length == 0 && orphaned.Length == 0,
+				"Missing baselines:" + Lines(missing) + "\nBaselines without a printing fixture:" + Lines(orphaned));
+		}
+
+		private static string Lines(string[] paths)
+		{
+			return paths.Length == 0 ? " none" : string.Concat(paths.Select(path => "\n  " + path));
 		}
 
 		// Without PreserveWhitespace the indentation of the formatted print is dropped.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 using Xunit;
 
 namespace Chummer.GoldenMaster.Tests
@@ -53,8 +54,12 @@ namespace Chummer.GoldenMaster.Tests
 			RecordingMugshotStore mugshots = new RecordingMugshotStore();
 			string print = Fixtures.Print(relativePath, mugshots);
 
-			// Against the save, not the baseline: an accepted baseline can carry a skipped call.
-			Assert.Equal(Fixtures.HasMugshot(relativePath) ? 1 : 0, mugshots.Calls);
+			// Against the save, not the baseline: an accepted baseline can carry a wrong mugshot.
+			bool hasMugshot = Fixtures.HasMugshot(relativePath);
+			Assert.Equal(hasMugshot ? 1 : 0, mugshots.Calls);
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(print);
+			Assert.Equal(hasMugshot ? RecordingMugshotStore.Url : "", document.SelectSingleNode("/characters/character/mugshot").InnerText);
 			Baselines.AssertMatches(relativePath, Fixtures.Baseline, print);
 		}
 	}
