@@ -61,8 +61,8 @@ namespace Chummer.Tests.Consumption.Expressions
 			Assert.Equal(
 				new[]
 				{
-					"clsCharacter.cs:1647",
-					"clsCharacter.cs:1673",
+					"clsCharacter.cs:1640",
+					"clsCharacter.cs:1666",
 					"frmCareer.cs:986",
 					"frmCareer.cs:1015",
 					"frmCareer.cs:19663",

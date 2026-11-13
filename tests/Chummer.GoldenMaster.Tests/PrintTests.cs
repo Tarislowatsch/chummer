@@ -11,7 +11,7 @@ namespace Chummer.GoldenMaster.Tests
 	{
 		// - fixtures whose print throws today, with the exception type
 		// - a listed fixture that prints fails its test
-		private static readonly Dictionary<string, Type> KnownPrintFailures = new Dictionary<string, Type>
+		internal static readonly Dictionary<string, Type> KnownPrintFailures = new Dictionary<string, Type>
 		{
 			// Legacy save: every techprogram has an empty <skill />.
 			{ @"examples\Technomancer.chum", typeof(NullReferenceException) },
@@ -44,9 +44,14 @@ namespace Chummer.GoldenMaster.Tests
 				return;
 			}
 
+			RecordingMugshotStore mugshots = new RecordingMugshotStore();
 			XmlDocument document = new XmlDocument();
-			document.LoadXml(Fixtures.Print(relativePath));
+			document.LoadXml(Fixtures.Print(relativePath, mugshots));
 			Assert.Equal(1, document.SelectNodes("/characters/character").Count);
+
+			bool hasMugshot = Fixtures.HasMugshot(relativePath);
+			Assert.Equal(hasMugshot ? 1 : 0, mugshots.Calls);
+			Assert.Equal(hasMugshot ? RecordingMugshotStore.Url : "", document.SelectSingleNode("/characters/character/mugshot").InnerText);
 		}
 	}
 }

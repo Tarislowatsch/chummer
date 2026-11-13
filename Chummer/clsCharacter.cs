@@ -65,6 +65,7 @@ namespace Chummer
 		// General character info.
 		private string _strName = "";
 		private string _strMugshot = "";
+		private IMugshotStore _objMugshotStore = new FileMugshotStore();
 		private string _strSex = "";
 		private string _strAge = "";
 		private string _strEyes = "";
@@ -1514,8 +1515,6 @@ namespace Chummer
 				}
 			}
 
-			Guid guiImage = new Guid();
-			guiImage = Guid.NewGuid();
 			// This line left in for debugging. Write the output to a fixed file name.
 			//FileStream objStream = new FileStream("D:\\temp\\print.xml", FileMode.Create, FileAccess.Write, FileShare.ReadWrite);//(_strFileName, FileMode.Create, FileAccess.Write, FileShare.ReadWrite);
 
@@ -1546,20 +1545,14 @@ namespace Chummer
 			else
 				objWriter.WriteElementString("name", LanguageManager.Instance.GetString("String_UnnamedCharacter"));
 
-			// Since IE is retarded and can't handle base64 images before IE9, we need to dump the image to a temporary directory and re-write the information.
-			// If you give it an extension of jpg, gif, or png, it expects the file to be in that format and won't render the image unless it was originally that type.
-			// But if you give it the extension img, it will render whatever you give it (which doesn't make any damn sense, but that's IE for you).
 			string strMugshotPath = "";
 			if (_strMugshot != "")
 			{
-				if (!Directory.Exists(Application.StartupPath + Path.DirectorySeparatorChar + "mugshots"))
-					Directory.CreateDirectory(Application.StartupPath + Path.DirectorySeparatorChar + "mugshots");
 				byte[] bytImage = Convert.FromBase64String(_strMugshot);
 				MemoryStream objImageStream = new MemoryStream(bytImage, 0, bytImage.Length);
 				objImageStream.Write(bytImage, 0, bytImage.Length);
 				Image imgMugshot = Image.FromStream(objImageStream, true);
-				imgMugshot.Save(Application.StartupPath + Path.DirectorySeparatorChar + "mugshots" + Path.DirectorySeparatorChar + guiImage.ToString() + ".img");
-				strMugshotPath = "file://" + (Application.StartupPath + Path.DirectorySeparatorChar + "mugshots" + Path.DirectorySeparatorChar + guiImage.ToString() + ".img").Replace(Path.DirectorySeparatorChar, '/');
+				strMugshotPath = _objMugshotStore.Store(imgMugshot);
 			}
 			// <mugshot />
 			objWriter.WriteElementString("mugshot", strMugshotPath);
@@ -2709,6 +2702,23 @@ namespace Chummer
 			set
 			{
 				_strMugshot = value;
+			}
+		}
+
+		/// <summary>
+		/// Where PrintToStream puts the decoded portrait for the mugshot URL.
+		/// </summary>
+		public IMugshotStore MugshotStore
+		{
+			get
+			{
+				return _objMugshotStore;
+			}
+			set
+			{
+				if (value == null)
+					throw new ArgumentNullException("value");
+				_objMugshotStore = value;
 			}
 		}
 

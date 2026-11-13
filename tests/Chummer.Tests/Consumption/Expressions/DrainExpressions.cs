@@ -31,8 +31,8 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - the forms read the label filled from <drain>, not the node itself
 		public static readonly IReadOnlyList<Consumer> Consumers = new[]
 		{
-			new Consumer("clsCharacter.cs:1650", "traditions.xml"),
-			new Consumer("clsCharacter.cs:1676", "streams.xml"),
+			new Consumer("clsCharacter.cs:1643", "traditions.xml"),
+			new Consumer("clsCharacter.cs:1669", "streams.xml"),
 			new Consumer("frmCareer.cs:992", "traditions.xml"),
 			new Consumer("frmCareer.cs:1021", "streams.xml"),
 			new Consumer("frmCareer.cs:19112", "traditions.xml"),
