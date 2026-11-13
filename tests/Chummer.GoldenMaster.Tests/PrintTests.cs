@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using Xunit;
 
 namespace Chummer.GoldenMaster.Tests
@@ -40,7 +39,7 @@ namespace Chummer.GoldenMaster.Tests
 
 		[Theory]
 		[MemberData(nameof(Fixtures.Characters), MemberType = typeof(Fixtures))]
-		public void EveryFixturePrints(string relativePath)
+		public void EveryFixtureMatchesItsBaseline(string relativePath)
 		{
 			Type expected;
 			if (KnownPrintFailures.TryGetValue(relativePath, out expected))
@@ -52,13 +51,11 @@ namespace Chummer.GoldenMaster.Tests
 			}
 
 			RecordingMugshotStore mugshots = new RecordingMugshotStore();
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(Fixtures.Print(relativePath, mugshots));
-			Assert.Equal(1, document.SelectNodes("/characters/character").Count);
+			string print = Fixtures.Print(relativePath, mugshots);
 
-			bool hasMugshot = Fixtures.HasMugshot(relativePath);
-			Assert.Equal(hasMugshot ? 1 : 0, mugshots.Calls);
-			Assert.Equal(hasMugshot ? RecordingMugshotStore.Url : "", document.SelectSingleNode("/characters/character/mugshot").InnerText);
+			// Against the save, not the baseline: an accepted baseline can carry a skipped call.
+			Assert.Equal(Fixtures.HasMugshot(relativePath) ? 1 : 0, mugshots.Calls);
+			Baselines.AssertMatches(relativePath, Fixtures.Baseline, print);
 		}
 	}
 }

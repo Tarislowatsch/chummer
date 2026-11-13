@@ -39,6 +39,11 @@ namespace Chummer.GoldenMaster.Tests
 			@"10 Mercs\Bravo Company\Mystic Adept Combat Medic.chum",
 		};
 
+		public static IEnumerable<object[]> GermanCases()
+		{
+			return GermanSubset.Select(path => new object[] { path });
+		}
+
 		// GetCultureInfo: a machine's own overrides of the culture must not reach the baseline.
 		public static readonly CultureInfo Baseline = CultureInfo.GetCultureInfo("en-US");
 		public static readonly CultureInfo German = CultureInfo.GetCultureInfo("de-DE");
