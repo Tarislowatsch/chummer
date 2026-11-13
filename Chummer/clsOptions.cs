@@ -83,8 +83,6 @@ namespace Chummer
 
 		private frmMain _frmMainForm;
 
-		private static bool _blnAutomaticUpdate = false;
-		private static bool _blnLocalisedUpdatesOnly = false;
 		private static bool _blnStartupFullscreen = false;
 		private static bool _blnSingleDiceRoller = true;
 		private static string _strLanguage = "en-us";
@@ -113,24 +111,6 @@ namespace Chummer
 			if (!Directory.Exists(Path.Combine(Application.StartupPath, "settings")))
 				Directory.CreateDirectory(Path.Combine(Application.StartupPath, "settings"));
 
-			// Automatic Update.
-			try
-			{
-				_blnAutomaticUpdate = Convert.ToBoolean(Registry.CurrentUser.CreateSubKey("Software\\Chummer").GetValue("autoupdate").ToString());
-			}
-			catch
-			{
-			}
-
-			// Whether or not the app should only download localised files in the user's selected language.
-			try
-			{
-				_blnLocalisedUpdatesOnly = Convert.ToBoolean(Registry.CurrentUser.CreateSubKey("Software\\Chummer").GetValue("localisedupdatesonly").ToString());
-			}
-			catch
-			{
-			}
-			
 			// Whether or not dates should include the time.
 			try
 			{
@@ -259,36 +239,6 @@ namespace Chummer
 		#endregion
 
 		#region Properties
-		/// <summary>
-		/// Whether or not Automatic Updates are enabled.
-		/// </summary>
-		public bool AutomaticUpdate
-		{
-			get
-			{
-				return _blnAutomaticUpdate;
-			}
-			set
-			{
-				_blnAutomaticUpdate = value;
-			}
-		}
-
-		/// <summary>
-		/// Whether or not the app should only download localised files in the user's selected language.
-		/// </summary>
-		public bool LocalisedUpdatesOnly
-		{
-			get
-			{
-				return _blnLocalisedUpdatesOnly;
-			}
-			set
-			{
-				_blnLocalisedUpdatesOnly = value;
-			}
-		}
-
 		/// <summary>
 		/// Whether or not dates should include the time.
 		/// </summary>

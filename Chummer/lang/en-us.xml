@@ -601,10 +601,6 @@
 			<text>&amp;Options</text>
 		</string>
 		<string>
-			<key>Menu_Main_Update</key>
-			<text>Check for Updates</text>
-		</string>
-		<string>
 			<key>Menu_Main_Omae</key>
 			<text>Omae</text>
 		</string>
@@ -4961,14 +4957,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<text>Nuyen per Build Point:</text>
 		</string>
 		<string>
-			<key>Checkbox_Options_AutomaticUpdates</key>
-			<text>Automatic Updates</text>
-		</string>
-		<string>
-			<key>Checkbox_Options_LocalisedUpdatesOnly</key>
-			<text>Only download updates in my selected language</text>
-		</string>
-		<string>
 			<key>Checkbox_Options_ConfirmDelete</key>
 			<text>Ask for confirmation when deleting items</text>
 		</string>
@@ -6205,51 +6193,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 		<string>
 			<key>Label_Week</key>
 			<text>Week:</text>
-		</string>
-		<!-- Update Window -->
-		<string>
-			<key>Title_Update</key>
-			<text>Chummer Update</text>
-		</string>
-		<string>
-			<key>Button_Update_DownloadSelectedUpdates</key>
-			<text>&amp;Download Selected Updates</text>
-		</string>
-		<string>
-			<key>Button_Update_SelectAll</key>
-			<text>Select &amp;All</text>
-		</string>
-		<string>
-			<key>Button_Update_RestartChummer</key>
-			<text>Restart Chummer</text>
-		</string>
-		<string>
-			<key>Label_Update_OverallProgress</key>
-			<text>Overall Progress:</text>
-		</string>
-		<string>
-			<key>Label_Update_FileProgress</key>
-			<text>File Progress:</text>
-		</string>
-		<string>
-			<key>Label_Update_DownloadComplete</key>
-			<text>Download Complete</text>
-		</string>
-		<string>
-			<key>Message_Update_NoUpdatesSelected</key>
-			<text>No updates selected.</text>
-		</string>
-		<string>
-			<key>Message_Update_CannotConnect</key>
-			<text>Unable to retrieve update information. Please try again later.</text>
-		</string>
-		<string>
-			<key>Message_Update_NoNewUpdates</key>
-			<text>No new updates are available at this time.</text>
-		</string>
-		<string>
-			<key>Message_Update_MultipleInstances</key>
-			<text>Chummer cannot be updated while there is more than 1 instance of the application running. Please close the other instances of Chummer then run the update again.</text>
 		</string>
 		<!-- Character Viewer Window -->
 		<string>

@@ -86,7 +86,6 @@
 			this.lblKarmaSpecialization = new System.Windows.Forms.Label();
 			this.chkPrintSkillsWithZeroRating = new System.Windows.Forms.CheckBox();
 			this.chkMoreLethalGameplay = new System.Windows.Forms.CheckBox();
-			this.chkAutomaticUpdate = new System.Windows.Forms.CheckBox();
 			this.chkSpiritForceBasedOnTotalMAG = new System.Windows.Forms.CheckBox();
 			this.chkSkillDefaultingIncludesModifiers = new System.Windows.Forms.CheckBox();
 			this.lblNuyenPerBP = new System.Windows.Forms.Label();
@@ -101,7 +100,6 @@
 			this.tabGeneral = new System.Windows.Forms.TabPage();
 			this.tabControl2 = new System.Windows.Forms.TabControl();
 			this.tabGlobal = new System.Windows.Forms.TabPage();
-			this.chkLocalisedUpdatesOnly = new System.Windows.Forms.CheckBox();
 			this.chkDatesIncludeTime = new System.Windows.Forms.CheckBox();
 			this.cmdPDFTest = new System.Windows.Forms.Button();
 			this.nudPDFOffset = new System.Windows.Forms.NumericUpDown();
@@ -880,17 +878,6 @@
 			this.chkMoreLethalGameplay.Text = "More Lethal Gameplay";
 			this.chkMoreLethalGameplay.UseVisualStyleBackColor = true;
 			// 
-			// chkAutomaticUpdate
-			// 
-			this.chkAutomaticUpdate.AutoSize = true;
-			this.chkAutomaticUpdate.Location = new System.Drawing.Point(9, 107);
-			this.chkAutomaticUpdate.Name = "chkAutomaticUpdate";
-			this.chkAutomaticUpdate.Size = new System.Drawing.Size(116, 17);
-			this.chkAutomaticUpdate.TabIndex = 4;
-			this.chkAutomaticUpdate.Tag = "Checkbox_Options_AutomaticUpdates";
-			this.chkAutomaticUpdate.Text = "Automatic Updates";
-			this.chkAutomaticUpdate.UseVisualStyleBackColor = true;
-			// 
 			// chkSpiritForceBasedOnTotalMAG
 			// 
 			this.chkSpiritForceBasedOnTotalMAG.AutoSize = true;
@@ -1060,7 +1047,6 @@
 			// tabGlobal
 			// 
 			this.tabGlobal.BackColor = System.Drawing.SystemColors.Control;
-			this.tabGlobal.Controls.Add(this.chkLocalisedUpdatesOnly);
 			this.tabGlobal.Controls.Add(this.chkDatesIncludeTime);
 			this.tabGlobal.Controls.Add(this.cmdPDFTest);
 			this.tabGlobal.Controls.Add(this.nudPDFOffset);
@@ -1078,7 +1064,6 @@
 			this.tabGlobal.Controls.Add(this.cmdVerify);
 			this.tabGlobal.Controls.Add(this.cmdVerifyData);
 			this.tabGlobal.Controls.Add(this.chkSingleDiceRoller);
-			this.tabGlobal.Controls.Add(this.chkAutomaticUpdate);
 			this.tabGlobal.Controls.Add(this.chkStartupFullscreen);
 			this.tabGlobal.Location = new System.Drawing.Point(4, 22);
 			this.tabGlobal.Name = "tabGlobal";
@@ -1087,17 +1072,6 @@
 			this.tabGlobal.TabIndex = 0;
 			this.tabGlobal.Tag = "Tab_Options_Global";
 			this.tabGlobal.Text = "Global";
-			// 
-			// chkLocalisedUpdatesOnly
-			// 
-			this.chkLocalisedUpdatesOnly.AutoSize = true;
-			this.chkLocalisedUpdatesOnly.Location = new System.Drawing.Point(9, 130);
-			this.chkLocalisedUpdatesOnly.Name = "chkLocalisedUpdatesOnly";
-			this.chkLocalisedUpdatesOnly.Size = new System.Drawing.Size(254, 17);
-			this.chkLocalisedUpdatesOnly.TabIndex = 19;
-			this.chkLocalisedUpdatesOnly.Tag = "Checkbox_Options_LocalisedUpdatesOnly";
-			this.chkLocalisedUpdatesOnly.Text = "Only download updates in my selected language";
-			this.chkLocalisedUpdatesOnly.UseVisualStyleBackColor = true;
 			// 
 			// chkDatesIncludeTime
 			// 
@@ -3234,7 +3208,6 @@
 		private System.Windows.Forms.Label lblKarmaInitiation;
 		private System.Windows.Forms.CheckBox chkPrintSkillsWithZeroRating;
 		private System.Windows.Forms.CheckBox chkMoreLethalGameplay;
-		private System.Windows.Forms.CheckBox chkAutomaticUpdate;
 		private System.Windows.Forms.CheckBox chkSpiritForceBasedOnTotalMAG;
 		private System.Windows.Forms.CheckBox chkSkillDefaultingIncludesModifiers;
 		private System.Windows.Forms.Label lblNuyenPerBP;
@@ -3428,7 +3401,6 @@
 		private System.Windows.Forms.CheckBox chkBreakSkillGroupsInCreateMode;
 		private System.Windows.Forms.CheckBox chkExtendAnyDetectionSpell;
 		private System.Windows.Forms.CheckBox chkPrintToFileFirst;
-		private System.Windows.Forms.CheckBox chkLocalisedUpdatesOnly;
 		private System.Windows.Forms.CheckBox chkSpecialKarmaCost;
 	}
 }
