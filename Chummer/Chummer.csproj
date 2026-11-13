@@ -54,19 +54,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Nine of the twelve former references are gone: eight come from the SDK's
-         implicit .NET Framework set (System, System.Core, System.Data,
-         System.Drawing, System.Runtime.Serialization, System.Xml,
-         System.Xml.Linq, Microsoft.CSharp) and System.Windows.Forms from
-         UseWindowsForms. These three do not, and none of them is a NuGet
-         package - they are framework assemblies from the targeting pack:
-         System.ServiceModel for the Omae WCF proxies, WindowsBase for the
-         System.IO.Packaging use in clsOmaeHelper.Decompress, and
-         DataVisualization for the two charts in frmCareer. P3-04 and P3-09
-         remove the first two; the chart reference stays. -->
-    <Reference Include="System.ServiceModel" />
+    <!-- - not in the SDK's implicit framework set or UseWindowsForms
+         - a framework assembly from the targeting pack, not a NuGet package
+         - used by the two charts in frmCareer -->
     <Reference Include="System.Windows.Forms.DataVisualization" />
-    <Reference Include="WindowsBase" />
   </ItemGroup>
 
   <ItemGroup>
@@ -102,8 +93,8 @@
        templates, default settings and the changelog shown by frmHistory.
        Without these the build produces an executable that cannot start, since
        every one of them is read from Application.StartupPath at run time (P0-13).
-       Extensions are listed explicitly rather than using *.* so that downloaded
-       updater payloads (data\*.zip) and editor backups are never copied.
+       Extensions are listed explicitly rather than using *.* so that editor
+       backups and other stray files are never copied.
        The None Remove lines keep these files from appearing as both None and
        Content, which is what the SDK's default None glob would otherwise do. -->
   <ItemGroup>
