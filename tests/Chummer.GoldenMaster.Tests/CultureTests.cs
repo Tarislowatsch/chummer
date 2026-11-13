@@ -27,6 +27,13 @@ namespace Chummer.GoldenMaster.Tests
 			Assert.DoesNotContain(Fixtures.GermanSubset, path => !Fixtures.RelativePaths().Contains(path));
 		}
 
+		[Theory]
+		[MemberData(nameof(Fixtures.GermanCases), MemberType = typeof(Fixtures))]
+		public void GermanPrintMatchesItsBaseline(string relativePath)
+		{
+			Baselines.AssertMatches(relativePath, Fixtures.German, Fixtures.Print(relativePath, culture: Fixtures.German));
+		}
+
 		// A German case that adds no differing element watches nothing.
 		[Fact]
 		public void GermanSubsetCoversEveryCultureDependentElement()

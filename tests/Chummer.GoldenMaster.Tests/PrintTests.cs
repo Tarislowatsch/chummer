@@ -31,9 +31,16 @@ namespace Chummer.GoldenMaster.Tests
 			Assert.DoesNotContain(KnownPrintFailures.Keys, path => !fixtures.Contains(path));
 		}
 
+		// A mugshot fixture: the image's file name was the only random part of the print.
+		[Fact]
+		public void PrintingTwiceGivesTheSamePrint()
+		{
+			Assert.Equal(Fixtures.Print(MugshotTests.MugshotFixture), Fixtures.Print(MugshotTests.MugshotFixture));
+		}
+
 		[Theory]
 		[MemberData(nameof(Fixtures.Characters), MemberType = typeof(Fixtures))]
-		public void EveryFixturePrints(string relativePath)
+		public void EveryFixtureMatchesItsBaseline(string relativePath)
 		{
 			Type expected;
 			if (KnownPrintFailures.TryGetValue(relativePath, out expected))
@@ -45,13 +52,15 @@ namespace Chummer.GoldenMaster.Tests
 			}
 
 			RecordingMugshotStore mugshots = new RecordingMugshotStore();
-			XmlDocument document = new XmlDocument();
-			document.LoadXml(Fixtures.Print(relativePath, mugshots));
-			Assert.Equal(1, document.SelectNodes("/characters/character").Count);
+			string print = Fixtures.Print(relativePath, mugshots);
 
+			// Against the save, not the baseline: an accepted baseline can carry a wrong mugshot.
 			bool hasMugshot = Fixtures.HasMugshot(relativePath);
 			Assert.Equal(hasMugshot ? 1 : 0, mugshots.Calls);
+			XmlDocument document = new XmlDocument();
+			document.LoadXml(print);
 			Assert.Equal(hasMugshot ? RecordingMugshotStore.Url : "", document.SelectSingleNode("/characters/character/mugshot").InnerText);
+			Baselines.AssertMatches(relativePath, Fixtures.Baseline, print);
 		}
 	}
 }

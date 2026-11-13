@@ -46,7 +46,8 @@ jobs:
       - name: Run tests
         run: dotnet test tests/Chummer.Tests/Chummer.Tests.csproj --configuration ${{ matrix.configuration }} --no-build --no-restore
 
-      # - loads and prints every fixture character through the application (~40 s)
+      # - loads and prints every fixture character through the application (~45 s)
+      # - compares each print with its baseline in tests/fixtures/prints
       # - --no-build is required: dotnet build cannot compile Chummer's resources
       - name: Run golden master tests
         run: dotnet test tests/Chummer.GoldenMaster.Tests/Chummer.GoldenMaster.Tests.csproj --configuration ${{ matrix.configuration }} --no-build --no-restore

@@ -209,7 +209,7 @@ There are two test projects under `tests/`:
 | Project | What it checks | Build with |
 | --- | --- | --- |
 | `Chummer.Tests` | the data files, as plain XML, without referencing the application | `dotnet test` on its own |
-| `Chummer.GoldenMaster.Tests` | loads and prints every fixture character through `Chummer.exe` | MSBuild first |
+| `Chummer.GoldenMaster.Tests` | loads and prints every fixture character through `Chummer.exe` and compares the print with its baseline | MSBuild first |
 
 The golden master project references `Chummer.csproj`, and `dotnet build`
 cannot compile that (see above). So build the solution with MSBuild, then run
@@ -245,6 +245,27 @@ The collection does not cover theory data. xUnit evaluates `MemberData` and
 `ClassData` during discovery, before any fixture exists, so a data source must
 not touch a Chummer type. It may list fixture files, but it must not load a
 character. No test catches a data source that does.
+
+### Baselines
+
+Each print is compared with its baseline in `tests/fixtures/prints/`:
+`en-US/` holds one file per fixture that prints, `de-DE/` the German subset
+(`Fixtures.GermanSubset`). A baseline is the print re-indented with tabs and LF.
+A CR in a text becomes `&#xD;`.
+
+When a print changes on purpose, write the new baselines and review them with git:
+
+```
+$env:CHUMMER_ACCEPT_PRINTS = "1"
+dotnet test tests/Chummer.GoldenMaster.Tests/Chummer.GoldenMaster.Tests.csproj --no-build
+Remove-Item Env:CHUMMER_ACCEPT_PRINTS
+git diff tests/fixtures/prints
+```
+
+With the variable set, every baseline test writes its file and still fails, so
+an accepting run is never green. Run once more without the variable before
+committing. A new fixture gets its baseline the same way. A baseline without a
+printing fixture fails `BaselinesExistForExactlyThePrintingFixtures`.
 
 ## Continuous integration
 
