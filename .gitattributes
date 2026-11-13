@@ -28,6 +28,10 @@
 # having, so normalisation is disabled without marking it binary.
 Chummer/settings/default.xml -text
 
+# - golden master baselines, compared byte for byte with the print
+# - written with LF: a CRLF checkout would fail every comparison
+tests/fixtures/prints/** -text
+
 *.png binary
 *.ico binary
 *.zip binary

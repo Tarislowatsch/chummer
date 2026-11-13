@@ -1,0 +1,3248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<characters>
+	<character>
+		<metatype>Human</metatype>
+		<metatype_english>Human</metatype_english>
+		<metavariant />
+		<metavariant_english />
+		<movement>10/25, Swim: 5</movement>
+		<movementwalk>10/25</movementwalk>
+		<movementswim>5</movementswim>
+		<movementfly>0</movementfly>
+		<name>Combat Mage</name>
+		<mugshot />
+		<mugshotbase64 />
+		<sex />
+		<age />
+		<eyes />
+		<height />
+		<weight />
+		<skin />
+		<hair />
+		<description />
+		<background />
+		<concept />
+		<notes />
+		<alias>Combat Mage</alias>
+		<playername />
+		<gamenotes />
+		<karma>0</karma>
+		<totalkarma>0</totalkarma>
+		<streetcred>0</streetcred>
+		<calculatedstreetcred>0</calculatedstreetcred>
+		<totalstreetcred>0</totalstreetcred>
+		<burntstreetcred>0</burntstreetcred>
+		<notoriety>0</notoriety>
+		<calculatednotoriety>0</calculatednotoriety>
+		<totalnotoriety>0</totalnotoriety>
+		<publicawareness>0</publicawareness>
+		<calculatedpublicawareness>0</calculatedpublicawareness>
+		<totalpublicawareness>0</totalpublicawareness>
+		<created>True</created>
+		<nuyen>0</nuyen>
+		<adept>False</adept>
+		<magician>True</magician>
+		<technomancer>False</technomancer>
+		<critter>False</critter>
+		<tradition>Hermetic</tradition>
+		<stream />
+		<drain>WIL + LOG (10)</drain>
+		<attributes>
+			<attribute>
+				<name>BOD</name>
+				<base>5</base>
+				<total>5</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>70</bp>
+			</attribute>
+			<attribute>
+				<name>AGI</name>
+				<base>5</base>
+				<total>4</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>70</bp>
+			</attribute>
+			<attribute>
+				<name>REA</name>
+				<base>5</base>
+				<total>4</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>70</bp>
+			</attribute>
+			<attribute>
+				<name>STR</name>
+				<base>3</base>
+				<total>3</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>25</bp>
+			</attribute>
+			<attribute>
+				<name>CHA</name>
+				<base>5</base>
+				<total>5</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>70</bp>
+			</attribute>
+			<attribute>
+				<name>INT</name>
+				<base>4</base>
+				<total>4</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>45</bp>
+			</attribute>
+			<attribute>
+				<name>LOG</name>
+				<base>4</base>
+				<total>4</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>45</bp>
+			</attribute>
+			<attribute>
+				<name>WIL</name>
+				<base>6</base>
+				<total>6</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>9</aug>
+				<bp>100</bp>
+			</attribute>
+			<attribute>
+				<name>INI</name>
+				<base>2</base>
+				<total>2</total>
+				<min>2</min>
+				<max>12</max>
+				<aug>18</aug>
+				<bp>0</bp>
+			</attribute>
+			<attribute>
+				<name>EDG</name>
+				<base>2</base>
+				<total>2</total>
+				<min>2</min>
+				<max>7</max>
+				<aug>7</aug>
+				<bp>0</bp>
+			</attribute>
+			<attribute>
+				<name>MAG</name>
+				<base>7</base>
+				<total>7</total>
+				<min>1</min>
+				<max>7</max>
+				<aug>7</aug>
+				<bp>135</bp>
+			</attribute>
+			<attribute>
+				<name>RES</name>
+				<base>1</base>
+				<total>1</total>
+				<min>1</min>
+				<max>6</max>
+				<aug>6</aug>
+				<bp>0</bp>
+			</attribute>
+			<attribute>
+				<name>ESS</name>
+				<base>6</base>
+			</attribute>
+		</attributes>
+		<armorb>14</armorb>
+		<armori>8</armori>
+		<physicalcm>11</physicalcm>
+		<stuncm>11</stuncm>
+		<physicalcmfilled>0</physicalcmfilled>
+		<stuncmfilled>0</stuncmfilled>
+		<cmthreshold>3</cmthreshold>
+		<cmthresholdoffset>0</cmthresholdoffset>
+		<cmoverflow>6</cmoverflow>
+		<init>
+			<base>9</base>
+			<total>8</total>
+		</init>
+		<ip>
+			<base>1</base>
+			<total>1</total>
+		</ip>
+		<astralinit>
+			<base>8</base>
+		</astralinit>
+		<astralip>
+			<base>3</base>
+		</astralip>
+		<matrixinit>
+			<base>9</base>
+		</matrixinit>
+		<matrixip>
+			<base>1</base>
+		</matrixip>
+		<magenabled>True</magenabled>
+		<initiategrade>1</initiategrade>
+		<resenabled>False</resenabled>
+		<submersiongrade>0</submersiongrade>
+		<groupmember>False</groupmember>
+		<groupname />
+		<groupnotes />
+		<composure>11</composure>
+		<judgeintentions>9</judgeintentions>
+		<liftandcarry>8</liftandcarry>
+		<memory>10</memory>
+		<liftweight>45</liftweight>
+		<carryweight>30</carryweight>
+		<skills>
+			<skill>
+				<name>Aeronautics Mechanic</name>
+				<skillgroup>Mechanic</skillgroup>
+				<skillgroup_english>Mechanic</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Animal Handling</name>
+				<skillgroup>Animal Husbandry</skillgroup>
+				<skillgroup_english>Animal Husbandry</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>RW</source>
+				<page>34</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Animal Training</name>
+				<skillgroup>Animal Husbandry</skillgroup>
+				<skillgroup_english>Animal Husbandry</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>RW</source>
+				<page>34</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Arcana</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Archery</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>121</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Armorer</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Artisan</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Assensing</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Astral Combat</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>5</rating>
+				<ratingmax>6</ratingmax>
+				<total>11</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>WIL</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>6</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>32</bp>
+			</skill>
+			<skill>
+				<name>Automatics</name>
+				<skillgroup>Firearms</skillgroup>
+				<skillgroup_english>Firearms</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>121</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Automotive Mechanic</name>
+				<skillgroup>Mechanic</skillgroup>
+				<skillgroup_english>Mechanic</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Banishing</name>
+				<skillgroup>Conjuring</skillgroup>
+				<skillgroup_english>Conjuring</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>13</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Binding</name>
+				<skillgroup>Conjuring</skillgroup>
+				<skillgroup_english>Conjuring</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>13</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Blades</name>
+				<skillgroup>Close Combat</skillgroup>
+				<skillgroup_english>Close Combat</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Chemistry</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Climbing</name>
+				<skillgroup>Athletics</skillgroup>
+				<skillgroup_english>Athletics</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>STR</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>3</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Clubs</name>
+				<skillgroup>Close Combat</skillgroup>
+				<skillgroup_english>Close Combat</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Compiling</name>
+				<skillgroup>Tasking</skillgroup>
+				<skillgroup_english>Tasking</skillgroup_english>
+				<skillcategory>Resonance Active</skillcategory>
+				<skillcategory_english>Resonance Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>RES</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>1</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Computer</name>
+				<skillgroup>Electronics</skillgroup>
+				<skillgroup_english>Electronics</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>14</bp>
+			</skill>
+			<skill>
+				<name>Con</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Counterspelling</name>
+				<skillgroup>Sorcery</skillgroup>
+				<skillgroup_english>Sorcery</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>11</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Cybercombat</name>
+				<skillgroup>Cracking</skillgroup>
+				<skillgroup_english>Cracking</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Cybertechnology</name>
+				<skillgroup>Biotech</skillgroup>
+				<skillgroup_english>Biotech</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>126</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Data Search</name>
+				<skillgroup>Electronics</skillgroup>
+				<skillgroup_english>Electronics</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>14</bp>
+			</skill>
+			<skill>
+				<name>Decompiling</name>
+				<skillgroup>Tasking</skillgroup>
+				<skillgroup_english>Tasking</skillgroup_english>
+				<skillcategory>Resonance Active</skillcategory>
+				<skillcategory_english>Resonance Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>RES</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>1</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Demolitions</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>2</rating>
+				<ratingmax>6</ratingmax>
+				<total>6</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>8</bp>
+			</skill>
+			<skill>
+				<name>Disguise</name>
+				<skillgroup>Stealth</skillgroup>
+				<skillgroup_english>Stealth</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Diving</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>4</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>BOD</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Dodge</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Electronic Warfare</name>
+				<skillgroup>Cracking</skillgroup>
+				<skillgroup_english>Cracking</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>14</bp>
+			</skill>
+			<skill>
+				<name>Enchanting</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Escape Artist</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Etiquette</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>First Aid</name>
+				<skillgroup>Biotech</skillgroup>
+				<skillgroup_english>Biotech</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>2</rating>
+				<ratingmax>6</ratingmax>
+				<total>6</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>8</bp>
+			</skill>
+			<skill>
+				<name>Flight</name>
+				<skillgroup>Athletics</skillgroup>
+				<skillgroup_english>Athletics</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>2</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>STR</attribute>
+				<source>RC</source>
+				<page>88</page>
+				<attributemod>3</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Forgery</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Gunnery</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Gymnastics</name>
+				<skillgroup>Athletics</skillgroup>
+				<skillgroup_english>Athletics</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>14</bp>
+			</skill>
+			<skill>
+				<name>Hacking</name>
+				<skillgroup>Cracking</skillgroup>
+				<skillgroup_english>Cracking</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Hardware</name>
+				<skillgroup>Electronics</skillgroup>
+				<skillgroup_english>Electronics</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Heavy Weapons</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>2</rating>
+				<ratingmax>6</ratingmax>
+				<total>6</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>8</bp>
+			</skill>
+			<skill>
+				<name>Industrial Mechanic</name>
+				<skillgroup>Mechanic</skillgroup>
+				<skillgroup_english>Mechanic</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Infiltration</name>
+				<skillgroup>Stealth</skillgroup>
+				<skillgroup_english>Stealth</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Instruction</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>9</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Intimidation</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>5</rating>
+				<ratingmax>6</ratingmax>
+				<total>10</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>32</bp>
+			</skill>
+			<skill>
+				<name>Leadership</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Locksmith</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Longarms</name>
+				<skillgroup>Firearms</skillgroup>
+				<skillgroup_english>Firearms</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Medicine</name>
+				<skillgroup>Biotech</skillgroup>
+				<skillgroup_english>Biotech</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Nautical Mechanic</name>
+				<skillgroup>Mechanic</skillgroup>
+				<skillgroup_english>Mechanic</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Navigation</name>
+				<skillgroup>Outdoors</skillgroup>
+				<skillgroup_english>Outdoors</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Negotiation</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>CHA</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Palming</name>
+				<skillgroup>Stealth</skillgroup>
+				<skillgroup_english>Stealth</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Parachuting</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>9</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>BOD</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>5</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Perception</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>5</rating>
+				<ratingmax>6</ratingmax>
+				<total>9</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>32</bp>
+			</skill>
+			<skill>
+				<name>Pilot Aerospace</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Pilot Aircraft</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Pilot Anthroform</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Pilot Ground Craft</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Pilot Watercraft</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Vehicle Active</skillcategory>
+				<skillcategory_english>Vehicle Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>SR4</source>
+				<page>128</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Pistols</name>
+				<skillgroup>Firearms</skillgroup>
+				<skillgroup_english>Firearms</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Registering</name>
+				<skillgroup>Tasking</skillgroup>
+				<skillgroup_english>Tasking</skillgroup_english>
+				<skillcategory>Resonance Active</skillcategory>
+				<skillcategory_english>Resonance Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>RES</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>1</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Riding</name>
+				<skillgroup>Animal Husbandry</skillgroup>
+				<skillgroup_english>Animal Husbandry</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>REA</attribute>
+				<source>RW</source>
+				<page>35</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Ritual Spellcasting</name>
+				<skillgroup>Sorcery</skillgroup>
+				<skillgroup_english>Sorcery</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>13</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Running</name>
+				<skillgroup>Athletics</skillgroup>
+				<skillgroup_english>Athletics</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>STR</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>3</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>22</bp>
+			</skill>
+			<skill>
+				<name>Shadowing</name>
+				<skillgroup>Stealth</skillgroup>
+				<skillgroup_english>Stealth</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Software</name>
+				<skillgroup>Electronics</skillgroup>
+				<skillgroup_english>Electronics</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>127</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Spellcasting</name>
+				<skillgroup>Sorcery</skillgroup>
+				<skillgroup_english>Sorcery</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>13</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Summoning</name>
+				<skillgroup>Conjuring</skillgroup>
+				<skillgroup_english>Conjuring</skillgroup_english>
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>False</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>13</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>123</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Survival</name>
+				<skillgroup>Outdoors</skillgroup>
+				<skillgroup_english>Outdoors</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>10</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>WIL</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>6</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Swimming</name>
+				<skillgroup>Athletics</skillgroup>
+				<skillgroup_english>Athletics</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>6</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>STR</attribute>
+				<source>SR4</source>
+				<page>124</page>
+				<attributemod>3</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>14</bp>
+			</skill>
+			<skill>
+				<name>Throwing Weapons</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>True</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>3</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Tracking</name>
+				<skillgroup>Outdoors</skillgroup>
+				<skillgroup_english>Outdoors</skillgroup_english>
+				<skillcategory>Physical Active</skillcategory>
+				<skillcategory_english>Physical Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Unarmed Combat</name>
+				<skillgroup>Close Combat</skillgroup>
+				<skillgroup_english>Close Combat</skillgroup_english>
+				<skillcategory>Combat Active</skillcategory>
+				<skillcategory_english>Combat Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>4</rating>
+				<ratingmax>6</ratingmax>
+				<total>8</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>AGI</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>VetTech</name>
+				<skillgroup>Animal Husbandry</skillgroup>
+				<skillgroup_english>Animal Husbandry</skillgroup_english>
+				<skillcategory>Technical Active</skillcategory>
+				<skillcategory_english>Technical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>RW</source>
+				<page>35</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Leadership, Command</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>LOG</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Leadership, Direct Fire</name>
+				<skillgroup>Influence</skillgroup>
+				<skillgroup_english>Influence</skillgroup_english>
+				<skillcategory>Social Active</skillcategory>
+				<skillcategory_english>Social Active</skillcategory_english>
+				<grouped>True</grouped>
+				<default>True</default>
+				<rating>3</rating>
+				<ratingmax>6</ratingmax>
+				<total>7</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>125</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Arcana, Metamagic</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>INT</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>4</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>0</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+			<skill>
+				<name>Arcana, Artificing</name>
+				<skillgroup />
+				<skillgroup_english />
+				<skillcategory>Magical Active</skillcategory>
+				<skillcategory_english>Magical Active</skillcategory_english>
+				<grouped>False</grouped>
+				<default>False</default>
+				<rating>0</rating>
+				<ratingmax>6</ratingmax>
+				<total>0</total>
+				<knowledge>False</knowledge>
+				<exotic>False</exotic>
+				<spec />
+				<attribute>MAG</attribute>
+				<source>SR4</source>
+				<page>122</page>
+				<attributemod>7</attributemod>
+				<ratingmod>0</ratingmod>
+				<poolmod>2</poolmod>
+				<islanguage>False</islanguage>
+				<bp>0</bp>
+			</skill>
+		</skills>
+		<contacts />
+		<spells>
+			<spell>
+				<name>Acid Stream</name>
+				<descriptors>Indirect, Elemental</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>204</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Armor</name>
+				<descriptors>Physical</descriptors>
+				<category>Manipulation</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>210</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Ball Lightning</name>
+				<descriptors>Indirect, Elemental, Area</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS (A)</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+5</dv>
+				<source>SR4</source>
+				<page>205</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Combat Sense</name>
+				<descriptors>Active, Psychic</descriptors>
+				<category>Detection</category>
+				<type>M</type>
+				<range>T</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+2</dv>
+				<source>SR4</source>
+				<page>206</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Control Actions</name>
+				<descriptors>Mental</descriptors>
+				<category>Manipulation</category>
+				<type>M</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)</dv>
+				<source>SR4</source>
+				<page>210</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Control Emotions</name>
+				<descriptors>Mental</descriptors>
+				<category>Manipulation</category>
+				<type>M</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)</dv>
+				<source>SR4</source>
+				<page>210</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Control Thoughts</name>
+				<descriptors>Mental</descriptors>
+				<category>Manipulation</category>
+				<type>M</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+2</dv>
+				<source>SR4</source>
+				<page>210</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Flamethrower</name>
+				<descriptors>Indirect, Elemental</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>204</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Heal</name>
+				<descriptors />
+				<category>Health</category>
+				<type>M</type>
+				<range>T</range>
+				<damage />
+				<duration>P</duration>
+				<dv>(Damage Value)-2</dv>
+				<source>SR4</source>
+				<page>208</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Improved Invisibility</name>
+				<descriptors>Realistic, Single-Sense</descriptors>
+				<category>Illusion</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+1</dv>
+				<source>SR4</source>
+				<page>209</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Increase Reflexes</name>
+				<descriptors />
+				<category>Health</category>
+				<type>P</type>
+				<range>T</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+2</dv>
+				<source>SR4</source>
+				<page>208</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Levitate</name>
+				<descriptors>Physical</descriptors>
+				<category>Manipulation</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+1</dv>
+				<source>SR4</source>
+				<page>210</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Lightning Bolt</name>
+				<descriptors>Indirect, Elemental</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>205</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Magic Fingers</name>
+				<descriptors>Physical</descriptors>
+				<category>Manipulation</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+1</dv>
+				<source>SR4</source>
+				<page>211</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Manabolt</name>
+				<descriptors>Direct</descriptors>
+				<category>Combat</category>
+				<type>M</type>
+				<range>LOS</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)</dv>
+				<source>SR4</source>
+				<page>204</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Manaball</name>
+				<descriptors>Direct, Area</descriptors>
+				<category>Combat</category>
+				<type>M</type>
+				<range>LOS (A)</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+2</dv>
+				<source>SR4</source>
+				<page>204</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Physical Barrier</name>
+				<descriptors>Environmental, Area</descriptors>
+				<category>Manipulation</category>
+				<type>P</type>
+				<range>LOS (A)</range>
+				<damage />
+				<duration>S</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>211</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Powerbolt</name>
+				<descriptors>Direct</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+1</dv>
+				<source>SR4</source>
+				<page>205</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Powerball</name>
+				<descriptors>Direct, Area</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>LOS (A)</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)+3</dv>
+				<source>SR4</source>
+				<page>205</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Punch</name>
+				<descriptors>Indirect, Touch</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>T</range>
+				<damage>S</damage>
+				<duration>I</duration>
+				<dv>(F÷2)-2</dv>
+				<source>SR4</source>
+				<page>204</page>
+				<extra />
+				<notes />
+			</spell>
+			<spell>
+				<name>Shatter</name>
+				<descriptors>Direct, Touch</descriptors>
+				<category>Combat</category>
+				<type>P</type>
+				<range>T</range>
+				<damage>P</damage>
+				<duration>I</duration>
+				<dv>(F÷2)-1</dv>
+				<source>SR4</source>
+				<page>205</page>
+				<extra />
+				<notes />
+			</spell>
+		</spells>
+		<powers />
+		<spirits />
+		<techprograms />
+		<martialarts />
+		<martialartmaneuvers />
+		<armors>
+			<armor>
+				<name>Camouflage Suit</name>
+				<name_english>Camouflage Suit</name_english>
+				<category>Armor</category>
+				<category_english>Armor</category_english>
+				<b>8</b>
+				<i>6</i>
+				<avail>4</avail>
+				<cost>1200</cost>
+				<owncost>1200</owncost>
+				<source>SR4</source>
+				<page>326</page>
+				<armorname />
+				<equipped>True</equipped>
+				<armormods />
+				<gears />
+				<extra />
+				<location />
+				<notes />
+			</armor>
+			<armor>
+				<name>Form-Fitting Full-Body Suit</name>
+				<name_english>Form-Fitting Full-Body Suit</name_english>
+				<category>Armor</category>
+				<category_english>Armor</category_english>
+				<b>6</b>
+				<i>2</i>
+				<avail>8</avail>
+				<cost>1600</cost>
+				<owncost>1600</owncost>
+				<source>AR</source>
+				<page>48</page>
+				<armorname />
+				<equipped>True</equipped>
+				<armormods />
+				<gears />
+				<extra />
+				<location />
+				<notes />
+			</armor>
+		</armors>
+		<weapons>
+			<weapon>
+				<name>Unarmed Attack</name>
+				<name_english>Unarmed Attack</name_english>
+				<category>Unarmed</category>
+				<category_english>Unarmed</category_english>
+				<type>Melee</type>
+				<reach>0</reach>
+				<damage>4S</damage>
+				<damage_english>4S</damage_english>
+				<rawdamage>(STR/2)S</rawdamage>
+				<ap>-</ap>
+				<mode />
+				<rc>0</rc>
+				<ammo>0</ammo>
+				<ammo_english>0</ammo_english>
+				<conceal>+0</conceal>
+				<avail>0</avail>
+				<cost>0</cost>
+				<owncost>0</owncost>
+				<source>SR4</source>
+				<page>159</page>
+				<weaponname />
+				<location />
+				<ranges>
+					<short />
+					<medium />
+					<long />
+					<extreme />
+				</ranges>
+				<currentammo />
+				<ammoslot1 />
+				<ammoslot2 />
+				<ammoslot3 />
+				<ammoslot4 />
+				<dicepool>8</dicepool>
+				<notes />
+			</weapon>
+			<weapon>
+				<name>Shiawase Arms Tactical Model 71</name>
+				<name_english>Shiawase Arms Tactical Model 71</name_english>
+				<category>Submachine Guns</category>
+				<category_english>Submachine Guns</category_english>
+				<type>Ranged</type>
+				<reach>0</reach>
+				<damage>7P</damage>
+				<damage_english>7P</damage_english>
+				<rawdamage>5P</rawdamage>
+				<ap>-4</ap>
+				<mode>BF/FA</mode>
+				<rc>3</rc>
+				<ammo>25(c)</ammo>
+				<ammo_english>25(c)</ammo_english>
+				<conceal>+5</conceal>
+				<avail>16F</avail>
+				<cost>4750</cost>
+				<owncost>4750</owncost>
+				<source>GH2</source>
+				<page>29</page>
+				<weaponname />
+				<location />
+				<mods>
+					<weaponmod>
+						<name>Electronic Firing</name>
+						<slots>2</slots>
+						<avail>10R</avail>
+						<rc>1</rc>
+						<rating>0</rating>
+						<cost>1000</cost>
+						<owncost>1000</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>150</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Folding Stock</name>
+						<slots>1</slots>
+						<avail>2</avail>
+						<rc>1</rc>
+						<rating>0</rating>
+						<cost>30</cost>
+						<owncost>30</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>151</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Foregrip</name>
+						<slots>1</slots>
+						<avail>0</avail>
+						<rc>1</rc>
+						<rating>0</rating>
+						<cost>50</cost>
+						<owncost>50</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>152</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Melee Hardening</name>
+						<slots>1</slots>
+						<avail>4</avail>
+						<rc />
+						<rating>0</rating>
+						<cost>300</cost>
+						<owncost>300</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>152</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Reduced Weight</name>
+						<slots>1</slots>
+						<avail>6</avail>
+						<rc />
+						<rating>0</rating>
+						<cost>4750</cost>
+						<owncost>4750</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>153</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Safe Target System</name>
+						<slots>1</slots>
+						<avail>4</avail>
+						<rc />
+						<rating>0</rating>
+						<cost>200</cost>
+						<owncost>200</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>153</page>
+						<notes />
+					</weaponmod>
+					<weaponmod>
+						<name>Smartgun System</name>
+						<slots>1</slots>
+						<avail>6R</avail>
+						<rc />
+						<rating>0</rating>
+						<cost>4750</cost>
+						<owncost>4750</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>153</page>
+						<notes />
+					</weaponmod>
+				</mods>
+				<ranges>
+					<short>0-10</short>
+					<medium>11-40</medium>
+					<long>41-85</long>
+					<extreme>86-150</extreme>
+				</ranges>
+				<currentammo>Ammo: APDS</currentammo>
+				<ammoslot1>Ammo: APDS</ammoslot1>
+				<ammoslot2 />
+				<ammoslot3 />
+				<ammoslot4 />
+				<dicepool>9</dicepool>
+				<notes />
+			</weapon>
+			<weapon>
+				<name>Ares Predator IV</name>
+				<name_english>Ares Predator IV</name_english>
+				<category>Heavy Pistols</category>
+				<category_english>Heavy Pistols</category_english>
+				<type>Ranged</type>
+				<reach>0</reach>
+				<damage>7P</damage>
+				<damage_english>7P</damage_english>
+				<rawdamage>5P</rawdamage>
+				<ap>-5</ap>
+				<mode>SA</mode>
+				<rc>0</rc>
+				<ammo>15(c)</ammo>
+				<ammo_english>15(c)</ammo_english>
+				<conceal>+0</conceal>
+				<avail>4R</avail>
+				<cost>350</cost>
+				<owncost>350</owncost>
+				<source>SR4</source>
+				<page>317</page>
+				<weaponname />
+				<location />
+				<mods>
+					<weaponmod>
+						<name>Smartgun System</name>
+						<slots>1</slots>
+						<avail>6R</avail>
+						<rc />
+						<rating>0</rating>
+						<cost>350</cost>
+						<owncost>350</owncost>
+						<included>True</included>
+						<source>AR</source>
+						<page>153</page>
+						<notes />
+					</weaponmod>
+				</mods>
+				<ranges>
+					<short>0-5</short>
+					<medium>6-20</medium>
+					<long>21-40</long>
+					<extreme>41-60</extreme>
+				</ranges>
+				<currentammo>Ammo: APDS</currentammo>
+				<ammoslot1>Ammo: APDS</ammoslot1>
+				<ammoslot2 />
+				<ammoslot3 />
+				<ammoslot4 />
+				<dicepool>9</dicepool>
+				<notes />
+			</weapon>
+			<weapon>
+				<name>Survival Knife</name>
+				<name_english>Survival Knife</name_english>
+				<category>Blades</category>
+				<category_english>Blades</category_english>
+				<type>Melee</type>
+				<reach>0</reach>
+				<damage>5P</damage>
+				<damage_english>5P</damage_english>
+				<rawdamage>(STR/2+1)P</rawdamage>
+				<ap>-1</ap>
+				<mode />
+				<rc>0</rc>
+				<ammo>0</ammo>
+				<ammo_english>0</ammo_english>
+				<conceal>-2</conceal>
+				<avail>0</avail>
+				<cost>50</cost>
+				<owncost>50</owncost>
+				<source>SR4</source>
+				<page>315</page>
+				<weaponname />
+				<location />
+				<ranges>
+					<short />
+					<medium />
+					<long />
+					<extreme />
+				</ranges>
+				<currentammo />
+				<ammoslot1 />
+				<ammoslot2 />
+				<ammoslot3 />
+				<ammoslot4 />
+				<dicepool>8</dicepool>
+				<notes />
+			</weapon>
+		</weapons>
+		<cyberwares />
+		<qualities>
+			<quality>
+				<name>Magician</name>
+				<extra />
+				<bp>15</bp>
+				<qualitytype>Positive</qualitytype>
+				<qualitytype_english>Positive</qualitytype_english>
+				<qualitysource>Selected</qualitysource>
+				<source>SR4</source>
+				<page>91</page>
+				<notes />
+			</quality>
+		</qualities>
+		<lifestyles>
+			<lifestyle>
+				<name>Street</name>
+				<cost>0</cost>
+				<dice>1</dice>
+				<multiplier>10</multiplier>
+				<months>1</months>
+				<purchased>False</purchased>
+				<lifestylename />
+				<type>Standard</type>
+				<comforts />
+				<entertainment />
+				<necessities />
+				<neighborhood />
+				<security />
+				<source>SR4</source>
+				<page>268</page>
+				<qualities />
+				<notes />
+			</lifestyle>
+		</lifestyles>
+		<gears>
+			<gear>
+				<name>Custom Commlink</name>
+				<name_english>Custom Commlink</name_english>
+				<category>Commlink</category>
+				<category_english>Commlink</category_english>
+				<iscommlink>True</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>0</avail>
+				<avail_english>0</avail_english>
+				<cost>10000</cost>
+				<owncost>0</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<gearname />
+				<source>SR4</source>
+				<page>328</page>
+				<response>5</response>
+				<signal>5</signal>
+				<firewall>5</firewall>
+				<system>5</system>
+				<processorlimit>5</processorlimit>
+				<conditionmonitor>11</conditionmonitor>
+				<active>True</active>
+				<children>
+					<gear>
+						<name>Custom Commlink OS</name>
+						<name_english>Custom Commlink OS</name_english>
+						<category>Commlink Operating System</category>
+						<category_english>Commlink Operating System</category_english>
+						<iscommlink>False</iscommlink>
+						<ispersona>False</ispersona>
+						<isnexus>False</isnexus>
+						<isammo>False</isammo>
+						<isprogram>False</isprogram>
+						<isos>True</isos>
+						<issin>False</issin>
+						<maxrating>0</maxrating>
+						<rating>0</rating>
+						<qty>1</qty>
+						<avail>0</avail>
+						<avail_english>0</avail_english>
+						<cost>5000</cost>
+						<owncost>0</owncost>
+						<extra />
+						<bonded>False</bonded>
+						<equipped>True</equipped>
+						<homenode>False</homenode>
+						<gearname />
+						<source>SR4</source>
+						<page>328</page>
+						<firewall>0</firewall>
+						<system>0</system>
+						<children>
+							<gear>
+								<name>Firewall 5</name>
+								<name_english>Firewall 5</name_english>
+								<category>Commlink Operating System Upgrade</category>
+								<category_english>Commlink Operating System Upgrade</category_english>
+								<iscommlink>False</iscommlink>
+								<ispersona>False</ispersona>
+								<isnexus>False</isnexus>
+								<isammo>False</isammo>
+								<isprogram>False</isprogram>
+								<isos>False</isos>
+								<issin>False</issin>
+								<maxrating>0</maxrating>
+								<rating>0</rating>
+								<qty>1</qty>
+								<avail>0</avail>
+								<avail_english>0</avail_english>
+								<cost>2500</cost>
+								<owncost>2500</owncost>
+								<extra />
+								<bonded>False</bonded>
+								<equipped>True</equipped>
+								<homenode>False</homenode>
+								<gearname />
+								<source>SR4</source>
+								<page>221</page>
+								<firewall>5</firewall>
+								<system>0</system>
+								<children />
+								<notes />
+							</gear>
+							<gear>
+								<name>System 5</name>
+								<name_english>System 5</name_english>
+								<category>Commlink Operating System Upgrade</category>
+								<category_english>Commlink Operating System Upgrade</category_english>
+								<iscommlink>False</iscommlink>
+								<ispersona>False</ispersona>
+								<isnexus>False</isnexus>
+								<isammo>False</isammo>
+								<isprogram>False</isprogram>
+								<isos>False</isos>
+								<issin>False</issin>
+								<maxrating>0</maxrating>
+								<rating>0</rating>
+								<qty>1</qty>
+								<avail>0</avail>
+								<avail_english>0</avail_english>
+								<cost>2500</cost>
+								<owncost>2500</owncost>
+								<extra />
+								<bonded>False</bonded>
+								<equipped>True</equipped>
+								<homenode>False</homenode>
+								<gearname />
+								<source>SR4</source>
+								<page>232</page>
+								<firewall>0</firewall>
+								<system>5</system>
+								<children />
+								<notes />
+							</gear>
+						</children>
+						<notes />
+					</gear>
+				</children>
+				<notes />
+			</gear>
+			<gear>
+				<name>Glasses</name>
+				<name_english>Glasses</name_english>
+				<category>Vision Enhancers</category>
+				<category_english>Vision Enhancers</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity>Rating</capacity>
+				<maxrating>4</maxrating>
+				<rating>3</rating>
+				<qty>1</qty>
+				<avail>10R</avail>
+				<avail_english>10R</avail_english>
+				<cost>700</cost>
+				<owncost>75</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>332</page>
+				<children>
+					<gear>
+						<name>Image Link</name>
+						<name_english>Image Link</name_english>
+						<category>Vision Enhancements</category>
+						<category_english>Vision Enhancements</category_english>
+						<iscommlink>False</iscommlink>
+						<ispersona>False</ispersona>
+						<isnexus>False</isnexus>
+						<isammo>False</isammo>
+						<isprogram>False</isprogram>
+						<isos>False</isos>
+						<issin>False</issin>
+						<capacity>[1]</capacity>
+						<maxrating>0</maxrating>
+						<rating>0</rating>
+						<qty>1</qty>
+						<avail>+0</avail>
+						<avail_english>+0</avail_english>
+						<cost>25</cost>
+						<owncost>25</owncost>
+						<extra />
+						<bonded>False</bonded>
+						<equipped>True</equipped>
+						<homenode>False</homenode>
+						<location />
+						<gearname />
+						<source>SR4</source>
+						<page>333</page>
+						<children />
+						<notes />
+					</gear>
+					<gear>
+						<name>Thermographic</name>
+						<name_english>Thermographic</name_english>
+						<category>Vision Enhancements</category>
+						<category_english>Vision Enhancements</category_english>
+						<iscommlink>False</iscommlink>
+						<ispersona>False</ispersona>
+						<isnexus>False</isnexus>
+						<isammo>False</isammo>
+						<isprogram>False</isprogram>
+						<isos>False</isos>
+						<issin>False</issin>
+						<capacity>[1]</capacity>
+						<maxrating>0</maxrating>
+						<rating>0</rating>
+						<qty>1</qty>
+						<avail>+6</avail>
+						<avail_english>+6</avail_english>
+						<cost>100</cost>
+						<owncost>100</owncost>
+						<extra />
+						<bonded>False</bonded>
+						<equipped>True</equipped>
+						<homenode>False</homenode>
+						<location />
+						<gearname />
+						<source>SR4</source>
+						<page>333</page>
+						<children />
+						<notes />
+					</gear>
+					<gear>
+						<name>Smartlink</name>
+						<name_english>Smartlink</name_english>
+						<category>Vision Enhancements</category>
+						<category_english>Vision Enhancements</category_english>
+						<iscommlink>False</iscommlink>
+						<ispersona>False</ispersona>
+						<isnexus>False</isnexus>
+						<isammo>False</isammo>
+						<isprogram>False</isprogram>
+						<isos>False</isos>
+						<issin>False</issin>
+						<capacity>[1]</capacity>
+						<maxrating>0</maxrating>
+						<rating>0</rating>
+						<qty>1</qty>
+						<avail>+4R</avail>
+						<avail_english>+4R</avail_english>
+						<cost>500</cost>
+						<owncost>500</owncost>
+						<extra />
+						<bonded>False</bonded>
+						<equipped>True</equipped>
+						<homenode>False</homenode>
+						<location />
+						<gearname />
+						<source>SR4</source>
+						<page>333</page>
+						<children />
+						<notes />
+					</gear>
+				</children>
+				<notes />
+			</gear>
+			<gear>
+				<name>Medkit</name>
+				<name_english>Medkit</name_english>
+				<category>Biotech</category>
+				<category_english>Biotech</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>6</maxrating>
+				<rating>5</rating>
+				<qty>1</qty>
+				<avail>0</avail>
+				<avail_english>0</avail_english>
+				<cost>500</cost>
+				<owncost>500</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>337</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Power Focus (Bonded Foci)</name>
+				<name_english>Power Focus</name_english>
+				<category>Foci</category>
+				<category_english>Foci</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>18</maxrating>
+				<rating>2</rating>
+				<qty>1</qty>
+				<avail>10R</avail>
+				<avail_english>10R</avail_english>
+				<cost>50000</cost>
+				<owncost>50000</owncost>
+				<extra />
+				<bonded>True</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>199</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Task Force Magus Mobile Lodge</name>
+				<name_english>Task Force Magus Mobile Lodge</name_english>
+				<category>Magical Supplies</category>
+				<category_english>Magical Supplies</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>0</avail>
+				<avail_english>0</avail_english>
+				<cost>50000</cost>
+				<owncost>50000</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>10M</source>
+				<page>41</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Smart Pouch System, Ammunition Pouch</name>
+				<name_english>Smart Pouch System, Ammunition Pouch</name_english>
+				<category>Odds and Ends</category>
+				<category_english>Odds and Ends</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>8</avail>
+				<avail_english>8</avail_english>
+				<cost>25</cost>
+				<owncost>25</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>AR</source>
+				<page>62</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Smart Pouch System, Combat Load Vest</name>
+				<name_english>Smart Pouch System, Combat Load Vest</name_english>
+				<category>Odds and Ends</category>
+				<category_english>Odds and Ends</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>8</avail>
+				<avail_english>8</avail_english>
+				<cost>300</cost>
+				<owncost>300</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>AR</source>
+				<page>62</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Smart Pouch System, Ration Pouch</name>
+				<name_english>Smart Pouch System, Ration Pouch</name_english>
+				<category>Odds and Ends</category>
+				<category_english>Odds and Ends</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>8</avail>
+				<avail_english>8</avail_english>
+				<cost>50</cost>
+				<owncost>50</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>AR</source>
+				<page>62</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Smart Pouch System, Smart Canteen</name>
+				<name_english>Smart Pouch System, Smart Canteen</name_english>
+				<category>Odds and Ends</category>
+				<category_english>Odds and Ends</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>8</avail>
+				<avail_english>8</avail_english>
+				<cost>5</cost>
+				<owncost>5</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>AR</source>
+				<page>62</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Subvocal Microphone</name>
+				<name_english>Subvocal Microphone</name_english>
+				<category>Commlink Accessories</category>
+				<category_english>Commlink Accessories</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>False</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>1</qty>
+				<avail>6</avail>
+				<avail_english>6</avail_english>
+				<cost>50</cost>
+				<owncost>50</owncost>
+				<extra />
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>328</page>
+				<children />
+				<notes />
+			</gear>
+			<gear>
+				<name>Ammo: APDS</name>
+				<name_english>Ammo: APDS</name_english>
+				<category>Ammunition</category>
+				<category_english>Ammunition</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>True</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>75</qty>
+				<avail>16F</avail>
+				<avail_english>16F</avail_english>
+				<cost>525</cost>
+				<owncost>7</owncost>
+				<extra>Submachine Guns</extra>
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>323</page>
+				<children />
+				<weaponbonusdamage>+0</weaponbonusdamage>
+				<weaponbonusdamage_english>+0</weaponbonusdamage_english>
+				<weaponbonusap>-4</weaponbonusap>
+				<notes />
+			</gear>
+			<gear>
+				<name>Ammo: APDS</name>
+				<name_english>Ammo: APDS</name_english>
+				<category>Ammunition</category>
+				<category_english>Ammunition</category_english>
+				<iscommlink>False</iscommlink>
+				<ispersona>False</ispersona>
+				<isnexus>False</isnexus>
+				<isammo>True</isammo>
+				<isprogram>False</isprogram>
+				<isos>False</isos>
+				<issin>False</issin>
+				<capacity />
+				<maxrating>0</maxrating>
+				<rating>0</rating>
+				<qty>30</qty>
+				<avail>16F</avail>
+				<avail_english>16F</avail_english>
+				<cost>210</cost>
+				<owncost>7</owncost>
+				<extra>Heavy Pistols</extra>
+				<bonded>False</bonded>
+				<equipped>True</equipped>
+				<homenode>False</homenode>
+				<location />
+				<gearname />
+				<source>SR4</source>
+				<page>323</page>
+				<children />
+				<weaponbonusdamage>+0</weaponbonusdamage>
+				<weaponbonusdamage_english>+0</weaponbonusdamage_english>
+				<weaponbonusap>-4</weaponbonusap>
+				<notes />
+			</gear>
+		</gears>
+		<vehicles />
+		<metamagics>
+			<metamagic>
+				<name>Centering</name>
+				<source>SR4</source>
+				<page>198</page>
+				<improvementsource>Metamagic</improvementsource>
+				<notes />
+			</metamagic>
+		</metamagics>
+		<critterpowers />
+	</character>
+</characters>
