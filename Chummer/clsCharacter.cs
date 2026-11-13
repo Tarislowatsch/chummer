@@ -2716,6 +2716,8 @@ namespace Chummer
 			}
 			set
 			{
+				if (value == null)
+					throw new ArgumentNullException("value");
 				_objMugshotStore = value;
 			}
 		}

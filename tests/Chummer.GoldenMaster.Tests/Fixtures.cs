@@ -56,12 +56,12 @@ namespace Chummer.GoldenMaster.Tests
 			}
 		}
 
+		// - read from the save, not the loaded character: the oracle must not depend on Load
+		// - streamed: a DOM would parse every save a second time
 		public static bool HasMugshot(string relativePath)
 		{
-			XmlDocument save = new XmlDocument();
-			save.Load(Path.Combine(CharactersDir, relativePath));
-			XmlNode mugshot = save.SelectSingleNode("/character/mugshot");
-			return mugshot != null && mugshot.InnerText != "";
+			using (XmlReader save = XmlReader.Create(Path.Combine(CharactersDir, relativePath)))
+				return save.ReadToFollowing("mugshot") && save.ReadElementContentAsString() != "";
 		}
 
 		private static string FindRepoRoot()

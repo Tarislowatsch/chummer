@@ -11,7 +11,7 @@ namespace Chummer.GoldenMaster.Tests
 	{
 		// - fixtures whose print throws today, with the exception type
 		// - a listed fixture that prints fails its test
-		private static readonly Dictionary<string, Type> KnownPrintFailures = new Dictionary<string, Type>
+		internal static readonly Dictionary<string, Type> KnownPrintFailures = new Dictionary<string, Type>
 		{
 			// Legacy save: every techprogram has an empty <skill />.
 			{ @"examples\Technomancer.chum", typeof(NullReferenceException) },

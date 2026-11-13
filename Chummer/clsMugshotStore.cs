@@ -7,6 +7,7 @@ namespace Chummer
 {
 	/// <summary>
 	/// Takes a character's decoded portrait during printing and returns the URL the sheets show.
+	/// The image stays the caller's: a store neither disposes it nor keeps a reference to it.
 	/// </summary>
 	public interface IMugshotStore
 	{

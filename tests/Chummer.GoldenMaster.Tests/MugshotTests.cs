@@ -13,20 +13,27 @@ namespace Chummer.GoldenMaster.Tests
 
 		private static string MugshotDirectory => Path.Combine(AppHost.AppDirectory, "mugshots");
 
-		// Exact count: each of these prints is where the store replaces a file write.
+		// - exact count: each of these prints asserts one Store call
+		// - a mugshot fixture that stops printing must lower the pin deliberately
 		[Fact]
-		public void MugshotFixtureCountIsPinned()
+		public void PrintingMugshotFixtureCountIsPinned()
 		{
-			Assert.Equal(36, Fixtures.RelativePaths().Count(Fixtures.HasMugshot));
+			Assert.Equal(36, Fixtures.RelativePaths().Count(path => Fixtures.HasMugshot(path) && !PrintTests.KnownPrintFailures.ContainsKey(path)));
 		}
 
 		[Fact]
 		public void PrintWritesNoFileBelowStartupPath()
 		{
 			Assert.True(Fixtures.HasMugshot(MugshotFixture), MugshotFixture + " lost its mugshot: pick another fixture.");
-			string[] before = FilesIn(MugshotDirectory);
+			string[] before = FilesBelow(AppHost.AppDirectory);
 			Fixtures.Print(MugshotFixture);
-			Assert.Equal(before, FilesIn(MugshotDirectory));
+			Assert.Equal(new string[0], FilesBelow(AppHost.AppDirectory).Except(before));
+		}
+
+		[Fact]
+		public void MugshotStoreRejectsNull()
+		{
+			Assert.Throws<ArgumentNullException>(() => { new Character().MugshotStore = null; });
 		}
 
 		// The store the app uses must keep writing where frmViewer deletes on close.
@@ -51,9 +58,12 @@ namespace Chummer.GoldenMaster.Tests
 			}
 		}
 
-		private static string[] FilesIn(string directory)
+		private static string[] FilesBelow(string directory)
 		{
-			return Directory.Exists(directory) ? Directory.GetFiles(directory).OrderBy(path => path, StringComparer.Ordinal).ToArray() : new string[0];
+			return Directory.GetFiles(directory, "*", SearchOption.AllDirectories)
+				.Select(path => path.Substring(directory.Length + 1))
+				.OrderBy(path => path, StringComparer.Ordinal)
+				.ToArray();
 		}
 	}
 }
