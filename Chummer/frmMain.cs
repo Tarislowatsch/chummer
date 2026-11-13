@@ -19,7 +19,7 @@ namespace Chummer
 
 			GlobalOptions.Instance.MRUChanged += PopulateMRU;
 
-			// Delete the old executable if it exists (created by the update process).
+			// Leftover from the removed self-updater.
 			if (File.Exists("Chummer.exe.old"))
 			{
 				try
