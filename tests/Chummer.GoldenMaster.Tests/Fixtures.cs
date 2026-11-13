@@ -28,11 +28,17 @@ namespace Chummer.GoldenMaster.Tests
 			return RelativePaths().Select(path => new object[] { path });
 		}
 
-		// - same document shape as frmViewer builds around PrintToStream
-		// - no BOM: frmViewer's preamble is not part of the print
 		public static string Print(string relativePath)
 		{
+			return Print(relativePath, new RecordingMugshotStore());
+		}
+
+		// - same document shape as frmViewer builds around PrintToStream
+		// - no BOM: frmViewer's preamble is not part of the print
+		public static string Print(string relativePath, IMugshotStore mugshots)
+		{
 			Character character = new Character();
+			character.MugshotStore = mugshots;
 			character.FileName = Path.Combine(CharactersDir, relativePath);
 			if (!character.Load())
 				throw new InvalidOperationException("Character.Load returned false for " + relativePath + ".");
@@ -48,6 +54,14 @@ namespace Chummer.GoldenMaster.Tests
 				writer.Flush();
 				return NoBom.GetString(stream.ToArray());
 			}
+		}
+
+		public static bool HasMugshot(string relativePath)
+		{
+			XmlDocument save = new XmlDocument();
+			save.Load(Path.Combine(CharactersDir, relativePath));
+			XmlNode mugshot = save.SelectSingleNode("/character/mugshot");
+			return mugshot != null && mugshot.InnerText != "";
 		}
 
 		private static string FindRepoRoot()

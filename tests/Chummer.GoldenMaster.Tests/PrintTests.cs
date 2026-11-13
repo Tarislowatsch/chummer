@@ -44,9 +44,14 @@ namespace Chummer.GoldenMaster.Tests
 				return;
 			}
 
+			RecordingMugshotStore mugshots = new RecordingMugshotStore();
 			XmlDocument document = new XmlDocument();
-			document.LoadXml(Fixtures.Print(relativePath));
+			document.LoadXml(Fixtures.Print(relativePath, mugshots));
 			Assert.Equal(1, document.SelectNodes("/characters/character").Count);
+
+			bool hasMugshot = Fixtures.HasMugshot(relativePath);
+			Assert.Equal(hasMugshot ? 1 : 0, mugshots.Calls);
+			Assert.Equal(hasMugshot ? RecordingMugshotStore.Url : "", document.SelectSingleNode("/characters/character/mugshot").InnerText);
 		}
 	}
 }

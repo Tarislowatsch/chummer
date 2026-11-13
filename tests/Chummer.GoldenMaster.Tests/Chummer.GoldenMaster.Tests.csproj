@@ -22,6 +22,8 @@
     <ProjectReference Include="..\..\Chummer\Chummer.csproj" />
     <!-- Only for Application.StartupPath. -->
     <Reference Include="System.Windows.Forms" />
+    <!-- Only for IMugshotStore's Image parameter. -->
+    <Reference Include="System.Drawing" />
   </ItemGroup>
 
   <ItemGroup>
