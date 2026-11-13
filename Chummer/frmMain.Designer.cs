@@ -66,7 +66,6 @@
 			this.mnuToolsDiceRoller = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
 			this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.mnuToolsOmae = new System.Windows.Forms.ToolStripMenuItem();
 			this.windowsMenu = new System.Windows.Forms.ToolStripMenuItem();
 			this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -431,8 +430,7 @@
 			this.toolsMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuToolsDiceRoller,
             this.toolStripSeparator5,
-            this.optionsToolStripMenuItem,
-            this.mnuToolsOmae});
+            this.optionsToolStripMenuItem});
 			this.toolsMenu.Name = "toolsMenu";
 			this.toolsMenu.Size = new System.Drawing.Size(48, 20);
 			this.toolsMenu.Tag = "Menu_Main_Tools";
@@ -461,14 +459,6 @@
 			this.optionsToolStripMenuItem.Tag = "Menu_Main_Options";
 			this.optionsToolStripMenuItem.Text = "&Options";
 			this.optionsToolStripMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
-			// 
-			// mnuToolsOmae
-			// 
-			this.mnuToolsOmae.Name = "mnuToolsOmae";
-			this.mnuToolsOmae.Size = new System.Drawing.Size(171, 22);
-			this.mnuToolsOmae.Tag = "Menu_Main_Omae";
-			this.mnuToolsOmae.Text = "Omae";
-			this.mnuToolsOmae.Click += new System.EventHandler(this.mnuToolsOmae_Click);
 			// 
 			// windowsMenu
 			// 
@@ -740,7 +730,6 @@
 		private System.Windows.Forms.TabControl tabForms;
 		private System.Windows.Forms.ToolStripMenuItem mnuToolsDiceRoller;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-		private System.Windows.Forms.ToolStripMenuItem mnuToolsOmae;
 		private System.Windows.Forms.ToolStripMenuItem mnuHelpDumpshock;
 	}
 }
