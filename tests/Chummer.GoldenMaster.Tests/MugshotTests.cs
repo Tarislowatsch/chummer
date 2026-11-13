@@ -9,7 +9,7 @@ namespace Chummer.GoldenMaster.Tests
 	[Collection(AppHost.Collection)]
 	public class MugshotTests
 	{
-		private const string MugshotFixture = @"SR4 Contacts\Fixer.chum";
+		internal const string MugshotFixture = @"SR4 Contacts\Fixer.chum";
 
 		private static string MugshotDirectory => Path.Combine(AppHost.AppDirectory, "mugshots");
 

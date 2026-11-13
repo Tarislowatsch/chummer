@@ -31,6 +31,13 @@ namespace Chummer.GoldenMaster.Tests
 			Assert.DoesNotContain(KnownPrintFailures.Keys, path => !fixtures.Contains(path));
 		}
 
+		// A mugshot fixture: the image's file name was the only random part of the print.
+		[Fact]
+		public void PrintingTwiceGivesTheSamePrint()
+		{
+			Assert.Equal(Fixtures.Print(MugshotTests.MugshotFixture), Fixtures.Print(MugshotTests.MugshotFixture));
+		}
+
 		[Theory]
 		[MemberData(nameof(Fixtures.Characters), MemberType = typeof(Fixtures))]
 		public void EveryFixturePrints(string relativePath)
