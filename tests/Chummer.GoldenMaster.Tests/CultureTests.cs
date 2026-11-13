@@ -11,7 +11,7 @@ namespace Chummer.GoldenMaster.Tests
 	[Collection(AppHost.Collection)]
 	public class CultureTests
 	{
-		// - every decimal site in Print that a fixture reaches: Essence, cyberware ess, power points
+		// - every element whose print the German subset changes, not the whole corpus
 		// - exact: a new culture-dependent element must be added here deliberately
 		private static readonly string[] CultureDependentElements =
 		{
