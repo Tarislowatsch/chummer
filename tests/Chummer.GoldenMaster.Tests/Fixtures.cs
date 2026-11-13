@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Xml;
 
 namespace Chummer.GoldenMaster.Tests
@@ -28,14 +30,39 @@ namespace Chummer.GoldenMaster.Tests
 			return RelativePaths().Select(path => new object[] { path });
 		}
 
-		public static string Print(string relativePath)
+		// Printed under German as well: decimals in Print follow the thread culture.
+		public static readonly string[] GermanSubset =
 		{
-			return Print(relativePath, new RecordingMugshotStore());
+			@"examples\Street Samurai.chum",
+			@"The Way of the Samurai\Troll Samurai.chum",
+			@"examples\Gunslinger Adept.chum",
+			@"10 Mercs\Bravo Company\Mystic Adept Combat Medic.chum",
+		};
+
+		// GetCultureInfo: a machine's own overrides of the culture must not reach the baseline.
+		public static readonly CultureInfo Baseline = CultureInfo.GetCultureInfo("en-US");
+		public static readonly CultureInfo German = CultureInfo.GetCultureInfo("de-DE");
+
+		// - Load runs under the culture too: the app loads and prints on the same thread
+		// - UI culture stays untouched: Chummer ships no satellite resources
+		public static string Print(string relativePath, IMugshotStore mugshots = null, CultureInfo culture = null)
+		{
+			Thread thread = Thread.CurrentThread;
+			CultureInfo ambient = thread.CurrentCulture;
+			thread.CurrentCulture = culture ?? Baseline;
+			try
+			{
+				return PrintUnderCurrentCulture(relativePath, mugshots ?? new RecordingMugshotStore());
+			}
+			finally
+			{
+				thread.CurrentCulture = ambient;
+			}
 		}
 
 		// - same document shape as frmViewer builds around PrintToStream
 		// - no BOM: frmViewer's preamble is not part of the print
-		public static string Print(string relativePath, IMugshotStore mugshots)
+		private static string PrintUnderCurrentCulture(string relativePath, IMugshotStore mugshots)
 		{
 			Character character = new Character();
 			character.MugshotStore = mugshots;
