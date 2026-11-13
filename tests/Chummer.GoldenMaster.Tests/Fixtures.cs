@@ -30,8 +30,7 @@ namespace Chummer.GoldenMaster.Tests
 			return RelativePaths().Select(path => new object[] { path });
 		}
 
-		// - printed under German as well: decimals in Print follow the thread culture
-		// - covers each such site that fixtures reach: Essence, cyberware ess, power points
+		// Printed under German as well: decimals in Print follow the thread culture.
 		public static readonly string[] GermanSubset =
 		{
 			@"examples\Street Samurai.chum",
@@ -40,23 +39,17 @@ namespace Chummer.GoldenMaster.Tests
 			@"10 Mercs\Bravo Company\Mystic Adept Combat Medic.chum",
 		};
 
-		public static IEnumerable<object[]> GermanCharacters()
-		{
-			return GermanSubset.Select(path => new object[] { path });
-		}
-
 		// GetCultureInfo: a machine's own overrides of the culture must not reach the baseline.
 		public static readonly CultureInfo Baseline = CultureInfo.GetCultureInfo("en-US");
 		public static readonly CultureInfo German = CultureInfo.GetCultureInfo("de-DE");
 
-		// Load runs under the culture too: the app loads and prints on the same thread.
+		// - Load runs under the culture too: the app loads and prints on the same thread
+		// - UI culture stays untouched: Chummer ships no satellite resources
 		public static string Print(string relativePath, IMugshotStore mugshots = null, CultureInfo culture = null)
 		{
 			Thread thread = Thread.CurrentThread;
 			CultureInfo ambient = thread.CurrentCulture;
-			CultureInfo ambientUi = thread.CurrentUICulture;
 			thread.CurrentCulture = culture ?? Baseline;
-			thread.CurrentUICulture = culture ?? Baseline;
 			try
 			{
 				return PrintUnderCurrentCulture(relativePath, mugshots ?? new RecordingMugshotStore());
@@ -64,7 +57,6 @@ namespace Chummer.GoldenMaster.Tests
 			finally
 			{
 				thread.CurrentCulture = ambient;
-				thread.CurrentUICulture = ambientUi;
 			}
 		}
 
