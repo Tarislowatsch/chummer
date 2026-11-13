@@ -16,13 +16,13 @@ namespace Chummer.GoldenMaster.Tests
 		[Fact]
 		public void BaselinesExistForExactlyThePrintingFixtures()
 		{
-			AssertSameFixtures(Fixtures.RelativePaths().Where(path => !PrintTests.KnownPrintFailures.ContainsKey(path)), Baselines.FixturesWithBaseline(Fixtures.Baseline));
+			AssertSameFiles(Fixtures.RelativePaths().Where(path => !PrintTests.KnownPrintFailures.ContainsKey(path)), Baselines.Files(Fixtures.Baseline));
 		}
 
 		[Fact]
 		public void GermanBaselinesExistForExactlyTheGermanSubset()
 		{
-			AssertSameFixtures(Fixtures.GermanSubset, Baselines.FixturesWithBaseline(Fixtures.German));
+			AssertSameFiles(Fixtures.GermanSubset, Baselines.Files(Fixtures.German));
 		}
 
 		[Fact]
@@ -57,13 +57,15 @@ namespace Chummer.GoldenMaster.Tests
 			Assert.Contains("actual:   \\t\\t<b />", message);
 		}
 
-		// One line per missing and per orphaned baseline, not only the first.
-		private static void AssertSameFixtures(IEnumerable<string> expected, IEnumerable<string> actual)
+		// - one line per missing and per orphaned file, not only the first
+		// - Except is safe here: file paths on disk are unique
+		private static void AssertSameFiles(IEnumerable<string> fixtures, IEnumerable<string> files)
 		{
-			string[] missing = expected.Except(actual, StringComparer.Ordinal).ToArray();
-			string[] orphaned = actual.Except(expected, StringComparer.Ordinal).ToArray();
+			string[] expected = fixtures.Select(Baselines.FileFor).ToArray();
+			string[] missing = expected.Except(files, StringComparer.Ordinal).ToArray();
+			string[] orphaned = files.Except(expected, StringComparer.Ordinal).ToArray();
 			Assert.True(missing.Length == 0 && orphaned.Length == 0,
-				"Missing baselines:" + Lines(missing) + "\nBaselines without a printing fixture:" + Lines(orphaned));
+				"Missing baselines:" + Lines(missing) + "\nFiles without a printing fixture:" + Lines(orphaned));
 		}
 
 		private static string Lines(string[] paths)

@@ -24,15 +24,21 @@ namespace Chummer.GoldenMaster.Tests
 
 		public static string PathFor(string relativePath, CultureInfo culture)
 		{
-			return Path.Combine(Root, culture.Name, Path.ChangeExtension(relativePath, ".xml"));
+			return Path.Combine(Root, culture.Name, FileFor(relativePath));
 		}
 
-		// Every file counts, not only .xml: a stray file must show up as an unknown fixture.
-		public static IEnumerable<string> FixturesWithBaseline(CultureInfo culture)
+		public static string FileFor(string relativePath)
+		{
+			return Path.ChangeExtension(relativePath, ".xml");
+		}
+
+		// - every file, unchanged: a stray file must show up under its own name
+		// - mapping files back to fixtures would merge Street Samurai.txt into Street Samurai.chum
+		public static IEnumerable<string> Files(CultureInfo culture)
 		{
 			string directory = Path.Combine(Root, culture.Name);
 			return Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories)
-				.Select(path => Path.ChangeExtension(path.Substring(directory.Length + 1), ".chum"))
+				.Select(path => path.Substring(directory.Length + 1))
 				.OrderBy(path => path, StringComparer.Ordinal);
 		}
 
