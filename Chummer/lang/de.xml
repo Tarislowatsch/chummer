@@ -2956,18 +2956,6 @@
 			<text>Notizen:</text>
 		</string>
 		<string>
-			<key>Label_StreetCred</key>
-			<text>Straßenruf:</text>
-		</string>
-		<string>
-			<key>Label_Notoriety</key>
-			<text>Schlechter Ruf:</text>
-		</string>
-		<string>
-			<key>Label_PublicAwareness</key>
-			<text>Prominenz:</text>
-		</string>
-		<string>
 			<key>Label_Mugshot</key>
 			<text>Portrait: (210px x 310px)</text>
 		</string>
@@ -5513,10 +5501,6 @@
 		<string>
 			<key>MessageTitle_Omae_DeleteSheet</key>
 			<text>Charakterblatt löschen</text>
-		</string>
-		<string>
-			<key>Message_DeleteArmorLocation</key>
-			<text>Möchten Sie dieses Panzerungsset wirklich löschen? Alle enthaltenen Gegenstände werden in den Rüstungsreiter verschoben.</text>
 		</string>
 		<string>
 			<key>Button_AddBundle</key>
