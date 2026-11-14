@@ -8988,23 +8988,6 @@
 			<page>158</page>
 		</weapon>
 		<weapon>
-			<name>Mortar Round: Rocket Assist</name>
-			<category>Gear</category>
-			<type>Ranged</type>
-			<reach>0</reach>
-			<damage>0</damage>
-			<ap>-</ap>
-			<mode>0</mode>
-			<rc>0</rc>
-			<ammo>0</ammo>
-			<conceal>2</conceal>
-			<avail>0</avail>
-			<cost>0</cost>
-			<allowaccessory>false</allowaccessory>
-			<source>WAR</source>
-			<page>158</page>
-		</weapon>
-		<weapon>
 			<name>Mortar Round: Sensor</name>
 			<category>Gear</category>
 			<type>Ranged</type>

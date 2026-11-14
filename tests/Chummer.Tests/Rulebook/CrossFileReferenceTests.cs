@@ -11,23 +11,10 @@ namespace Chummer.Tests.Rulebook
 	// - the guards below catch a rule gone vacant or a consumer gone, not a missing rule
 	public class CrossFileReferenceTests
 	{
-		// - fixing one changes what a critter or sprite gets: a behaviour change, not a tidy-up
-		// - the typos mirror the data, not typos in this list
+		// - fixing one changes the ranges a weapon shows: a behaviour change, not a tidy-up
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"bonus selectskill excludecategory: Vechicle Active",
-			"bonus selectskillgroup excludecategory: Vechicle Active",
-			"bonus specificskill: Conjuring",
-			"bonus specificskill: Sorcery",
-			"critter optional complex forms: Databomb",
-			"critter optional complex forms: Shielding",
-			"critter skill groups: Conjuration",
-			"critter skill groups: Intimidation",
-			"critter skills: Gymanstics",
-			"critter skills: Infilatration",
-			"critter skills: Intimidatino",
-			"critter skills: shadowing",
 			"weapon range by category: Clubs",
 			"weapon range by category: Crossbows",
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
@@ -135,11 +122,12 @@ namespace Chummer.Tests.Rulebook
 				{ "bonus skillattribute exclude", 1 },
 				{ "bonus skillcategory", 24 },
 				{ "bonus skillcategory exclude", 2 },
-				{ "bonus skillgroup", 14 },
-				{ "bonus specificskill", 135 },
+				{ "bonus skillgroup", 20 },
+				{ "bonus specificskill", 129 },
 				{ "bonus spellcategory", 48 },
 				{ "bonus weaponcategorydv", 26 },
 				{ "critter complex forms", 242 },
+				{ "critter exotic skills", 63 },
 				{ "critter gears", 64 },
 				{ "critter knowledge categories", 2 },
 				{ "critter metavariant powers", 66 },
@@ -148,13 +136,13 @@ namespace Chummer.Tests.Rulebook
 				{ "critter optional powers", 246 },
 				{ "critter positive qualities", 116 },
 				{ "critter powers", 2265 },
-				{ "critter skill groups", 60 },
-				{ "critter skills", 2214 },
+				{ "critter skill groups", 59 },
+				{ "critter skills", 2215 },
 				{ "cyberware addweapon", 49 },
 				{ "cyberware suite grade", 44 },
 				{ "cyberware suite items", 426 },
 				{ "echo requires all echoes", 9 },
-				{ "gear addweapon", 203 },
+				{ "gear addweapon", 205 },
 				{ "gear usegear", 83 },
 				{ "metamagic requires all metamagics", 13 },
 				{ "metamagic requires all metatypes", 1 },
@@ -217,7 +205,7 @@ namespace Chummer.Tests.Rulebook
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
 				{ "weapon range", 162 },
-				{ "weapon range by category", 466 },
+				{ "weapon range by category", 465 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};

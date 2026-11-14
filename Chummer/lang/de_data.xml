@@ -12173,6 +12173,11 @@
 				<translate>Mine: KM-18 Zweihänder</translate>
 			</gear>
 			<gear>
+				<name>Mortar Round: Anti-Aircraft</name>
+				<page>175</page>
+				<translate>Mörsergeschoss: Luftabwehr</translate>
+			</gear>
+			<gear>
 				<name>Mortar Round: Anti-Tank</name>
 				<page>175</page>
 				<translate>Mörsergeschoss: Panzerabwehr</translate>
@@ -30633,11 +30638,6 @@
 				<name>Mortar Round: Mine</name>
 				<page>175</page>
 				<translate>Mörsergeschoss: Mine</translate>
-			</weapon>
-			<weapon>
-				<name>Mortar Round: Rocket Assist</name>
-				<page>175</page>
-				<translate>Mörsergeschoss: Raketenunterstützt</translate>
 			</weapon>
 			<weapon>
 				<name>Mortar Round: Sensor</name>

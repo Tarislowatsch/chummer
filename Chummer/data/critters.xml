@@ -1499,7 +1499,7 @@
 			</powers>
 			<skills>
 				<skill rating="2">Diving</skill>
-				<skill rating="3">Gymanstics</skill>
+				<skill rating="3">Gymnastics</skill>
 				<skill rating="2">Perception</skill>
 				<skill rating="4">Swimming</skill>
 				<skill rating="4">Unarmed Combat</skill>
@@ -1561,7 +1561,7 @@
 			</powers>
 			<skills>
 				<skill rating="2">Diving</skill>
-				<skill rating="2">Gymanstics</skill>
+				<skill rating="2">Gymnastics</skill>
 				<skill rating="2">Perception</skill>
 				<skill rating="4">Swimming</skill>
 				<skill rating="2">Unarmed Combat</skill>
@@ -1624,7 +1624,7 @@
 			</powers>
 			<skills>
 				<skill rating="2">Diving</skill>
-				<skill rating="3">Gymanstics</skill>
+				<skill rating="3">Gymnastics</skill>
 				<skill rating="2">Perception</skill>
 				<skill rating="4">Swimming</skill>
 				<skill rating="1">Unarmed Combat</skill>
@@ -14284,7 +14284,7 @@
 			</powers>
 			<skills>
 				<skill rating="3">Astral Combat</skill>
-				<skill rating="3">Exotic Range Weapon</skill>
+				<skill rating="3">Exotic Ranged Weapon</skill>
 				<skill rating="3">Flight</skill>
 				<skill rating="4">Perception</skill>
 				<skill rating="3">Unarmed Combat</skill>
@@ -17781,7 +17781,7 @@
 				<skill rating="3">Climbing</skill>
 				<skill rating="3">Intimidation</skill>
 				<skill rating="3">Perception</skill>
-				<skill rating="2">shadowing</skill>
+				<skill rating="2">Shadowing</skill>
 				<skill rating="2">Throwing Weapons</skill>
 				<group rating="4">Close Combat</group>
 				<group rating="3">Outdoors</group>
@@ -18072,7 +18072,7 @@
 			<skills>
 				<skill rating="2">Exotic Ranged Weapon</skill>
 				<skill rating="3">Infiltration</skill>
-				<skill rating="3">Intimidatino</skill>
+				<skill rating="3">Intimidation</skill>
 				<skill rating="6">Perception</skill>
 				<skill rating="4">Running</skill>
 				<skill rating="4">Shadowing</skill>
@@ -20503,7 +20503,7 @@
 			</powers>
 			<skills>
 				<skill rating="2">Climbing</skill>
-				<skill rating="2">Infilatration</skill>
+				<skill rating="2">Infiltration</skill>
 				<skill rating="4">Perception</skill>
 				<skill rating="3">Spellcasting</skill>
 				<skill rating="3">Tracking</skill>
@@ -30622,7 +30622,7 @@
 			</optionalpowers>
 			<skills>
 				<skill rating="6">Enchanting</skill>
-				<group rating="6">Conjuration</group>
+				<group rating="6">Conjuring</group>
 				<group rating="6">Sorcery</group>
 			</skills>
 			<source>RW</source>
@@ -34295,7 +34295,7 @@
 			</complexforms>
 			<optionalcomplexforms>
 				<complexform rating="F">Attack</complexform>
-				<complexform rating="F">Databomb</complexform>
+				<complexform rating="F">Data Bomb</complexform>
 				<complexform rating="F">Decrypt</complexform>
 				<complexform rating="F" category="Autosoft" />
 			</optionalcomplexforms>
@@ -34525,7 +34525,7 @@
 			<optionalcomplexforms>
 				<complexform rating="F">Armor</complexform>
 				<complexform rating="F">Exploit</complexform>
-				<complexform rating="F">Shielding</complexform>
+				<complexform rating="F">Shield</complexform>
 				<complexform rating="F">Stealth</complexform>
 			</optionalcomplexforms>
 			<source>UN</source>
@@ -35809,7 +35809,7 @@
 				<skill rating="2">Climbing</skill>
 				<skill rating="3">Perception</skill>
 				<skill rating="4">Unarmed Combat</skill>
-				<group rating="3">Intimidation</group>
+				<skill rating="3">Intimidation</skill>
 			</skills>
 			<source>SOX</source>
 			<page>64</page>

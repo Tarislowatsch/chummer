@@ -545,10 +545,14 @@ namespace Chummer.Tests.Rulebook
 			Rule("critter gears", "frmMetatype.cs:893",
 				"objXmlCritter.SelectNodes(\"gears/gear\")",
 				"critters.xml", "/chummer/metatypes/metatype/gears/gear", Gear),
-			// - "Exotic" names take their own branch and become a new skill, never looked up
+			// - "Exotic" names take their own branch and become a new skill: next rule
 			Rule("critter skills", "frmMetatype.cs:774",
 				"objXmlCritter.SelectNodes(\"skills/skill\")",
 				"critters.xml", "/chummer/metatypes/metatype/skills/skill[not(contains(., 'Exotic'))]", Skills),
+			// - the new skill looks up its category and translation by name
+			Rule("critter exotic skills", "clsUnique.cs:1884",
+				"objSkillDoc.SelectSingleNode(\"/chummer/skills/skill[name = \\\"\" + _strName",
+				"critters.xml", "/chummer/metatypes/metatype/skills/skill[contains(., 'Exotic')]", Skills),
 			Rule("critter skill groups", "frmMetatype.cs:807",
 				"objXmlCritter.SelectNodes(\"skills/group\")",
 				"critters.xml", "/chummer/metatypes/metatype/skills/group", SkillGroups, ByTextToText),

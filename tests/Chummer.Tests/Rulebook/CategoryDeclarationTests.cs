@@ -66,10 +66,6 @@ namespace Chummer.Tests.Rulebook
 		// - fixing one is a data change for its own ticket: delete the line there
 		private static readonly HashSet<string> KnownWeaponsWithoutCarrier = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"Grenade: Smoke (2050)",
-			"Minigrenade: Smoke (2050)",
-			"Mortar Round: Anti-Aircraft",
-			"Mortar Round: Rocket Assist",
 		};
 
 		// - an empty rule set would leave every carrier-only weapon "unreachable" for the wrong reason
