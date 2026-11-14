@@ -5923,7 +5923,7 @@
 		</vehicle>
 		<vehicle>
 			<name>Doc Wagon CRT Air Unit (Light Transport)</name>
-			<category>Rotocraft</category>
+			<category>Rotorcraft</category>
 			<handling>2</handling>
 			<accel>30/120</accel>
 			<speed>350</speed>

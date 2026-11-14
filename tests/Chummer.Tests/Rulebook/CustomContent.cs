@@ -155,7 +155,8 @@ namespace Chummer.Tests.Rulebook
 				HashSet<string> set = new HashSet<string>(declared, StringComparer.Ordinal);
 				foreach (CategoryDeclarations.CategoryUsage usage in CategoryDeclarations.UsagesIn(collection))
 				{
-					if (!set.Contains(usage.Category))
+					if (!set.Contains(usage.Category)
+						&& !CategoryDeclarations.IsCarrierOnly(file.BaseFileNames[0], collection.Name, usage.Category))
 						yield return usage;
 				}
 			}

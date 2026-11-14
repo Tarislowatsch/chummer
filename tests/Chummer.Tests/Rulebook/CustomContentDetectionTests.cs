@@ -102,6 +102,19 @@ namespace Chummer.Tests.Rulebook
 			Assert.Equal(new[] { "override_a_gear.xml", "override_b_gear.xml" }, conflict.Value);
 		}
 
+		[Fact]
+		public void APackSkipsOnlyItsCarrierOnlyUsages()
+		{
+			XmlDocument pack = Xml.Parse("<chummer><weapons>"
+				+ "<weapon><name>Carried</name><category>Gear</category></weapon>"
+				+ "<weapon><name>Sold</name><category>Made Up</category></weapon></weapons></chummer>");
+			PackFiles.PackFile file = new PackFiles.PackFile(@"C:\pack\custom_test_weapons.xml", "custom",
+				new[] { "weapons.xml" });
+
+			Assert.Equal(new[] { "Sold" },
+				CustomContent.UndeclaredCategoryUsages(file, pack).Select(usage => usage.ItemName));
+		}
+
 		// - "Ammunition" is declared by the real gear.xml, "Made Up" is not
 		[Fact]
 		public void RedeclaredCategoriesFindsOnlyValuesTheBaseDeclares()

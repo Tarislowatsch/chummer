@@ -9,19 +9,9 @@ namespace Chummer.Tests.Consumption.Fields
 {
 	public class KitRatingTests
 	{
-		// - rating 1 on items without a rating: "(Rating 1)" in the tree, rating 1 in save and print
-		// - the fix changes what users see: it waits for the golden master
 		// - format: <kit> / <item>, copied from the failure output
 		private static readonly HashSet<string> KnownExcessRatings = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"Hacker Pack / AR Gloves",
-			"Hacker Pack / Holo Projector",
-			"Hacker Pack / Nanopaste Trodes",
-			"Hacker Pack / Satellite Link",
-			"Hacker Pack / Simrig",
-			"Hacker Pack / Skinlink",
-			"Matrix Power User / AR Gloves",
-			"Matrix Power User / Nanopaste Trodes",
 		};
 
 		private static bool IsDefect(KitRatings.Finding finding)
@@ -63,7 +53,6 @@ namespace Chummer.Tests.Consumption.Fields
 				{ "pack bioware: Fits", 20 },
 				{ "pack cyberware children: Fits", 8 },
 				{ "pack cyberware: Fits", 17 },
-				{ "pack gear: Exceeds", 8 },
 				{ "pack gear: Fits", 137 },
 				{ "pack programs: NoMaximum", 35 },
 				{ "pack vehicle gear: none", 0 },
