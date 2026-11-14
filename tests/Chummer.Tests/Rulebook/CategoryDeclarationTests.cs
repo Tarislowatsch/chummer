@@ -89,7 +89,7 @@ namespace Chummer.Tests.Rulebook
 		[Fact]
 		public void EveryCarrierOnlyWeaponHasACarrier()
 		{
-			string[] orphans = WeaponCarriers.Unreachable(WeaponCarriers.WeaponsInData(), WeaponCarriers.CarriesInData())
+			string[] orphans = WeaponCarriers.UnreachableInData()
 				.Select(weapon => weapon.Label)
 				.Distinct(StringComparer.Ordinal)
 				.ToArray();

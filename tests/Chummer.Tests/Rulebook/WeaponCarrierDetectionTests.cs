@@ -55,6 +55,42 @@ namespace Chummer.Tests.Rulebook
 			Assert.Empty(Unreachable(weapons, underbarrel, new WeaponCarriers.Carry(null, "gear addweapon", "Parent", null)));
 		}
 
+		[Fact]
+		public void AnOverrideTakesItsItemsBaseCarrierAwayFromThatPack()
+		{
+			WeaponCarriers.Weapon weapon = CarrierOnly("a", "Grenade", "gear addweapon");
+			WeaponCarriers.Carry carry = new WeaponCarriers.Carry(null, "gear addweapon", "Grenade", null, "gear.xml/gears/Kit");
+
+			Assert.Empty(WeaponCarriers.Unreachable(new[] { weapon }, new[] { carry }));
+			Assert.Single(WeaponCarriers.Unreachable(new[] { weapon }, new[] { carry },
+				new[] { WeaponCarriers.KeyOf("a", "gear.xml/gears/Kit") }));
+			Assert.Empty(WeaponCarriers.Unreachable(new[] { weapon }, new[] { carry },
+				new[] { WeaponCarriers.KeyOf("b", "gear.xml/gears/Kit") }));
+		}
+
+		[Fact]
+		public void AWeaponWithoutCategoryIsNotCarrierOnly()
+		{
+			Assert.False(WeaponCarriers.WeaponsIn("a", Xml.Parse(
+				"<chummer><weapons><weapon><name>Rewritten</name></weapon></weapons></chummer>")).Single().CarrierOnly);
+		}
+
+		[Theory]
+		[InlineData("custom", "Fresh")]
+		[InlineData("override", "Taken")]
+		public void LoadedPartKeepsOnlyWhatLoadMerges(string prefix, string kept)
+		{
+			PackFiles.PackFile file = new PackFiles.PackFile(@"C:\pack\" + prefix + "_test_weapons.xml", prefix,
+				new[] { "weapons.xml" });
+			System.Xml.XmlDocument pack = WeaponCarriers.LoadedPart(file, Xml.Parse("<chummer><weapons>"
+				+ "<weapon><name>Taken</name><underbarrel>Child</underbarrel></weapon>"
+				+ "<weapon><name>Fresh</name><underbarrel>Child</underbarrel></weapon></weapons></chummer>"),
+				Xml.Parse("<chummer><weapons><weapon><name>Taken</name></weapon></weapons></chummer>"));
+
+			Assert.Equal(new[] { kept },
+				pack.SelectNodes("/chummer/weapons/weapon/name").Cast<System.Xml.XmlNode>().Select(name => name.InnerText));
+		}
+
 		private static WeaponCarriers.Weapon CarrierOnly(string scope, string name, params string[] admittedBy)
 		{
 			return new WeaponCarriers.Weapon(scope, name, true, admittedBy);
