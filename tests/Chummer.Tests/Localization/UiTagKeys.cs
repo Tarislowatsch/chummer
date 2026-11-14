@@ -220,6 +220,12 @@ namespace Chummer.Tests.Localization
 			return Read(assignments, classBases, true).Where(assignment => !known.Contains(assignment.Value));
 		}
 
+		public static IEnumerable<Assignment> ReadTags(IEnumerable<Assignment> assignments,
+			IReadOnlyDictionary<string, string> classBases)
+		{
+			return Read(assignments, classBases, true);
+		}
+
 		public static IEnumerable<Assignment> Unread(IEnumerable<Assignment> assignments,
 			IReadOnlyDictionary<string, string> classBases)
 		{

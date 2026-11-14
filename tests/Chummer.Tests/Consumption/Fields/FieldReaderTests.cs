@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -173,8 +174,8 @@ namespace Chummer.Tests.Consumption.Fields
 				{ "conditionmonitor", "overflow physical stun threshold thresholdoffset" },
 				{ "livingpersona", "biofeedback firewall response signal system" },
 				{ "selectattribute", "affectbase attribute aug excludeattribute max min val" },
-				{ "selectskill", "applytorating max val" },
-				{ "selectskillgroup", "applytorating bonus" },
+				{ "selectskill", "@excludecategory @limittoskill @skillcategory @skillgroup applytorating max val" },
+				{ "selectskillgroup", "@excludecategory applytorating bonus" },
 				{ "swapskillattribute", "attribute" },
 			};
 
@@ -184,6 +185,87 @@ namespace Chummer.Tests.Consumption.Fields
 			PinReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
 				FieldReaders.HandlerBranches.ToDictionary(branch => branch.Handler, branch => Sorted(branch.Fields),
 					StringComparer.Ordinal));
+		}
+
+		// - read forms the unread check depends on: a lost one would let a repeat or a chain go green
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerReadForms =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "selectattribute every copy", "attribute excludeattribute" },
+				{ "selectskill chain 1", "@skillgroup [text skillgroup] @skillcategory [text skillcategory]"
+					+ " @excludecategory [text excludecategory] @limittoskill [text limittoskill]" },
+				{ "swapskillattribute every copy", "attribute" },
+			};
+
+		[Fact]
+		public void EachIndexedHandlerReadsInTheMeasuredForms()
+		{
+			PinReport.AssertEqual("Read forms per handler", MeasuredHandlerReadForms,
+				FieldReaders.HandlerBranches
+					.Where(branch => branch.EveryCopy.Count > 0)
+					.Select(branch => (Key: branch.Handler + " every copy", Value: Sorted(branch.EveryCopy)))
+					.Concat(FieldReaders.HandlerBranches.SelectMany(branch => branch.Chains
+						.Select((chain, index) => (Key: branch.Handler + " chain " + (index + 1), Value: string.Join(" ", chain)))))
+					.ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal));
+		}
+
+		// - the data shapes the read forms guard: an extractor that drops them would hide every finding
+		private static readonly IReadOnlyDictionary<string, int> MeasuredHandlerShapes =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "selectattribute/attribute (repeated)", 6 },
+				{ "selectattribute/excludeattribute (repeated)", 12 },
+				{ "selectskill/@excludecategory", 5 },
+				{ "selectskill/@skillcategory", 2 },
+				{ "selectskill/@skillgroup", 2 },
+				{ "selectskillgroup/@excludecategory", 2 },
+			};
+
+		[Fact]
+		public void HandlerBlocksHaveTheMeasuredAttributesAndRepeats()
+		{
+			PinReport.AssertEqual("Attributes and repeated children per handler", MeasuredHandlerShapes,
+				FieldReaders.AllHandlerFields
+					.Where(field => field.Repeated || field.Tag.StartsWith(FieldReaders.AttributePrefix, StringComparison.Ordinal))
+					.GroupBy(field => field.Handler + "/" + field.Tag + (field.Repeated ? " (repeated)" : ""),
+						StringComparer.Ordinal)
+					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
+		}
+
+		// - deliberately no allowlist: no block text names an earlier link today
+		[Fact]
+		public void NoChainPicksAnAbsentAttribute()
+		{
+			string[] crashing = FieldReaders.ChainsPickingAnAbsentAttribute(FieldReaders.AllHandlerFields,
+				FieldReaders.HandlerBranches).ToArray();
+
+			FailureReport.AssertNone("These blocks make the chain read a missing attribute", crashing);
+		}
+
+		// - a text test outside a chain would decide a branch the unread check never models
+		[Fact]
+		public void EveryTextTestIsAChainLink()
+		{
+			string[] unlinked = FieldReaders.HandlerBranches
+				.SelectMany(branch => branch.UnlinkedTextTests.Select(site => branch.Handler + " " + site))
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("The chain scan misses these OuterXml tests", unlinked);
+		}
+
+		// - a text test in a handler outside IndexedHandlers would escape the check above
+		[Fact]
+		public void EveryTextTestInTheConsumerLiesInAnIndexedBranch()
+		{
+			HashSet<string> covered = new HashSet<string>(
+				FieldReaders.HandlerBranches.SelectMany(branch => branch.TextTestSites), StringComparer.Ordinal);
+
+			string[] outside = FieldReaders.TextTestSitesIn(BonusVocabulary.HandlerConsumerFile,
+					SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source)
+				.Where(site => !covered.Contains(site))
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("These OuterXml tests lie outside every indexed handler branch", outside);
 		}
 
 		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =

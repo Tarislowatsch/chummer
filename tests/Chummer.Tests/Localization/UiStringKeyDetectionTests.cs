@@ -21,6 +21,23 @@ namespace Chummer.Tests.Localization
 				UiStringKeys.EntriesMissingKeyOrText(EnglishStrings.EntriesIn(language)));
 		}
 
+		[Fact]
+		public void RepeatedKeysCountsCopiesAndTheirTexts()
+		{
+			XmlDocument language = Xml.Parse("<chummer><strings>"
+				+ "<string><key>A</key><text>a</text></string>"
+				+ "<string><key>B</key><text>b</text></string>"
+				+ "<string><key>A</key><text>a</text></string>"
+				+ "<string><key>B</key><text>other</text></string>"
+				+ "<string><text>keyless</text></string>"
+				+ "<string><text>keyless</text></string>"
+				+ "<string><key>C</key><text>c</text></string>"
+				+ "</strings></chummer>");
+
+			Assert.Equal(new[] { "A 2 1", "B 2 2" }, UiStringKeys.RepeatedKeys(EnglishStrings.EntriesIn(language))
+				.Select(repeat => repeat.Key + " " + repeat.Count + " " + repeat.DistinctTexts));
+		}
+
 		private static string[] Arguments(string fileName, params string[] lines)
 		{
 			return UiStringKeys.CallsIn(fileName, SourceLines.Of(lines)).Select(call => call.Argument).ToArray();
