@@ -24,24 +24,72 @@ namespace Chummer.Tests.Rulebook
 			"critterpowers.xml/powers/Dracoforms",
 			"gear.xml/gears/Mook",
 			"gear.xml/gears/Transgenic",
-			"weapons.xml/weapons/Cyberware",
-			"weapons.xml/weapons/Cyberware Blades",
-			"weapons.xml/weapons/Cyberware Clubs",
-			"weapons.xml/weapons/Cyberware Exotic Melee Weapons",
-			"weapons.xml/weapons/Cyberware Exotic Ranged Weapons",
-			"weapons.xml/weapons/Cyberware Grenade Launchers",
-			"weapons.xml/weapons/Cyberware Heavy Pistols",
-			"weapons.xml/weapons/Cyberware Holdouts",
-			"weapons.xml/weapons/Cyberware Light Pistols",
-			"weapons.xml/weapons/Cyberware Machine Pistols",
-			"weapons.xml/weapons/Cyberware Shotguns",
-			"weapons.xml/weapons/Cyberware Submachine Guns",
-			"weapons.xml/weapons/Cyberware Tasers",
-			"weapons.xml/weapons/Cyberware Throwing Weapons",
-			"weapons.xml/weapons/Gear",
-			"weapons.xml/weapons/Quality",
-			"weapons.xml/weapons/Underbarrel Weapons",
 		};
+
+		// - every exempted category must still be used and still be undeclared
+		[Fact]
+		public void CarrierOnlyCategoriesAreUsedAndUndeclared()
+		{
+			HashSet<string> used = new HashSet<string>(StringComparer.Ordinal);
+			HashSet<string> declared = new HashSet<string>(StringComparer.Ordinal);
+			foreach (object[] testCase in CategoryDeclarations.CategoryKeyedCollections())
+			{
+				string xmlPath = (string)testCase[0];
+				string collectionName = (string)testCase[1];
+				CategoryDeclarations.CategoryContract contract = CategoryDeclarations.ContractFor(xmlPath, collectionName);
+				foreach (CategoryDeclarations.CategoryUsage usage in contract.Usages)
+					used.Add(Entry(xmlPath, collectionName, usage.Category));
+				foreach (string category in contract.DeclaredCategories)
+					declared.Add(Entry(xmlPath, collectionName, category));
+			}
+
+			string[] stale = CategoryDeclarations.CarrierOnlyCategoryKeys()
+				.Where(key => !used.Contains(key) || declared.Contains(key))
+				.OrderBy(key => key, StringComparer.Ordinal)
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("These carrier-only categories are declared or no longer used", stale);
+		}
+
+		// - in a carrier-only category, yet no carrier adds them: unreachable
+		// - fixing one is a data change for its own ticket: delete the line there
+		private static readonly HashSet<string> KnownWeaponsWithoutCarrier = new HashSet<string>(StringComparer.Ordinal)
+		{
+			"Grenade: Smoke (2050)",
+			"Minigrenade: Smoke (2050)",
+			"Mortar Round: Anti-Aircraft",
+			"Mortar Round: Rocket Assist",
+		};
+
+		// - addweapon readers: clsEquipment.cs:136, :2484 (cyberware and bioware), :9764, clsUnique.cs:1074
+		// - underbarrel reader: clsEquipment.cs:4325
+		[Fact]
+		public void EveryCarrierOnlyWeaponHasACarrier()
+		{
+			HashSet<string> carried = new HashSet<string>(StringComparer.Ordinal);
+			foreach (string file in new[] { "armor.xml", "bioware.xml", "cyberware.xml", "gear.xml", "qualities.xml" })
+				foreach (System.Xml.XmlNode node in Xml.Load(Path.Combine(DataPaths.ChummerDataDir, file)).SelectNodes("//addweapon"))
+					carried.Add(node.InnerText);
+			string weaponsPath = Path.Combine(DataPaths.ChummerDataDir, "weapons.xml");
+			foreach (System.Xml.XmlNode node in Xml.Load(weaponsPath).SelectNodes("//underbarrel"))
+				carried.Add(node.InnerText);
+
+			string[] orphans = CategoryDeclarations.ContractFor(weaponsPath, "weapons").Usages
+				.Where(usage => CategoryDeclarations.IsCarrierOnly("weapons.xml", "weapons", usage.Category))
+				.Select(usage => usage.ItemName)
+				.Where(name => !carried.Contains(name))
+				.ToArray();
+
+			string[] differences = orphans.Where(name => !KnownWeaponsWithoutCarrier.Contains(name))
+				.Select(name => "no carrier adds: " + name)
+				.Concat(KnownWeaponsWithoutCarrier.Where(name => !orphans.Contains(name))
+					.Select(name => "carried now or gone, drop it from the list: " + name))
+				.OrderBy(line => line, StringComparer.Ordinal)
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("Carrier-only weapons and " + nameof(KnownWeaponsWithoutCarrier) + " disagree",
+				differences);
+		}
 
 		[Theory]
 		[MemberData(nameof(CategoryDeclarations.CategoryKeyedCollections), MemberType = typeof(CategoryDeclarations))]
