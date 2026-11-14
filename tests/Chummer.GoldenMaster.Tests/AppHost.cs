@@ -41,6 +41,10 @@ namespace Chummer.GoldenMaster.Tests
 			int rc = RegCreateKeyEx(HKEY_CURRENT_USER, SandboxKey, 0, null, REG_OPTION_VOLATILE, KEY_ALL_ACCESS, IntPtr.Zero, out sandbox, out disposition);
 			if (rc != 0)
 				throw new InvalidOperationException("RegCreateKeyEx failed with " + rc + ".");
+			// An aborted run can leave child keys that GlobalOptions would read.
+			rc = RegDeleteTree(sandbox, null);
+			if (rc != 0)
+				throw new InvalidOperationException("RegDeleteTree failed with " + rc + ".");
 			rc = RegOverridePredefKey(HKEY_CURRENT_USER, sandbox);
 			if (rc != 0)
 				throw new InvalidOperationException("RegOverridePredefKey failed with " + rc + ".");
@@ -67,6 +71,9 @@ namespace Chummer.GoldenMaster.Tests
 
 		[DllImport("advapi32.dll")]
 		private static extern int RegCloseKey(IntPtr hKey);
+
+		[DllImport("advapi32.dll", CharSet = CharSet.Unicode)]
+		private static extern int RegDeleteTree(IntPtr hKey, string lpSubKey);
 
 		[DllImport("advapi32.dll", CharSet = CharSet.Unicode)]
 		private static extern int RegCreateKeyEx(UIntPtr hKey, string lpSubKey, int reserved, string lpClass, int dwOptions, int samDesired, IntPtr lpSecurityAttributes, out IntPtr phkResult, out int lpdwDisposition);

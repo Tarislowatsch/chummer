@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using Microsoft.Win32;
 using Xunit;
@@ -38,7 +39,7 @@ namespace Chummer.GoldenMaster.Tests
 		}
 
 		// - a user who never changed a setting has no Chummer key
-		// - cannot catch CreateSubKey: the sandbox refuses non-volatile keys
+		// - blind to a CreateSubKey regression: the catch hides the sandbox's refusal
 		[Fact]
 		public void DeleteFromCurrentUserToleratesAMissingKey()
 		{
@@ -63,7 +64,7 @@ namespace Chummer.GoldenMaster.Tests
 			string[] mentions = files
 				.Select(path => new { Name = Path.GetFileName(path), Text = File.ReadAllText(path) })
 				.SelectMany(file => ObsoleteRegistryValues.Names
-					.Where(name => file.Text.Contains("\"" + name + "\""))
+					.Where(name => file.Text.IndexOf("\"" + name + "\"", StringComparison.OrdinalIgnoreCase) >= 0)
 					.Select(name => file.Name + ": " + name))
 				.ToArray();
 			Assert.Empty(mentions);
