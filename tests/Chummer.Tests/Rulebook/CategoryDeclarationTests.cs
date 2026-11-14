@@ -80,7 +80,7 @@ namespace Chummer.Tests.Rulebook
 			"Mortar Round: Rocket Assist",
 		};
 
-		// - carriers come from the reference rules: whatever adds a weapon by name, kits and vehicles included
+		// - carriers: every reference rule that adds a weapon by name, vehicles and kits included
 		private static readonly CrossFileReferences.ReferenceRule[] CarrierRules = CrossFileReferences.Rules
 			.Where(rule => rule.Targets.Any(target => target.FileName == "weapons.xml"
 				&& target.ItemXPath.StartsWith("/chummer/weapons/weapon", StringComparison.Ordinal)
