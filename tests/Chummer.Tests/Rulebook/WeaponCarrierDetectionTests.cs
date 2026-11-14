@@ -55,6 +55,21 @@ namespace Chummer.Tests.Rulebook
 			Assert.Empty(Unreachable(weapons, underbarrel, new WeaponCarriers.Carry(null, "gear addweapon", "Parent", null)));
 		}
 
+		// - the child comes first: one pass over the list cannot reach it
+		[Fact]
+		public void AChildListedBeforeItsParentIsReachedOnALaterPass()
+		{
+			WeaponCarriers.Weapon[] weapons =
+			{
+				CarrierOnly(null, "Child", "weapon underbarrel"),
+				CarrierOnly(null, "Parent", "gear addweapon"),
+			};
+
+			Assert.Empty(Unreachable(weapons,
+				new WeaponCarriers.Carry(null, "weapon underbarrel", "Child", "Parent"),
+				new WeaponCarriers.Carry(null, "gear addweapon", "Parent", null)));
+		}
+
 		[Fact]
 		public void AnOverrideTakesItsItemsBaseCarrierAwayFromThatPack()
 		{
