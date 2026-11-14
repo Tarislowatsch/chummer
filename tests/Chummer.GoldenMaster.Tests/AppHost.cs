@@ -46,12 +46,27 @@ namespace Chummer.GoldenMaster.Tests
 				throw new InvalidOperationException("RegOverridePredefKey failed with " + rc + ".");
 		}
 
+		// - the only way to give the sandbox a child key: see IsolateCurrentUserRegistry
+		// - intermediate keys are created volatile as well
+		public static void CreateVolatileCurrentUserKey(string subKey)
+		{
+			IntPtr key;
+			int disposition;
+			int rc = RegCreateKeyEx(HKEY_CURRENT_USER, subKey, 0, null, REG_OPTION_VOLATILE, KEY_ALL_ACCESS, IntPtr.Zero, out key, out disposition);
+			if (rc != 0)
+				throw new InvalidOperationException("RegCreateKeyEx failed with " + rc + ".");
+			RegCloseKey(key);
+		}
+
 		private static readonly UIntPtr HKEY_CURRENT_USER = new UIntPtr(0x80000001u);
 		private const int REG_OPTION_VOLATILE = 1;
 		private const int KEY_ALL_ACCESS = 0xF003F;
 
 		[DllImport("advapi32.dll")]
 		private static extern int RegOverridePredefKey(UIntPtr hKey, IntPtr hNewHKey);
+
+		[DllImport("advapi32.dll")]
+		private static extern int RegCloseKey(IntPtr hKey);
 
 		[DllImport("advapi32.dll", CharSet = CharSet.Unicode)]
 		private static extern int RegCreateKeyEx(UIntPtr hKey, string lpSubKey, int reserved, string lpClass, int dwOptions, int samDesired, IntPtr lpSecurityAttributes, out IntPtr phkResult, out int lpdwDisposition);
