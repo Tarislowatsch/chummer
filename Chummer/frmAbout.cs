@@ -101,10 +101,5 @@ namespace Chummer
 			}
 		}
 		#endregion
-
-		private void cmdDonate_Click(object sender, EventArgs e)
-		{
-			System.Diagnostics.Process.Start("https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=LG855DVUT8FDU");
-		}
 	}
 }

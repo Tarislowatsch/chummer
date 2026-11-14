@@ -8,7 +8,6 @@ namespace Chummer
 {
 	public partial class frmMain : Form
 	{
-		private frmOmae _frmOmae;
 		private frmDiceRoller _frmRoller;
 
 		#region Control Events
@@ -115,16 +114,6 @@ namespace Chummer
 		{
 			frmAbout frmShowAbout = new frmAbout();
 			frmShowAbout.ShowDialog(this);
-		}
-
-		private void contentsToolStripMenuItem_Click(object sender, EventArgs e)
-		{
-			System.Diagnostics.Process.Start("http://www.chummergen.com/chummer/wiki/");
-		}
-
-		private void mnuHelpDumpshock_Click(object sender, EventArgs e)
-		{
-			System.Diagnostics.Process.Start("http://forums.dumpshock.com/index.php?showtopic=36737");
 		}
 
 		private void mnuFilePrintMultiple_Click(object sender, EventArgs e)
@@ -337,21 +326,6 @@ namespace Chummer
 				// No limit on the number of Dice Roller windows, so just create a new one.
 				frmDiceRoller frmRoller = new frmDiceRoller(this);
 				frmRoller.Show();
-			}
-		}
-
-		private void mnuToolsOmae_Click(object sender, EventArgs e)
-		{
-			// Only a single instance of Omae can be open, so either find the current instance and focus on it, or create a new one.
-			if (_frmOmae == null)
-			{
-				frmOmae frmOmaeOnline = new frmOmae(this);
-				_frmOmae = frmOmaeOnline;
-				frmOmaeOnline.Show();
-			}
-			else
-			{
-				_frmOmae.Focus();
 			}
 		}
 
@@ -798,21 +772,6 @@ namespace Chummer
 		#endregion
 
 		#region Application Properties
-		/// <summary>
-		/// The frmOmae window being used by the application.
-		/// </summary>
-		public frmOmae OmaeWindow
-		{
-			get
-			{
-				return _frmOmae;
-			}
-			set
-			{
-				_frmOmae = value;
-			}
-		}
-
 		/// <summary>
 		/// The frmDiceRoller window being used by the application.
 		/// </summary>
