@@ -2,7 +2,7 @@
 <chummer>
 	<vehicles>
 		<vehicle>
-			<name>Ford Americar (Sedan, ARN)</name>
+			<name>Ford Americar (Sedan) (ARN)</name>
 			<category>Cars</category>
 			<handling>0</handling>
 			<accel>15/30</accel>
