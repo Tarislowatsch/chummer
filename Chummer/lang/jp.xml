@@ -615,16 +615,8 @@
 			<text>すべて閉じる (&amp;L)</text>
 		</string>
 		<string>
-			<key>Menu_Main_ChummerWiki</key>
-			<text>Chummer Wiki</text>
-		</string>
-		<string>
 			<key>Menu_Main_RevisionHistory</key>
 			<text>修正履歴 (&amp;R)</text>
-		</string>
-		<string>
-			<key>Menu_Main_DumpshockThread</key>
-			<text>&amp;Dumpshock Thread</text>
 		</string>
 		<string>
 			<key>Menu_Main_About</key>

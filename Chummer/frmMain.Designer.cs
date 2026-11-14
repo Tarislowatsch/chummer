@@ -70,8 +70,6 @@
 			this.newWindowToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.closeAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.helpMenu = new System.Windows.Forms.ToolStripMenuItem();
-			this.contentsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
 			this.mnuHelpRevisionHistory = new System.Windows.Forms.ToolStripMenuItem();
 			this.aboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStrip = new System.Windows.Forms.ToolStrip();
@@ -85,7 +83,6 @@
 			this.helpToolStripButton = new System.Windows.Forms.ToolStripButton();
 			this.toolTip = new System.Windows.Forms.ToolTip(this.components);
 			this.tabForms = new System.Windows.Forms.TabControl();
-			this.mnuHelpDumpshock = new System.Windows.Forms.ToolStripMenuItem();
 			this.menuStrip.SuspendLayout();
 			this.toolStrip.SuspendLayout();
 			this.SuspendLayout();
@@ -490,31 +487,13 @@
 			// helpMenu
 			// 
 			this.helpMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.contentsToolStripMenuItem,
-            this.toolStripSeparator8,
             this.mnuHelpRevisionHistory,
-            this.mnuHelpDumpshock,
             this.aboutToolStripMenuItem});
 			this.helpMenu.Name = "helpMenu";
 			this.helpMenu.Size = new System.Drawing.Size(44, 20);
 			this.helpMenu.Tag = "Menu_Main_Help";
 			this.helpMenu.Text = "&Help";
 			this.helpMenu.DropDownOpening += new System.EventHandler(this.Menu_DropDownOpening);
-			// 
-			// contentsToolStripMenuItem
-			// 
-			this.contentsToolStripMenuItem.Image = global::Chummer.Properties.Resources.world_go;
-			this.contentsToolStripMenuItem.Name = "contentsToolStripMenuItem";
-			this.contentsToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.F1)));
-			this.contentsToolStripMenuItem.Size = new System.Drawing.Size(200, 22);
-			this.contentsToolStripMenuItem.Tag = "Menu_Main_ChummerWiki";
-			this.contentsToolStripMenuItem.Text = "Chummer Wiki";
-			this.contentsToolStripMenuItem.Click += new System.EventHandler(this.contentsToolStripMenuItem_Click);
-			// 
-			// toolStripSeparator8
-			// 
-			this.toolStripSeparator8.Name = "toolStripSeparator8";
-			this.toolStripSeparator8.Size = new System.Drawing.Size(197, 6);
 			// 
 			// mnuHelpRevisionHistory
 			// 
@@ -636,14 +615,6 @@
 			this.tabForms.Visible = false;
 			this.tabForms.SelectedIndexChanged += new System.EventHandler(this.tabForms_SelectedIndexChanged);
 			// 
-			// mnuHelpDumpshock
-			// 
-			this.mnuHelpDumpshock.Name = "mnuHelpDumpshock";
-			this.mnuHelpDumpshock.Size = new System.Drawing.Size(200, 22);
-			this.mnuHelpDumpshock.Tag = "Menu_Main_DumpshockThread";
-			this.mnuHelpDumpshock.Text = "&Dumpshock Thread";
-			this.mnuHelpDumpshock.Click += new System.EventHandler(this.mnuHelpDumpshock_Click);
-			// 
 			// frmMain
 			// 
 			this.AllowDrop = true;
@@ -682,7 +653,6 @@
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
 		private System.Windows.Forms.ToolStripSeparator mnuMURSep;
 		private System.Windows.Forms.ToolStripMenuItem printSetupToolStripMenuItem;
-		private System.Windows.Forms.ToolStripSeparator toolStripSeparator8;
 		private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem fileMenu;
 		private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
@@ -696,7 +666,6 @@
 		private System.Windows.Forms.ToolStripMenuItem newWindowToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem closeAllToolStripMenuItem;
 		private System.Windows.Forms.ToolStripMenuItem helpMenu;
-		private System.Windows.Forms.ToolStripMenuItem contentsToolStripMenuItem;
 		private System.Windows.Forms.ToolStripButton newToolStripButton;
 		private System.Windows.Forms.ToolStripButton openToolStripButton;
 		private System.Windows.Forms.ToolStripButton tsbPrint;
@@ -730,7 +699,6 @@
 		private System.Windows.Forms.TabControl tabForms;
 		private System.Windows.Forms.ToolStripMenuItem mnuToolsDiceRoller;
 		private System.Windows.Forms.ToolStripSeparator toolStripSeparator5;
-		private System.Windows.Forms.ToolStripMenuItem mnuHelpDumpshock;
 	}
 }
 

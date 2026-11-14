@@ -609,10 +609,6 @@
 			<text>&amp;Fermer toutes les fenêtres</text>
 		</string>
 		<string>
-			<key>Menu_Main_ChummerWiki</key>
-			<text>&amp;Wiki de Chummer (anglais)</text>
-		</string>
-		<string>
 			<key>Menu_Main_RevisionHistory</key>
 			<text>&amp;Notes de versions (en anglais)</text>
 		</string>

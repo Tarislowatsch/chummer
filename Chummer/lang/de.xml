@@ -552,10 +552,6 @@
 			<text>Alle Schließen</text>
 		</string>
 		<string>
-			<key>Menu_Main_ChummerWiki</key>
-			<text>Chummer Wiki</text>
-		</string>
-		<string>
 			<key>Menu_Main_RevisionHistory</key>
 			<text>Revision History</text>
 		</string>
@@ -6051,10 +6047,6 @@
 		<string>
 			<key>Label_Options_DefaultCharacterSheet</key>
 			<text>Standard Charakaterbogen:</text>
-		</string>
-		<string>
-			<key>Menu_Main_DumpshockThread</key>
-			<text>&amp;Zum offiziellem Forum</text>
 		</string>
 		<!-- Version 449 -->
 		<string>

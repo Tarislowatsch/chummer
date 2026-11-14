@@ -37,7 +37,6 @@
 			this.tableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
 			this.logoPictureBox = new System.Windows.Forms.PictureBox();
 			this.txtDisclaimer = new System.Windows.Forms.TextBox();
-			this.cmdDonate = new System.Windows.Forms.Button();
 			this.tableLayoutPanel.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.logoPictureBox)).BeginInit();
 			this.SuspendLayout();
@@ -127,7 +126,6 @@
 			this.tableLayoutPanel.Controls.Add(this.textBoxDescription, 1, 4);
 			this.tableLayoutPanel.Controls.Add(this.txtDisclaimer, 1, 5);
 			this.tableLayoutPanel.Controls.Add(this.okButton, 1, 7);
-			this.tableLayoutPanel.Controls.Add(this.cmdDonate, 1, 6);
 			this.tableLayoutPanel.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.tableLayoutPanel.Location = new System.Drawing.Point(9, 9);
 			this.tableLayoutPanel.Name = "tableLayoutPanel";
@@ -169,17 +167,6 @@
 			this.txtDisclaimer.TabIndex = 25;
 			this.txtDisclaimer.Text = "Disclaimer";
 			// 
-			// cmdDonate
-			// 
-			this.cmdDonate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-			this.cmdDonate.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-			this.cmdDonate.Location = new System.Drawing.Point(496, 324);
-			this.cmdDonate.Name = "cmdDonate";
-			this.cmdDonate.Size = new System.Drawing.Size(75, 23);
-			this.cmdDonate.TabIndex = 26;
-			this.cmdDonate.Text = "Donate";
-			this.cmdDonate.Click += new System.EventHandler(this.cmdDonate_Click);
-			// 
 			// frmAbout
 			// 
 			this.AcceptButton = this.okButton;
@@ -216,7 +203,6 @@
 		private System.Windows.Forms.TableLayoutPanel tableLayoutPanel;
 		private System.Windows.Forms.PictureBox logoPictureBox;
 		private System.Windows.Forms.TextBox txtDisclaimer;
-		private System.Windows.Forms.Button cmdDonate;
 
 	}
 }

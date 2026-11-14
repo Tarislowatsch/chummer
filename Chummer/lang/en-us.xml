@@ -613,16 +613,8 @@
 			<text>C&amp;lose All</text>
 		</string>
 		<string>
-			<key>Menu_Main_ChummerWiki</key>
-			<text>Chummer Wiki</text>
-		</string>
-		<string>
 			<key>Menu_Main_RevisionHistory</key>
 			<text>&amp;Revision History</text>
-		</string>
-		<string>
-			<key>Menu_Main_DumpshockThread</key>
-			<text>&amp;Dumpshock Thread</text>
 		</string>
 		<string>
 			<key>Menu_Main_About</key>
