@@ -9456,6 +9456,7 @@
 		<gear>
 			<name>Mortar Round: Anti-Aircraft</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>20F</avail>
 			<addweapon>Mortar Round: Anti-Aircraft</addweapon>
@@ -9467,6 +9468,7 @@
 		<gear>
 			<name>Mortar Round: Anti-Tank</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>20F</avail>
 			<addweapon>Mortar Round: Anti-Tank</addweapon>
@@ -9478,6 +9480,7 @@
 		<gear>
 			<name>Mortar Round: Cluster</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>12F</avail>
 			<addweapon>Mortar Round: Cluster</addweapon>
@@ -9489,6 +9492,7 @@
 		<gear>
 			<name>Mortar Round: Drone</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>8F</avail>
 			<addweapon>Mortar Round: Drone</addweapon>
@@ -9500,6 +9504,7 @@
 		<gear>
 			<name>Mortar Round: ECM</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>10</rating>
 			<avail>10F</avail>
 			<addweapon>Mortar Round: ECM</addweapon>
@@ -9509,19 +9514,9 @@
 			<page>158</page>
 		</gear>
 		<gear>
-			<name>Mortar Round: Guided</name>
-			<category>Ammunition</category>
-			<rating>0</rating>
-			<avail>2</avail>
-			<addweapon>Mortar Round: Guided</addweapon>
-			<costfor>1</costfor>
-			<cost>500</cost>
-			<source>WAR</source>
-			<page>158</page>
-		</gear>
-		<gear>
 			<name>Mortar Round: Mine</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>16F</avail>
 			<addweapon>Mortar Round: Mine</addweapon>
@@ -9533,6 +9528,7 @@
 		<gear>
 			<name>Mortar Round: Sensor</name>
 			<category>Ammunition</category>
+			<addoncategory>Mortar Heads</addoncategory>
 			<rating>0</rating>
 			<avail>10F</avail>
 			<addweapon>Mortar Round: Sensor</addweapon>

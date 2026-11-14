@@ -12198,11 +12198,6 @@
 				<translate>Mörsergeschoss: ECM</translate>
 			</gear>
 			<gear>
-				<name>Mortar Round: Guided</name>
-				<page>175</page>
-				<translate>Mörsergeschoss: Gelenkt</translate>
-			</gear>
-			<gear>
 				<name>Mortar Round: Mine</name>
 				<page>175</page>
 				<translate>Mörsergeschoss: Mine</translate>
@@ -30628,11 +30623,6 @@
 				<name>Mortar Round: ECM</name>
 				<page>175</page>
 				<translate>Mörsergeschoss: ECM</translate>
-			</weapon>
-			<weapon>
-				<name>Mortar Round: Guided</name>
-				<page>175</page>
-				<translate>Mörsergeschoss: Gelenkt</translate>
 			</weapon>
 			<weapon>
 				<name>Mortar Round: Mine</name>
