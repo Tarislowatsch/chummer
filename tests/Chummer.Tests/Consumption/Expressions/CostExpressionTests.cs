@@ -25,7 +25,7 @@ namespace Chummer.Tests.Consumption.Expressions
 				KnownFailuresFor(id));
 		}
 
-		// - no allowlist: the known failures above are base entries
+		// - no allowlist: no pack cost fails today
 		[Theory]
 		[MemberData(nameof(ExpressionChecks.PackRuleIds), "cost", MemberType = typeof(ExpressionChecks))]
 		public void EveryPackCostParsesInItsCalculator(string packPath, string id)
