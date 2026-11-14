@@ -191,7 +191,8 @@ namespace Chummer.Tests.Consumption.Fields
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				{ "selectattribute every copy", "attribute excludeattribute" },
-				{ "selectskill chain 1", "@skillgroup @skillcategory @excludecategory @limittoskill" },
+				{ "selectskill chain 1", "@skillgroup [text skillgroup] @skillcategory [text skillcategory]"
+					+ " @excludecategory [text excludecategory] @limittoskill [text limittoskill]" },
 				{ "swapskillattribute every copy", "attribute" },
 			};
 
@@ -228,6 +229,27 @@ namespace Chummer.Tests.Consumption.Fields
 					.GroupBy(field => field.Handler + "/" + field.Tag + (field.Repeated ? " (repeated)" : ""),
 						StringComparer.Ordinal)
 					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
+		}
+
+		// - deliberately no allowlist: no block text names an earlier link today
+		[Fact]
+		public void NoChainPicksAnAbsentAttribute()
+		{
+			string[] crashing = FieldReaders.ChainsPickingAnAbsentAttribute(FieldReaders.AllHandlerFields,
+				FieldReaders.HandlerBranches).ToArray();
+
+			FailureReport.AssertNone("These blocks make the chain read a missing attribute", crashing);
+		}
+
+		// - a text test outside a chain would decide a branch the unread check never models
+		[Fact]
+		public void EveryTextTestIsAChainLink()
+		{
+			string[] unlinked = FieldReaders.HandlerBranches
+				.SelectMany(branch => branch.UnlinkedTextTests.Select(site => branch.Handler + " " + site))
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("The chain scan misses these OuterXml tests", unlinked);
 		}
 
 		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =

@@ -360,7 +360,7 @@ namespace Chummer.Tests.Consumption.Fields
 		public sealed class HandlerField
 		{
 			public HandlerField(string file, string handler, BlockReach reach, string tag, string value,
-				bool repeated = false, IReadOnlyCollection<string> blockAttributes = null)
+				bool repeated = false, IReadOnlyCollection<string> blockAttributes = null, string blockText = "")
 			{
 				File = file;
 				Handler = handler;
@@ -369,6 +369,7 @@ namespace Chummer.Tests.Consumption.Fields
 				Value = value;
 				Repeated = repeated;
 				BlockAttributes = blockAttributes ?? new string[0];
+				BlockText = blockText;
 			}
 
 			public string File { get; }
@@ -388,6 +389,9 @@ namespace Chummer.Tests.Consumption.Fields
 
 			// - every attribute of the block, for the else-if chains
 			public IReadOnlyCollection<string> BlockAttributes { get; }
+
+			// - the block's OuterXml: what a text test in a chain searches
+			public string BlockText { get; }
 
 			public string Entry => File + " " + Handler + "/" + Tag
 				+ (Reach == BlockReach.First ? "" : " (" + Reach + ")")
@@ -411,17 +415,46 @@ namespace Chummer.Tests.Consumption.Fields
 						string[] attributes = block.Attributes.Cast<XmlAttribute>()
 							.Select(attribute => AttributePrefix + attribute.LocalName).ToArray();
 						HashSet<string> seen = new HashSet<string>(StringComparer.Ordinal);
+						string text = block.OuterXml;
 						return block.Attributes.Cast<XmlAttribute>()
 							.Select(attribute => new HandlerField(file, handler, reach, AttributePrefix + attribute.LocalName,
-								attribute.Value, false, attributes))
+								attribute.Value, false, attributes, text))
 							.Concat(block.ChildNodes.Cast<XmlNode>()
 								.Select(node => (Tag: TagOf(node), node.InnerText, Element: node is XmlElement))
 								.Where(child => child.Tag != null)
 								.Select(child => new HandlerField(file, handler, reach, child.Tag, child.InnerText,
-									child.Element && !seen.Add(child.Tag), attributes)))
+									child.Element && !seen.Add(child.Tag), attributes, text)))
 							.ToArray();
 					}))
 				.ToArray();
+		}
+
+		// One link of an if/else-if chain: the attribute its body reads and what its condition tests.
+		public sealed class ChainLink
+		{
+			public ChainLink(string attribute, string textTest)
+			{
+				Attribute = attribute;
+				TextTest = textTest;
+			}
+
+			public string Attribute { get; }
+
+			// - the OuterXml.Contains literal: any text in the block passes, not just the attribute
+			// - null for any other condition, taken as "the attribute is present"
+			public string TextTest { get; }
+
+			public bool Passes(HandlerField field)
+			{
+				return TextTest != null
+					? field.BlockText.Contains(TextTest)
+					: field.BlockAttributes.Contains(Attribute);
+			}
+
+			public override string ToString()
+			{
+				return Attribute + (TextTest != null ? " [text " + TextTest + "]" : "");
+			}
 		}
 
 		// One handler's branch in CreateImprovements: its literals and the fields its indexer reads.
@@ -429,14 +462,16 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			public HandlerBranch(string handler, IReadOnlyList<NameLookups.Literal> literals,
 				IReadOnlyCollection<string> fields, IReadOnlyDictionary<string, IReadOnlyCollection<string>> dispatch,
-				IReadOnlyCollection<string> everyCopy = null, IReadOnlyList<IReadOnlyList<string>> chains = null)
+				IReadOnlyCollection<string> everyCopy = null, IReadOnlyList<IReadOnlyList<ChainLink>> chains = null,
+				IReadOnlyList<string> unlinkedTextTests = null)
 			{
 				Handler = handler;
 				Literals = literals;
 				Fields = fields;
 				Dispatch = dispatch;
 				EveryCopy = everyCopy ?? new string[0];
-				Chains = chains ?? new IReadOnlyList<string>[0];
+				Chains = chains ?? new IReadOnlyList<ChainLink>[0];
+				UnlinkedTextTests = unlinkedTextTests ?? new string[0];
 			}
 
 			public string Handler { get; }
@@ -452,8 +487,11 @@ namespace Chummer.Tests.Consumption.Fields
 			// - fields read by SelectNodes: the only form that reaches a repeated child
 			public IReadOnlyCollection<string> EveryCopy { get; }
 
-			// - attributes read in one if/else-if chain, in order: only the first present one counts
-			public IReadOnlyList<IReadOnlyList<string>> Chains { get; }
+			// - links of one if/else-if chain, in order: only the first that passes is read
+			public IReadOnlyList<IReadOnlyList<ChainLink>> Chains { get; }
+
+			// - OuterXml lines no link took: a text test the chain scan missed
+			public IReadOnlyList<string> UnlinkedTextTests { get; }
 		}
 
 		// - public so the detection tests can drive it with hand-built source
@@ -470,11 +508,11 @@ namespace Chummer.Tests.Consumption.Fields
 				+ @"|\.Attributes\[\s*""(?<attribute>\w+)""\s*\])";
 			Regex read = new Regex(fieldRead);
 			Regex comparison = new Regex(fieldRead + @"\.InnerText\s*==\s*""(?<value>[^""]*)""");
-			Regex condition = new Regex(@"^\s*(?<else>else\s+)?if\s*\(");
 			Match[] reads = block.Code.SelectMany(line => read.Matches(line).Cast<Match>()).ToArray();
 
 			string[] sites = Enumerable.Range(start + 1, block.Code.Length)
 				.Select(line => fileName + ":" + line).ToArray();
+			(IReadOnlyList<IReadOnlyList<ChainLink>> chains, ISet<int> conditions) = ChainsIn(block, read);
 			return new HandlerBranch(handler,
 				NameLookups.LiteralsIn(fileName, source).Where(literal => sites.Contains(literal.Site)).ToArray(),
 				new HashSet<string>(reads.Select(FieldOf), StringComparer.Ordinal),
@@ -486,7 +524,11 @@ namespace Chummer.Tests.Consumption.Fields
 						StringComparer.Ordinal),
 				new HashSet<string>(reads.Where(match => match.Groups["method"].Value == "SelectNodes").Select(FieldOf),
 					StringComparer.Ordinal),
-				ChainsIn(block.Code, condition, read));
+				chains,
+				Enumerable.Range(0, block.Code.Length)
+					.Where(index => block.Code[index].Contains(".OuterXml") && !conditions.Contains(index))
+					.Select(index => sites[index])
+					.ToArray());
 		}
 
 		private static string FieldOf(Match match)
@@ -496,27 +538,39 @@ namespace Chummer.Tests.Consumption.Fields
 				: match.Groups["field"].Value;
 		}
 
-		// - a condition line whose next line reads one attribute is a link
-		// - else-if right after a link extends its chain, anything else starts a new one
-		private static IReadOnlyList<IReadOnlyList<string>> ChainsIn(string[] code, Regex condition, Regex read)
+		private static readonly Regex Condition = new Regex(@"^\s*(?<else>else\s+)?if\s*\(");
+
+		private static readonly Regex TextTest = new Regex(@"\.OuterXml\.Contains\(\s*""(?<text>[^""]*)""\s*\)");
+
+		// - a condition whose body reads one attribute is a link: one bare line, or a { } block
+		// - else-if right after a link's body extends its chain, anything else starts a new one
+		private static (IReadOnlyList<IReadOnlyList<ChainLink>>, ISet<int>) ChainsIn(SourceLines block, Regex read)
 		{
-			List<List<string>> chains = new List<List<string>>();
-			int lastLink = -3;
+			string[] code = block.Code;
+			List<List<(int Line, ChainLink Link)>> chains = new List<List<(int, ChainLink)>>();
+			int expected = -1;
 			for (int i = 0; i + 1 < code.Length; i++)
 			{
-				Match test = condition.Match(code[i]);
-				Match[] body = read.Matches(code[i + 1]).Cast<Match>()
-					.Where(match => match.Groups["attribute"].Success).ToArray();
-				if (!test.Success || body.Length != 1)
+				Match test = Condition.Match(code[i]);
+				if (!test.Success)
 					continue;
 
-				if (!test.Groups["else"].Success || lastLink != i - 2)
-					chains.Add(new List<string>());
-				chains[chains.Count - 1].Add(FieldOf(body[0]));
-				lastLink = i;
+				int end = code[i + 1].Trim() == "{" ? i + 1 + block.BlockFrom(i + 1).Code.Length - 1 : i + 1;
+				string[] body = Enumerable.Range(i + 1, end - i).SelectMany(line => read.Matches(code[line]).Cast<Match>())
+					.Where(match => match.Groups["attribute"].Success).Select(FieldOf).Distinct(StringComparer.Ordinal).ToArray();
+				if (body.Length != 1)
+					continue;
+
+				if (!test.Groups["else"].Success || expected != i)
+					chains.Add(new List<(int, ChainLink)>());
+				Match text = TextTest.Match(code[i]);
+				chains[chains.Count - 1].Add((i, new ChainLink(body[0], text.Success ? text.Groups["text"].Value : null)));
+				expected = end + 1;
 			}
 
-			return chains.Where(chain => chain.Count > 1).Select(chain => (IReadOnlyList<string>)chain).ToArray();
+			List<(int Line, ChainLink Link)>[] kept = chains.Where(chain => chain.Count > 1).ToArray();
+			return (kept.Select(chain => (IReadOnlyList<ChainLink>)chain.Select(entry => entry.Link).ToArray()).ToArray(),
+				new HashSet<int>(kept.SelectMany(chain => chain.Select(entry => entry.Line))));
 		}
 
 		public static IReadOnlyList<HandlerBranch> HandlerBranches => CachedBranches.Value;
@@ -536,15 +590,30 @@ namespace Chummer.Tests.Consumption.Fields
 			Dictionary<string, HandlerBranch> byHandler = branches.ToDictionary(branch => branch.Handler, StringComparer.Ordinal);
 			return fields.Where(field => field.Reach != BlockReach.First || !byHandler[field.Handler].Fields.Contains(field.Tag)
 				|| (field.Repeated && !byHandler[field.Handler].EveryCopy.Contains(field.Tag))
-				|| IsShadowed(field, byHandler[field.Handler]));
+				|| IsSkipped(field, byHandler[field.Handler]));
 		}
 
-		// - an earlier link of its chain is present in the block: the else-if never gets here
-		private static bool IsShadowed(HandlerField field, HandlerBranch branch)
+		// - another link of its chain passes first: the else-if never gets here
+		private static bool IsSkipped(HandlerField field, HandlerBranch branch)
 		{
 			return branch.Chains
-				.Where(chain => chain.Contains(field.Tag))
-				.Any(chain => chain.TakeWhile(link => link != field.Tag).Any(field.BlockAttributes.Contains));
+				.Where(chain => chain.Any(link => link.Attribute == field.Tag))
+				.Any(chain => chain.FirstOrDefault(link => link.Passes(field))?.Attribute != field.Tag);
+		}
+
+		// - a text test can pick a link whose attribute the block lacks: Attributes[...] is then null
+		// - one line per block, found through any of its fields
+		public static IEnumerable<string> ChainsPickingAnAbsentAttribute(IEnumerable<HandlerField> fields,
+			IEnumerable<HandlerBranch> branches)
+		{
+			Dictionary<string, HandlerBranch> byHandler = branches.ToDictionary(branch => branch.Handler, StringComparer.Ordinal);
+			return fields
+				.Where(field => field.Reach == BlockReach.First)
+				.SelectMany(field => byHandler[field.Handler].Chains
+					.Select(chain => chain.FirstOrDefault(link => link.Passes(field)))
+					.Where(link => link != null && !field.BlockAttributes.Contains(link.Attribute))
+					.Select(link => field.File + " " + field.Handler + " picks " + link + ": " + field.BlockText))
+				.Distinct(StringComparer.Ordinal);
 		}
 
 		// - a read field whose value no comparison matches is just as dead

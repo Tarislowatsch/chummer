@@ -334,14 +334,72 @@ namespace Chummer.Tests.Consumption.Fields
 			Assert.Equal(new[] { "@limit", "@skillcategory", "@skillgroup", "max", "min", "val" },
 				branch.Fields.OrderBy(field => field, StringComparer.Ordinal));
 			Assert.Equal(new[] { "val" }, branch.EveryCopy);
-			Assert.Equal(new[] { "@skillgroup", "@skillcategory" }, Assert.Single(branch.Chains));
+			Assert.Equal(new[] { "@skillgroup [text skillgroup]", "@skillcategory [text skillcategory]" },
+				Assert.Single(branch.Chains).Select(link => link.ToString()));
+			Assert.Empty(branch.UnlinkedTextTests);
 		}
 
+		[Fact]
+		public void ABracedBodyIsALinkAndAStrayTextTestIsUnlinked()
+		{
+			string[] source =
+			{
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, string s, XmlNode nodBonus, bool b)",
+				"{",
+				"	if (NodeExists(nodBonus, \"selectskill\"))",
+				"	{",
+				"		if (nodBonus[\"selectskill\"].Attributes[\"skillgroup\"] != null)",
+				"		{",
+				"			a = nodBonus[\"selectskill\"].Attributes[\"skillgroup\"].InnerText;",
+				"		}",
+				"		else if (nodBonus[\"selectskill\"].OuterXml.Contains(\"limittoskill\"))",
+				"		{",
+				"			b = nodBonus[\"selectskill\"].Attributes[\"limittoskill\"].InnerText;",
+				"			c = 1;",
+				"		}",
+				"		d = nodBonus[\"selectskill\"].OuterXml.Contains(\"val\");",
+				"	}",
+				"}",
+			};
+
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("selectskill", "x.cs", SourceLines.Of(source));
+
+			Assert.Equal(new[] { "@skillgroup", "@limittoskill [text limittoskill]" },
+				Assert.Single(branch.Chains).Select(link => link.ToString()));
+			Assert.Equal(new[] { "x.cs:14" }, branch.UnlinkedTextTests);
+		}
+
+		// - the block text names each attribute present, as an OuterXml would
 		private static FieldReaders.HandlerField SkillField(string file, string tag, bool repeated = false,
 			params string[] attributes)
 		{
 			return new FieldReaders.HandlerField(file, "selectskill", FieldReaders.BlockReach.First, tag, "x",
-				repeated, attributes);
+				repeated, attributes, string.Join(" ", attributes));
+		}
+
+		// - the code tests OuterXml: a value naming an earlier link picks that link
+		[Fact]
+		public void TextNamingAnEarlierLinkPicksItAndCrashes()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("selectskill", "x.cs", SourceLines.Of(ChainSource));
+			string text = "<selectskill skillcategory=\"no skillgroup here\" />";
+			FieldReaders.HandlerField field = new FieldReaders.HandlerField("q.xml", "selectskill",
+				FieldReaders.BlockReach.First, "@skillcategory", "no skillgroup here", false, new[] { "@skillcategory" }, text);
+
+			Assert.Equal(new[] { "q.xml" },
+				FieldReaders.UnreadHandlerFields(new[] { field }, new[] { branch }).Select(entry => entry.File));
+			Assert.Equal(new[] { "q.xml selectskill picks @skillgroup [text skillgroup]: " + text },
+				FieldReaders.ChainsPickingAnAbsentAttribute(new[] { field }, new[] { branch }));
+		}
+
+		[Fact]
+		public void AChainPickingAPresentAttributeIsNoCrash()
+		{
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("selectskill", "x.cs", SourceLines.Of(ChainSource));
+
+			Assert.Empty(FieldReaders.ChainsPickingAnAbsentAttribute(
+				new[] { SkillField("a", "@skillcategory", false, "@skillcategory"), SkillField("b", "val") },
+				new[] { branch }));
 		}
 
 		[Fact]
