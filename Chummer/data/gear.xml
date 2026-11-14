@@ -15335,7 +15335,7 @@
 			<rating>0</rating>
 			<capacity>0</capacity>
 			<avail>0</avail>
-			<cost>Variable(0+)</cost>
+			<cost>Variable(0-1000000)</cost>
 			<bonus>
 				<selecttext />
 			</bonus>

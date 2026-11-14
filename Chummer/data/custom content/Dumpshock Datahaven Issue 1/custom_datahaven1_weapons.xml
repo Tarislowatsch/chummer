@@ -12,7 +12,7 @@
 			<rc>0</rc>
 			<ammo>3(cy)</ammo>
 			<conceal>6</conceal>
-			<avail>8FF</avail>
+			<avail>8F</avail>
 			<cost>750</cost>
 			<allowaccessory>false</allowaccessory>
 			<source>DH1</source>

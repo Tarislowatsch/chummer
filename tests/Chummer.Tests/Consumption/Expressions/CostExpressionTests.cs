@@ -15,9 +15,6 @@ namespace Chummer.Tests.Consumption.Expressions
 		private static readonly IReadOnlyDictionary<string, string[]> KnownFailures =
 			new Dictionary<string, string[]>(StringComparer.Ordinal)
 			{
-				// - both bounds 0: Create keeps the text (clsEquipment.cs:9726)
-				// - TotalCost then runs Convert.ToInt32("Variable(0+)"), read off the code, not run
-				{ "Gear.cost", new[] { "Datasoft (2050) = Variable(0+)" } },
 			};
 
 		[Theory]
