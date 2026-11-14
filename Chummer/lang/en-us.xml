@@ -4431,6 +4431,11 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<key>Title_Notes</key>
 			<text>Notes</text>
 		</string>
+		<!-- Omae Window -->
+		<string>
+			<key>MessageTitle_Omae_DeleteSheet</key>
+			<text>Delete Character Sheet</text>
+		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>

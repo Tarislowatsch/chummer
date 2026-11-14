@@ -5515,6 +5515,10 @@
 		</string>
 		<!-- Version 323 -->
 		<string>
+			<key>MessageTitle_Omae_DeleteSheet</key>
+			<text>Charakterblatt löschen</text>
+		</string>
+		<string>
 			<key>Message_DeleteArmorLocation</key>
 			<text>Möchten Sie dieses Panzerungsset wirklich löschen? Alle enthaltenen Gegenstände werden in den Rüstungsreiter verschoben.</text>
 		</string>

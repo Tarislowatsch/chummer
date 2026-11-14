@@ -4415,6 +4415,11 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<key>Title_Notes</key>
 			<text>Notes</text>
 		</string>
+		<!-- Omae Window -->
+		<string>
+			<key>MessageTitle_Omae_DeleteSheet</key>
+			<text>Effacer la feuille de personnage</text>
+		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>

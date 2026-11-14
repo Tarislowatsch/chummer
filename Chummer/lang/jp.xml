@@ -4432,6 +4432,11 @@
 			<key>Title_Notes</key>
 			<text>ノート</text>
 		</string>
+		<!-- Omae Window -->
+		<string>
+			<key>MessageTitle_Omae_DeleteSheet</key>
+			<text>キャラクターシートの削除</text>
+		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>

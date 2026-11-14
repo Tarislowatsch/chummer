@@ -75,7 +75,7 @@ namespace Chummer.Tests.Kernel
 		[Fact]
 		public void EnglishKeysFindsEveryKey()
 		{
-			Assert.Equal(1503, UiStringKeys.EnglishKeys.Count);
+			Assert.Equal(1504, UiStringKeys.EnglishKeys.Count);
 		}
 
 		// - exact count, not ">N": this file set is small and enumerable
