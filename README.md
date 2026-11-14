@@ -17,6 +17,22 @@ codebase: the original SR4 application, last touched in 2013, its history
 otherwise untouched since. It shares no code or history with Chummer5a's SR5
 line beyond a common ancestor.
 
+## Optional content packs
+
+`Chummer/data/custom content/` holds six optional packs. Chummer only loads data
+files that sit directly in `data/`, so a pack is inactive until you copy it there:
+
+1. Close Chummer.
+2. Copy the files from the pack's folder into `data/`, next to `books.xml`.
+3. Start Chummer and open **Tools → Options**. On the **General** tab, tick the
+   pack's book under **Additional Sourcebooks to Use**. Until you do, the pack's
+   items stay out of the selection lists.
+
+Five packs add content and each brings its own book. *Audio and Vision
+Enhancement Options* is different: it replaces existing gear and has no book.
+Its three files are alternatives (audio, vision or both), so copy only one of
+them. To remove a pack, delete its files from `data/` again.
+
 ## Building
 
 See [`docs/BUILDING.md`](docs/BUILDING.md) for toolchain requirements, the
