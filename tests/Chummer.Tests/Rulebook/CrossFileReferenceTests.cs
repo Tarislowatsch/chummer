@@ -141,7 +141,7 @@ namespace Chummer.Tests.Rulebook
 				{ "cyberware suite grade", 44 },
 				{ "cyberware suite items", 426 },
 				{ "echo requires all echoes", 9 },
-				{ "gear addweapon", 203 },
+				{ "gear addweapon", 205 },
 				{ "gear usegear", 83 },
 				{ "metamagic requires all metamagics", 13 },
 				{ "metamagic requires all metatypes", 1 },
@@ -204,7 +204,7 @@ namespace Chummer.Tests.Rulebook
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
 				{ "weapon range", 162 },
-				{ "weapon range by category", 466 },
+				{ "weapon range by category", 465 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};

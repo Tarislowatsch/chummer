@@ -30635,11 +30635,6 @@
 				<translate>Mörsergeschoss: Mine</translate>
 			</weapon>
 			<weapon>
-				<name>Mortar Round: Rocket Assist</name>
-				<page>175</page>
-				<translate>Mörsergeschoss: Raketenunterstützt</translate>
-			</weapon>
-			<weapon>
 				<name>Mortar Round: Sensor</name>
 				<page>175</page>
 				<translate>Mörsergeschoss: Sensor</translate>
