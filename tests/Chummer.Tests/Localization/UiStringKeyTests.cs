@@ -26,12 +26,6 @@ namespace Chummer.Tests.Localization
 		private static readonly IReadOnlyDictionary<string, string> KnownTranslationRepeats =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
-				["de Label_Notoriety"] = "2 entries, 1 text",
-				["de Label_PublicAwareness"] = "2 entries, 1 text",
-				["de Label_StreetCred"] = "2 entries, 1 text",
-				["de Message_DeleteArmorLocation"] = "2 entries, 2 texts",
-				["fr Button_AddPet"] = "2 entries, 1 text",
-				["fr Tab_Pets"] = "2 entries, 1 text",
 			};
 
 		[Fact]

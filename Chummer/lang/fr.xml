@@ -934,10 +934,6 @@
 			<text>Equipement</text>
 		</string>
 		<string>
-			<key>Tab_Pets</key>
-			<text>Animaux</text>
-		</string>
-		<string>
 			<key>Tab_ConditionMonitor</key>
 			<text>Moniteur de condition</text>
 		</string>
@@ -2661,10 +2657,6 @@
 		<string>
 			<key>Button_AddEnemy</key>
 			<text>Ajouter un &amp;Ennemi</text>
-		</string>
-		<string>
-			<key>Button_AddPet</key>
-			<text>Ajouter Animal</text>
 		</string>
 		<string>
 			<key>Node_SelectedPositiveQualities</key>
