@@ -173,8 +173,8 @@ namespace Chummer.Tests.Consumption.Fields
 				{ "conditionmonitor", "overflow physical stun threshold thresholdoffset" },
 				{ "livingpersona", "biofeedback firewall response signal system" },
 				{ "selectattribute", "affectbase attribute aug excludeattribute max min val" },
-				{ "selectskill", "applytorating max val" },
-				{ "selectskillgroup", "applytorating bonus" },
+				{ "selectskill", "@excludecategory @limittoskill @skillcategory @skillgroup applytorating max val" },
+				{ "selectskillgroup", "@excludecategory applytorating bonus" },
 				{ "swapskillattribute", "attribute" },
 			};
 
@@ -184,6 +184,50 @@ namespace Chummer.Tests.Consumption.Fields
 			PinReport.AssertEqual("Fields read per handler", MeasuredHandlerFields,
 				FieldReaders.HandlerBranches.ToDictionary(branch => branch.Handler, branch => Sorted(branch.Fields),
 					StringComparer.Ordinal));
+		}
+
+		// - read forms the unread check depends on: a lost one would let a repeat or a chain go green
+		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerReadForms =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				{ "selectattribute every copy", "attribute excludeattribute" },
+				{ "selectskill chain 1", "@skillgroup @skillcategory @excludecategory @limittoskill" },
+				{ "swapskillattribute every copy", "attribute" },
+			};
+
+		[Fact]
+		public void EachIndexedHandlerReadsInTheMeasuredForms()
+		{
+			PinReport.AssertEqual("Read forms per handler", MeasuredHandlerReadForms,
+				FieldReaders.HandlerBranches
+					.Where(branch => branch.EveryCopy.Count > 0)
+					.Select(branch => (Key: branch.Handler + " every copy", Value: Sorted(branch.EveryCopy)))
+					.Concat(FieldReaders.HandlerBranches.SelectMany(branch => branch.Chains
+						.Select((chain, index) => (Key: branch.Handler + " chain " + (index + 1), Value: string.Join(" ", chain)))))
+					.ToDictionary(entry => entry.Key, entry => entry.Value, StringComparer.Ordinal));
+		}
+
+		// - the data shapes the read forms guard: an extractor that drops them would hide every finding
+		private static readonly IReadOnlyDictionary<string, int> MeasuredHandlerShapes =
+			new Dictionary<string, int>(StringComparer.Ordinal)
+			{
+				{ "selectattribute/attribute (repeated)", 6 },
+				{ "selectattribute/excludeattribute (repeated)", 12 },
+				{ "selectskill/@excludecategory", 5 },
+				{ "selectskill/@skillcategory", 2 },
+				{ "selectskill/@skillgroup", 2 },
+				{ "selectskillgroup/@excludecategory", 2 },
+			};
+
+		[Fact]
+		public void HandlerBlocksHaveTheMeasuredAttributesAndRepeats()
+		{
+			PinReport.AssertEqual("Attributes and repeated children per handler", MeasuredHandlerShapes,
+				FieldReaders.AllHandlerFields
+					.Where(field => field.Repeated || field.Tag.StartsWith(FieldReaders.AttributePrefix, StringComparison.Ordinal))
+					.GroupBy(field => field.Handler + "/" + field.Tag + (field.Repeated ? " (repeated)" : ""),
+						StringComparer.Ordinal)
+					.ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal));
 		}
 
 		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =
