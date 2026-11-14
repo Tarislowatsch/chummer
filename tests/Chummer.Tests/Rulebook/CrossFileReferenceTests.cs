@@ -127,6 +127,7 @@ namespace Chummer.Tests.Rulebook
 				{ "bonus spellcategory", 48 },
 				{ "bonus weaponcategorydv", 26 },
 				{ "critter complex forms", 242 },
+				{ "critter exotic skills", 63 },
 				{ "critter gears", 64 },
 				{ "critter knowledge categories", 2 },
 				{ "critter metavariant powers", 66 },
