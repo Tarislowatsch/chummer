@@ -1,4 +1,8 @@
-﻿using Xunit;
+﻿using System.Linq;
+using System.Text.RegularExpressions;
+using System.Xml;
+using Chummer.Tests.Kernel;
+using Xunit;
 
 namespace Chummer.Tests.Consumption.Expressions
 {
@@ -19,6 +23,20 @@ namespace Chummer.Tests.Consumption.Expressions
 		public void EveryPackAvailabilityParsesInItsCalculator(string packPath, string id)
 		{
 			ExpressionChecks.AssertNoFailures(ExpressionChecks.PackCheckFor(packPath, id), "its calculator throws on");
+		}
+
+		// - "24FF" parses, so the guards above cannot see a doubled suffix
+		// - the raw text still shows and prints
+		[Fact]
+		public void NoAvailabilityRepeatsItsSuffix()
+		{
+			string[] doubled = DataPaths.DataFilesWithPacks
+				.SelectMany(file => Xml.Load(file.FilePath).SelectNodes("//avail").Cast<XmlNode>()
+					.Where(node => Regex.IsMatch(node.InnerText.Trim(), "[RF]{2}$"))
+					.Select(node => file.Label + ": " + node.InnerText))
+				.ToArray();
+
+			FailureReport.AssertNone("These availabilities repeat their R/F suffix", doubled);
 		}
 	}
 }

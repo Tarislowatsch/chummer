@@ -34372,7 +34372,7 @@
 				<complexform rating="F">Analyze</complexform>
 				<complexform rating="F">Attack</complexform>
 				<complexform rating="F">Blackout</complexform>
-				<complexform rating="F/2">Expert Defense</complexform>
+				<complexform rating="floor(F/2)">Expert Defense</complexform>
 			</optionalcomplexforms>
 			<source>UN</source>
 			<page>155</page>
@@ -34520,7 +34520,7 @@
 				<complexform rating="F" option="Psychotropic">Attack</complexform>
 				<complexform rating="F">Black Hammer</complexform>
 				<complexform rating="F">Blackout</complexform>
-				<complexform rating="F/2">Cascading</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
 			</complexforms>
 			<optionalcomplexforms>
 				<complexform rating="F">Armor</complexform>
@@ -36624,8 +36624,8 @@
 				<complexform rating="F">Armor</complexform>
 				<complexform rating="F+1">Attack</complexform>
 				<complexform rating="F">Browse</complexform>
-				<complexform rating="F/2">Cascading</complexform>
-				<complexform rating="F/2">Expert Offense</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
+				<complexform rating="floor(F/2)">Expert Offense</complexform>
 				<complexform rating="F-1">Exploit</complexform>
 				<complexform rating="F+1">Stealth</complexform>
 			</complexforms>
@@ -36702,9 +36702,9 @@
 				<complexform rating="F">Analyze</complexform>
 				<complexform rating="F+1">Armor</complexform>
 				<complexform rating="F+2">Attack</complexform>
-				<complexform rating="F/2">Cascading</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
 				<complexform rating="F+1">Disarm</complexform>
-				<complexform rating="F/2">Expert Offense</complexform>
+				<complexform rating="floor(F/2)">Expert Offense</complexform>
 				<complexform rating="F">Exploit</complexform>
 				<complexform rating="F">Reality Filter</complexform>
 			</complexforms>
@@ -36784,8 +36784,8 @@
 				<complexform rating="F">Armor</complexform>
 				<complexform rating="F-1">Attack</complexform>
 				<complexform rating="F">Black Hammer</complexform>
-				<complexform rating="F/2">Cascading</complexform>
-				<complexform rating="F/3">Expert Offense</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
+				<complexform rating="floor(F/3)">Expert Offense</complexform>
 				<complexform rating="F-2">Exploit</complexform>
 				<complexform rating="F">Stealth</complexform>
 			</complexforms>
@@ -37172,8 +37172,8 @@
 				<complexform rating="F">Armor</complexform>
 				<complexform rating="F">Attack</complexform>
 				<complexform rating="F">Disarm</complexform>
-				<complexform rating="F/2">Expert Defense</complexform>
-				<complexform rating="F/2">Expert Offense</complexform>
+				<complexform rating="floor(F/2)">Expert Defense</complexform>
+				<complexform rating="floor(F/2)">Expert Offense</complexform>
 				<complexform rating="F-2">Exploit</complexform>
 				<complexform rating="F-1">Stealth</complexform>
 			</complexforms>
@@ -37253,7 +37253,7 @@
 				<complexform rating="F">Analyze</complexform>
 				<complexform rating="F">Armor</complexform>
 				<complexform rating="F+2">Attack</complexform>
-				<complexform rating="F/2">Cascading</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
 				<complexform rating="F" select="Home">Homeground</complexform>
 				<complexform rating="F-3">Medic</complexform>
 			</complexforms>
@@ -37403,7 +37403,7 @@
 				<complexform rating="F">Analyze</complexform>
 				<complexform rating="F+2">Armor</complexform>
 				<complexform rating="F">Attack</complexform>
-				<complexform rating="F/2">Expert Defense</complexform>
+				<complexform rating="floor(F/2)">Expert Defense</complexform>
 				<complexform rating="F-2">Exploit</complexform>
 			</complexforms>
 			<source>RW</source>
@@ -37862,7 +37862,7 @@
 				<complexform rating="F+1">Analyze</complexform>
 				<complexform rating="F+3">Armor</complexform>
 				<complexform rating="F">Browse</complexform>
-				<complexform rating="F/2">Cascading</complexform>
+				<complexform rating="floor(F/2)">Cascading</complexform>
 				<complexform rating="F">Command</complexform>
 				<complexform rating="F">Corrupt</complexform>
 				<complexform rating="F-4">Data Bomb</complexform>

@@ -14,8 +14,6 @@ namespace Chummer.Tests.Rulebook
 		// - format: <pack file>/<collection>/<name>, copied verbatim from the failure output
 		private static readonly HashSet<string> KnownDiscardedEntries = new HashSet<string>(StringComparer.Ordinal)
 		{
-			// - not a copy: no Obsolete mod, ARN p.19 instead of UCL p.13
-			"custom_another_rainy_night_vehicles.xml/vehicles/Ford Americar (Sedan)",
 		};
 
 		// - same values as the base allowlist in CategoryDeclarationTests: the pack inherits the defect

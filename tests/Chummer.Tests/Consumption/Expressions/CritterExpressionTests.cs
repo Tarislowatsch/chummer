@@ -9,22 +9,9 @@ namespace Chummer.Tests.Consumption.Expressions
 {
 	public class CritterExpressionTests
 	{
-		// - "F/2" at an odd Force gives x.5: Convert.ToInt32 rejects it
 		// - each entry must keep failing: a fixed one leaves this list, it does not linger
 		private static readonly string[] KnownFailures =
 		{
-			"critters.xml: Cyberwerewolf complexforms/complexform[Cascading]/@rating = F/2",
-			"critters.xml: Daemon complexforms/complexform[Cascading]/@rating = F/2",
-			"critters.xml: Daemon complexforms/complexform[Expert Offense]/@rating = F/2",
-			"critters.xml: Frobnitz complexforms/complexform[Cascading]/@rating = F/2",
-			"critters.xml: Frobnitz complexforms/complexform[Expert Offense]/@rating = F/2",
-			"critters.xml: Grue complexforms/complexform[Cascading]/@rating = F/2",
-			"critters.xml: Grue complexforms/complexform[Expert Offense]/@rating = F/3",
-			"critters.xml: Heavyweight complexforms/complexform[Expert Defense]/@rating = F/2",
-			"critters.xml: Spike Sprite complexforms/complexform[Cascading]/@rating = F/2",
-			"critters.xml: Tentacle complexforms/complexform[Expert Defense]/@rating = F/2",
-			"critters.xml: Tentacle complexforms/complexform[Expert Offense]/@rating = F/2",
-			"critters.xml: Yantra complexforms/complexform[Cascading]/@rating = F/2",
 		};
 
 		[Fact]
