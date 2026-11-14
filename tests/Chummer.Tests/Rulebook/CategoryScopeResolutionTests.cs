@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace Chummer.Tests.Rulebook
@@ -83,6 +84,29 @@ namespace Chummer.Tests.Rulebook
 
 			Assert.False(CategoryDeclarations.TryResolveDeclarationBlock("weapons.xml", "mods",
 				Declarations("categories", "Weapon Mod"), out block, out declared));
+		}
+
+		// - a key without its file or collection part would exempt the category everywhere
+		[Fact]
+		public void CarrierOnlyNeedsFileCollectionAndCategory()
+		{
+			Assert.True(CategoryDeclarations.IsCarrierOnly("weapons.xml", "weapons", "Gear"));
+			Assert.False(CategoryDeclarations.IsCarrierOnly("gear.xml", "weapons", "Gear"));
+			Assert.False(CategoryDeclarations.IsCarrierOnly("weapons.xml", "accessories", "Gear"));
+			Assert.False(CategoryDeclarations.IsCarrierOnly("weapons.xml", "weapons", "Made Up"));
+		}
+
+		[Fact]
+		public void AContractSkipsOnlyItsCarrierOnlyUsages()
+		{
+			CategoryDeclarations.CategoryContract contract = new CategoryDeclarations.CategoryContract(
+				@"C:\data\weapons.xml", "weapons", "categories", new[] { "Bows" }, new[]
+				{
+					new CategoryDeclarations.CategoryUsage("weapons", "Gear", "Carried"),
+					new CategoryDeclarations.CategoryUsage("weapons", "Made Up", "Sold"),
+				});
+
+			Assert.Equal(new[] { "Sold" }, contract.UndeclaredUsages().Select(usage => usage.ItemName));
 		}
 
 		private static readonly IReadOnlyDictionary<string, IReadOnlyCollection<string>> NoDeclarations =

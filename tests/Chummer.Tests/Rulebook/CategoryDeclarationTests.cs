@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -27,39 +28,31 @@ namespace Chummer.Tests.Rulebook
 		};
 
 		// - a declared exemption puts carrier weapons on sale while every guard stays silent
-		// - a pack's <categories> joins the base block in the picker, so packs count too
+		// - pack <categories> join the base block in the picker
 		[Fact]
 		public void CarrierOnlyCategoriesAreUsedAndUndeclared()
 		{
 			HashSet<string> used = new HashSet<string>(StringComparer.Ordinal);
-			List<string> declared = new List<string>();
+			HashSet<string> declared = new HashSet<string>(StringComparer.Ordinal);
 			foreach (object[] testCase in CategoryDeclarations.CategoryKeyedCollections())
 			{
 				string xmlPath = (string)testCase[0];
 				string collectionName = (string)testCase[1];
 				CategoryDeclarations.CategoryContract contract = CategoryDeclarations.ContractFor(xmlPath, collectionName);
-				foreach (CategoryDeclarations.CategoryUsage usage in contract.Usages)
-					used.Add(Entry(xmlPath, collectionName, usage.Category));
-				foreach (string category in contract.DeclaredCategories)
-					declared.Add(Entry(xmlPath, collectionName, category));
+				used.UnionWith(contract.Usages.Select(usage => Entry(xmlPath, collectionName, usage.Category)));
+				declared.UnionWith(contract.DeclaredCategories.Select(category => Entry(xmlPath, collectionName, category)));
 			}
 
 			foreach (PackFiles.PackFile file in PackFiles.Paired())
 			{
-				System.Xml.XmlDocument pack = Xml.Load(file.FilePath);
-				IReadOnlyDictionary<string, IReadOnlyCollection<string>> visible =
-					CustomContent.CategoryDeclarationsVisibleTo(file, pack);
-				foreach (System.Xml.XmlNode collection in RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement))
+				XmlDocument pack = Xml.Load(file.FilePath);
+				foreach (XmlNode collection in RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement))
 				{
-					string block;
-					IReadOnlyCollection<string> categories;
-					if (CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileNames[0], collection.Name,
-							visible, out block, out categories))
-					{
-						declared.AddRange(categories.Select(category =>
-							Entry(file.BaseFileNames[0], collection.Name, category)));
-					}
+					used.UnionWith(CategoryDeclarations.UsagesIn(collection)
+						.Select(usage => Entry(file.BaseFileName, collection.Name, usage.Category)));
 				}
+
+				declared.UnionWith(PackDeclarations(file, pack));
 			}
 
 			string[] stale = CategoryDeclarations.CarrierOnlyCategoryKeys()
@@ -68,6 +61,26 @@ namespace Chummer.Tests.Rulebook
 				.ToArray();
 
 			FailureReport.AssertNoneInFull("These carrier-only categories are declared or no longer used", stale);
+		}
+
+		// - every collection of the base file: a pack's block joins in without the pack's items
+		private static IEnumerable<string> PackDeclarations(PackFiles.PackFile file, XmlDocument pack)
+		{
+			IReadOnlyDictionary<string, IReadOnlyCollection<string>> blocks =
+				CustomContent.CategoryDeclarationsVisibleTo(file, pack);
+			foreach (object[] testCase in CategoryDeclarations.CategoryKeyedCollections()
+				.Where(testCase => Path.GetFileName((string)testCase[0]) == file.BaseFileName))
+			{
+				string collectionName = (string)testCase[1];
+				string block;
+				IReadOnlyCollection<string> categories;
+				if (CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileName, collectionName, blocks,
+						out block, out categories))
+				{
+					foreach (string category in categories)
+						yield return Entry(file.BaseFileName, collectionName, category);
+				}
+			}
 		}
 
 		// - in a carrier-only category, yet no carrier adds them: unreachable
@@ -80,26 +93,6 @@ namespace Chummer.Tests.Rulebook
 			"Mortar Round: Rocket Assist",
 		};
 
-		// - carriers: every reference rule that adds a weapon by name, vehicles and kits included
-		private static readonly CrossFileReferences.ReferenceRule[] CarrierRules = CrossFileReferences.Rules
-			.Where(rule => rule.Targets.Any(target => target.FileName == "weapons.xml"
-				&& target.ItemXPath.StartsWith("/chummer/weapons/weapon", StringComparison.Ordinal)
-				&& !target.ItemXPath.StartsWith("/chummer/weapons/weapon/", StringComparison.Ordinal)))
-			.ToArray();
-
-		private static IEnumerable<string> CarriedNames(IEnumerable<CrossFileReferences.Reference> references)
-		{
-			foreach (CrossFileReferences.Reference reference in references)
-			{
-				CrossFileReferences.ReferenceRule rule = CarrierRules.FirstOrDefault(candidate => candidate.Id == reference.RuleId);
-				if (rule == null)
-					continue;
-				int nameField = rule.KeyFields.ToList().FindIndex(field => field.Target == "name");
-				if (nameField >= 0 && reference.Values[nameField] != null)
-					yield return reference.Values[nameField];
-			}
-		}
-
 		// - an empty rule set would leave every carrier-only weapon "unreachable" for the wrong reason
 		[Fact]
 		public void CarrierRulesCoverItemsVehiclesAndKits()
@@ -110,32 +103,14 @@ namespace Chummer.Tests.Rulebook
 					"armor mod addweapon", "bioware addweapon", "cyberware addweapon", "gear addweapon",
 					"pack vehicle weapons", "pack weapons", "quality addweapon", "vehicle weapons", "weapon underbarrel",
 				},
-				CarrierRules.Select(rule => rule.Id).OrderBy(id => id, StringComparer.Ordinal));
+				WeaponCarriers.Rules.Select(rule => rule.Id).OrderBy(id => id, StringComparer.Ordinal));
 		}
 
 		[Fact]
 		public void EveryCarrierOnlyWeaponHasACarrier()
 		{
-			string weaponsPath = Path.Combine(DataPaths.ChummerDataDir, "weapons.xml");
-			List<CategoryDeclarations.CategoryUsage> weapons = CategoryDeclarations.ContractFor(weaponsPath, "weapons")
-				.Usages.ToList();
-			HashSet<string> carried = new HashSet<string>(
-				CarriedNames(RuleCorpus.Files.SelectMany(file => file.CrossFileReferences)), StringComparer.Ordinal);
-			foreach (PackFiles.PackFile file in PackFiles.Paired())
-			{
-				System.Xml.XmlDocument pack = Xml.Load(file.FilePath);
-				foreach (string baseFileName in file.BaseFileNames)
-					carried.UnionWith(CarriedNames(CrossFileReferences.ReferencesIn(baseFileName, pack, CarrierRules)));
-				if (file.BaseFileNames.Contains("weapons.xml"))
-					weapons.AddRange(RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement)
-						.Where(collection => collection.Name == "weapons")
-						.SelectMany(CategoryDeclarations.UsagesIn));
-			}
-
-			string[] orphans = weapons
-				.Where(usage => CategoryDeclarations.IsCarrierOnly("weapons.xml", "weapons", usage.Category))
-				.Select(usage => usage.ItemName)
-				.Where(name => !carried.Contains(name))
+			string[] orphans = WeaponCarriers.Unreachable(WeaponCarriers.WeaponsInData(), WeaponCarriers.CarriesInData())
+				.Select(weapon => weapon.Label)
 				.Distinct(StringComparer.Ordinal)
 				.ToArray();
 
