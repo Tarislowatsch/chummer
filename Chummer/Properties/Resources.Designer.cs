@@ -543,16 +543,6 @@ namespace Chummer.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap server_lightning {
-            get {
-                object obj = ResourceManager.GetObject("server_lightning", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap shield_add {
             get {
                 object obj = ResourceManager.GetObject("shield_add", resourceCulture);
@@ -596,16 +586,6 @@ namespace Chummer.Properties {
         internal static System.Drawing.Bitmap user_go {
             get {
                 object obj = ResourceManager.GetObject("user_go", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap world_go {
-            get {
-                object obj = ResourceManager.GetObject("world_go", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
