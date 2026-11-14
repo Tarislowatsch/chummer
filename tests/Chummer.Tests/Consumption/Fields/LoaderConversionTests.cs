@@ -88,7 +88,7 @@ namespace Chummer.Tests.Consumption.Fields
 				{ "critters: powers/power/@rating", 185 },
 				{ "critters: skills/knowledge/@rating", 2 },
 				{ "kits: .//gears/gear/qty", 115 },
-				{ "kits: .//gears/gear/rating", 145 },
+				{ "kits: .//gears/gear/rating", 137 },
 				{ "kits: armors/armor/mods/mod/rating", 6 },
 				{ "kits: attributes/*", 179 },
 				{ "kits: biowares/bioware/rating", 20 },

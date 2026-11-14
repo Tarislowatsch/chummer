@@ -158,6 +158,7 @@
 			this.chkRestricted.Name = "chkRestricted";
 			this.chkRestricted.Size = new System.Drawing.Size(108, 17);
 			this.chkRestricted.TabIndex = 8;
+			this.chkRestricted.Tag = "Checkbox_RestrictedTarget";
 			this.chkRestricted.Text = "Restricted Target";
 			this.chkRestricted.UseVisualStyleBackColor = true;
 			this.chkRestricted.CheckedChanged += new System.EventHandler(this.chkRestricted_CheckedChanged);
@@ -169,6 +170,7 @@
 			this.chkVeryRestricted.Name = "chkVeryRestricted";
 			this.chkVeryRestricted.Size = new System.Drawing.Size(132, 17);
 			this.chkVeryRestricted.TabIndex = 9;
+			this.chkVeryRestricted.Tag = "Checkbox_VeryRestrictedTarget";
 			this.chkVeryRestricted.Text = "Very Restricted Target";
 			this.chkVeryRestricted.UseVisualStyleBackColor = true;
 			this.chkVeryRestricted.CheckedChanged += new System.EventHandler(this.chkVeryRestricted_CheckedChanged);

@@ -136,29 +136,39 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		// - scope resolved against the base file name: overrides and exemptions apply unchanged
-		public static IEnumerable<CategoryDeclarations.CategoryUsage> UndeclaredCategoryUsages(PackFiles.PackFile file,
+		// - every collection of the base file too: a pack's block joins the picker without items
+		public static IEnumerable<CategoryDeclarations.CategoryContract> CategoryContractsIn(PackFiles.PackFile file,
 			XmlDocument pack)
 		{
 			IReadOnlyDictionary<string, IReadOnlyCollection<string>> declarations =
 				CategoryDeclarationsVisibleTo(file, pack);
+			ILookup<string, XmlNode> packCollections = RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement)
+				.ToLookup(collection => collection.Name, StringComparer.Ordinal);
+			IEnumerable<string> baseCollections = CategoryDeclarations.CategoryKeyedCollections()
+				.Where(testCase => string.Equals(Path.GetFileName((string)testCase[0]), file.BaseFileName,
+					StringComparison.Ordinal))
+				.Select(testCase => (string)testCase[1]);
 
-			foreach (XmlNode collection in RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement))
+			foreach (string collectionName in baseCollections.Union(packCollections.Select(group => group.Key),
+				StringComparer.Ordinal))
 			{
 				string block;
 				IReadOnlyCollection<string> declared;
-				if (!CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileNames[0], collection.Name,
+				if (!CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileName, collectionName,
 						declarations, out block, out declared))
 				{
 					continue;
 				}
 
-				HashSet<string> set = new HashSet<string>(declared, StringComparer.Ordinal);
-				foreach (CategoryDeclarations.CategoryUsage usage in CategoryDeclarations.UsagesIn(collection))
-				{
-					if (!set.Contains(usage.Category))
-						yield return usage;
-				}
+				yield return new CategoryDeclarations.CategoryContract(file.BaseFilePath, collectionName, block, declared,
+					packCollections[collectionName].SelectMany(CategoryDeclarations.UsagesIn).ToArray());
 			}
+		}
+
+		public static IEnumerable<CategoryDeclarations.CategoryUsage> UndeclaredCategoryUsages(PackFiles.PackFile file,
+			XmlDocument pack)
+		{
+			return CategoryContractsIn(file, pack).SelectMany(contract => contract.UndeclaredUsages());
 		}
 
 		private static IEnumerable<string> Values(

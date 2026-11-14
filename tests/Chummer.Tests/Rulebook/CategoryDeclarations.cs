@@ -32,6 +32,39 @@ namespace Chummer.Tests.Rulebook
 				"programs.xml/options",
 			};
 
+		// - these weapons enter only through a carrier: another item, a vehicle or a kit
+		// - declaring them would sell each one on its own in frmSelectWeapon
+		private static readonly HashSet<string> CarrierOnlyCategories = new HashSet<string>(StringComparer.Ordinal)
+		{
+			"weapons.xml/weapons/Cyberware",
+			"weapons.xml/weapons/Cyberware Blades",
+			"weapons.xml/weapons/Cyberware Clubs",
+			"weapons.xml/weapons/Cyberware Exotic Melee Weapons",
+			"weapons.xml/weapons/Cyberware Exotic Ranged Weapons",
+			"weapons.xml/weapons/Cyberware Grenade Launchers",
+			"weapons.xml/weapons/Cyberware Heavy Pistols",
+			"weapons.xml/weapons/Cyberware Holdouts",
+			"weapons.xml/weapons/Cyberware Light Pistols",
+			"weapons.xml/weapons/Cyberware Machine Pistols",
+			"weapons.xml/weapons/Cyberware Shotguns",
+			"weapons.xml/weapons/Cyberware Submachine Guns",
+			"weapons.xml/weapons/Cyberware Tasers",
+			"weapons.xml/weapons/Cyberware Throwing Weapons",
+			"weapons.xml/weapons/Gear",
+			"weapons.xml/weapons/Quality",
+			"weapons.xml/weapons/Underbarrel Weapons",
+		};
+
+		public static IEnumerable<string> CarrierOnlyCategoryKeys()
+		{
+			return CarrierOnlyCategories.ToArray();
+		}
+
+		public static bool IsCarrierOnly(string xmlFileName, string collectionName, string category)
+		{
+			return CarrierOnlyCategories.Contains(RuleCorpus.TableKey(xmlFileName, collectionName) + "/" + category);
+		}
+
 		// - pickers build their lists from the governing block (frmSelectWeapon.cs:47 and :82)
 		// - translations attach only to declared nodes (clsXmlManager.cs:226)
 		// - an untranslated category goes onto the printed sheet (clsEquipment.cs:304)
@@ -96,7 +129,9 @@ namespace Chummer.Tests.Rulebook
 			// - grouping is left to the caller: message and allowlist guard want different shapes
 			public IEnumerable<CategoryUsage> UndeclaredUsages()
 			{
-				return Usages.Where(usage => !DeclaredCategories.Contains(usage.Category));
+				string fileName = System.IO.Path.GetFileName(FilePath);
+				return Usages.Where(usage => !DeclaredCategories.Contains(usage.Category)
+					&& !IsCarrierOnly(fileName, CollectionName, usage.Category));
 			}
 		}
 

@@ -10,12 +10,7 @@ namespace Chummer.Tests.Localization
 	{
 		// - exact: deleting a key or adding a reader must shrink this list in the same change
 		// - a listed key waits for a fix: a reader to wire up or a deletion
-		private static readonly IReadOnlyList<string> KnownUnreadKeys = new[]
-		{
-			"Checkbox_RestrictedTarget",
-			"Checkbox_VeryRestrictedTarget",
-			"Title_ExportCharacter",
-		};
+		private static readonly IReadOnlyList<string> KnownUnreadKeys = Array.Empty<string>();
 
 		[Fact]
 		public void OnlyKnownKeysGoUnread()

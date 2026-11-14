@@ -2437,7 +2437,7 @@
 									</td>
 								</tr>
 		</xsl:if>
-		<xsl:if test="cyberwares/cyberware/children/cyberwear/gears/gear[isprogram = 'True']">
+		<xsl:if test="cyberwares/cyberware/children/cyberware/gears/gear[isprogram = 'True']">
 								<tr>
 									<td colspan="6">
 									<strong>Programme</strong><br />

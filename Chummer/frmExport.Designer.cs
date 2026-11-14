@@ -94,6 +94,7 @@
 			this.Name = "frmExport";
 			this.ShowInTaskbar = false;
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+			this.Tag = "Title_ExportCharacter";
 			this.Text = "Export Character";
 			this.Load += new System.EventHandler(this.frmExport_Load);
 			this.ResumeLayout(false);
