@@ -31,11 +31,14 @@ namespace Chummer.Tests.Consumption.Expressions
 		// - below 1 the original clamps to 1: a low Force keeps the form at rating 1
 		[Theory]
 		[InlineData("floor(F/2)", 1, "1")]
+		[InlineData("floor(F/2)", 3, "1")]
 		[InlineData("floor(F/2)", 5, "2")]
 		[InlineData("floor(F/2)", 6, "3")]
 		[InlineData("floor(F/3)", 2, "1")]
+		[InlineData("floor(F/3)", 4, "1")]
 		[InlineData("floor(F/3)", 5, "1")]
 		[InlineData("floor(F/3)", 6, "2")]
+		[InlineData("floor(F/3)", 7, "2")]
 		public void AFlooredDivisionRoundsDownAndClampsToOne(string form, int force, string expected)
 		{
 			Assert.Equal(expected, CritterExpressions.ExpressionToString(form, force, 0));
