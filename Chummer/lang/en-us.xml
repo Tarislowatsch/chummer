@@ -273,16 +273,8 @@
 			<text>Ballistic:</text>
 		</string>
 		<string>
-			<key>Label_BallisticArmorLong</key>
-			<text>Ballistic Armor:</text>
-		</string>
-		<string>
 			<key>Label_ImpactArmorShort</key>
 			<text>Impact:</text>
-		</string>
-		<string>
-			<key>Label_ImpactArmorLong</key>
-			<text>Impact Armor:</text>
 		</string>
 		<string>
 			<key>Label_Test</key>
@@ -341,14 +333,6 @@
 			<text>week</text>
 		</string>
 		<string>
-			<key>String_Weeks</key>
-			<text>weeks</text>
-		</string>
-		<string>
-			<key>String_Hour</key>
-			<text>hour</text>
-		</string>
-		<string>
 			<key>String_Hours</key>
 			<text>hours</text>
 		</string>
@@ -365,14 +349,6 @@
 			<text>Stacked Focus</text>
 		</string>
 		<!-- Printout Strings -->
-		<string>
-			<key>String_UnarmedAttack</key>
-			<text>Unarmed Attack</text>
-		</string>
-		<string>
-			<key>String_Unarmed</key>
-			<text>Unarmed</text>
-		</string>
 		<string>
 			<key>String_LivingPersona</key>
 			<text>Living Persona</text>
@@ -421,10 +397,6 @@
 		<string>
 			<key>MessageTitle_RemoveCharacterAssociation</key>
 			<text>Remove Character Association</text>
-		</string>
-		<string>
-			<key>Message_IncorrectGameVersion_SR4</key>
-			<text>This save file is intended to be used with Shadowrun 4th Edition while this version of Chummer is for Shadowrun 5th Edition. Please use the Shadowrun 4th Edition version of Chummer to open this file.</text>
 		</string>
 		<string>
 			<key>Message_IncorrectGameVersion_SR5</key>
@@ -522,10 +494,6 @@
 		<string>
 			<key>String_AttributeRESShort</key>
 			<text>RES</text>
-		</string>
-		<string>
-			<key>String_AttributeINILong</key>
-			<text>Initiative</text>
 		</string>
 		<string>
 			<key>String_AttributeINIShort</key>
@@ -1116,10 +1084,6 @@
 		<string>
 			<key>Message_DeleteImprovementGroup</key>
 			<text>Are you sure you want to delete this Improvement Group? All of the Improvements in this group will be moved to the Selected Improvements container.</text>
-		</string>
-		<string>
-			<key>Message_DeleteStackedFocus</key>
-			<text>Are you sure you want to delete this Stacked Focus?</text>
 		</string>
 		<string>
 			<key>Message_SpiritServices</key>
@@ -2486,10 +2450,6 @@
 			<text>Self</text>
 		</string>
 		<string>
-			<key>String_SpellSpecial</key>
-			<text>Special</text>
-		</string>
-		<string>
 			<key>String_SpellForce</key>
 			<text>F</text>
 		</string>
@@ -3011,10 +2971,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<text>Group:</text>
 		</string>
 		<string>
-			<key>Label_Network</key>
-			<text>Network:</text>
-		</string>
-		<string>
 			<key>Checkbox_GroupInitiation</key>
 			<text>Group Initiation (-20%)</text>
 		</string>
@@ -3103,10 +3059,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 		<string>
 			<key>Tab_DecreaseLifestyleMonths</key>
 			<text>Decrease the number of pre-paid months for the Lifestyle.</text>
-		</string>
-		<string>
-			<key>String_Roommates</key>
-			<text>roommates</text>
 		</string>
 		<!-- Street Gear/Armor Tab -->
 		<string>
@@ -3320,10 +3272,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<text>Bonded Foci</text>
 		</string>
 		<!-- Vehicles Tab -->
-		<string>
-			<key>Label_GearRating</key>
-			<text>Gear Rating:</text>
-		</string>
 		<string>
 			<key>Label_GearQty</key>
 			<text>Gear Qty:</text>
@@ -3541,10 +3489,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<text>Selected Improvements</text>
 		</string>
 		<!-- Improvements Control -->
-		<string>
-			<key>Tip_Improvement_EditNotes</key>
-			<text>Edit Improvement Notes.</text>
-		</string>
 		<!-- Build Point Summery Tab -->
 		<string>
 			<key>Label_SummaryMetatype</key>
@@ -4424,10 +4368,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 			<text>Notes</text>
 		</string>
 		<!-- Omae Window -->
-		<string>
-			<key>MessageTitle_Omae_DeleteSheet</key>
-			<text>Delete Character Sheet</text>
-		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>
@@ -5483,10 +5423,6 @@ Only one attribute may be at its Maximum value during character creation.</text>
 		<string>
 			<key>String_SelectPACKSKit_Spirits</key>
 			<text>Spirits</text>
-		</string>
-		<string>
-			<key>String_SelectPACKSKit_Sprites</key>
-			<text>Sprites</text>
 		</string>
 		<string>
 			<key>String_SelectPACKSKit_Lifestyles</key>

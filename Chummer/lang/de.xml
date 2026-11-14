@@ -256,16 +256,8 @@
 			<text>Ballistisch:</text>
 		</string>
 		<string>
-			<key>Label_BallisticArmorLong</key>
-			<text>Ballistische Panzerung:</text>
-		</string>
-		<string>
 			<key>Label_ImpactArmorShort</key>
 			<text>Stoß:</text>
-		</string>
-		<string>
-			<key>Label_ImpactArmorLong</key>
-			<text>Stoßpanzerung:</text>
 		</string>
 		<string>
 			<key>Label_Test</key>
@@ -316,24 +308,8 @@
 			<text>Woche</text>
 		</string>
 		<string>
-			<key>String_Weeks</key>
-			<text>Wochen</text>
-		</string>
-		<string>
-			<key>String_Hour</key>
-			<text>Stunde</text>
-		</string>
-		<string>
 			<key>String_Hours</key>
 			<text>Stunden</text>
-		</string>
-		<string>
-			<key>String_UnarmedAttack</key>
-			<text>Unbewaffneter Angriff</text>
-		</string>
-		<string>
-			<key>String_Unarmed</key>
-			<text>Unbewaffnet</text>
 		</string>
 		<string>
 			<key>String_LivingPersona</key>
@@ -470,10 +446,6 @@
 		<string>
 			<key>String_AttributeRESShort</key>
 			<text>RES</text>
-		</string>
-		<string>
-			<key>String_AttributeINILong</key>
-			<text>Initiative</text>
 		</string>
 		<string>
 			<key>String_AttributeINIShort</key>
@@ -2180,10 +2152,6 @@
 			<text>Selbst</text>
 		</string>
 		<string>
-			<key>String_SpellSpecial</key>
-			<text>spezial</text>
-		</string>
-		<string>
 			<key>String_SpellForce</key>
 			<text>K</text>
 		</string>
@@ -2608,10 +2576,6 @@
 			<text>Gruppe:</text>
 		</string>
 		<string>
-			<key>Label_Network</key>
-			<text>Netzwerk:</text>
-		</string>
-		<string>
 			<key>Checkbox_GroupInitiation</key>
 			<text>Gruppeninitiation (-20%)</text>
 		</string>
@@ -2862,10 +2826,6 @@
 		<string>
 			<key>String_AddLocation</key>
 			<text>Namen für den neuen Standort eingeben.</text>
-		</string>
-		<string>
-			<key>Label_GearRating</key>
-			<text>Qualitätsstufe:</text>
 		</string>
 		<string>
 			<key>Label_GearQty</key>
@@ -4483,10 +4443,6 @@
 			<text>Geister</text>
 		</string>
 		<string>
-			<key>String_SelectPACKSKit_Sprites</key>
-			<text>Sprites</text>
-		</string>
-		<string>
 			<key>String_SelectPACKSKit_Lifestyles</key>
 			<text>Lebensstile</text>
 		</string>
@@ -4955,10 +4911,6 @@
 			<text>Möchten sie diese Verbesserung wirklich löschen?</text>
 		</string>
 		<string>
-			<key>Tip_Improvement_EditNotes</key>
-			<text>Notizen bearbeiten</text>
-		</string>
-		<string>
 			<key>Checkbox_CreateImprovementApplyToRating</key>
 			<text>auf den Wert anwenden</text>
 		</string>
@@ -5107,10 +5059,6 @@
 		<string>
 			<key>MessageTitle_CannotStackFoci</key>
 			<text>Mehrfachfoki kann nicht erstellt werden</text>
-		</string>
-		<string>
-			<key>Message_DeleteStackedFocus</key>
-			<text>Wollen Sie diesen Mehrfachfoki wirklich löschen?</text>
 		</string>
 		<string>
 			<key>String_StackedFocus</key>
@@ -5499,10 +5447,6 @@
 		</string>
 		<!-- Version 323 -->
 		<string>
-			<key>MessageTitle_Omae_DeleteSheet</key>
-			<text>Charakterblatt löschen</text>
-		</string>
-		<string>
 			<key>Button_AddBundle</key>
 			<text>Panzerungsset hinzufügen</text>
 		</string>
@@ -5590,10 +5534,6 @@
 		<string>
 			<key>Button_DisableAll</key>
 			<text>Alle deaktivieren</text>
-		</string>
-		<string>
-			<key>String_Roommates</key>
-			<text>Mitbewohner</text>
 		</string>
 		<!-- Version 350 -->
 		<string>
@@ -6074,10 +6014,6 @@
 		<string>
 			<key>String_ExpensePurchaseCyberwareSuite</key>
 			<text>Cyberware-Set erwerben</text>
-		</string>
-		<string>
-			<key>Message_IncorrectGameVersion_SR4</key>
-			<text>Diese Sicherungsdatei ist für Shadowrun 4 vorgesehen, während diese Version von Chummer für Shadowrun 5 ist. Bitte benutze die Version für Shadowrun 4 von Chummer um diese Datei zu öffnen.</text>
 		</string>
 		<string>
 			<key>Message_IncorrectGameVersion_SR5</key>

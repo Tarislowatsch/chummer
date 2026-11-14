@@ -269,16 +269,8 @@
 			<text>Balistique :</text>
 		</string>
 		<string>
-			<key>Label_BallisticArmorLong</key>
-			<text>Armure Balistique :</text>
-		</string>
-		<string>
 			<key>Label_ImpactArmorShort</key>
 			<text>Impact :</text>
-		</string>
-		<string>
-			<key>Label_ImpactArmorLong</key>
-			<text>Armure d'Impact :</text>
 		</string>
 		<string>
 			<key>Label_Test</key>
@@ -337,14 +329,6 @@
 			<text>semaine</text>
 		</string>
 		<string>
-			<key>String_Weeks</key>
-			<text>semaines</text>
-		</string>
-		<string>
-			<key>String_Hour</key>
-			<text>heure</text>
-		</string>
-		<string>
 			<key>String_Hours</key>
 			<text>heures</text>
 		</string>
@@ -361,14 +345,6 @@
 			<text>Focus multiple</text>
 		</string>
 		<!-- Printout Strings -->
-		<string>
-			<key>String_UnarmedAttack</key>
-			<text>Attaque à mains nues</text>
-		</string>
-		<string>
-			<key>String_Unarmed</key>
-			<text>Mains nues</text>
-		</string>
 		<string>
 			<key>String_LivingPersona</key>
 			<text>Persona incarné</text>
@@ -417,10 +393,6 @@
 		<string>
 			<key>MessageTitle_RemoveCharacterAssociation</key>
 			<text>Supprimer l'association du personnage</text>
-		</string>
-		<string>
-			<key>Message_IncorrectGameVersion_SR4</key>
-			<text>Ce fichier de sauvegarde doit être utilisé pour la 4e Édition de Shadowrun, cependant cette version de Chummer est conçue pour la 5e Édition. Veuillez utiliser la version de Chummer conçue pour la 4e Édition pour ouvrir ce fichier.</text>
 		</string>
 		<string>
 			<key>Message_IncorrectGameVersion_SR5</key>
@@ -518,10 +490,6 @@
 		<string>
 			<key>String_AttributeRESShort</key>
 			<text>RES</text>
-		</string>
-		<string>
-			<key>String_AttributeINILong</key>
-			<text>Initiative</text>
 		</string>
 		<string>
 			<key>String_AttributeINIShort</key>
@@ -1112,10 +1080,6 @@
 		<string>
 			<key>Message_DeleteImprovementGroup</key>
 			<text>Êtes-vous sûr de vouloir supprimer ce groupe d'amélioration ? Toutes les améliorations placées dans ce groupe seront déplacées vers les améliorations sélectionnées.</text>
-		</string>
-		<string>
-			<key>Message_DeleteStackedFocus</key>
-			<text>Êtes-vous sûr de vouloir supprimer ce focus multiple?</text>
 		</string>
 		<string>
 			<key>Message_SpiritServices</key>
@@ -2474,10 +2438,6 @@
 			<text>Lanceur</text>
 		</string>
 		<string>
-			<key>String_SpellSpecial</key>
-			<text>Spécial</text>
-		</string>
-		<string>
 			<key>String_SpellForce</key>
 			<text>F</text>
 		</string>
@@ -2991,10 +2951,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<text>Groupe :</text>
 		</string>
 		<string>
-			<key>Label_Network</key>
-			<text>Réseau :</text>
-		</string>
-		<string>
 			<key>Checkbox_GroupInitiation</key>
 			<text>Initiation de Groupe (-20%)</text>
 		</string>
@@ -3083,10 +3039,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 		<string>
 			<key>Tab_DecreaseLifestyleMonths</key>
 			<text>Supprimer un mois de loyer prépayé de ce Niveau de vie.</text>
-		</string>
-		<string>
-			<key>String_Roommates</key>
-			<text>Colocataires :</text>
 		</string>
 		<!-- Street Gear/Armor Tab -->
 		<string>
@@ -3292,10 +3244,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<text>Focus liés</text>
 		</string>
 		<!-- Vehicles Tab -->
-		<string>
-			<key>Label_GearRating</key>
-			<text>Indice d'équipement :</text>
-		</string>
 		<string>
 			<key>Label_GearQty</key>
 			<text>Quantité :</text>
@@ -3521,10 +3469,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<text>Améliorations sélectionnées</text>
 		</string>
 		<!-- Improvements Control -->
-		<string>
-			<key>Tip_Improvement_EditNotes</key>
-			<text>Modifier les notes de l'amélioration.</text>
-		</string>
 		<!-- Build Point Summery Tab -->
 		<string>
 			<key>Label_SummaryMetatype</key>
@@ -4404,10 +4348,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 			<text>Notes</text>
 		</string>
 		<!-- Omae Window -->
-		<string>
-			<key>MessageTitle_Omae_DeleteSheet</key>
-			<text>Effacer la feuille de personnage</text>
-		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>
@@ -5443,10 +5383,6 @@ Un saul attribut peut atteindre sa valeur maximum durant la création de personn
 		<string>
 			<key>String_SelectPACKSKit_Spirits</key>
 			<text>Esprits</text>
-		</string>
-		<string>
-			<key>String_SelectPACKSKit_Sprites</key>
-			<text>Sprites</text>
 		</string>
 		<string>
 			<key>String_SelectPACKSKit_Lifestyles</key>
