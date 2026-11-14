@@ -20,9 +20,6 @@ namespace Chummer.Tests.Rulebook
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
 			"weapon range by category: Cyberware Throwing Weapons",
 			"weapon range by category: Exotic Ranged Weapons",
-			// - 154 rockets, missiles, rounds, mines: no code hands them the launcher's range
-			// - 21 launcher grenades carry one themselves: the data can
-			"weapon range by category: Gear",
 			"weapon range by category: Special Weapons",
 			"weapon range by category: Vehicle Weapons",
 		};
@@ -204,8 +201,8 @@ namespace Chummer.Tests.Rulebook
 				{ "vessel powers", 7 },
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
-				{ "weapon range", 162 },
-				{ "weapon range by category", 464 },
+				{ "weapon range", 300 },
+				{ "weapon range by category", 312 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};

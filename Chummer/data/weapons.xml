@@ -7304,6 +7304,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7321,6 +7322,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7338,6 +7340,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7355,6 +7358,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7372,6 +7376,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7389,6 +7394,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>SR4</source>
 			<page>325</page>
 		</weapon>
@@ -7520,6 +7526,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7537,6 +7544,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7554,6 +7562,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7571,6 +7580,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7588,6 +7598,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7605,6 +7616,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7622,6 +7634,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7639,6 +7652,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7656,6 +7670,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7673,6 +7688,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>AR</source>
 			<page>37</page>
 		</weapon>
@@ -7690,6 +7706,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7707,6 +7724,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7724,6 +7742,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7741,6 +7760,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7758,6 +7778,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7775,6 +7796,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7792,6 +7814,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7809,6 +7832,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7826,6 +7850,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7843,6 +7868,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7860,6 +7886,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>38</page>
 		</weapon>
@@ -7896,6 +7923,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>35</page>
 		</weapon>
@@ -7913,6 +7941,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>35</page>
 		</weapon>
@@ -7930,6 +7959,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>35</page>
 		</weapon>
@@ -7947,6 +7977,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7964,6 +7995,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7981,6 +8013,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -7998,6 +8031,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -8312,6 +8346,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range />
 			<source>AR</source>
 			<page>124</page>
 		</weapon>
@@ -8329,6 +8364,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (25 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8346,6 +8382,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range />
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8363,6 +8400,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8380,6 +8418,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8397,6 +8436,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8414,6 +8454,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8431,6 +8472,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8448,6 +8490,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8465,6 +8508,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (5 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8482,6 +8526,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8499,6 +8544,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8516,6 +8562,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (10 km)</range>
 			<source>AR</source>
 			<page>125</page>
 		</weapon>
@@ -8533,6 +8580,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>19</page>
 		</weapon>
@@ -8550,6 +8598,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>20</page>
 		</weapon>
@@ -8567,6 +8616,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>21</page>
 		</weapon>
@@ -8584,6 +8634,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>21</page>
 		</weapon>
@@ -8601,6 +8652,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>22</page>
 		</weapon>
@@ -8618,6 +8670,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>22</page>
 		</weapon>
@@ -8635,6 +8688,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>22</page>
 		</weapon>
@@ -8652,6 +8706,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>38</page>
 		</weapon>
@@ -8669,6 +8724,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>39</page>
 		</weapon>
@@ -8686,6 +8742,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST</source>
 			<page>39</page>
 		</weapon>
@@ -8721,6 +8778,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers (500 km)</range>
 			<source>DW</source>
 			<page>33</page>
 		</weapon>
@@ -8739,6 +8797,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -8757,6 +8816,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -8775,6 +8835,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -8793,6 +8854,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>157</page>
 		</weapon>
@@ -8811,6 +8873,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8829,6 +8892,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8847,6 +8911,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8865,6 +8930,7 @@
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
 			<useskill>Armorer</useskill>
+			<range />
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8882,6 +8948,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8899,6 +8966,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8916,6 +8984,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8933,6 +9002,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8950,6 +9020,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8967,6 +9038,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>158</page>
 		</weapon>
@@ -8984,6 +9056,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Mortar Launchers</range>
 			<source>WAR</source>
 			<page>159</page>
 		</weapon>
@@ -9071,6 +9144,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>174</page>
 		</weapon>
@@ -9088,6 +9162,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>174</page>
 		</weapon>
@@ -9105,6 +9180,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>174</page>
 		</weapon>
@@ -9122,6 +9198,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>174</page>
 		</weapon>
@@ -9139,6 +9216,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>174</page>
 		</weapon>
@@ -10487,6 +10565,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10504,6 +10583,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10521,6 +10601,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10538,6 +10619,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10555,6 +10637,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10572,6 +10655,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10589,6 +10673,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10606,6 +10691,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10623,6 +10709,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10640,6 +10727,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10657,6 +10745,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10674,6 +10763,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10691,6 +10781,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10708,6 +10799,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10725,6 +10817,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10742,6 +10835,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10759,6 +10853,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Heavy Mortar</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10776,6 +10871,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10793,6 +10889,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10810,6 +10907,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10827,6 +10925,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10844,6 +10943,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10861,6 +10961,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10878,6 +10979,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10895,6 +10997,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10912,6 +11015,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10929,6 +11033,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10946,6 +11051,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10963,6 +11069,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10980,6 +11087,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -10997,6 +11105,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -11014,6 +11123,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -11031,6 +11141,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -11048,6 +11159,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Howitzer</range>
 			<source>WAR</source>
 			<page>176</page>
 		</weapon>
@@ -12883,6 +12995,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>13</page>
 		</weapon>
@@ -12978,6 +13091,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>24</page>
 		</weapon>
@@ -13014,6 +13128,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>25</page>
 		</weapon>
@@ -13031,6 +13146,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>25</page>
 		</weapon>
@@ -13068,6 +13184,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>27</page>
 		</weapon>
@@ -13085,6 +13202,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>27</page>
 		</weapon>
@@ -13102,6 +13220,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>28</page>
 		</weapon>
@@ -13119,6 +13238,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>29</page>
 		</weapon>
@@ -13136,6 +13256,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>29</page>
 		</weapon>
@@ -13153,6 +13274,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>30</page>
 		</weapon>
@@ -13170,6 +13292,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>30</page>
 		</weapon>
@@ -13187,6 +13310,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>MST2</source>
 			<page>31</page>
 		</weapon>
@@ -14825,6 +14949,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>31</page>
 		</weapon>
@@ -14842,6 +14967,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>31</page>
 		</weapon>
@@ -14914,6 +15040,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>46</page>
 		</weapon>
@@ -14931,6 +15058,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>46</page>
 		</weapon>
@@ -14948,6 +15076,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>47</page>
 		</weapon>
@@ -14965,6 +15094,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>47</page>
 		</weapon>
@@ -14982,6 +15112,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>48</page>
 		</weapon>
@@ -14999,6 +15130,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>48</page>
 		</weapon>
@@ -15016,6 +15148,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>48</page>
 		</weapon>
@@ -15033,6 +15166,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>48</page>
 		</weapon>
@@ -15076,6 +15210,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>59</page>
 		</weapon>
@@ -15093,6 +15228,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>59</page>
 		</weapon>
@@ -15110,6 +15246,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>60</page>
 		</weapon>
@@ -15127,6 +15264,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>60</page>
 		</weapon>
@@ -15223,6 +15361,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>71</page>
 		</weapon>
@@ -15240,6 +15379,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>71</page>
 		</weapon>
@@ -15257,6 +15397,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>72</page>
 		</weapon>
@@ -15274,6 +15415,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>72</page>
 		</weapon>
@@ -15317,6 +15459,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>89</page>
 		</weapon>
@@ -15334,6 +15477,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>89</page>
 		</weapon>
@@ -15351,6 +15495,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>90</page>
 		</weapon>
@@ -15368,6 +15513,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>90</page>
 		</weapon>
@@ -15385,6 +15531,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>91</page>
 		</weapon>
@@ -15402,6 +15549,7 @@
 			<avail>0</avail>
 			<cost>0</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>EWA</source>
 			<page>91</page>
 		</weapon>

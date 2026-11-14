@@ -139,6 +139,38 @@
 			<extreme>1500</extreme>
 		</range>
 		<range>
+			<category>Missile Launchers (5 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>5000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (10 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>10000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (25 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>25000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (500 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>500000</extreme>
+		</range>
+		<range>
 			<category>Mortar Launchers</category>
 			<min>150</min>
 			<short>300</short>
