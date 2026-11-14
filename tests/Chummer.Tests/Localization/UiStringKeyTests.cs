@@ -14,13 +14,46 @@ namespace Chummer.Tests.Localization
 		[Fact]
 		public void EnglishKeysAreUnique()
 		{
-			string[] repeated = UiStringKeys.EnglishKeys
-				.GroupBy(key => key, StringComparer.Ordinal)
-				.Where(group => group.Count() > 1)
-				.Select(group => group.Key)
+			string[] repeated = UiStringKeys.RepeatedKeys(EnglishStrings.All)
+				.Select(repeat => repeat.Key)
 				.ToArray();
 
 			FailureReport.AssertNone("en-us.xml declares these keys more than once", repeated);
+		}
+
+		// - a translation overwrites per key: the last repeat wins (clsLanguageManager.cs:176-177)
+		// - exact: a removed repeat must leave this list in the same change
+		private static readonly IReadOnlyDictionary<string, string> KnownTranslationRepeats =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				["de Label_Notoriety"] = "2 entries, 1 text",
+				["de Label_PublicAwareness"] = "2 entries, 1 text",
+				["de Label_StreetCred"] = "2 entries, 1 text",
+				["de Message_DeleteArmorLocation"] = "2 entries, 2 texts",
+				["fr Button_AddPet"] = "2 entries, 1 text",
+				["fr Tab_Pets"] = "2 entries, 1 text",
+			};
+
+		[Fact]
+		public void TranslationKeysRepeatOnlyAsKnown()
+		{
+			Dictionary<string, string> actual = UiStringKeys.TranslationLanguages
+				.SelectMany(language => UiStringKeys.RepeatedKeys(UiStringKeys.TranslationEntries(language))
+					.Select(repeat => new { language, repeat }))
+				.ToDictionary(
+					entry => entry.language + " " + entry.repeat.Key,
+					entry => entry.repeat.Count + " entries, " + entry.repeat.DistinctTexts
+						+ (entry.repeat.DistinctTexts == 1 ? " text" : " texts"),
+					StringComparer.Ordinal);
+
+			PinReport.AssertEqual("Repeated keys in the translation files", KnownTranslationRepeats, actual);
+		}
+
+		// - an empty selection would leave the repeat pin green on no files
+		[Fact]
+		public void TranslationLanguagesAreTheShippedOnes()
+		{
+			Assert.Equal(new[] { "de", "fr", "jp" }, UiStringKeys.TranslationLanguages);
 		}
 
 		// - the same catch exits the application when an entry lacks <key> or <text>

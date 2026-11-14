@@ -21,6 +21,52 @@ namespace Chummer.Tests.Localization
 				.Select(entry => entry.Key)
 				.ToArray());
 
+		// - the options dialog lists every lang/*.xml with a /chummer/name (frmOptions.cs:157-167)
+		// - en-us.xml is the base the others override, not a translation
+		public static IReadOnlyList<string> TranslationLanguages => CachedTranslationLanguages.Value;
+
+		private static readonly Lazy<IReadOnlyList<string>> CachedTranslationLanguages =
+			new Lazy<IReadOnlyList<string>>(() => Directory.EnumerateFiles(DataPaths.ChummerLangDir, "*.xml")
+				.Where(path => Xml.Load(path).SelectSingleNode("/chummer/name") != null)
+				.Select(Path.GetFileNameWithoutExtension)
+				.Where(language => language != "en-us")
+				.OrderBy(language => language, StringComparer.Ordinal)
+				.ToArray());
+
+		public static IReadOnlyList<EnglishStrings.Entry> TranslationEntries(string language)
+		{
+			return EnglishStrings.EntriesIn(Xml.Load(Path.Combine(DataPaths.ChummerLangDir, language + ".xml")));
+		}
+
+		// One key that occurs more than once in a language file.
+		public sealed class Repeat
+		{
+			public Repeat(string key, int count, int distinctTexts)
+			{
+				Key = key;
+				Count = count;
+				DistinctTexts = distinctTexts;
+			}
+
+			public string Key { get; }
+
+			public int Count { get; }
+
+			// - 1 means the copies agree: the clean-up only drops one
+			public int DistinctTexts { get; }
+		}
+
+		public static IEnumerable<Repeat> RepeatedKeys(IEnumerable<EnglishStrings.Entry> entries)
+		{
+			return entries
+				.Where(entry => entry.Key != null)
+				.GroupBy(entry => entry.Key, StringComparer.Ordinal)
+				.Where(group => group.Count() > 1)
+				.Select(group => new Repeat(group.Key, group.Count(),
+					group.Select(entry => entry.Text).Distinct(StringComparer.Ordinal).Count()))
+				.OrderBy(repeat => repeat.Key, StringComparer.Ordinal);
+		}
+
 		// - RefreshStrings reads objNode["key"] and objNode["text"] unguarded (clsLanguageManager.cs:139-140)
 		// - public so the detection tests can drive it with hand-built XML
 		public static IEnumerable<string> EntriesMissingKeyOrText(IEnumerable<EnglishStrings.Entry> entries)
