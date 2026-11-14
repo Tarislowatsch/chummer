@@ -12,10 +12,20 @@ namespace Chummer.Tests.Rulebook
 	{
 		private const string WeaponsFile = "weapons.xml";
 
+		// - frmCreate.cs:21099 reads it, but no packs.xml carries one
+		// - here, not in CrossFileReferences: a rule there needs data to check
+		private static readonly CrossFileReferences.ReferenceRule KitUnderbarrel = new CrossFileReferences.ReferenceRule(
+			"kit weapon underbarrel", "frmCreate.cs:21099", "objXmlWeapon[\"underbarrel\"]",
+			"packs.xml", "/chummer/packs/pack/weapons/weapon/underbarrel",
+			new[] { new CrossFileReferences.KeyField(".", "name", false) },
+			new[] { new CrossFileReferences.Target(WeaponsFile, "/chummer/weapons/weapon") });
+
+		private static readonly CrossFileReferences.ReferenceRule[] LocalRules = { KitUnderbarrel };
+
 		// - every reference rule that adds a weapon by name
-		// - kit underbarrels have no rule: no kit carries one (frmCreate.cs:21097)
 		public static readonly IReadOnlyList<CrossFileReferences.ReferenceRule> Rules = CrossFileReferences.Rules
 			.Where(rule => WeaponTargets(rule).Any())
+			.Concat(LocalRules)
 			.ToArray();
 
 		private static readonly IReadOnlyDictionary<string, int> NameFields =
@@ -47,6 +57,8 @@ namespace Chummer.Tests.Rulebook
 			public IReadOnlyCollection<string> AdmittedBy { get; }
 
 			public string Label => Scope == null ? Name : Scope + ": " + Name;
+
+			internal string Key => KeyOf(Scope, Name);
 		}
 
 		// One reference that adds a weapon by name.
@@ -70,38 +82,39 @@ namespace Chummer.Tests.Rulebook
 			public string OwnerWeapon { get; }
 		}
 
-		// - base carriers reach every weapon, a pack's carriers only the base and that pack
+		// - a base weapon needs a base carrier: without the pack nobody gets it
+		// - a pack weapon takes a carrier from the base or its own pack
 		// - a carrier inside a weapon counts once that weapon is reachable itself
 		public static IEnumerable<Weapon> Unreachable(IReadOnlyList<Weapon> weapons, IReadOnlyList<Carry> carries)
 		{
-			HashSet<Weapon> reachable = new HashSet<Weapon>(weapons.Where(weapon => !weapon.CarrierOnly));
+			HashSet<string> reachable = new HashSet<string>(
+				weapons.Where(weapon => !weapon.CarrierOnly).Select(weapon => weapon.Key), StringComparer.Ordinal);
 			ILookup<string, Carry> carriesByName = carries.ToLookup(carry => carry.Name, StringComparer.Ordinal);
 
 			bool grew = true;
 			while (grew)
 			{
 				grew = false;
-				foreach (Weapon weapon in weapons.Where(weapon => !reachable.Contains(weapon)).ToArray())
+				foreach (Weapon weapon in weapons.Where(weapon => !reachable.Contains(weapon.Key)).ToArray())
 				{
-					if (carriesByName[weapon.Name].Any(carry => Adds(carry, weapon) && OwnerReachable(carry, reachable)))
+					if (carriesByName[weapon.Name].Any(carry => Adds(carry, weapon)
+						&& (carry.OwnerWeapon == null || reachable.Contains(KeyOf(carry.Scope, carry.OwnerWeapon)))))
 					{
-						reachable.Add(weapon);
+						reachable.Add(weapon.Key);
 						grew = true;
 					}
 				}
 			}
 
-			return weapons.Where(weapon => !reachable.Contains(weapon));
+			return weapons.Where(weapon => !reachable.Contains(weapon.Key));
 		}
 
+		// - an override entry is the pack's version of a base weapon, scoped to that pack
 		public static IReadOnlyList<Weapon> WeaponsInData()
 		{
 			List<Weapon> weapons = WeaponsIn(null, Xml.Load(Path.Combine(DataPaths.ChummerDataDir, WeaponsFile))).ToList();
-			foreach (PackFiles.PackFile file in PackFiles.Paired()
-				.Where(file => !file.IsOverride && file.BaseFileName == WeaponsFile))
-			{
+			foreach (PackFiles.PackFile file in PackFiles.Paired().Where(file => file.BaseFileName == WeaponsFile))
 				weapons.AddRange(WeaponsIn(file.PackName, Xml.Load(file.FilePath)));
-			}
 
 			return weapons;
 		}
@@ -111,6 +124,12 @@ namespace Chummer.Tests.Rulebook
 			List<Carry> carries = RuleCorpus.Files
 				.SelectMany(file => CarriesOf(null, file.CrossFileReferences))
 				.ToList();
+			foreach (CrossFileReferences.ReferenceRule rule in LocalRules)
+			{
+				carries.AddRange(CarriesOf(null, CrossFileReferences.ReferencesIn(rule.SourceFile,
+					Xml.Load(Path.Combine(DataPaths.ChummerDataDir, rule.SourceFile)), new[] { rule })));
+			}
+
 			foreach (PackFiles.PackFile file in PackFiles.Paired())
 			{
 				carries.AddRange(CarriesOf(file.PackName,
@@ -158,15 +177,12 @@ namespace Chummer.Tests.Rulebook
 		private static bool Adds(Carry carry, Weapon weapon)
 		{
 			return weapon.AdmittedBy.Contains(carry.RuleId)
-				&& (carry.Scope == null || weapon.Scope == null
-					|| string.Equals(carry.Scope, weapon.Scope, StringComparison.Ordinal));
+				&& (carry.Scope == null || string.Equals(carry.Scope, weapon.Scope, StringComparison.Ordinal));
 		}
 
-		private static bool OwnerReachable(Carry carry, HashSet<Weapon> reachable)
+		private static string KeyOf(string scope, string name)
 		{
-			return carry.OwnerWeapon == null
-				|| reachable.Any(weapon => string.Equals(weapon.Scope, carry.Scope, StringComparison.Ordinal)
-					&& string.Equals(weapon.Name, carry.OwnerWeapon, StringComparison.Ordinal));
+			return scope + "\0" + name;
 		}
 
 		private static IEnumerable<CrossFileReferences.Target> WeaponTargets(CrossFileReferences.ReferenceRule rule)

@@ -10,10 +10,10 @@ namespace Chummer.Tests.Rulebook
 		[Theory]
 		[InlineData(null, null, true)]
 		[InlineData(null, "a", true)]
-		[InlineData("a", null, true)]
+		[InlineData("a", null, false)]
 		[InlineData("a", "a", true)]
 		[InlineData("a", "b", false)]
-		public void APacksCarrierReachesOnlyTheBaseAndThatPack(string carrierScope, string weaponScope, bool reached)
+		public void APacksCarrierReachesOnlyItsOwnPack(string carrierScope, string weaponScope, bool reached)
 		{
 			WeaponCarriers.Weapon weapon = CarrierOnly(weaponScope, "Grenade", "gear addweapon");
 

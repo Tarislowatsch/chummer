@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -27,7 +26,7 @@ namespace Chummer.Tests.Rulebook
 			"gear.xml/gears/Transgenic",
 		};
 
-		// - a declared exemption puts carrier weapons on sale while every guard stays silent
+		// - why none may be declared: CategoryDeclarations.CarrierOnlyCategories
 		// - pack <categories> join the base block in the picker
 		[Fact]
 		public void CarrierOnlyCategoriesAreUsedAndUndeclared()
@@ -45,14 +44,14 @@ namespace Chummer.Tests.Rulebook
 
 			foreach (PackFiles.PackFile file in PackFiles.Paired())
 			{
-				XmlDocument pack = Xml.Load(file.FilePath);
-				foreach (XmlNode collection in RuleCorpus.CatalogueCollectionsIn(pack.DocumentElement))
+				foreach (CategoryDeclarations.CategoryContract contract in
+					CustomContent.CategoryContractsIn(file, Xml.Load(file.FilePath)))
 				{
-					used.UnionWith(CategoryDeclarations.UsagesIn(collection)
-						.Select(usage => Entry(file.BaseFileName, collection.Name, usage.Category)));
+					used.UnionWith(contract.Usages
+						.Select(usage => Entry(file.BaseFileName, contract.CollectionName, usage.Category)));
+					declared.UnionWith(contract.DeclaredCategories
+						.Select(category => Entry(file.BaseFileName, contract.CollectionName, category)));
 				}
-
-				declared.UnionWith(PackDeclarations(file, pack));
 			}
 
 			string[] stale = CategoryDeclarations.CarrierOnlyCategoryKeys()
@@ -61,26 +60,6 @@ namespace Chummer.Tests.Rulebook
 				.ToArray();
 
 			FailureReport.AssertNoneInFull("These carrier-only categories are declared or no longer used", stale);
-		}
-
-		// - every collection of the base file: a pack's block joins in without the pack's items
-		private static IEnumerable<string> PackDeclarations(PackFiles.PackFile file, XmlDocument pack)
-		{
-			IReadOnlyDictionary<string, IReadOnlyCollection<string>> blocks =
-				CustomContent.CategoryDeclarationsVisibleTo(file, pack);
-			foreach (object[] testCase in CategoryDeclarations.CategoryKeyedCollections()
-				.Where(testCase => Path.GetFileName((string)testCase[0]) == file.BaseFileName))
-			{
-				string collectionName = (string)testCase[1];
-				string block;
-				IReadOnlyCollection<string> categories;
-				if (CategoryDeclarations.TryResolveDeclarationBlock(file.BaseFileName, collectionName, blocks,
-						out block, out categories))
-				{
-					foreach (string category in categories)
-						yield return Entry(file.BaseFileName, collectionName, category);
-				}
-			}
 		}
 
 		// - in a carrier-only category, yet no carrier adds them: unreachable
@@ -101,7 +80,8 @@ namespace Chummer.Tests.Rulebook
 				new[]
 				{
 					"armor mod addweapon", "bioware addweapon", "cyberware addweapon", "gear addweapon",
-					"pack vehicle weapons", "pack weapons", "quality addweapon", "vehicle weapons", "weapon underbarrel",
+					"kit weapon underbarrel", "pack vehicle weapons", "pack weapons", "quality addweapon", "vehicle weapons",
+					"weapon underbarrel",
 				},
 				WeaponCarriers.Rules.Select(rule => rule.Id).OrderBy(id => id, StringComparer.Ordinal));
 		}
