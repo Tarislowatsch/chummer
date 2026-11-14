@@ -84,10 +84,40 @@ namespace Chummer.Tests.Rulebook
 		}
 
 		[Fact]
-		public void AWeaponWithoutCategoryIsNotCarrierOnly()
+		public void AWeaponWithoutCategoryNeedsACarrier()
 		{
-			Assert.False(WeaponCarriers.WeaponsIn("a", Xml.Parse(
+			Assert.True(WeaponCarriers.WeaponsIn("a", Xml.Parse(
 				"<chummer><weapons><weapon><name>Rewritten</name></weapon></weapons></chummer>")).Single().CarrierOnly);
+		}
+
+		// - "Bottle" sits in Blades and Clubs in the real weapons.xml
+		[Fact]
+		public void ACarrierFindsOnlyTheFirstEntryOfAName()
+		{
+			WeaponCarriers.Weapon[] weapons = WeaponCarriers.WeaponsIn(null, Xml.Parse("<chummer><weapons>"
+				+ "<weapon><name>Bottle</name><category>Blades</category></weapon>"
+				+ "<weapon><name>Bottle</name><category>Underbarrel Weapons</category></weapon></weapons></chummer>"))
+				.ToArray();
+
+			WeaponCarriers.Weapon unreached = WeaponCarriers.Unreachable(weapons,
+				new[] { new WeaponCarriers.Carry(null, "vehicle weapons", "Bottle", null) }).Single();
+
+			Assert.Same(weapons[1], unreached);
+		}
+
+		// - Reference.ItemName would name the vehicle or the kit's weapon instead
+		[Fact]
+		public void AKitCarrierIsSourcedToTheKit()
+		{
+			System.Xml.XmlDocument packs = Xml.Parse("<chummer><packs><pack><name>Kit</name>"
+				+ "<vehicles><vehicle><name>Car</name><weapons><weapon><name>Gun</name></weapon></weapons></vehicle></vehicles>"
+				+ "<weapons><weapon><name>Rifle</name><underbarrel>Launcher</underbarrel></weapon></weapons>"
+				+ "</pack></packs></chummer>");
+
+			WeaponCarriers.Carry[] carries = WeaponCarriers.CarriesIn(null, "packs.xml", packs).ToArray();
+
+			Assert.Equal(new[] { "Gun", "Launcher", "Rifle" }, carries.Select(carry => carry.Name).OrderBy(name => name));
+			Assert.All(carries, carry => Assert.Equal("packs.xml/packs/Kit", carry.Source));
 		}
 
 		[Theory]

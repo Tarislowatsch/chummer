@@ -20,16 +20,11 @@ namespace Chummer.Tests.Rulebook
 			new[] { new CrossFileReferences.KeyField(".", "name", false) },
 			new[] { new CrossFileReferences.Target(WeaponsFile, "/chummer/weapons/weapon") });
 
-		private static readonly CrossFileReferences.ReferenceRule[] LocalRules = { KitUnderbarrel };
-
 		// - every reference rule that adds a weapon by name
 		public static readonly IReadOnlyList<CrossFileReferences.ReferenceRule> Rules = CrossFileReferences.Rules
 			.Where(rule => WeaponTargets(rule).Any())
-			.Concat(LocalRules)
+			.Concat(new[] { KitUnderbarrel })
 			.ToArray();
-
-		private static readonly IReadOnlyDictionary<string, CrossFileReferences.ReferenceRule> RulesById =
-			Rules.ToDictionary(rule => rule.Id, StringComparer.Ordinal);
 
 		private static readonly IReadOnlyDictionary<string, int> NameFields =
 			Rules.ToDictionary(rule => rule.Id, NameFieldOf, StringComparer.Ordinal);
@@ -42,12 +37,13 @@ namespace Chummer.Tests.Rulebook
 		// One weapon entry: Scope is null for the base file, else the pack's name.
 		public sealed class Weapon
 		{
-			public Weapon(string scope, string name, bool carrierOnly, IEnumerable<string> admittedBy)
+			public Weapon(string scope, string name, bool carrierOnly, IEnumerable<string> admittedBy, string id = null)
 			{
 				Scope = scope;
 				Name = name;
 				CarrierOnly = carrierOnly;
 				AdmittedBy = new HashSet<string>(admittedBy, StringComparer.Ordinal);
+				Id = id ?? name;
 			}
 
 			public string Scope { get; }
@@ -56,12 +52,15 @@ namespace Chummer.Tests.Rulebook
 
 			public bool CarrierOnly { get; }
 
-			// - the rules whose target filter selects this entry, e.g. category = 'Gear'
+			// - the rules whose lookup finds this entry, e.g. under category = 'Gear'
 			public IReadOnlyCollection<string> AdmittedBy { get; }
+
+			// - per entry, not per name: two entries may share a name in different categories
+			public string Id { get; }
 
 			public string Label => Scope == null ? Name : Scope + ": " + Name;
 
-			internal string Key => KeyOf(Scope, Name);
+			internal string Key => KeyOf(Scope, Id);
 		}
 
 		// One reference that adds a weapon by name.
@@ -82,17 +81,16 @@ namespace Chummer.Tests.Rulebook
 
 			public string Name { get; }
 
-			// - the weapon holding the reference, null when another kind of item does
+			// - the Id of the weapon holding the reference, null when another kind of item does
 			public string OwnerWeapon { get; }
 
-			// - <file>/<collection>/<name> of the item holding the reference
+			// - <file>/<collection>/<name> of the top-level item holding the reference
 			public string Source { get; }
 		}
 
 		// - a base weapon needs a base carrier: without the pack nobody gets it
 		// - a pack weapon takes a carrier from the base or its own pack
 		// - a carrier inside a weapon counts once that weapon is reachable itself
-		// - replaced: pack + source of each base item a pack's override rewrites
 		public static IEnumerable<Weapon> Unreachable(IReadOnlyList<Weapon> weapons, IReadOnlyList<Carry> carries,
 			IEnumerable<string> replaced = null)
 		{
@@ -137,6 +135,7 @@ namespace Chummer.Tests.Rulebook
 			return pack;
 		}
 
+		// - against the base only: a twin across packs fails NoTwoCustomEntriesShareAName
 		private static IReadOnlyList<KeyValuePair<PackFiles.PackFile, XmlDocument>> LoadedPacks()
 		{
 			Dictionary<string, XmlDocument> bases = new Dictionary<string, XmlDocument>(StringComparer.Ordinal);
@@ -165,20 +164,12 @@ namespace Chummer.Tests.Rulebook
 
 		private static IReadOnlyList<Carry> CarriesInData(IEnumerable<KeyValuePair<PackFiles.PackFile, XmlDocument>> packs)
 		{
-			List<Carry> carries = RuleCorpus.Files
-				.SelectMany(file => CarriesOf(null, file.CrossFileReferences))
+			List<Carry> carries = Rules.Select(rule => rule.SourceFile)
+				.Distinct(StringComparer.OrdinalIgnoreCase)
+				.SelectMany(fileName => CarriesIn(null, fileName, Xml.Load(Path.Combine(DataPaths.ChummerDataDir, fileName))))
 				.ToList();
-			foreach (CrossFileReferences.ReferenceRule rule in LocalRules)
-			{
-				carries.AddRange(CarriesOf(null, CrossFileReferences.ReferencesIn(rule.SourceFile,
-					Xml.Load(Path.Combine(DataPaths.ChummerDataDir, rule.SourceFile)), new[] { rule })));
-			}
-
 			foreach (KeyValuePair<PackFiles.PackFile, XmlDocument> pack in packs)
-			{
-				carries.AddRange(CarriesOf(pack.Key.PackName,
-					CrossFileReferences.ReferencesIn(pack.Key.BaseFileName, pack.Value, Rules)));
-			}
+				carries.AddRange(CarriesIn(pack.Key.PackName, pack.Key.BaseFileName, pack.Value));
 
 			return carries;
 		}
@@ -191,42 +182,77 @@ namespace Chummer.Tests.Rulebook
 					.Select(item => KeyOf(pack.Key.PackName, pack.Key.BaseFileName + "/" + item.Collection + "/" + item.Name)));
 		}
 
+		// - a rule admits only the first entry of a name: the consumer's lookup is SelectSingleNode
 		public static IEnumerable<Weapon> WeaponsIn(string scope, XmlDocument document)
 		{
+			IReadOnlyDictionary<XmlNode, string> ids = WeaponIdsIn(document);
 			Dictionary<XmlNode, List<string>> admitted = new Dictionary<XmlNode, List<string>>();
 			foreach (CrossFileReferences.ReferenceRule rule in Rules)
 			{
 				foreach (XmlNode node in WeaponTargets(rule)
-					.SelectMany(target => document.SelectNodes(target.ItemXPath).Cast<XmlNode>()))
+					.SelectMany(target => document.SelectNodes(target.ItemXPath).Cast<XmlNode>())
+					.Where(node => node["name"] != null)
+					.GroupBy(node => node["name"].InnerText, StringComparer.Ordinal)
+					.Select(group => group.First()))
 				{
-					List<string> ids;
-					if (!admitted.TryGetValue(node, out ids))
-						admitted.Add(node, ids = new List<string>());
-					ids.Add(rule.Id);
+					List<string> rules;
+					if (!admitted.TryGetValue(node, out rules))
+						admitted.Add(node, rules = new List<string>());
+					rules.Add(rule.Id);
 				}
 			}
 
-			// - no <category>, as after an override without one: not carrier-only
-			return document.SelectNodes("/chummer/weapons/weapon[name]").Cast<XmlNode>()
-				.Select(node => new Weapon(scope, node["name"].InnerText,
-					node["category"] != null
-						&& CategoryDeclarations.IsCarrierOnly(WeaponsFile, "weapons", node["category"].InnerText),
-					admitted.ContainsKey(node) ? admitted[node] : Enumerable.Empty<string>()))
+			// - no <category>, as after an override without one: no picker lists it, only a carrier
+			return ids.Select(entry => new Weapon(scope, entry.Key["name"].InnerText,
+					entry.Key["category"] == null
+						|| CategoryDeclarations.IsCarrierOnly(WeaponsFile, "weapons", entry.Key["category"].InnerText),
+					admitted.ContainsKey(entry.Key) ? admitted[entry.Key] : Enumerable.Empty<string>(),
+					entry.Value))
 				.ToArray();
 		}
 
-		private static IEnumerable<Carry> CarriesOf(string scope, IEnumerable<CrossFileReferences.Reference> references)
+		// - read off the nodes: Reference.ItemName names a vehicle or weapon inside a kit, not the kit
+		public static IEnumerable<Carry> CarriesIn(string scope, string fileName, XmlDocument document)
 		{
-			foreach (CrossFileReferences.Reference reference in references)
+			IReadOnlyDictionary<XmlNode, string> weaponIds = WeaponIdsIn(document);
+			foreach (CrossFileReferences.ReferenceRule rule in Rules
+				.Where(rule => string.Equals(rule.SourceFile, fileName, StringComparison.OrdinalIgnoreCase)))
 			{
-				int nameField;
-				if (!NameFields.TryGetValue(reference.RuleId, out nameField) || reference.Values[nameField] == null)
-					continue;
+				string nameSource = rule.KeyFields[NameFields[rule.Id]].Source;
+				foreach (XmlNode node in document.SelectNodes(rule.SourceXPath))
+				{
+					string name = nameSource == "." ? node.InnerText : node.SelectSingleNode(nameSource)?.InnerText;
+					XmlNode item = TopItemOf(node);
+					if (name == null || item == null)
+						continue;
 
-				yield return new Carry(scope, reference.RuleId, reference.Values[nameField],
-					WeaponOwnedRules.Contains(reference.RuleId) ? reference.ItemName : null,
-					SourceOf(RulesById[reference.RuleId], reference.ItemName));
+					string owner = null;
+					if (WeaponOwnedRules.Contains(rule.Id))
+						weaponIds.TryGetValue(item, out owner);
+					yield return new Carry(scope, rule.Id, name, owner,
+						fileName + "/" + item.ParentNode.Name + "/" + item["name"]?.InnerText);
+				}
 			}
+		}
+
+		// - an entry's Id: its name and position among the file's weapons
+		private static IReadOnlyDictionary<XmlNode, string> WeaponIdsIn(XmlDocument document)
+		{
+			return document.SelectNodes("/chummer/weapons/weapon[name]").Cast<XmlNode>()
+				.Select((node, index) => new KeyValuePair<XmlNode, string>(node, node["name"].InnerText + "#" + index))
+				.ToDictionary(entry => entry.Key, entry => entry.Value);
+		}
+
+		// - the catalogue entry directly under /chummer/<collection>
+		private static XmlNode TopItemOf(XmlNode node)
+		{
+			for (XmlNode item = node; item.ParentNode != null; item = item.ParentNode)
+			{
+				if (item.ParentNode.ParentNode == node.OwnerDocument.DocumentElement)
+					return item;
+			}
+
+			return null;
 		}
 
 		// - a base carrier is gone for a pack whose override rewrote its item
@@ -238,12 +264,6 @@ namespace Chummer.Tests.Rulebook
 				return string.Equals(carry.Scope, weapon.Scope, StringComparison.Ordinal);
 
 			return weapon.Scope == null || !rewritten.Contains(KeyOf(weapon.Scope, carry.Source));
-		}
-
-		// - the collection is the rule's third path step: /chummer/<collection>/...
-		private static string SourceOf(CrossFileReferences.ReferenceRule rule, string itemName)
-		{
-			return rule.SourceFile + "/" + rule.SourceXPath.Split('/')[2] + "/" + itemName;
 		}
 
 		internal static string KeyOf(string scope, string name)
