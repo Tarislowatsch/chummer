@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Chummer.Tests.Consumption.Bonus;
 using Chummer.Tests.Kernel;
 using Xunit;
 
@@ -250,6 +251,21 @@ namespace Chummer.Tests.Consumption.Fields
 				.ToArray();
 
 			FailureReport.AssertNoneInFull("The chain scan misses these OuterXml tests", unlinked);
+		}
+
+		// - a text test in a handler outside IndexedHandlers would escape the check above
+		[Fact]
+		public void EveryTextTestInTheConsumerLiesInAnIndexedBranch()
+		{
+			HashSet<string> covered = new HashSet<string>(
+				FieldReaders.HandlerBranches.SelectMany(branch => branch.TextTestSites), StringComparer.Ordinal);
+
+			string[] outside = FieldReaders.TextTestSitesIn(BonusVocabulary.HandlerConsumerFile,
+					SourceCorpus.File(BonusVocabulary.HandlerConsumerFile).Source)
+				.Where(site => !covered.Contains(site))
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("These OuterXml tests lie outside every indexed handler branch", outside);
 		}
 
 		private static readonly IReadOnlyDictionary<string, string> MeasuredHandlerDispatch =

@@ -383,13 +383,66 @@ namespace Chummer.Tests.Consumption.Fields
 		{
 			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("selectskill", "x.cs", SourceLines.Of(ChainSource));
 			string text = "<selectskill skillcategory=\"no skillgroup here\" />";
-			FieldReaders.HandlerField field = new FieldReaders.HandlerField("q.xml", "selectskill",
-				FieldReaders.BlockReach.First, "@skillcategory", "no skillgroup here", false, new[] { "@skillcategory" }, text);
+			FieldReaders.HandlerField[] fields = new[] { 1, 2 }
+				.Select(number => new FieldReaders.HandlerField("q.xml", "selectskill", FieldReaders.BlockReach.First,
+					"@skillcategory", "no skillgroup here", false, new[] { "@skillcategory" }, text, number))
+				.ToArray();
 
-			Assert.Equal(new[] { "q.xml" },
-				FieldReaders.UnreadHandlerFields(new[] { field }, new[] { branch }).Select(entry => entry.File));
-			Assert.Equal(new[] { "q.xml selectskill picks @skillgroup [text skillgroup]: " + text },
-				FieldReaders.ChainsPickingAnAbsentAttribute(new[] { field }, new[] { branch }));
+			Assert.Equal(new[] { "q.xml", "q.xml" },
+				FieldReaders.UnreadHandlerFields(fields, new[] { branch }).Select(entry => entry.File));
+			Assert.Equal(
+				new[]
+				{
+					"q.xml selectskill #1 picks @skillgroup [text skillgroup]: " + text,
+					"q.xml selectskill #2 picks @skillgroup [text skillgroup]: " + text,
+				},
+				FieldReaders.ChainsPickingAnAbsentAttribute(fields, new[] { branch }));
+		}
+
+		[Fact]
+		public void HandlerFieldsNumberTheirBlocks()
+		{
+			XmlDocument document = Xml.Parse("<chummer><qualities><quality><bonus><selectskill><val>1</val></selectskill>"
+				+ "</bonus></quality><quality><bonus><selectskill><val>1</val></selectskill></bonus></quality></qualities></chummer>");
+
+			Assert.Equal(new[] { 1, 2 }, FieldReaders.HandlerFieldsIn("q.xml", "qualities.xml", document,
+				new[] { "selectskill" }).Select(field => field.BlockNumber));
+		}
+
+		[Fact]
+		public void AnIfInsideALinkBodyKeepsTheOuterChainWhole()
+		{
+			string[] source =
+			{
+				"public bool CreateImprovements(Improvement.ImprovementSource objSource, string s, XmlNode nodBonus, bool b)",
+				"{",
+				"	if (NodeExists(nodBonus, \"selectskill\"))",
+				"	{",
+				"		if (nodBonus[\"selectskill\"].Attributes[\"skillgroup\"] != null)",
+				"		{",
+				"			if (nodBonus[\"selectskill\"].Attributes[\"skillgroup\"] != null)",
+				"				a = nodBonus[\"selectskill\"].Attributes[\"skillgroup\"].InnerText;",
+				"		}",
+				"		else if (nodBonus[\"selectskill\"].Attributes[\"limittoskill\"] != null)",
+				"			b = nodBonus[\"selectskill\"].Attributes[\"limittoskill\"].InnerText;",
+				"	}",
+				"}",
+			};
+
+			FieldReaders.HandlerBranch branch = FieldReaders.BranchOf("selectskill", "x.cs", SourceLines.Of(source));
+
+			Assert.Equal(new[] { "@skillgroup", "@limittoskill" },
+				Assert.Single(branch.Chains).Select(link => link.ToString()));
+		}
+
+		[Fact]
+		public void TextTestSitesFindsEveryOuterXmlLine()
+		{
+			Assert.Equal(new[] { "x.cs:2" }, FieldReaders.TextTestSitesIn("x.cs", SourceLines.Of(new[]
+			{
+				"// a = n.OuterXml.Contains(\"x\");",
+				"b = n[\"y\"].OuterXml.Contains(\"z\");",
+			})));
 		}
 
 		[Fact]
