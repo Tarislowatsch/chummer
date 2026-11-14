@@ -13,7 +13,6 @@ namespace Chummer.Tests.Rulebook
 	public class CategoryDeclarationTests
 	{
 		// - declaring one of these is a visible behaviour change to make deliberately, not a tidy-up
-		// - "Periphirals" and "Paranroaml" mirror typos in the data, not typos in this list
 		// - format: <file>/<collection>/<category>, one line per entry
 		private static readonly HashSet<string> KnownUndeclaredCategories = new HashSet<string>(StringComparer.Ordinal)
 		{
@@ -23,11 +22,8 @@ namespace Chummer.Tests.Rulebook
 			"armor.xml/mods/Second Skin Polymer",
 			"armor.xml/mods/Victory Liners",
 			"critterpowers.xml/powers/Dracoforms",
-			"critterpowers.xml/powers/Paranroaml",
 			"gear.xml/gears/Mook",
-			"gear.xml/gears/Periphirals",
 			"gear.xml/gears/Transgenic",
-			"vehicles.xml/vehicles/Rotocraft",
 			"weapons.xml/weapons/Cyberware",
 			"weapons.xml/weapons/Cyberware Blades",
 			"weapons.xml/weapons/Cyberware Clubs",
