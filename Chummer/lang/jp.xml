@@ -275,16 +275,8 @@
 			<text>対弾:</text>
 		</string>
 		<string>
-			<key>Label_BallisticArmorLong</key>
-			<text>対弾装甲:</text>
-		</string>
-		<string>
 			<key>Label_ImpactArmorShort</key>
 			<text>対衝撃:</text>
-		</string>
-		<string>
-			<key>Label_ImpactArmorLong</key>
-			<text>対衝撃装甲:</text>
 		</string>
 		<string>
 			<key>Label_Test</key>
@@ -343,14 +335,6 @@
 			<text>週</text>
 		</string>
 		<string>
-			<key>String_Weeks</key>
-			<text>週</text>
-		</string>
-		<string>
-			<key>String_Hour</key>
-			<text>時間</text>
-		</string>
-		<string>
 			<key>String_Hours</key>
 			<text>時間</text>
 		</string>
@@ -367,14 +351,6 @@
 			<text>重積収束具</text>
 		</string>
 		<!-- Printout Strings -->
-		<string>
-			<key>String_UnarmedAttack</key>
-			<text>素手攻撃</text>
-		</string>
-		<string>
-			<key>String_Unarmed</key>
-			<text>素手</text>
-		</string>
 		<string>
 			<key>String_LivingPersona</key>
 			<text>生体ペルソナ</text>
@@ -423,10 +399,6 @@
 		<string>
 			<key>MessageTitle_RemoveCharacterAssociation</key>
 			<text>キャラクターの連携を削除</text>
-		</string>
-		<string>
-			<key>Message_IncorrectGameVersion_SR4</key>
-			<text>使用中の Chummer はシャドウラン 5th Edition 用ですが, このファイルはシャドウラン 4th Edition のものです. このファイルを開くには シャドウラン 4th Edition 用の Chummer を使用してください.</text>
 		</string>
 		<string>
 			<key>Message_IncorrectGameVersion_SR5</key>
@@ -524,10 +496,6 @@
 		<string>
 			<key>String_AttributeRESShort</key>
 			<text>共振力</text>
-		</string>
-		<string>
-			<key>String_AttributeINILong</key>
-			<text>イニシアティブ</text>
 		</string>
 		<string>
 			<key>String_AttributeINIShort</key>
@@ -1118,10 +1086,6 @@
 		<string>
 			<key>Message_DeleteImprovementGroup</key>
 			<text>この Improvement グループを削除してもよろしいですか?この場所内のすべての Improvement は選択中の Improvement コンテナに移動します.</text>
-		</string>
-		<string>
-			<key>Message_DeleteStackedFocus</key>
-			<text>この重積複合体を削除してもよろしいですか?</text>
 		</string>
 		<string>
 			<key>Message_SpiritServices</key>
@@ -2488,10 +2452,6 @@
 			<text>自身</text>
 		</string>
 		<string>
-			<key>String_SpellSpecial</key>
-			<text>特殊</text>
-		</string>
-		<string>
 			<key>String_SpellForce</key>
 			<text>フォース</text>
 		</string>
@@ -3012,10 +2972,6 @@
 			<text>魔法結社:</text>
 		</string>
 		<string>
-			<key>Label_Network</key>
-			<text>ネットワーク:</text>
-		</string>
-		<string>
 			<key>Checkbox_GroupInitiation</key>
 			<text>グループ・イニシエーション (-20%)</text>
 		</string>
@@ -3104,10 +3060,6 @@
 		<string>
 			<key>Tab_DecreaseLifestyleMonths</key>
 			<text>ライフスタイルの支払い済み月数を減少.</text>
-		</string>
-		<string>
-			<key>String_Roommates</key>
-			<text>ルームメイト</text>
 		</string>
 		<!-- Street Gear/Armor Tab -->
 		<string>
@@ -3321,10 +3273,6 @@
 			<text>結合済みの収束具</text>
 		</string>
 		<!-- Vehicles Tab -->
-		<string>
-			<key>Label_GearRating</key>
-			<text>装備のレーティング:</text>
-		</string>
 		<string>
 			<key>Label_GearQty</key>
 			<text>装備の個数:</text>
@@ -3542,10 +3490,6 @@
 			<text>追加した Improvement</text>
 		</string>
 		<!-- Improvements Control -->
-		<string>
-			<key>Tip_Improvement_EditNotes</key>
-			<text>Improvement のノートを編集.</text>
-		</string>
 		<!-- Build Point Summery Tab -->
 		<string>
 			<key>Label_SummaryMetatype</key>
@@ -4425,10 +4369,6 @@
 			<text>ノート</text>
 		</string>
 		<!-- Omae Window -->
-		<string>
-			<key>MessageTitle_Omae_DeleteSheet</key>
-			<text>キャラクターシートの削除</text>
-		</string>
 		<!-- Options Window -->
 		<string>
 			<key>Title_Options</key>
@@ -5480,10 +5420,6 @@
 		<string>
 			<key>String_SelectPACKSKit_Spirits</key>
 			<text>精霊</text>
-		</string>
-		<string>
-			<key>String_SelectPACKSKit_Sprites</key>
-			<text>スプライト</text>
 		</string>
 		<string>
 			<key>String_SelectPACKSKit_Lifestyles</key>
