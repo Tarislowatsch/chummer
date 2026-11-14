@@ -11,15 +11,10 @@ namespace Chummer.Tests.Rulebook
 	// - the guards below catch a rule gone vacant or a consumer gone, not a missing rule
 	public class CrossFileReferenceTests
 	{
-		// - fixing one changes what a critter or sprite gets: a behaviour change, not a tidy-up
-		// - the typos mirror the data, not typos in this list
+		// - fixing one changes the ranges a weapon shows: a behaviour change, not a tidy-up
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"bonus selectskill excludecategory: Vechicle Active",
-			"bonus selectskillgroup excludecategory: Vechicle Active",
-			"bonus specificskill: Conjuring",
-			"bonus specificskill: Sorcery",
 			"weapon range by category: Clubs",
 			"weapon range by category: Crossbows",
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
@@ -127,8 +122,8 @@ namespace Chummer.Tests.Rulebook
 				{ "bonus skillattribute exclude", 1 },
 				{ "bonus skillcategory", 24 },
 				{ "bonus skillcategory exclude", 2 },
-				{ "bonus skillgroup", 14 },
-				{ "bonus specificskill", 135 },
+				{ "bonus skillgroup", 20 },
+				{ "bonus specificskill", 129 },
 				{ "bonus spellcategory", 48 },
 				{ "bonus weaponcategorydv", 26 },
 				{ "critter complex forms", 242 },

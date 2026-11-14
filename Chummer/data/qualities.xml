@@ -6677,10 +6677,10 @@
 			<bp>-5</bp>
 			<category>Negative</category>
 			<bonus>
-				<specificskill>
+				<skillgroup>
 					<name>Sorcery</name>
 					<bonus>-4</bonus>
-				</specificskill>
+				</skillgroup>
 				<specificskill>
 					<name>Assensing</name>
 					<bonus>-4</bonus>
@@ -6717,10 +6717,10 @@
 			<bp>-5</bp>
 			<category>Negative</category>
 			<bonus>
-				<specificskill>
+				<skillgroup>
 					<name>Conjuring</name>
 					<bonus>-4</bonus>
-				</specificskill>
+				</skillgroup>
 				<specificskill>
 					<name>Assensing</name>
 					<bonus>-4</bonus>
@@ -6823,14 +6823,14 @@
 			<bp>-10</bp>
 			<category>Negative</category>
 			<bonus>
-				<specificskill>
+				<skillgroup>
 					<name>Sorcery</name>
 					<bonus>-4</bonus>
-				</specificskill>
-				<specificskill>
+				</skillgroup>
+				<skillgroup>
 					<name>Conjuring</name>
 					<bonus>-4</bonus>
-				</specificskill>
+				</skillgroup>
 				<specificskill>
 					<name>Enchanting</name>
 					<bonus>-4</bonus>
@@ -6859,20 +6859,20 @@
 			<bp>-10</bp>
 			<category>Negative</category>
 			<bonus>
-				<specificskill>
+				<skillgroup>
 					<name>Sorcery</name>
 					<bonus>-4</bonus>
-				</specificskill>
+				</skillgroup>
+				<skillgroup>
+					<name>Conjuring</name>
+					<bonus>-4</bonus>
+				</skillgroup>
 				<specificskill>
 					<name>Assensing</name>
 					<bonus>-4</bonus>
 				</specificskill>
 				<specificskill>
 					<name>Astral Combat</name>
-					<bonus>-4</bonus>
-				</specificskill>
-				<specificskill>
-					<name>Conjuring</name>
 					<bonus>-4</bonus>
 				</specificskill>
 			</bonus>
