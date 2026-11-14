@@ -552,9 +552,9 @@ namespace Chummer.Tests.Rulebook
 			Rule("critter skill groups", "frmMetatype.cs:807",
 				"objXmlCritter.SelectNodes(\"skills/group\")",
 				"critters.xml", "/chummer/metatypes/metatype/skills/group", SkillGroups, ByTextToText),
-			// - stored unchecked, but SkillControl.cs:363 only offers the declared knowledge categories
+			// - stored unchecked, but SkillControl.cs:364 only offers the declared knowledge categories
 			// - all three critter loaders read @category unguarded: a missing one fails as unresolved
-			Rule("critter knowledge categories", "frmMetatype.cs:821",
+			Rule("critter knowledge categories", "frmMetatype.cs:828",
 				"objXmlSkill.Attributes[\"category\"].InnerText",
 				"critters.xml", "/chummer/metatypes/metatype/skills/knowledge",
 				In("skills.xml", "/chummer/categories/category[@type = 'knowledge']"),
