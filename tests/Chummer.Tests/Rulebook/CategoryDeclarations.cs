@@ -32,7 +32,7 @@ namespace Chummer.Tests.Rulebook
 				"programs.xml/options",
 			};
 
-		// - these weapons enter only through a carrier's <addweapon> or <underbarrel>
+		// - these weapons enter only through a carrier: another item, a vehicle or a kit
 		// - declaring them would sell each one on its own in frmSelectWeapon
 		private static readonly HashSet<string> CarrierOnlyCategories = new HashSet<string>(StringComparer.Ordinal)
 		{
@@ -57,7 +57,7 @@ namespace Chummer.Tests.Rulebook
 
 		public static IEnumerable<string> CarrierOnlyCategoryKeys()
 		{
-			return CarrierOnlyCategories;
+			return CarrierOnlyCategories.ToArray();
 		}
 
 		public static bool IsCarrierOnly(string xmlFileName, string collectionName, string category)
