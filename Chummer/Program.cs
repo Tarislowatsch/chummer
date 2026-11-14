@@ -15,6 +15,7 @@ namespace Chummer
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+			ObsoleteRegistryValues.DeleteFromCurrentUser();
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, null);
 			// Make sure the default language has been loaded before attempting to open the Main Form.
 			if (LanguageManager.Instance.Loaded)
