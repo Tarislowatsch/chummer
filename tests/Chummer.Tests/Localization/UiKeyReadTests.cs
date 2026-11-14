@@ -9,7 +9,7 @@ namespace Chummer.Tests.Localization
 	public class UiKeyReadTests
 	{
 		// - exact: deleting a key or adding a reader must shrink this list in the same change
-		// - these keys stay: their controls exist but lack the Tag that would read them
+		// - a listed key waits for a fix: a reader to wire up or a deletion
 		private static readonly IReadOnlyList<string> KnownUnreadKeys = new[]
 		{
 			"Checkbox_RestrictedTarget",
