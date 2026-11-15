@@ -226,7 +226,7 @@ namespace Chummer.Tests.Localization
 				{
 					if (metavariant["translate"] != null)
 						read.Add(metavariant["translate"]);
-					if (metavariant["translate"] == null && metavariant["altpage"] == null)
+					if (metavariant["translate"] == null && metavariant["page"] == null)
 						continue;
 
 					string metatype = child["name"]?.InnerXml;
@@ -237,15 +237,8 @@ namespace Chummer.Tests.Localization
 						continue;
 					}
 
-					string key = metatype + "/" + name;
-					Entry found = entry(Kind.Metavariant, key, "/chummer/metatypes/metatype[name = \"" + metatype
-						+ "\"]/metavariants/metavariant[name = \"" + name + "\"]");
-
-					// - clsXmlManager.cs:268 tests <altpage> but reads <page>: a hit without <page> throws
-					bool pageCrashes = metavariant["altpage"] != null && metavariant["page"] == null
-						&& found.Outcome == Outcome.Applied;
-					yield return pageCrashes ? new Entry(language, fileName, Kind.Metavariant, key + " (altpage, no page)",
-						Outcome.Crashes) : found;
+					yield return entry(Kind.Metavariant, metatype + "/" + name, "/chummer/metatypes/metatype[name = \""
+						+ metatype + "\"]/metavariants/metavariant[name = \"" + name + "\"]");
 				}
 			}
 
@@ -259,7 +252,7 @@ namespace Chummer.Tests.Localization
 					yield return art == null
 						? crash(Kind.Advantage, advantage.InnerXml)
 						: entry(Kind.Advantage, art + ": " + advantage.InnerXml,
-							"/chummer/martialarts/martialart[name = \"" + art + "\"]/advantages/advantage[. = \""
+							"/chummer/martialarts/martialart[name = \"" + art + "\"]/advantages/advantage[name = \""
 							+ advantage.InnerXml + "\"]");
 				}
 			}

@@ -84,32 +84,30 @@ namespace Chummer.Tests.Localization
 				+ "<spec translate=\"Revolver\">Revolvers</spec></specs></skill></skills>"));
 		}
 
-		// - the shape of the first allowlist section
+		// The whole-text key is the old lookup: it never matched an advantage with a bonus.
 		[Fact]
-		public void AdvantageWithABonusCannotBeMatched()
+		public void AdvantageIsMatchedByItsName()
 		{
 			string arts = "<chummer><martialarts><martialart><name>Kali</name><advantages>"
 				+ "<advantage><name>Disarm</name></advantage>"
 				+ "<advantage><name>+1 DV</name><bonus><weaponcategorydv><name>Blades</name></weaponcategorydv></bonus>"
 				+ "</advantage></advantages></martialart></martialarts></chummer>";
 
-			Assert.Equal(new[] { "Applied", "Dropped" }, Outcomes("martialarts.xml", arts,
+			Assert.Equal(new[] { "Applied", "Applied", "Dropped" }, Outcomes("martialarts.xml", arts,
 				"<martialarts><martialart><name>Kali</name><advantages>"
 				+ "<advantage translate=\"Entwaffnen\">Disarm</advantage>"
-				+ "<advantage translate=\"+1 SW\">+1 DV</advantage></advantages></martialart></martialarts>"));
+				+ "<advantage translate=\"+1 SW\">+1 DV</advantage>"
+				+ "<advantage translate=\"+1 SW\">+1 DVBlades</advantage></advantages></martialart></martialarts>"));
 		}
 
-		// - the shape of the metavariant lookup
 		[Fact]
-		public void MetavariantPageWithoutTranslateIsNotRead()
+		public void MetavariantPageWithoutTranslateIsLookedUp()
 		{
-			string metatypes = "<chummer><metatypes><metatype><name>Elf</name><metavariants>"
-				+ "<metavariant><name>Night One</name></metavariant></metavariants></metatype></metatypes></chummer>";
-
-			Assert.Empty(Entries("metatypes.xml", metatypes,
-				"<metatypes><metatype><name>Elf</name><metavariants><metavariant><name>Nite One</name><page>9</page>"
-				+ "</metavariant></metavariants></metatype></metatypes>")
-				.Where(entry => entry.Kind == TranslationReferences.Kind.Metavariant));
+			Assert.Equal(new[] { "Applied", "Dropped" }, Outcomes("metatypes.xml", Metatypes,
+				"<metatypes><metatype><name>Elf</name><metavariants>"
+				+ "<metavariant><name>Night One</name><page>9</page></metavariant>"
+				+ "<metavariant><name>Nite One</name><page>9</page></metavariant>"
+				+ "</metavariants></metatype></metatypes>"));
 		}
 
 		// - one dropped block, not one finding per translation inside it
@@ -153,9 +151,9 @@ namespace Chummer.Tests.Localization
 		}
 
 		[Fact]
-		public void AltpageWithoutPageCrashesOnAHit()
+		public void MetavariantAltpageIsNotRead()
 		{
-			Assert.Equal(new[] { "Crashes", "Applied" }, Outcomes("metatypes.xml", Metatypes,
+			Assert.Equal(new[] { "Applied" }, Outcomes("metatypes.xml", Metatypes,
 				"<metatypes><metatype><name>Elf</name><metavariants>"
 				+ "<metavariant><name>Night One</name><altpage>9</altpage></metavariant>"
 				+ "</metavariants></metatype><metatype><name>Dwarf</name><metavariants>"
