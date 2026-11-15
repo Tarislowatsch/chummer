@@ -503,9 +503,11 @@ namespace Chummer.Tests.Rulebook
 				"weapons.xml", "/chummer/weapons/weapon/range[. != '']", RangeCategories, ByTextToText),
 			// - an empty range falls back as well: Create copies it verbatim (clsEquipment.cs:4287)
 			// - melee weapons have no range by design, the empty display is correct for them
+			// - an explicit <range /> on a Gear weapon marks it rangeless on purpose: bombs, mines
 			Rule("weapon range by category", "clsEquipment.cs:6570",
 				"string strRangeCategory = _strCategory",
-				"weapons.xml", "/chummer/weapons/weapon[type != 'Melee' and string(range) = '']/category",
+				"weapons.xml",
+				"/chummer/weapons/weapon[type != 'Melee' and string(range) = '' and not(category = 'Gear' and range)]/category",
 				RangeCategories, ByTextToText),
 
 			// - a missed grade falls back to "Standard" without a word (clsEquipment.cs:2327)

@@ -139,6 +139,38 @@
 			<extreme>1500</extreme>
 		</range>
 		<range>
+			<category>Missile Launchers (5 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>5000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (10 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>10000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (25 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>25000</extreme>
+		</range>
+		<range>
+			<category>Missile Launchers (500 km)</category>
+			<min>20</min>
+			<short>70</short>
+			<medium>150</medium>
+			<long>450</long>
+			<extreme>500000</extreme>
+		</range>
+		<range>
 			<category>Mortar Launchers</category>
 			<min>150</min>
 			<short>300</short>
@@ -225,6 +257,14 @@
 			<medium>STR*2</medium>
 			<long>STR*3</long>
 			<extreme>STR*5</extreme>
+		</range>
+		<range>
+			<category>Projectile Spur</category>
+			<min>0</min>
+			<short>14</short>
+			<medium>28</medium>
+			<long>42</long>
+			<extreme>70</extreme>
 		</range>
 		<range>
 			<category>Shuriken</category>

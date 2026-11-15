@@ -15,16 +15,8 @@ namespace Chummer.Tests.Rulebook
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"weapon range by category: Clubs",
-			"weapon range by category: Crossbows",
+			// - Eye Tool Laser reaches 1 m: equal bands would display Medium as "2-1"
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
-			"weapon range by category: Cyberware Throwing Weapons",
-			"weapon range by category: Exotic Ranged Weapons",
-			// - 154 rockets, missiles, rounds, mines: no code hands them the launcher's range
-			// - 21 launcher grenades carry one themselves: the data can
-			"weapon range by category: Gear",
-			"weapon range by category: Special Weapons",
-			"weapon range by category: Vehicle Weapons",
 		};
 
 		[Theory]
@@ -142,7 +134,7 @@ namespace Chummer.Tests.Rulebook
 				{ "cyberware suite grade", 44 },
 				{ "cyberware suite items", 426 },
 				{ "echo requires all echoes", 9 },
-				{ "gear addweapon", 205 },
+				{ "gear addweapon", 204 },
 				{ "gear usegear", 83 },
 				{ "metamagic requires all metamagics", 13 },
 				{ "metamagic requires all metatypes", 1 },
@@ -204,8 +196,8 @@ namespace Chummer.Tests.Rulebook
 				{ "vessel powers", 7 },
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
-				{ "weapon range", 162 },
-				{ "weapon range by category", 465 },
+				{ "weapon range", 311 },
+				{ "weapon range by category", 301 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};
