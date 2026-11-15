@@ -15,13 +15,10 @@ namespace Chummer.Tests.Rulebook
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"weapon range by category: Clubs",
 			"weapon range by category: Crossbows",
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
 			"weapon range by category: Cyberware Throwing Weapons",
 			"weapon range by category: Exotic Ranged Weapons",
-			"weapon range by category: Special Weapons",
-			"weapon range by category: Vehicle Weapons",
 		};
 
 		[Theory]
@@ -201,8 +198,8 @@ namespace Chummer.Tests.Rulebook
 				{ "vessel powers", 7 },
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
-				{ "weapon range", 300 },
-				{ "weapon range by category", 312 },
+				{ "weapon range", 305 },
+				{ "weapon range by category", 307 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};

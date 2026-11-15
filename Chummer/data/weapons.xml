@@ -2208,6 +2208,7 @@
 				<mount>Top</mount>
 			</accessorymounts>
 			<useskill>Pistols</useskill>
+			<range>Tasers</range>
 			<source>AR</source>
 			<page>20</page>
 		</weapon>
@@ -5515,6 +5516,7 @@
 				<mount>Under</mount>
 			</accessorymounts>
 			<useskill>Exotic Ranged Weapon</useskill>
+			<range>Submachine Guns</range>
 			<source>SR4</source>
 			<page>319</page>
 		</weapon>
@@ -9074,6 +9076,7 @@
 			<avail>34F</avail>
 			<cost>21000</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>173</page>
 		</weapon>
@@ -9091,6 +9094,7 @@
 			<avail>24F</avail>
 			<cost>9000</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>WAR</source>
 			<page>173</page>
 		</weapon>
@@ -14874,6 +14878,7 @@
 			<avail>15F</avail>
 			<cost>15000</cost>
 			<allowaccessory>true</allowaccessory>
+			<range>Missile Launchers</range>
 			<source>2050</source>
 			<page>195</page>
 		</weapon>
