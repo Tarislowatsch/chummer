@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using Microsoft.Win32;
 
 namespace Chummer.GoldenMaster.Tests
 {
@@ -12,27 +13,37 @@ namespace Chummer.GoldenMaster.Tests
 		// What the translation pass of XmlManager.Load adds to an item.
 		private static readonly string[] AddedElements = { "translate", "altpage", "altcode", "altadvantage", "altdisadvantage" };
 
+		private const string ChummerKey = @"Software\Chummer";
+
+		// - the language goes in the registry, where the app reads it
+		// - GlobalOptions' static constructor reads it, then loads and caches books, cyberware and bioware
+		// - the registry sandbox is per process: the key must be gone before the next test
 		public static string[] Project(string language, IEnumerable<string> fileNames)
 		{
-			AppDomain domain = AppDomain.CreateDomain("TranslatedLoad " + language, null, AppDomain.CurrentDomain.SetupInformation);
+			AppHost.CreateVolatileCurrentUserKey(ChummerKey);
+			AppDomain domain = null;
 			try
 			{
+				using (RegistryKey key = Registry.CurrentUser.OpenSubKey(ChummerKey, true))
+					key.SetValue("language", language);
+				domain = AppDomain.CreateDomain("TranslatedLoad " + language, null, AppDomain.CurrentDomain.SetupInformation);
 				TranslatedLoad worker = (TranslatedLoad)domain.CreateInstanceAndUnwrap(typeof(TranslatedLoad).Assembly.FullName, typeof(TranslatedLoad).FullName);
 				return worker.ProjectInThisDomain(language, fileNames.ToArray());
 			}
 			finally
 			{
-				AppDomain.Unload(domain);
+				if (domain != null)
+					AppDomain.Unload(domain);
+				Registry.CurrentUser.DeleteSubKeyTree("Software", false);
 			}
 		}
 
-		// - the StartupPath field is per domain: redirect it again
-		// - Load is called directly: XmlManager's static constructor may already have run with en-us
+		// The StartupPath field is per domain: redirect it before GlobalOptions reads it.
 		public string[] ProjectInThisDomain(string language, string[] fileNames)
 		{
 			AppHost.RedirectStartupPath();
-			GlobalOptions.Instance.Language = language;
-			LanguageManager.Instance.Load(language, null);
+			if (GlobalOptions.Instance.Language != language)
+				throw new InvalidOperationException("GlobalOptions read " + GlobalOptions.Instance.Language + " instead of " + language + ".");
 			return fileNames.SelectMany(fileName => Lines(fileName, XmlManager.Instance.Load(fileName))).ToArray();
 		}
 

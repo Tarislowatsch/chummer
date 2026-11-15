@@ -27,7 +27,7 @@ namespace Chummer.GoldenMaster.Tests
 		[MemberData(nameof(LanguageCases))]
 		public void TranslatedLoadMatchesItsBaseline(string language)
 		{
-			string actual = string.Concat(TranslatedLoad.Project(language, TranslatedFiles(language)).Select(line => line + "\n"));
+			string actual = string.Concat(Projection(language).Select(line => line + "\n"));
 			string path = Path.Combine(Root, language + ".txt");
 			if (Environment.GetEnvironmentVariable(Baselines.AcceptVariable) == "1")
 			{
@@ -43,6 +43,15 @@ namespace Chummer.GoldenMaster.Tests
 			if (expected != actual)
 				Assert.Fail(path + " differs from the translated load. " + Baselines.FirstDifference(expected, actual)
 					+ "\nIf the change is intended, run with " + Baselines.AcceptVariable + "=1 and review it with git diff.");
+		}
+
+		// A file loaded before the language took effect stays English in the cache and adds nothing.
+		[Theory]
+		[MemberData(nameof(LanguageCases))]
+		public void EveryTranslatedFileAddsSomething(string language)
+		{
+			HashSet<string> projected = new HashSet<string>(Projection(language).Select(line => line.Substring(0, line.IndexOf(' '))), StringComparer.Ordinal);
+			Assert.Empty(TranslatedFiles(language).Where(file => !projected.Contains(file)));
 		}
 
 		// A data file shipped for a language the theory skips would go unpinned.
@@ -70,6 +79,20 @@ namespace Chummer.GoldenMaster.Tests
 		{
 			string[] files = Languages.SelectMany(TranslatedFiles).Distinct().OrderBy(name => name, StringComparer.Ordinal).ToArray();
 			Assert.Empty(TranslatedLoad.Project("en-us", files));
+		}
+
+		private static readonly Dictionary<string, string[]> Projections = new Dictionary<string, string[]>(StringComparer.Ordinal);
+
+		// One domain per language and run: the guards reuse the baseline's projection.
+		private static string[] Projection(string language)
+		{
+			lock (Projections)
+			{
+				string[] lines;
+				if (!Projections.TryGetValue(language, out lines))
+					Projections[language] = lines = TranslatedLoad.Project(language, TranslatedFiles(language));
+				return lines;
+			}
 		}
 
 		// The files whose translation block Load reads for this language.
