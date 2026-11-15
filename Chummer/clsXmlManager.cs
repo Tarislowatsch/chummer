@@ -265,7 +265,7 @@ namespace Chummer
 													if (objItem != null)
 														objItem.InnerXml += "<translate>" + objMetavariant["translate"].InnerXml + "</translate>";
 												}
-												if (objMetavariant["altpage"] != null)
+												if (objMetavariant["page"] != null)
 												{
 													XmlNode objItem = objDoc.SelectSingleNode("/chummer/metatypes/metatype[name = \"" + objChild["name"].InnerXml + "\"]/metavariants/metavariant[name = \"" + objMetavariant["name"].InnerXml + "\"]");
 													if (objItem != null)
@@ -284,7 +284,7 @@ namespace Chummer
 											{
 												if (objAdvantage.Attributes["translate"] != null)
 												{
-													XmlNode objItem = objDoc.SelectSingleNode("/chummer/martialarts/martialart[name = \"" + objChild["name"].InnerXml + "\"]/advantages/advantage[. = \"" + objAdvantage.InnerXml + "\"]");
+													XmlNode objItem = objDoc.SelectSingleNode("/chummer/martialarts/martialart[name = \"" + objChild["name"].InnerXml + "\"]/advantages/advantage[name = \"" + objAdvantage.InnerXml + "\"]");
 													if (objItem != null)
 													{
 														XmlElement objElement = (XmlElement)objItem;

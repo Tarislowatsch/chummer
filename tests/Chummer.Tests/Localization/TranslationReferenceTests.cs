@@ -12,63 +12,6 @@ namespace Chummer.Tests.Localization
 		// - format: <language> <file> <kind>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownDroppedTranslations = new HashSet<string>(StringComparer.Ordinal)
 		{
-			// - Load compares an advantage by its whole text: one with a <bonus> can never match
-			"de martialarts.xml advantage: Arnis De Mano: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Arnis De Mano: +1 DV on Club attacks",
-			"de martialarts.xml advantage: Ars Cybernetica: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Boxing: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Escrima: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Escrima: +1 DV on Club attacks",
-			"de martialarts.xml advantage: Eztlitzli: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Hapkido: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Hwarang-do: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Kali: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Kali: +1 DV on Club attacks",
-			"de martialarts.xml advantage: Karate: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Kenpo: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Kiai: +1 on Intimidation Tests",
-			"de martialarts.xml advantage: Kickboxing: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Kung Fu: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Muay Thai: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Musti Yudha: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Ninjutsu: +1 die on Infiltration Tests",
-			"de martialarts.xml advantage: Rince an Bhata Uisce Bheatha: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Sangre y Acero: +1 DV on Blades attacks",
-			"de martialarts.xml advantage: Savate (Alternate): +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Savate: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Soo Bahk Do: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Tae Kwon Do: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Tai Chi Ch'uan: +1 on Intimidation Tests",
-			"de martialarts.xml advantage: Wildcat: +1 DV on Unarmed Combat attacks",
-			"de martialarts.xml advantage: Wushu: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Arnis De Mano: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Arnis De Mano: +1 DV on Club attacks",
-			"fr martialarts.xml advantage: Ars Cybernetica: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Boxing: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Escrima: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Escrima: +1 DV on Club attacks",
-			"fr martialarts.xml advantage: Eztlitzli: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Hapkido: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Hwarang-do: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Kali: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Kali: +1 DV on Club attacks",
-			"fr martialarts.xml advantage: Karate: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Kenpo: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Kiai: +1 on Intimidation Tests",
-			"fr martialarts.xml advantage: Kickboxing: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Kung Fu: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Muay Thai: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Musti Yudha: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Ninjutsu: +1 die on Infiltration Tests",
-			"fr martialarts.xml advantage: Rince an Bhata Uisce Bheatha: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Sangre y Acero: +1 DV on Blades attacks",
-			"fr martialarts.xml advantage: Savate (Alternate): +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Savate: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Soo Bahk Do: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Tae Kwon Do: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Tai Chi Ch'uan: +1 on Intimidation Tests",
-			"fr martialarts.xml advantage: Wildcat: +1 DV on Unarmed Combat attacks",
-			"fr martialarts.xml advantage: Wushu: +1 DV on Unarmed Combat attacks",
 		};
 
 		public static IEnumerable<object[]> Languages()
@@ -121,7 +64,7 @@ namespace Chummer.Tests.Localization
 		}
 
 		// - updating the hash is only correct after re-reading Load and fixing the port
-		private const string PinnedLoadFingerprint = "30CB7871CF8E7CDD";
+		private const string PinnedLoadFingerprint = "53B0D0A073F3437E";
 
 		[Fact]
 		public void TranslationPassUnchangedSinceItsPortWasWritten()
