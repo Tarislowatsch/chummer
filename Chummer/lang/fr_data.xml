@@ -20736,7 +20736,7 @@
 			</weapon>
 			<weapon>
 				<name>Bottle</name>
-				<translate>Bouteille, Intacte</translate>
+				<translate>Bouteille, Brisée</translate>
 				<page>17</page>
 			</weapon>
 			<weapon>
@@ -20875,8 +20875,8 @@
 				<page>17</page>
 			</weapon>
 			<weapon>
-				<name>Bottle</name>
-				<translate>Bouteille, Brisée</translate>
+				<name>Bottle (Clubs)</name>
+				<translate>Bouteille, Intacte</translate>
 				<page>17</page>
 			</weapon>
 			<weapon>

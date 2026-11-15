@@ -507,7 +507,7 @@
 			<page>210</page>
 		</power>
 		<power>
-			<name>Engulf</name>
+			<name>Engulf (RW)</name>
 			<category>Paranormal</category>
 			<type>P</type>
 			<action>Complex</action>
@@ -814,7 +814,7 @@
 			<page>208</page>
 		</power>
 		<power>
-			<name>Binding</name>
+			<name>Binding (RW)</name>
 			<category>Paranormal</category>
 			<toxic>yes</toxic>
 			<type>P</type>
@@ -937,7 +937,7 @@
 			<page>214</page>
 		</power>
 		<power>
-			<name>Spirit Pact</name>
+			<name>Spirit Pact (RW)</name>
 			<category>Paranormal</category>
 			<type>M</type>
 			<action>Special</action>

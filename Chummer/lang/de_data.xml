@@ -2418,7 +2418,7 @@
 				<translate>Energieentzug</translate>
 			</power>
 			<power>
-				<name>Engulf</name>
+				<name>Engulf (RW)</name>
 				<page>224</page>
 				<translate>Verschlingen</translate>
 			</power>
@@ -2568,7 +2568,7 @@
 				<translate>Farbanpassung</translate>
 			</power>
 			<power>
-				<name>Binding</name>
+				<name>Binding (RW)</name>
 				<page>218</page>
 				<translate>Bindung</translate>
 			</power>
@@ -2628,7 +2628,7 @@
 				<translate>Durchdringung</translate>
 			</power>
 			<power>
-				<name>Spirit Pact</name>
+				<name>Spirit Pact (RW)</name>
 				<page>220</page>
 				<translate>Geisterpakt</translate>
 			</power>
@@ -5973,13 +5973,6 @@
 				<name>Antarctic Hound</name>
 				<page>77</page>
 				<translate>Antarktishund</translate>
-			</metatype>
-			<metatype>
-				<name>Ross Seal</name>
-				<page>
-				</page>
-				<translate>
-				</translate>
 			</metatype>
 			<metatype>
 				<name>Ross Seal</name>

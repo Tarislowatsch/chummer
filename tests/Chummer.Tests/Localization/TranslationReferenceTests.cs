@@ -205,7 +205,7 @@ namespace Chummer.Tests.Localization
 			{
 				{ "de advantage", 147 },
 				{ "de file", 23 },
-				{ "de item", 6064 },
+				{ "de item", 6063 },
 				{ "de metavariant", 62 },
 				{ "de spec", 961 },
 				{ "de text", 291 },
