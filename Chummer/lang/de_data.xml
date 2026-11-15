@@ -21240,7 +21240,7 @@
 					<spec translate="Sturmgewehre">Assault Rifles</spec>
 					<spec translate="Schwere Sturmgewehre">Battle Rifles</spec>
 					<spec translate="Karabiner">Carbines</spec>
-					<spec translate="Maschinenpistolen">Machine Pistols</spec>
+					<spec translate="Automatikpistolen">Machine Pistols</spec>
 					<spec translate="Maschinenpistolen">Submachine Guns</spec>
 				</specs>
 			</skill>
