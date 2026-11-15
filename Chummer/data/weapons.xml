@@ -1426,6 +1426,7 @@
 			<avail>6</avail>
 			<cost>75</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Shuriken</range>
 			<source>AR</source>
 			<page>39</page>
 		</weapon>
@@ -1461,6 +1462,7 @@
 			<avail>16F</avail>
 			<cost>2500</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Shuriken</range>
 			<source>AR</source>
 			<page>39</page>
 		</weapon>
@@ -1987,6 +1989,7 @@
 			<avail>0</avail>
 			<cost>30</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Shuriken</range>
 			<source>AR</source>
 			<page>18</page>
 		</weapon>
@@ -6782,6 +6785,7 @@
 			<mods>
 				<mod>Smartgun System</mod>
 			</mods>
+			<range>Pistol Crossbows</range>
 			<source>AU</source>
 			<page>46</page>
 		</weapon>
