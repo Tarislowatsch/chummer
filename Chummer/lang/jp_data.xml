@@ -7549,7 +7549,7 @@
 				<name>Heavy Weapons</name>
 				<translate>重火器</translate>
 				<specs>
-					<spec translate="アサルトキャノン">Assault Cannon</spec>
+					<spec translate="アサルトキャノン">Assault Cannons</spec>
 					<spec translate="グレネードランチャー">Grenade Launchers</spec>
 					<spec translate="誘導ミサイル">Guided Missiles</spec>
 					<spec translate="マシンガン">Machine Guns</spec>
@@ -7624,7 +7624,7 @@
 				<specs>
 					<spec translate="ショットガン">Shotguns</spec>
 					<spec translate="スナイパーライフル">Sniper Rifles</spec>
-					<spec translate="スポーツライフル">Sporting Rifles</spec>
+					<spec translate="スポーツライフル">Sports Rifles</spec>
 				</specs>
 				<page>144</page>
 			</skill>
@@ -7791,9 +7791,6 @@
 			<skill>
 				<name>Ritual Spellcasting</name>
 				<translate>儀式呪文行使</translate>
-				<specs>
-					<spec translate="呪文の種類">Spell Type</spec>
-				</specs>
 				<page>146</page>
 			</skill>
 			<skill>
@@ -7830,9 +7827,6 @@
 			<skill>
 				<name>Spellcasting</name>
 				<translate>呪文行使</translate>
-				<specs>
-					<spec translate="呪文の種類">Spell Type</spec>
-				</specs>
 				<page>146</page>
 			</skill>
 			<skill>
@@ -8307,7 +8301,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 					<spec translate="北アメリカ">N. America</spec>
@@ -8510,7 +8504,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 					<spec translate="北アメリカ">N. America</spec>
@@ -8585,7 +8579,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 				</specs>
@@ -8639,7 +8633,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 					<spec translate="北アメリカ">N. America</spec>
@@ -8707,7 +8701,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 					<spec translate="北アメリカ">N. America</spec>
@@ -8776,7 +8770,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 					<spec translate="北アメリカ">N. America</spec>
@@ -8928,7 +8922,6 @@
 				<specs>
 					<spec translate="なわばり">Turf</spec>
 					<spec translate="政治">Politics</spec>
-					<spec translate="しるし">Signs</spec>
 					<spec translate="歴史">History</spec>
 					<spec translate="組織">Organizations</spec>
 					<spec translate="セーフハウス">Safe Houses</spec>
@@ -9002,7 +8995,7 @@
 					<spec translate="ケベック">Quebec</spec>
 					<spec translate="サーリッシュ・シー評議会国家">Salish-Shidhe Council</spec>
 					<spec translate="シー国">Sioux</spec>
-					<spec translate="ティル・タンジェル">Tir Tairngaire</spec>
+					<spec translate="ティル・タンジェル">Tir Tairngire</spec>
 					<spec translate="ツィムシアン国">Tsimshian Protectorate</spec>
 					<spec translate="ユカタン">Yukutan</spec>
 				</specs>
