@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using Microsoft.Win32;
 using Xunit;
 
 namespace Chummer.GoldenMaster.Tests
@@ -52,6 +53,23 @@ namespace Chummer.GoldenMaster.Tests
 		{
 			HashSet<string> projected = new HashSet<string>(Projection(language).Select(line => line.Substring(0, line.IndexOf(' '))), StringComparer.Ordinal);
 			Assert.Empty(TranslatedFiles(language).Where(file => !projected.Contains(file)));
+		}
+
+		// Stands in for a real profile: every one has HKCU\Software.
+		[Fact]
+		public void ProjectRefusesARegistryWithSoftware()
+		{
+			AppHost.CreateVolatileCurrentUserKey("Software");
+			try
+			{
+				Assert.Throws<InvalidOperationException>(() => TranslatedLoad.Project("de", new[] { "books.xml" }));
+				using (RegistryKey software = Registry.CurrentUser.OpenSubKey("Software"))
+					Assert.Empty(software.GetSubKeyNames());
+			}
+			finally
+			{
+				Registry.CurrentUser.DeleteSubKeyTree("Software", false);
+			}
 		}
 
 		// A data file shipped for a language the theory skips would go unpinned.

@@ -18,23 +18,38 @@ namespace Chummer.GoldenMaster.Tests
 		// - the language goes in the registry, where the app reads it
 		// - GlobalOptions' static constructor reads it, then loads and caches books, cyberware and bioware
 		// - the registry sandbox is per process: the key must be gone before the next test
-		public static string[] Project(string language, IEnumerable<string> fileNames)
+		internal static string[] Project(string language, IEnumerable<string> fileNames)
 		{
+			// The cleanup deletes HKCU\Software: outside the empty sandbox that is the user's real one.
+			using (RegistryKey software = Registry.CurrentUser.OpenSubKey("Software"))
+				if (software != null)
+					throw new InvalidOperationException(@"HKCU\Software exists: the registry sandbox is not active.");
+
 			AppHost.CreateVolatileCurrentUserKey(ChummerKey);
-			AppDomain domain = null;
 			try
 			{
 				using (RegistryKey key = Registry.CurrentUser.OpenSubKey(ChummerKey, true))
 					key.SetValue("language", language);
-				domain = AppDomain.CreateDomain("TranslatedLoad " + language, null, AppDomain.CurrentDomain.SetupInformation);
-				TranslatedLoad worker = (TranslatedLoad)domain.CreateInstanceAndUnwrap(typeof(TranslatedLoad).Assembly.FullName, typeof(TranslatedLoad).FullName);
-				return worker.ProjectInThisDomain(language, fileNames.ToArray());
+				return ProjectInNewDomain(language, fileNames.ToArray());
 			}
 			finally
 			{
-				if (domain != null)
-					AppDomain.Unload(domain);
 				Registry.CurrentUser.DeleteSubKeyTree("Software", false);
+			}
+		}
+
+		// A failing Unload must not skip the registry cleanup in the caller.
+		private static string[] ProjectInNewDomain(string language, string[] fileNames)
+		{
+			AppDomain domain = AppDomain.CreateDomain("TranslatedLoad " + language, null, AppDomain.CurrentDomain.SetupInformation);
+			try
+			{
+				TranslatedLoad worker = (TranslatedLoad)domain.CreateInstanceAndUnwrap(typeof(TranslatedLoad).Assembly.FullName, typeof(TranslatedLoad).FullName);
+				return worker.ProjectInThisDomain(language, fileNames);
+			}
+			finally
+			{
+				AppDomain.Unload(domain);
 			}
 		}
 
