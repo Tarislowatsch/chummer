@@ -183,6 +183,14 @@ namespace Chummer.Tests.Localization
 
 		private static readonly string[] ItemFields = { "translate", "page", "code", "advantage", "disadvantage" };
 
+		private static readonly string[] MetavariantFields = { "translate", "page" };
+
+		// - only what Load copies: whitespace or a comment elsewhere is no second translation
+		private static string FieldsOf(XmlElement element, string[] fields)
+		{
+			return string.Join("|", fields.Select(field => element[field]?.InnerXml ?? ""));
+		}
+
 		// - mentor and paragon choices are left out: a translated one would show up as unreached
 		private static IEnumerable<Entry> EntriesOf(string language, string fileName, XmlDocument english,
 			XmlElement type, XmlElement child, HashSet<XmlNode> read)
@@ -207,7 +215,7 @@ namespace Chummer.Tests.Localization
 				{
 					string name = Decoded(child["name"]);
 					yield return entry(Kind.Item, name,
-						"/chummer/" + type.Name + "/" + child.Name + "[name = \"" + name + "\"]", child.InnerXml);
+						"/chummer/" + type.Name + "/" + child.Name + "[name = \"" + name + "\"]", FieldsOf(child, ItemFields));
 				}
 			}
 
@@ -251,7 +259,7 @@ namespace Chummer.Tests.Localization
 					}
 
 					yield return entry(Kind.Metavariant, metatype + "/" + name, "/chummer/metatypes/metatype[name = \""
-						+ metatype + "\"]/metavariants/metavariant[name = \"" + name + "\"]", metavariant.InnerXml);
+						+ metatype + "\"]/metavariants/metavariant[name = \"" + name + "\"]", FieldsOf(metavariant, MetavariantFields));
 				}
 			}
 

@@ -221,6 +221,14 @@ namespace Chummer.Tests.Localization
 		}
 
 		[Fact]
+		public void FieldsLoadIgnoresDoNotMakeASecondTranslation()
+		{
+			Assert.Equal(new[] { "de gear.xml item: gears/gear: Meta Link = 2 entries, 1 translation" },
+				Repeats("gear.xml", Gear, "<gears><gear><name>Meta Link</name><translate>A</translate></gear>"
+					+ "<gear><name>Meta Link</name><!-- copy --><translate>A</translate><notes>x</notes></gear></gears>"));
+		}
+
+		[Fact]
 		public void TwoTranslationsOfOneCategoryRepeat()
 		{
 			Assert.Equal(new[] { "de gear.xml text: categories/category: Commlinks = 2 entries, 2 translations" },
@@ -264,7 +272,7 @@ namespace Chummer.Tests.Localization
 				.ToArray();
 		}
 
-		private const string Metatypes ="<chummer><metatypes><metatype><name>Elf</name><metavariants>"
+		private const string Metatypes = "<chummer><metatypes><metatype><name>Elf</name><metavariants>"
 			+ "<metavariant><name>Night One</name></metavariant></metavariants></metatype>"
 			+ "<metatype><name>Dwarf</name><metavariants><metavariant><name>Gnome</name></metavariant>"
 			+ "</metavariants></metatype></metatypes></chummer>";
