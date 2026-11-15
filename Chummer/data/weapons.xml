@@ -1899,6 +1899,7 @@
 			<avail>6R</avail>
 			<cost>600</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Light Crossbows</range>
 			<source>AR</source>
 			<page>18</page>
 		</weapon>
@@ -6723,6 +6724,7 @@
 			<avail>0</avail>
 			<cost>2200</cost>
 			<allowaccessory>false</allowaccessory>
+			<range>Projectile Spur</range>
 			<source>AU</source>
 			<page>43</page>
 		</weapon>

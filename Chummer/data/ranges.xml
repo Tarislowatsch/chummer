@@ -259,6 +259,14 @@
 			<extreme>STR*5</extreme>
 		</range>
 		<range>
+			<category>Projectile Spur</category>
+			<min>0</min>
+			<short>14</short>
+			<medium>28</medium>
+			<long>42</long>
+			<extreme>70</extreme>
+		</range>
+		<range>
 			<category>Shuriken</category>
 			<min>0</min>
 			<short>STR</short>

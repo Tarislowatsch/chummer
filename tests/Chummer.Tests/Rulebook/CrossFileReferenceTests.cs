@@ -15,10 +15,8 @@ namespace Chummer.Tests.Rulebook
 		// - format: <rule id>: <key>, copied from the failure output
 		private static readonly HashSet<string> KnownUnresolvedReferences = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"weapon range by category: Crossbows",
 			// - Eye Tool Laser reaches 1 m: equal bands would display Medium as "2-1"
 			"weapon range by category: Cyberware Exotic Ranged Weapons",
-			"weapon range by category: Cyberware Throwing Weapons",
 		};
 
 		[Theory]
@@ -198,8 +196,8 @@ namespace Chummer.Tests.Rulebook
 				{ "vessel powers", 7 },
 				{ "weapon accessories", 152 },
 				{ "weapon mods", 357 },
-				{ "weapon range", 309 },
-				{ "weapon range by category", 303 },
+				{ "weapon range", 311 },
+				{ "weapon range by category", 301 },
 				{ "weapon underbarrel", 14 },
 				{ "weapon useskill", 90 },
 			};
