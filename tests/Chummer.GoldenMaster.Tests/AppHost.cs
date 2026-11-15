@@ -23,7 +23,7 @@ namespace Chummer.GoldenMaster.Tests
 
 		// - StartupPath is the test host's directory inside the dotnet SDK
 		// - net48 is frozen: this private field cannot move
-		private static void RedirectStartupPath()
+		internal static void RedirectStartupPath()
 		{
 			FieldInfo field = typeof(Application).GetField("startupPath", BindingFlags.NonPublic | BindingFlags.Static);
 			if (field == null)

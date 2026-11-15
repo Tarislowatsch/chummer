@@ -32,6 +32,9 @@ Chummer/settings/default.xml -text
 # - written with LF: a CRLF checkout would fail every comparison
 tests/fixtures/prints/** -text
 
+# - translated-load baselines, compared byte for byte like the prints
+tests/fixtures/translations/** -text
+
 *.png binary
 *.ico binary
 *.zip binary
