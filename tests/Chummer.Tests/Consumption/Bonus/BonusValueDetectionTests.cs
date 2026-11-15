@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq;
 using System.Xml;
 using Chummer.Tests.Kernel;
 using Xunit;
@@ -8,20 +10,20 @@ namespace Chummer.Tests.Consumption.Bonus
 	public class BonusValueDetectionTests
 	{
 		[Fact]
-		public void AFractionPrintedInTheGermanCultureParsesTenfold()
+		public void AFractionIgnoresTheThreadCulture()
 		{
-			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.Application));
-			Assert.Equal(5, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.German));
+			Assert.Equal(0, BonusValues.ValueToInt("Rating div 2", 1, 0, Cultures.German));
+			Assert.Equal(0, BonusValues.ValueToInt("Rating div 3", 1, 0, Cultures.German));
+			Assert.Empty(Failures(
+				"<gear><name>G</name><rating>3</rating><bonus><initiative>Rating * 0.5</initiative></bonus></gear>"));
 		}
 
+		// No value in the port depends on the culture any more: a fake conversion stands in.
 		[Fact]
-		public void AFractionalResultIsReportedAsCultureDependent()
+		public void ANumberThatDependsOnTheCultureIsReported()
 		{
-			BonusValues.BonusValueFailure failure = Assert.Single(Failures(
-				"<gear><name>G</name><rating>3</rating><bonus><initiative>Rating * 0.5</initiative></bonus></gear>"));
-
-			Assert.Equal(1, failure.Rating);
-			Assert.Equal("en-US gives 0, de-DE gives 5", failure.Error);
+			Assert.Equal("p = v: en-US gives 0, de-DE gives 5", RecordFailure((value, attribute, culture) =>
+				culture == Cultures.German ? 5 : 0));
 		}
 
 		[Fact]
@@ -62,8 +64,8 @@ namespace Chummer.Tests.Consumption.Bonus
 		[Fact]
 		public void ACultureThatThrowsIsStillReportedAsCultureDependent()
 		{
-			Assert.Equal("en-US gives 0, de-DE throws OverflowException", Assert.Single(Failures(
-				"<gear><name>G</name><rating>1</rating><bonus><reach>Rating div 3</reach></bonus></gear>")).Error);
+			Assert.Equal("p = v: en-US gives 0, de-DE throws OverflowException", RecordFailure((value, attribute, culture) =>
+				culture == Cultures.German ? throw new OverflowException() : 0));
 		}
 
 		[Fact]
@@ -76,7 +78,7 @@ namespace Chummer.Tests.Consumption.Bonus
 		public void AFailingValueDoesNotHideTheNextInItsBranch()
 		{
 			Assert.Equal(new[] { "conditionmonitor/physical", "conditionmonitor/stun" }, Failures(
-				"<gear><name>G</name><rating>1</rating><bonus><conditionmonitor><physical>Rating div 2</physical>"
+				"<gear><name>G</name><rating>1</rating><bonus><conditionmonitor><physical>y</physical>"
 					+ "<stun>x</stun></conditionmonitor></bonus></gear>").Select(failure => failure.Path));
 		}
 
@@ -226,6 +228,13 @@ namespace Chummer.Tests.Consumption.Bonus
 		private static BonusValues.BonusValueFailure[] Failures(string item)
 		{
 			return Check(item).Failures.ToArray();
+		}
+
+		private static string RecordFailure(Func<string, int, CultureInfo, int> convert)
+		{
+			BonusValues.Reader reader = new BonusValues.Reader(1);
+			reader.Record("p", () => "v", convert);
+			return Assert.Single(reader.Failures).Message;
 		}
 	}
 }

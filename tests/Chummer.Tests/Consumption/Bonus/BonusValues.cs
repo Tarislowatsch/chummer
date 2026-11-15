@@ -212,7 +212,7 @@ namespace Chummer.Tests.Consumption.Bonus
 
 				XPathNavigator nav = new XmlDocument().CreateNavigator();
 				XPathExpression expression = nav.Compile(value.Replace("Rating", rating.ToString(threadCulture)));
-				decimal number = Convert.ToDecimal(Convert.ToString(nav.Evaluate(expression), threadCulture),
+				decimal number = Convert.ToDecimal(Convert.ToString(nav.Evaluate(expression), Cultures.Application),
 					Cultures.Application);
 				return Convert.ToInt32(Math.Floor(number));
 			}
@@ -281,7 +281,7 @@ namespace Chummer.Tests.Consumption.Bonus
 				Record(path, read, (value, attribute, culture) => System.Convert.ToInt32(value, culture));
 			}
 
-			private void Record(string path, Func<string> read, Func<string, int, CultureInfo, int> convert)
+			internal void Record(string path, Func<string> read, Func<string, int, CultureInfo, int> convert)
 			{
 				try
 				{
@@ -335,8 +335,7 @@ namespace Chummer.Tests.Consumption.Bonus
 						throw new ReadFailed(path, value, exception);
 					}
 
-					// - ValueToInt prints in the thread culture, then parses back as en-US: "1,5" reads as 15
-					// - "0,333…" reads as 333333333333333 and overflows: still the culture, not the data
+					// ValueToInt still prints and parses integers in the thread culture.
 					string local;
 					try
 					{
