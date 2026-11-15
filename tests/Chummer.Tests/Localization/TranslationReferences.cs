@@ -32,13 +32,16 @@ namespace Chummer.Tests.Localization
 
 		public sealed class Entry
 		{
-			public Entry(string language, string fileName, Kind kind, string key, Outcome outcome)
+			public Entry(string language, string fileName, Kind kind, string key, Outcome outcome,
+				XmlNode target = null, string payload = null)
 			{
 				Language = language;
 				FileName = fileName;
 				Kind = kind;
 				Key = key;
 				Outcome = outcome;
+				Target = target;
+				Payload = payload;
 			}
 
 			public string Language { get; }
@@ -50,6 +53,12 @@ namespace Chummer.Tests.Localization
 			public string Key { get; }
 
 			public Outcome Outcome { get; }
+
+			// - the English node the lookup finds, null unless applied
+			public XmlNode Target { get; }
+
+			// - what the pass writes onto the target
+			public string Payload { get; }
 
 			// - the allowlist key and the failure text
 			public string Display => Language + " " + FileName + " " + Kind.ToString().ToLowerInvariant() + ": " + Key;
@@ -174,12 +183,23 @@ namespace Chummer.Tests.Localization
 
 		private static readonly string[] ItemFields = { "translate", "page", "code", "advantage", "disadvantage" };
 
+		private static readonly string[] MetavariantFields = { "translate", "page" };
+
+		// - only what Load copies: whitespace or a comment elsewhere is no second translation
+		private static string FieldsOf(XmlElement element, string[] fields)
+		{
+			return string.Join("|", fields.Select(field => element[field]?.InnerXml ?? ""));
+		}
+
 		// - mentor and paragon choices are left out: a translated one would show up as unreached
 		private static IEnumerable<Entry> EntriesOf(string language, string fileName, XmlDocument english,
 			XmlElement type, XmlElement child, HashSet<XmlNode> read)
 		{
-			Func<Kind, string, string, Entry> entry = (kind, key, xPath) =>
-				new Entry(language, fileName, kind, key, Resolve(english, xPath, key));
+			Func<Kind, string, string, string, Entry> entry = (kind, key, xPath, payload) =>
+			{
+				XmlNode target = Resolve(english, xPath, key, out Outcome outcome);
+				return new Entry(language, fileName, kind, key, outcome, target, payload);
+			};
 			Func<Kind, string, Entry> crash = (kind, key) =>
 				new Entry(language, fileName, kind, key + " (no name)", Outcome.Crashes);
 
@@ -195,7 +215,7 @@ namespace Chummer.Tests.Localization
 				{
 					string name = Decoded(child["name"]);
 					yield return entry(Kind.Item, name,
-						"/chummer/" + type.Name + "/" + child.Name + "[name = \"" + name + "\"]");
+						"/chummer/" + type.Name + "/" + child.Name + "[name = \"" + name + "\"]", FieldsOf(child, ItemFields));
 				}
 			}
 
@@ -203,7 +223,8 @@ namespace Chummer.Tests.Localization
 			{
 				read.Add(child);
 				string text = child.InnerXml.Replace("&amp;", "&");
-				yield return entry(Kind.Text, text, "/chummer/" + type.Name + "/" + child.Name + "[. = \"" + text + "\"]");
+				yield return entry(Kind.Text, text, "/chummer/" + type.Name + "/" + child.Name + "[. = \"" + text + "\"]",
+					child.GetAttribute("translate"));
 			}
 
 			// - the nested lookups below take InnerXml as is, without &amp; decoding
@@ -216,7 +237,7 @@ namespace Chummer.Tests.Localization
 					yield return skill == null
 						? crash(Kind.Spec, spec.InnerXml)
 						: entry(Kind.Spec, skill + ": " + spec.InnerXml, "/chummer/" + type.Name + "/skill[name = \""
-							+ skill + "\"]/specs/spec[. = \"" + spec.InnerXml + "\"]");
+							+ skill + "\"]/specs/spec[. = \"" + spec.InnerXml + "\"]", spec.GetAttribute("translate"));
 				}
 			}
 
@@ -238,7 +259,7 @@ namespace Chummer.Tests.Localization
 					}
 
 					yield return entry(Kind.Metavariant, metatype + "/" + name, "/chummer/metatypes/metatype[name = \""
-						+ metatype + "\"]/metavariants/metavariant[name = \"" + name + "\"]");
+						+ metatype + "\"]/metavariants/metavariant[name = \"" + name + "\"]", FieldsOf(metavariant, MetavariantFields));
 				}
 			}
 
@@ -253,18 +274,65 @@ namespace Chummer.Tests.Localization
 						? crash(Kind.Advantage, advantage.InnerXml)
 						: entry(Kind.Advantage, art + ": " + advantage.InnerXml,
 							"/chummer/martialarts/martialart[name = \"" + art + "\"]/advantages/advantage[name = \""
-							+ advantage.InnerXml + "\"]");
+							+ advantage.InnerXml + "\"]", advantage.GetAttribute("translate"));
 				}
 			}
 		}
 
 		// - Load concatenates the key into a double-quoted XPath literal: a quote breaks the query
-		private static Outcome Resolve(XmlDocument english, string xPath, string key)
+		private static XmlNode Resolve(XmlDocument english, string xPath, string key, out Outcome outcome)
 		{
 			if (key.Contains("\""))
-				return Outcome.Crashes;
+			{
+				outcome = Outcome.Crashes;
+				return null;
+			}
 
-			return english.SelectSingleNode(xPath) == null ? Outcome.Dropped : Outcome.Applied;
+			XmlNode target = english.SelectSingleNode(xPath);
+			outcome = target == null ? Outcome.Dropped : Outcome.Applied;
+			return target;
+		}
+
+		// - Load appends a second <translate> unread, or overwrites the first @translate
+		// - grouped by node, not by key: a duplicate English name pulls two keys onto one node
+		public static IEnumerable<Repeat> RepeatedTargets(IEnumerable<Entry> entries)
+		{
+			return entries
+				.Where(entry => entry.Target != null)
+				.GroupBy(entry => new { entry.Language, entry.Kind, entry.Target })
+				.Where(group => group.Count() > 1)
+				.Select(group => new Repeat(group.Key.Language + " " + group.First().FileName + " "
+					+ group.Key.Kind.ToString().ToLowerInvariant() + ": " + TargetPathOf(group.Key.Target),
+					group.Count(), group.Select(entry => entry.Payload).Distinct(StringComparer.Ordinal).Count()))
+				.OrderBy(repeat => repeat.Key, StringComparer.Ordinal);
+		}
+
+		public sealed class Repeat
+		{
+			public Repeat(string key, int count, int distinctPayloads)
+			{
+				Key = key;
+				Count = count;
+				DistinctPayloads = distinctPayloads;
+			}
+
+			public string Key { get; }
+
+			public int Count { get; }
+
+			public int DistinctPayloads { get; }
+
+			public string Description => Count + " entries, " + DistinctPayloads
+				+ (DistinctPayloads == 1 ? " translation" : " translations");
+		}
+
+		private static string TargetPathOf(XmlNode target)
+		{
+			List<string> path = new List<string>();
+			for (XmlNode step = target; step != null && step.ParentNode is XmlElement; step = step.ParentNode)
+				path.Insert(0, step["name"] != null && step != target ? step.Name + "[" + step["name"].InnerText + "]" : step.Name);
+
+			return string.Join("/", path) + ": " + (target["name"]?.InnerText ?? target.InnerText);
 		}
 
 		private static string Decoded(XmlNode name)

@@ -204,6 +204,74 @@ namespace Chummer.Tests.Localization
 				entry => entry.Kind == TranslationReferences.Kind.Unreached);
 		}
 
+		[Fact]
+		public void TwoTranslationsOfOneItemRepeat()
+		{
+			Assert.Equal(new[] { "de gear.xml item: gears/gear: Meta Link = 2 entries, 2 translations" },
+				Repeats("gear.xml", Gear, "<gears><gear><name>Meta Link</name><translate>A</translate></gear>"
+					+ "<gear><name>Meta Link</name><translate>B</translate></gear></gears>"));
+		}
+
+		[Fact]
+		public void ExactCopyCountsAsOneTranslation()
+		{
+			Assert.Equal(new[] { "de gear.xml item: gears/gear: Meta Link = 2 entries, 1 translation" },
+				Repeats("gear.xml", Gear, "<gears><gear><name>Meta Link</name><translate>A</translate></gear>"
+					+ "<gear><name>Meta Link</name><translate>A</translate></gear></gears>"));
+		}
+
+		[Fact]
+		public void FieldsLoadIgnoresDoNotMakeASecondTranslation()
+		{
+			Assert.Equal(new[] { "de gear.xml item: gears/gear: Meta Link = 2 entries, 1 translation" },
+				Repeats("gear.xml", Gear, "<gears><gear><name>Meta Link</name><translate>A</translate></gear>"
+					+ "<gear><name>Meta Link</name><!-- copy --><translate>A</translate><notes>x</notes></gear></gears>"));
+		}
+
+		[Fact]
+		public void TwoTranslationsOfOneCategoryRepeat()
+		{
+			Assert.Equal(new[] { "de gear.xml text: categories/category: Commlinks = 2 entries, 2 translations" },
+				Repeats("gear.xml", Gear, "<categories><category translate=\"A\">Commlinks</category>"
+					+ "<category translate=\"B\">Commlinks</category></categories>"));
+		}
+
+		// - the key alone would see a repeat here: the lookup is anchored on the collection
+		[Fact]
+		public void SameNameInTwoCollectionsDoesNotRepeat()
+		{
+			Assert.Empty(Repeats("gear.xml",
+				"<chummer><gears><gear><name>Hardening</name></gear></gears><mods><mod><name>Hardening</name></mod></mods></chummer>",
+				"<gears><gear><name>Hardening</name><translate>A</translate></gear></gears>"
+					+ "<mods><mod><name>Hardening</name><translate>B</translate></mod></mods>"));
+		}
+
+		// - the key alone would see no repeat here: both translations meant different English items
+		[Fact]
+		public void EnglishDuplicatePullsBothTranslationsOntoTheFirstItem()
+		{
+			Assert.Equal(new[] { "de gear.xml item: gears/gear: Microphone = 2 entries, 2 translations" },
+				Repeats("gear.xml",
+					"<chummer><gears><gear><name>Microphone</name><category>Audio</category></gear>"
+						+ "<gear><name>Microphone</name><category>Sensor</category></gear></gears></chummer>",
+					"<gears><gear><name>Microphone</name><page>1</page></gear>"
+						+ "<gear><name>Microphone</name><page>2</page></gear></gears>"));
+		}
+
+		[Fact]
+		public void DroppedTranslationsDoNotRepeat()
+		{
+			Assert.Empty(Repeats("gear.xml", Gear, "<gears><gear><name>Metalink</name><translate>A</translate></gear>"
+				+ "<gear><name>Metalink</name><translate>B</translate></gear></gears>"));
+		}
+
+		private static string[] Repeats(string fileName, string englishXml, string blockXml)
+		{
+			return TranslationReferences.RepeatedTargets(Entries(fileName, englishXml, blockXml))
+				.Select(repeat => repeat.Key + " = " + repeat.Description)
+				.ToArray();
+		}
+
 		private const string Metatypes = "<chummer><metatypes><metatype><name>Elf</name><metavariants>"
 			+ "<metavariant><name>Night One</name></metavariant></metavariants></metatype>"
 			+ "<metatype><name>Dwarf</name><metavariants><metavariant><name>Gnome</name></metavariant>"

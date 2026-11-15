@@ -63,6 +63,129 @@ namespace Chummer.Tests.Localization
 				+ nameof(KnownDroppedTranslations), stale);
 		}
 
+		// - only one translation per English node can show
+		// - exact: a removed repeat must leave this list in the same change
+		private static readonly IReadOnlyDictionary<string, string> KnownRepeatedTranslations =
+			new Dictionary<string, string>(StringComparer.Ordinal)
+			{
+				// - English name twice: the second item can never get its translation
+				{ "de gear.xml item: gears/gear: Hardening", "2 entries, 2 translations" },
+				{ "de gear.xml item: gears/gear: Microphone", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Optimization", "2 entries, 2 translations" },
+				{ "de gear.xml item: gears/gear: Overdrive", "2 entries, 2 translations" },
+				{ "de gear.xml item: gears/gear: Targeting", "3 entries, 2 translations" },
+				{ "fr gear.xml item: gears/gear: Hardening", "2 entries, 2 translations" },
+				{ "fr gear.xml item: gears/gear: Microphone", "2 entries, 2 translations" },
+				{ "fr gear.xml item: gears/gear: Optimization", "2 entries, 2 translations" },
+				{ "fr gear.xml item: gears/gear: Overdrive", "2 entries, 2 translations" },
+				{ "fr gear.xml item: gears/gear: Targeting", "2 entries, 2 translations" },
+				{ "jp gear.xml item: gears/gear: Microphone", "2 entries, 1 translation" },
+				// - same text, other page: every reader takes the first <altpage>
+				{ "de critterpowers.xml item: powers/power: Info Sortilege", "2 entries, 2 translations" },
+				{ "de critterpowers.xml item: powers/power: Siphon", "2 entries, 2 translations" },
+				{ "de critterpowers.xml item: powers/power: Sparky", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Courier Sprite", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Crack Sprite", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Data Sprite", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Eastern Dragon", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Fault Sprite", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Feathered Serpent", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Great Eastern Dragon", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Great Feathered Serpent", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Great Leviathan", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Great Western Dragon", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Leviathan", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Machine Sprite", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Air", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Air, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Beasts", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Beasts, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Earth", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Earth, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Fire", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Fire, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Man", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Man, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Water", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Spirit of Water, Greater Form", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Watcher Spirit", "2 entries, 2 translations" },
+				{ "de critters.xml item: metatypes/metatype: Western Dragon", "2 entries, 2 translations" },
+				{ "de weapons.xml item: weapons/weapon: Jupiter Taser Club", "2 entries, 2 translations" },
+				{ "fr weapons.xml item: weapons/weapon: Jupiter Taser Club", "2 entries, 2 translations" },
+				// - exact copies: nothing is lost, the second is dead weight
+				{ "de gear.xml item: gears/gear: Adaptability", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Agent", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Analyze", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Anti-Aircraft Assist", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Armor", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Attack", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Biofeedback Filter", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Black Hammer", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Blackout", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Browse", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Cascading", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Chaser", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Clearsight", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Command", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Corrupt", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Covert Ops", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Data Bomb", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Decrypt", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Defense", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Defuse", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Disarm", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: ECCM", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Edit", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Electronic Warfare", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Encrypt", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Expert Defense", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Exploit", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Headjammer", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Homeground", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: IC", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Jammer, Area", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Jammer, Directional", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: MRSI Software", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Maneuver", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Medic", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Micro-Transceiver", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Nuke", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Pilot", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Profession", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Purge", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Reality Filter", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Replicate", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Scan", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Security Tags", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Sensor Tags", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Sniffer", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Spoof", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Standard RFID Tags", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Stealth", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Stealth Tags", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Suite: Basic User", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Suite: Basic+", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Suite: Pro User", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: System", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Tactical Satellite Mapping Software", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Tag Eraser", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Track", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: Trailblazer", "2 entries, 1 translation" },
+				{ "de gear.xml item: gears/gear: White Noise Generator", "2 entries, 1 translation" },
+				{ "fr spells.xml item: spells/spell: Napalm Wall", "2 entries, 1 translation" },
+				{ "fr spells.xml item: spells/spell: Nauseate", "2 entries, 1 translation" },
+				{ "fr spells.xml item: spells/spell: Radiation Shield", "2 entries, 1 translation" },
+			};
+
+		[Fact]
+		public void EachEnglishEntryIsTranslatedOnlyOncePerLanguage()
+		{
+			Dictionary<string, string> actual = TranslationReferences.RepeatedTargets(TranslationReferences.AllEntries)
+				.ToDictionary(repeat => repeat.Key, repeat => repeat.Description, StringComparer.Ordinal);
+
+			PinReport.AssertEqual("Repeated translations", KnownRepeatedTranslations, actual);
+		}
+
 		// - updating the hash is only correct after re-reading Load and fixing the port
 		private const string PinnedLoadFingerprint = "53B0D0A073F3437E";
 
