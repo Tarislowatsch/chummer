@@ -8,14 +8,8 @@ namespace Chummer.Tests.Consumption.Bonus
 {
 	public class BonusValueTests
 	{
-		// - code defect, not data: ValueToInt prints in the thread culture, see BonusValues.ConvertEach
-		// - fixing ValueToInt empties this list, the data stays as it is
 		private static readonly IReadOnlyDictionary<string, string> KnownFailures =
-			new Dictionary<string, string>(StringComparer.Ordinal)
-			{
-				{ "cyberware.xml | Boosted Reflexes | initiativepass = Rating div 2", "de-DE: 5 passes at rating 1, 15 at 3" },
-				{ "cyberware.xml | Boosted Reflexes (2050) | initiativepass = Rating div 2", "de-DE: 5 passes at rating 1, 15 at 3, 25 at 5" },
-			};
+			new Dictionary<string, string>(StringComparer.Ordinal);
 
 		[Fact]
 		public void EveryBonusValuePassesValueToInt()
@@ -150,7 +144,7 @@ namespace Chummer.Tests.Consumption.Bonus
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
 				{ "ImprovementManager.NodeExists", "CCEEB841D4C41A47" },
-				{ "ImprovementManager.ValueToInt", "E41DF909B3A78A30" },
+				{ "ImprovementManager.ValueToInt", "DDB437B692F02F4C" },
 				{ "armor", "75EDFF53F289627E" },
 				{ "conditionmonitor", "189B501E4B75A0BB" },
 				{ "livingpersona", "ACA64A106C57D3DE" },

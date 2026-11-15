@@ -1080,7 +1080,7 @@ namespace Chummer
 				XPathExpression xprValue = nav.Compile(strReturn);
 
 				// Treat this as a decimal value so any fractions can be rounded down. This is currently only used by the Boosted Reflexes Cyberware from SR2050.
-				decimal decValue = Convert.ToDecimal(nav.Evaluate(xprValue).ToString(), GlobalOptions.Instance.CultureInfo);
+				decimal decValue = Convert.ToDecimal(Convert.ToString(nav.Evaluate(xprValue), GlobalOptions.Instance.CultureInfo), GlobalOptions.Instance.CultureInfo);
 				decValue = Math.Floor(decValue);
 				int intValue = Convert.ToInt32(decValue);
 

@@ -12,7 +12,7 @@ namespace Chummer.GoldenMaster.Tests
 	[Collection(AppHost.Collection)]
 	public class ImprovementCultureTests
 	{
-		// - the bonus values BonusValueTests found culture-dependent, both "Rating div 2"
+		// - the only bonus values with a fractional result, both "Rating div 2"
 		private static readonly string[] Cyberware = { "Boosted Reflexes", "Boosted Reflexes (2050)" };
 
 		// - "name | rating" -> initiative passes under en-US and de-DE, read off the running code
@@ -20,14 +20,14 @@ namespace Chummer.GoldenMaster.Tests
 		private static readonly IReadOnlyDictionary<string, string> PinnedPasses =
 			new Dictionary<string, string>(StringComparer.Ordinal)
 			{
-				{ "Boosted Reflexes | 1", "en-US 0, de-DE 5" },
+				{ "Boosted Reflexes | 1", "en-US 0, de-DE 0" },
 				{ "Boosted Reflexes | 2", "en-US 1, de-DE 1" },
-				{ "Boosted Reflexes | 3", "en-US 1, de-DE 15" },
-				{ "Boosted Reflexes (2050) | 1", "en-US 0, de-DE 5" },
+				{ "Boosted Reflexes | 3", "en-US 1, de-DE 1" },
+				{ "Boosted Reflexes (2050) | 1", "en-US 0, de-DE 0" },
 				{ "Boosted Reflexes (2050) | 2", "en-US 1, de-DE 1" },
-				{ "Boosted Reflexes (2050) | 3", "en-US 1, de-DE 15" },
+				{ "Boosted Reflexes (2050) | 3", "en-US 1, de-DE 1" },
 				{ "Boosted Reflexes (2050) | 4", "en-US 2, de-DE 2" },
-				{ "Boosted Reflexes (2050) | 5", "en-US 2, de-DE 25" },
+				{ "Boosted Reflexes (2050) | 5", "en-US 2, de-DE 2" },
 				{ "Boosted Reflexes (2050) | 6", "en-US 3, de-DE 3" },
 			};
 
