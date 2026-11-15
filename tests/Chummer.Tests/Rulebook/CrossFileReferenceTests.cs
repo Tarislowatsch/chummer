@@ -70,6 +70,48 @@ namespace Chummer.Tests.Rulebook
 				+ nameof(KnownUnresolvedReferences), stale);
 		}
 
+		// - the range rule skips these: an empty <range /> on Gear counts as deliberate
+		// - exact by name: a stray <range /> on a new missile moves no reference count
+		private static readonly HashSet<string> GearWeaponsWithoutRange = new HashSet<string>(StringComparer.Ordinal)
+		{
+			// Dropped or laid, not launched.
+			"Vehicle Missile: Aztechnology Series 5 Iron Bomb",
+			"Vehicle Missile: Esprit Corail Depth Charge",
+			"Mine: Ares Fireblossom",
+			"Mine: B-114 Anti-Personnel",
+			"Mine: B-116 Chemical Mine",
+			"Mine: CI Dragon Box Mine",
+			"Mine: E-121 Electrical Mine",
+			"Mine: RWE Gang Feng",
+			"Mine: NA Anti-Tank",
+			"Mine: KM-18 Zweihänder",
+			// Empty before the rule existed: no range was ever decided for these.
+			"Commlink: Stun Gas Deployment",
+			"Commlink: Small Explosive Device",
+			"Commlink: Flash-Pak",
+			"Commlink: Mini Flamethrower",
+		};
+
+		[Fact]
+		public void OnlyTheListedGearWeaponsSkipTheRangeRule()
+		{
+			string[] actual = DataPaths.FilesWithPacks("weapons.xml")
+				.SelectMany(path => Xml.Load(path)
+					.SelectNodes("/chummer/weapons/weapon[type != 'Melee' and category = 'Gear' and range and string(range) = '']/name")
+					.Cast<System.Xml.XmlNode>())
+				.Select(name => name.InnerText)
+				.ToArray();
+
+			string[] drifted = actual.Where(name => !GearWeaponsWithoutRange.Contains(name))
+				.Select(name => name + ": empty <range /> but not listed")
+				.Concat(GearWeaponsWithoutRange.Where(name => !actual.Contains(name, StringComparer.Ordinal))
+					.Select(name => name + ": listed but has a range or is gone"))
+				.OrderBy(entry => entry, StringComparer.Ordinal)
+				.ToArray();
+
+			FailureReport.AssertNoneInFull("Give these a range or update " + nameof(GearWeaponsWithoutRange), drifted);
+		}
+
 		// - a mistyped source path selects nothing: its theory case passes unchecked
 		// - a mistyped target makes every reference dangle, unless a fallback target hides it
 		[Fact]
