@@ -2966,7 +2966,7 @@
 			<page>185</page>
 		</cyberware>
 		<cyberware>
-			<name>Radio (2050)</name>
+			<name>Radio (2050) (Earware)</name>
 			<category>Earware</category>
 			<ess>0.75</ess>
 			<capacity>[1]</capacity>
@@ -2986,7 +2986,7 @@
 			<page>185</page>
 		</cyberware>
 		<cyberware>
-			<name>Telephone (2050)</name>
+			<name>Telephone (2050) (Earware)</name>
 			<category>Earware</category>
 			<ess>0.5</ess>
 			<capacity>[1]</capacity>

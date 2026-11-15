@@ -12,18 +12,10 @@ namespace Chummer.Tests.Rulebook
 	// - only direct children of the wrapper are entries: nested <cyberware> nodes are references
 	public class NameUniquenessTests
 	{
-		// - resolving these is deferred: a rename silently breaks every save storing the old name
+		// - gear lookups also filter by category: a rename breaks saves that store the second entry
 		// - format: <file>/<collection>/<key>, one line per entry
 		private static readonly HashSet<string> KnownDuplicates = new HashSet<string>(StringComparer.Ordinal)
 		{
-			"armor.xml/mods/Transparent Ruthenium Polymer Coating",
-			"critterpowers.xml/powers/Binding",
-			"critterpowers.xml/powers/Engulf",
-			"critterpowers.xml/powers/Spirit Pact",
-			"critters.xml/metatypes/Musk Ox",
-			"critters.xml/metatypes/Ross Seal",
-			"cyberware.xml/cyberwares/Radio (2050)",
-			"cyberware.xml/cyberwares/Telephone (2050)",
 			"gear.xml/gears/Crimson Orchid",
 			"gear.xml/gears/Deepweed",
 			"gear.xml/gears/Hardening",
@@ -33,8 +25,6 @@ namespace Chummer.Tests.Rulebook
 			"gear.xml/gears/Orichalcum",
 			"gear.xml/gears/Overdrive",
 			"gear.xml/gears/Targeting",
-			"vehicles.xml/vehicles/Dodge Scoot (Scooter)",
-			"weapons.xml/weapons/Bottle",
 		};
 
 		[Theory]

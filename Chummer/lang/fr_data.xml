@@ -924,7 +924,7 @@
 				<page>62</page>
 			</bioware>
 			<bioware>
-				<name>Chloroplash Skin</name>
+				<name>Chloroplast Skin</name>
 				<translate>Peau à chloroplastes</translate>
 				<page>62</page>
 			</bioware>
@@ -4357,7 +4357,7 @@
 				<page>143</page>
 			</echo>
 			<echo>
-				<name>Mind Over machine</name>
+				<name>Mind Over Machine</name>
 				<translate>Possession de la machine</translate>
 				<page>143</page>
 			</echo>
@@ -4493,7 +4493,7 @@
 			<category translate="Équipement de survie en milieu toxique">Toxic Environment Gear</category>
 			<category translate="Toxines">Toxins</category>
 			<category translate="Équipement de plongée sous-marine">Underwater Gear</category>
-			<category translate="Produits chimiques généraux">Utility Chemicals</category>
+			<category translate="Produits chimiques généraux">Chemicals</category>
 			<category translate="Senseurs visuels et appareils d'imagerie">Vision Enhancers</category>
 			<category translate="Appareils visuels">Vision Enhancements</category>
 			<category translate="Inhibiteurs de wifi">Wireless Negation</category>
@@ -8584,7 +8584,7 @@
 				<page>123</page>
 			</gear>
 			<gear>
-				<name>Software Programm Suite</name>
+				<name>Software Programming Suite</name>
 				<translate>Suite de programmation</translate>
 				<page>115</page>
 			</gear>
@@ -15519,7 +15519,7 @@
 				<name>Hardware</name>
 				<translate>Hardware</translate>
 				<specs>
-					<spec translate="Par type d'appareil">Program or Device Type</spec>
+					<spec translate="Par type d'appareil">Specific Devices</spec>
 				</specs>
 				<page>127</page>
 			</skill>
@@ -15527,7 +15527,7 @@
 				<name>Heavy Weapons</name>
 				<translate>Armes lourdes</translate>
 				<specs>
-					<spec translate="Canons d'assaut">Assault Cannon</spec>
+					<spec translate="Canons d'assaut">Assault Cannons</spec>
 					<spec translate="Lance-grenades">Grenade Launchers</spec>
 					<spec translate="Missiles guidés">Guided Missiles</spec>
 					<spec translate="Mitrailleuses">Machine Guns</spec>
@@ -15602,7 +15602,7 @@
 				<specs>
 					<spec translate="Shotguns">Shotguns</spec>
 					<spec translate="Fusils de précision">Sniper Rifles</spec>
-					<spec translate="Fusils de sport">Sporting Rifles</spec>
+					<spec translate="Fusils de sport">Sports Rifles</spec>
 				</specs>
 				<page>122</page>
 			</skill>
@@ -15778,9 +15778,6 @@
 			<skill>
 				<name>Ritual Spellcasting</name>
 				<translate>Lancement de sorts rituel</translate>
-				<specs>
-					<spec translate="Par catégorie de sort">Spell Type</spec>
-				</specs>
 				<page>123</page>
 			</skill>
 			<skill>
@@ -15817,9 +15814,6 @@
 			<skill>
 				<name>Spellcasting</name>
 				<translate>Lancement de sorts</translate>
-				<specs>
-					<spec translate="Par catégorie de sort">Spell Type</spec>
-				</specs>
 				<page>123</page>
 			</skill>
 			<skill>
@@ -16301,7 +16295,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish-shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat du Tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 					<spec translate="Amérique du Nord">N. America</spec>
@@ -16504,7 +16498,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 					<spec translate="Amérique du Nord">N. America</spec>
@@ -16615,7 +16609,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 				</specs>
@@ -16669,7 +16663,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 					<spec translate="Amérique du Nord">N. America</spec>
@@ -16737,7 +16731,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 					<spec translate="Amérique du Nord">N. America</spec>
@@ -16806,7 +16800,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 					<spec translate="Amérique du Nord">N. America</spec>
@@ -16958,7 +16952,6 @@
 				<specs>
 					<spec translate="Territoire">Turf</spec>
 					<spec translate="Politique">Politics</spec>
-					<spec translate="Symboles">Signs</spec>
 					<spec translate="Histoires">History</spec>
 					<spec translate="Organisations">Organizations</spec>
 					<spec translate="Planques">Safe Houses</spec>
@@ -17032,7 +17025,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Conseil salish shidhe">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Protectorat tsimshian">Tsimshian Protectorate</spec>
 					<spec translate="Yucatan">Yukutan</spec>
 				</specs>
@@ -20736,7 +20729,7 @@
 			</weapon>
 			<weapon>
 				<name>Bottle</name>
-				<translate>Bouteille, Intacte</translate>
+				<translate>Bouteille, Brisée</translate>
 				<page>17</page>
 			</weapon>
 			<weapon>
@@ -20875,8 +20868,8 @@
 				<page>17</page>
 			</weapon>
 			<weapon>
-				<name>Bottle</name>
-				<translate>Bouteille, Brisée</translate>
+				<name>Bottle (Clubs)</name>
+				<translate>Bouteille, Intacte</translate>
 				<page>17</page>
 			</weapon>
 			<weapon>

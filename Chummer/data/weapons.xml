@@ -656,7 +656,7 @@
 			<page>17</page>
 		</weapon>
 		<weapon>
-			<name>Bottle</name>
+			<name>Bottle (Clubs)</name>
 			<category>Clubs</category>
 			<type>Melee</type>
 			<reach>0</reach>

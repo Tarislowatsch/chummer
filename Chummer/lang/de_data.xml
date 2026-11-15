@@ -2418,7 +2418,7 @@
 				<translate>Energieentzug</translate>
 			</power>
 			<power>
-				<name>Engulf</name>
+				<name>Engulf (RW)</name>
 				<page>224</page>
 				<translate>Verschlingen</translate>
 			</power>
@@ -2568,7 +2568,7 @@
 				<translate>Farbanpassung</translate>
 			</power>
 			<power>
-				<name>Binding</name>
+				<name>Binding (RW)</name>
 				<page>218</page>
 				<translate>Bindung</translate>
 			</power>
@@ -2628,7 +2628,7 @@
 				<translate>Durchdringung</translate>
 			</power>
 			<power>
-				<name>Spirit Pact</name>
+				<name>Spirit Pact (RW)</name>
 				<page>220</page>
 				<translate>Geisterpakt</translate>
 			</power>
@@ -5973,13 +5973,6 @@
 				<name>Antarctic Hound</name>
 				<page>77</page>
 				<translate>Antarktishund</translate>
-			</metatype>
-			<metatype>
-				<name>Ross Seal</name>
-				<page>
-				</page>
-				<translate>
-				</translate>
 			</metatype>
 			<metatype>
 				<name>Ross Seal</name>
@@ -16171,7 +16164,7 @@
 			<martialart>
 				<name>Firefight</name>
 				<advantages>
-					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
+					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
 					<advantage translate="+1 Würfel auf Verteidigungsproben, um Fernkampfangriffen auszuweichen, wenn man sich im Nahkampf befindet">+1 die to Defense Tests to dodge Ranged Attacks if engaged in melee</advantage>
 					<advantage translate="+1 Würfel für Verteidigungsproben für Ausweichen im Nahkampf">+1 die on melee dodge Defense Test</advantage>
 				</advantages>
@@ -16232,7 +16225,7 @@
 					<advantage translate="+1 Würfel für Angesagte Ziele zum Entwaffnen">+1 die on Called Shots to disarm</advantage>
 					<advantage translate="Zielen wird eine Freie Handlung">Take Aim as Free Action</advantage>
 					<advantage translate="Waffe bereitmachen wird eine Freie Handlung">Ready Weapon as Free Action</advantage>
-					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
+					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>Krav Maga</translate>
@@ -16243,7 +16236,7 @@
 					<advantage translate="+1 Würfel für Angesagte Ziele zum Entwaffnen">+1 die on Called Shots to disarm</advantage>
 					<advantage translate="Zielen wird eine Freie Handlung">Take Aim as Free Action</advantage>
 					<advantage translate="Waffe bereitmachen wird eine Freie Handlung">Ready Weapon as Free Action</advantage>
-					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
+					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>Hasidut</translate>
@@ -16254,7 +16247,7 @@
 					<advantage translate="+1 Würfel für Angesagte Ziele zum Entwaffnen">+1 die on Called Shots to disarm</advantage>
 					<advantage translate="Zielen wird eine Freie Handlung">Take Aim as Free Action</advantage>
 					<advantage translate="Waffe bereitmachen wird eine Freie Handlung">Ready Weapon as Free Action</advantage>
-					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
+					<advantage translate="Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>ROSS</translate>
@@ -16371,8 +16364,8 @@
 				<advantages>
 					<advantage translate="+1 Würfel für Angriffe mit Exotische Nahkampfwaffe, bei denen eine Cyberimplantatwaffe an ungewöhnlicher Stelle benutzt wird">+1 die for Exotic Melee Weapon attacks using a cyber-implant in an unusual location</advantage>
 					<advantage translate="+1 Schaden für Angriffe mit Klingenwaffen">+1 DV on Blades attacks</advantage>
-					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
-					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's'friends in melee'bonus by 1</advantage>
+					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
+					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's 'friends in melee' bonus by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>Sangre y Acero</translate>
@@ -16382,8 +16375,8 @@
 				<advantages>
 					<advantage translate="+1 Würfel für Angriffe mit Exotische Nahkampfwaffe, bei denen eine Cyberimplantatwaffe an ungewöhnlicher Stelle benutzt wird">+1 die for Exotic Melee Weapon attacks using a cyber-implant in an unusual location</advantage>
 					<advantage translate="+1 Schaden für Angriffe mit Klingenwaffen">+1 DV on Blades attacks</advantage>
-					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
-					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's'friends in melee'bonus by 1</advantage>
+					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
+					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's 'friends in melee' bonus by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>Eztlitzli</translate>
@@ -16393,8 +16386,8 @@
 				<advantages>
 					<advantage translate="+1 Würfel für Angriffe mit Exotische Nahkampfwaffe, bei denen eine Cyberimplantatwaffe an ungewöhnlicher Stelle benutzt wird">+1 die for Exotic Melee Weapon attacks using a cyber-implant in an unusual location</advantage>
 					<advantage translate="+1 Schaden für Angriffe mit Klingenwaffen">+1 DV on Blades attacks</advantage>
-					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat'attacker in melee combat'modifier by 1</advantage>
-					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's'friends in melee'bonus by 1</advantage>
+					<advantage translate=" Senkung des Fernkampfmodifikators „Angreifer im Nahkampf“ um 1">Reduce ranged combat 'attacker in melee combat' modifier by 1</advantage>
+					<advantage translate="Senkung eines gegnerischen „Freunde im Nahkampf“- Bonus um 1">Reduce an opponent's 'friends in melee' bonus by 1</advantage>
 				</advantages>
 				<page>166</page>
 				<translate>Ars Cybernetica</translate>
@@ -21243,14 +21236,14 @@
 				<name>Automatics</name>
 				<page>148</page>
 				<translate>Schnellfeuerwaffen</translate>
+				<specs>
+					<spec translate="Sturmgewehre">Assault Rifles</spec>
+					<spec translate="Schwere Sturmgewehre">Battle Rifles</spec>
+					<spec translate="Karabiner">Carbines</spec>
+					<spec translate="Maschinenpistolen">Machine Pistols</spec>
+					<spec translate="Maschinengewehre">Submachine Guns</spec>
+				</specs>
 			</skill>
-			<specs>
-				<spec translate="Sturmgewehre">Assault Rifles</spec>
-				<spec translate="Schwere Sturmgewehre">Battle Rifles</spec>
-				<spec translate="Karabiner">Carbines</spec>
-				<spec translate="Maschinenpistolen">Machine Pistols</spec>
-				<spec translate="Maschinengewehre">Submachine Guns</spec>
-			</specs>
 			<skill>
 				<name>Automotive Mechanic</name>
 				<page>153</page>
@@ -21509,7 +21502,7 @@
 				<page>148</page>
 				<translate>Schwere Waffen</translate>
 				<specs>
-					<spec translate="Sturmkanone">Assault Cannon</spec>
+					<spec translate="Sturmkanone">Assault Cannons</spec>
 					<spec translate="Granatwerfer">Grenade Launchers</spec>
 					<spec translate="Granatwerfer">Guided Missiles</spec>
 					<spec translate="Maschinengewehre">Machine Guns</spec>
@@ -21578,7 +21571,7 @@
 				<specs>
 					<spec translate="Schrotflinten">Shotguns</spec>
 					<spec translate="Scharfschützengewehre">Sniper Rifles</spec>
-					<spec translate="Sportgewehre">Sporting Rifles</spec>
+					<spec translate="Sportgewehre">Sports Rifles</spec>
 				</specs>
 			</skill>
 			<skill>
@@ -21645,8 +21638,8 @@
 				<specs>
 					<spec translate="BASE-Jumping">BASE Jumping</spec>
 					<spec translate="HALO">HALO</spec>
-					<spec translate="Low Altitude">geringe Sprunghöhe</spec>
-					<spec translate="Recreational">normales Fallschirmspringen</spec>
+					<spec translate="geringe Sprunghöhe">Low Altitude</spec>
+					<spec translate="normales Fallschirmspringen">Recreational</spec>
 					<spec translate="Automatische Auslösung">Static Line</spec>
 				</specs>
 			</skill>
@@ -21667,7 +21660,7 @@
 				<page>154</page>
 				<translate>Raumfahrzeuge</translate>
 				<specs>
-					<spec translate="Deep Space">Weltraum</spec>
+					<spec translate="Weltraum">Deep Space</spec>
 					<spec translate="Startprozeduren">Launch Craft</spec>
 					<spec translate="Fernsteuerung">Remote Operation</spec>
 					<spec translate="Semiballistisch">Semiballistic</spec>
@@ -21726,13 +21719,13 @@
 				<name>Pistols</name>
 				<page>148</page>
 				<translate>Pistolen</translate>
+				<specs>
+					<spec translate="Holdouts">Holdouts</spec>
+					<spec translate="Revolvers">Revolvers</spec>
+					<spec translate="Halbautomatik">Semi-Automatics</spec>
+					<spec translate="Taser">Tasers</spec>
+				</specs>
 			</skill>
-			<specs>
-				<spec translate="Holdouts">Hold-Outs</spec>
-				<spec translate="Revolvers">Revolvers</spec>
-				<spec translate="Halbautomatik">Semi-Automatics</spec>
-				<spec translate="Taser">Tasers</spec>
-			</specs>
 			<skill>
 				<name>Registering</name>
 				<page>151</page>
@@ -21844,7 +21837,7 @@
 				<page>148</page>
 				<translate>Waffenloser Kampf</translate>
 				<specs>
-					<spec translate="Cyber-Nahkampfwaffen">Cyber-Implant</spec>
+					<spec translate="Cyber-Nahkampfwaffen">Cyber-Implants</spec>
 					<spec translate="Kampfkünste">Martial Arts</spec>
 					<spec translate="Gegner festhalten">Subdual Combat</spec>
 					<spec translate="Blocken">Parrying</spec>
@@ -22263,7 +22256,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 					<spec translate="Nordamerika">N. America</spec>
@@ -22466,7 +22459,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 					<spec translate="Nordamerika">N. America</spec>
@@ -22577,7 +22570,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 				</specs>
@@ -22631,7 +22624,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 					<spec translate="Nordamerika">N. America</spec>
@@ -22699,7 +22692,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 					<spec translate="Nordamerika">N. America</spec>
@@ -22768,7 +22761,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 					<spec translate="Nordamerika">N. America</spec>
@@ -22993,7 +22986,7 @@
 					<spec translate="Quebec">Quebec</spec>
 					<spec translate="Salish-Shidhe-Rat">Salish-Shidhe Council</spec>
 					<spec translate="Sioux">Sioux</spec>
-					<spec translate="Tir Tairngaire">Tir Tairngaire</spec>
+					<spec translate="Tir Tairngaire">Tir Tairngire</spec>
 					<spec translate="Tsimshian-Protektorat">Tsimshian Protectorate</spec>
 					<spec translate="Yucatán">Yukutan</spec>
 				</specs>
