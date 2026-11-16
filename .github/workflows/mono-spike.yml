@@ -87,7 +87,12 @@ jobs:
             DISPLAY=$display "$START" "Chummer/bin/Debug/$chum.chum" > "out/$c.log" 2>&1 &
             pid=$!
             sleep 45
-            DISPLAY=${display:-:0} xwd -root -silent -out "out/$c.xwd" || true
+            if [ "$c" = xquartz ]; then
+              # - XQuartz draws onto the macOS desktop: its X11 root window stays black
+              screencapture -x "out/$c.png" || true
+            else
+              xwd -root -silent -out "out/$c.xwd" || true
+            fi
             if kill -0 "$pid" 2>/dev/null; then
               echo "$c: running after 45 s" | tee -a out/result.txt
               kill "$pid" || true
