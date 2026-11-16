@@ -41,7 +41,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        driver: [native, x11]
+        # - no native run: Mono's Carbon driver is 32-bit and misses HIViewPlaceInSuperviewAt
+        driver: [x11]
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -71,11 +72,15 @@ jobs:
         if: matrix.driver == 'x11'
         run: |
           brew install pkgconf libx11
+          mkdir -p out
+          log="$PWD/out"
           curl -sSL https://dl.winehq.org/mono/sources/libgdiplus/libgdiplus-6.2.tar.gz | tar xz
           cd libgdiplus-6.2
-          ./configure --prefix="$HOME/gdiplus-x11" > ../configure.log 2>&1 || { tail -50 ../configure.log; exit 1; }
-          grep -q "X11 = yes" ../configure.log || { tail -30 ../configure.log; exit 1; }
-          make -j"$(sysctl -n hw.ncpu)" > ../make.log 2>&1 || { tail -50 ../make.log; exit 1; }
+          # - outside brew's own build nothing points the compiler at Homebrew's headers and libraries
+          export CPPFLAGS="-I$(brew --prefix)/include" LDFLAGS="-L$(brew --prefix)/lib"
+          ./configure --prefix="$HOME/gdiplus-x11" > "$log/configure.log" 2>&1 || { tail -50 "$log/configure.log"; exit 1; }
+          grep -q "X11 = yes" "$log/configure.log" || { tail -30 "$log/configure.log"; exit 1; }
+          make -j"$(sysctl -n hw.ncpu)" > "$log/make.log" 2>&1 || { tail -50 "$log/make.log"; exit 1; }
           make install > /dev/null
           nm -gU "$HOME/gdiplus-x11/lib/libgdiplus.dylib" | grep GdipCreateFromXDrawable_linux
 
