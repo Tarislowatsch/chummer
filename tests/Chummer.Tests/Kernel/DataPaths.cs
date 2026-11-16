@@ -53,7 +53,7 @@ namespace Chummer.Tests.Kernel
 
 		public static string ChummerExportDir => Path.Combine(RepoRoot, "Chummer", "export");
 
-		// - the pickers' filter, frmViewer.cs:36 and frmExport.cs:27: case-sensitive ".xsl"
+		// - the pickers' filter, frmViewer.cs:56 and frmExport.cs:27: case-sensitive ".xsl"
 		// - a .xslt is only ever reached through xsl:include
 		public static IEnumerable<object[]> LoadableStylesheets()
 		{
