@@ -51,6 +51,7 @@ namespace Chummer
 			_objImprovementManager = new ImprovementManager(_objCharacter);
 			_objController = new MainController(_objCharacter);
 			InitializeComponent();
+			CreateExpenseCharts();
 
 			// Add EventHandlers for the MAG and RES enabled events and tab enabled events.
 			_objCharacter.MAGEnabledChanged += objCharacter_MAGEnabledChanged;
@@ -20665,10 +20666,15 @@ namespace Chummer
 		private void splitKarmaNuyen_Panel1_Resize(object sender, EventArgs e)
 		{
 			lstKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
-			chtKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
-			chtKarma.Height = 210;
-			chtKarma.Top = splitKarmaNuyen.Panel1.Size.Height - 6 - chtKarma.Height;
-			lstKarma.Height = chtKarma.Top - 6 - lstKarma.Top;
+			if (chtKarma != null)
+			{
+				chtKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
+				chtKarma.Height = 210;
+				chtKarma.Top = splitKarmaNuyen.Panel1.Size.Height - 6 - chtKarma.Height;
+				lstKarma.Height = chtKarma.Top - 6 - lstKarma.Top;
+			}
+			else
+				lstKarma.Height = splitKarmaNuyen.Panel1.Size.Height - 6 - lstKarma.Top;
 			try
 			{
 				if (lstKarma.Width > 409)
@@ -20684,10 +20690,15 @@ namespace Chummer
 		private void splitKarmaNuyen_Panel2_Resize(object sender, EventArgs e)
 		{
 			lstNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
-			chtNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
-			chtNuyen.Height = 210;
-			chtNuyen.Top = splitKarmaNuyen.Panel2.Size.Height - 6 - chtNuyen.Height;
-			lstNuyen.Height = chtNuyen.Top - 6 - lstNuyen.Top;
+			if (chtNuyen != null)
+			{
+				chtNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
+				chtNuyen.Height = 210;
+				chtNuyen.Top = splitKarmaNuyen.Panel2.Size.Height - 6 - chtNuyen.Height;
+				lstNuyen.Height = chtNuyen.Top - 6 - lstNuyen.Top;
+			}
+			else
+				lstNuyen.Height = splitKarmaNuyen.Panel2.Size.Height - 6 - lstNuyen.Top;
 			try
 			{
 				if (lstNuyen.Width > 409)
@@ -25403,6 +25414,10 @@ namespace Chummer
 			lstKarma.Sort();
 			lstNuyen.Sort();
 
+			// No charts on Mono, see CreateExpenseCharts.
+			if (chtKarma == null)
+				return;
+
 			// Charting test for Expenses.
 			chtKarma.Series.Clear();
 			chtNuyen.Series.Clear();
@@ -25461,6 +25476,45 @@ namespace Chummer
 			//chtKarma.ChartAreas[0].AxisX.MaximumAutoSize = 100;
 			chtKarma.Invalidate();
 			chtNuyen.Invalidate();
+		}
+
+		// - built here, not in InitializeComponent: Mono's Chart stub throws NotImplementedException
+		// - declared here too: the designer would drop fields it does not initialize
+		// - on Mono both charts stay null
+		private Chart chtKarma;
+		private Chart chtNuyen;
+
+		private void CreateExpenseCharts()
+		{
+			if (!Platform.IsMono)
+			{
+				chtKarma = CreateExpenseChart("chtKarma", 409, 4);
+				chtNuyen = CreateExpenseChart("chtNuyen", 410, 7);
+				splitKarmaNuyen.Panel1.Controls.Add(chtKarma);
+				splitKarmaNuyen.Panel1.Controls.SetChildIndex(chtKarma, 0);
+				splitKarmaNuyen.Panel2.Controls.Add(chtNuyen);
+				splitKarmaNuyen.Panel2.Controls.SetChildIndex(chtNuyen, 0);
+			}
+			// The resize events fired during InitializeComponent, before the charts existed.
+			splitKarmaNuyen_Panel1_Resize(this, EventArgs.Empty);
+			splitKarmaNuyen_Panel2_Resize(this, EventArgs.Empty);
+		}
+
+		private static Chart CreateExpenseChart(string strName, int intWidth, int intTabIndex)
+		{
+			Chart objChart = new Chart();
+			((System.ComponentModel.ISupportInitialize)objChart).BeginInit();
+			objChart.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			ChartArea objArea = new ChartArea();
+			objArea.Name = "ChartArea1";
+			objChart.ChartAreas.Add(objArea);
+			objChart.Location = new System.Drawing.Point(0, 391);
+			objChart.Name = strName;
+			objChart.Size = new System.Drawing.Size(intWidth, 208);
+			objChart.TabIndex = intTabIndex;
+			objChart.Text = "chart1";
+			((System.ComponentModel.ISupportInitialize)objChart).EndInit();
+			return objChart;
 		}
 
 		/// <summary>
