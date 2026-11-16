@@ -1003,7 +1003,7 @@ namespace Chummer
 			treVehicles.DragDrop += treVehicles_DragDrop;
 
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 
 			// If this is a Sprite, re-label the Mental Attribute Labels.
@@ -1226,7 +1226,7 @@ namespace Chummer
 			if (!e.Cancel)
 			{
 				if (!_blnSkipToolStripRevert)
-					ToolStripManager.RevertMerge("toolStrip");
+					ToolStripMerge.RevertMerge("toolStrip");
 
 				// Unsubscribe from events.
 				_objCharacter.MAGEnabledChanged -= objCharacter_MAGEnabledChanged;
@@ -1342,7 +1342,7 @@ namespace Chummer
 		private void frmCreate_Activated(object sender, EventArgs e)
 		{
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 		}
 
@@ -14419,9 +14419,9 @@ namespace Chummer
 		#region Splitter Resize Events
 		private void splitSkills_Panel1_Resize(object sender, EventArgs e)
 		{
-			panActiveSkills.Height = splitSkills.Panel1.Height - panActiveSkills.Top;
-			panSkillGroups.Height = splitSkills.Panel1.Height - panSkillGroups.Top;
-			panActiveSkills.Width = splitSkills.Panel1.Width - panActiveSkills.Left;
+			panActiveSkills.Height = splitSkills.Panel1.Size.Height - panActiveSkills.Top;
+			panSkillGroups.Height = splitSkills.Panel1.Size.Height - panSkillGroups.Top;
+			panActiveSkills.Width = splitSkills.Panel1.Size.Width - panActiveSkills.Left;
 			panSkillGroups.Width = panActiveSkills.Left - 6 - panSkillGroups.Left;
 
 			cmdAddExoticSkill.Left = panActiveSkills.Left + panActiveSkills.Width - cmdAddExoticSkill.Width - 3;
@@ -14430,20 +14430,20 @@ namespace Chummer
 
 		private void splitSkills_Panel2_Resize(object sender, EventArgs e)
 		{
-			panKnowledgeSkills.Width = splitSkills.Panel2.Width - 3;
-			panKnowledgeSkills.Height = splitSkills.Panel2.Height - panKnowledgeSkills.Top;
+			panKnowledgeSkills.Width = splitSkills.Panel2.Size.Width - 3;
+			panKnowledgeSkills.Height = splitSkills.Panel2.Size.Height - panKnowledgeSkills.Top;
 		}
 
 		private void splitContacts_Panel1_Resize(object sender, EventArgs e)
 		{
-			panContacts.Width = splitContacts.Panel1.Width - 3;
-			panContacts.Height = splitContacts.Panel1.Height - panContacts.Top;
+			panContacts.Width = splitContacts.Panel1.Size.Width - 3;
+			panContacts.Height = splitContacts.Panel1.Size.Height - panContacts.Top;
 		}
 
 		private void splitContacts_Panel2_Resize(object sender, EventArgs e)
 		{
-			panEnemies.Width = splitContacts.Panel2.Width - 3;
-			panEnemies.Height = splitContacts.Panel2.Height - panEnemies.Top;
+			panEnemies.Width = splitContacts.Panel2.Size.Width - 3;
+			panEnemies.Height = splitContacts.Panel2.Size.Height - panEnemies.Top;
 		}
 		#endregion
 

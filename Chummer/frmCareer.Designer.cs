@@ -58,9 +58,7 @@
 			System.Windows.Forms.TreeNode treeNode26 = new System.Windows.Forms.TreeNode("Selected Weapons");
 			System.Windows.Forms.TreeNode treeNode27 = new System.Windows.Forms.TreeNode("Selected Gear");
 			System.Windows.Forms.TreeNode treeNode28 = new System.Windows.Forms.TreeNode("Selected Vehicles");
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
 			System.Windows.Forms.TreeNode treeNode29 = new System.Windows.Forms.TreeNode("Selected Improvements");
-			System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
 			this.StatusStrip = new System.Windows.Forms.StatusStrip();
 			this.tssKarmaLabel = new System.Windows.Forms.ToolStripStatusLabel();
 			this.tssKarma = new System.Windows.Forms.ToolStripStatusLabel();
@@ -743,7 +741,6 @@
 			this.picMugshot = new System.Windows.Forms.PictureBox();
 			this.tabKarma = new System.Windows.Forms.TabPage();
 			this.splitKarmaNuyen = new System.Windows.Forms.SplitContainer();
-			this.chtKarma = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.cmdKarmaEdit = new System.Windows.Forms.Button();
 			this.cmdKarmaGained = new System.Windows.Forms.Button();
 			this.lstKarma = new System.Windows.Forms.ListView();
@@ -958,7 +955,6 @@
 			this.tsVehicleWeaponModNotes = new System.Windows.Forms.ToolStripMenuItem();
 			this.cmsWeaponLocation = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.tsWeaponRenameLocation = new System.Windows.Forms.ToolStripMenuItem();
-			this.chtNuyen = new System.Windows.Forms.DataVisualization.Charting.Chart();
 			this.cmdAddMartialArt = new SplitButton();
 			this.cmdAddSpell = new SplitButton();
 			this.cmdAddComplexForm = new SplitButton();
@@ -1034,7 +1030,6 @@
 			this.splitKarmaNuyen.Panel1.SuspendLayout();
 			this.splitKarmaNuyen.Panel2.SuspendLayout();
 			this.splitKarmaNuyen.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.chtKarma)).BeginInit();
 			this.tabCalendar.SuspendLayout();
 			this.tabNotes.SuspendLayout();
 			this.tabImprovements.SuspendLayout();
@@ -1079,7 +1074,6 @@
 			this.cmsVehicleWeaponAccessoryGear.SuspendLayout();
 			this.cmsVehicleWeaponMod.SuspendLayout();
 			this.cmsWeaponLocation.SuspendLayout();
-			((System.ComponentModel.ISupportInitialize)(this.chtNuyen)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// StatusStrip
@@ -8886,7 +8880,6 @@
 			// splitKarmaNuyen.Panel1
 			// 
 			this.splitKarmaNuyen.Panel1.BackColor = System.Drawing.SystemColors.ButtonFace;
-			this.splitKarmaNuyen.Panel1.Controls.Add(this.chtKarma);
 			this.splitKarmaNuyen.Panel1.Controls.Add(this.cmdKarmaEdit);
 			this.splitKarmaNuyen.Panel1.Controls.Add(this.cmdKarmaGained);
 			this.splitKarmaNuyen.Panel1.Controls.Add(this.lstKarma);
@@ -8896,7 +8889,6 @@
 			// splitKarmaNuyen.Panel2
 			// 
 			this.splitKarmaNuyen.Panel2.BackColor = System.Drawing.SystemColors.ButtonFace;
-			this.splitKarmaNuyen.Panel2.Controls.Add(this.chtNuyen);
 			this.splitKarmaNuyen.Panel2.Controls.Add(this.cmdNuyenEdit);
 			this.splitKarmaNuyen.Panel2.Controls.Add(this.lstNuyen);
 			this.splitKarmaNuyen.Panel2.Controls.Add(this.cmdNuyenSpent);
@@ -8905,17 +8897,6 @@
 			this.splitKarmaNuyen.Size = new System.Drawing.Size(832, 602);
 			this.splitKarmaNuyen.SplitterDistance = 412;
 			this.splitKarmaNuyen.TabIndex = 6;
-			// 
-			// chtKarma
-			// 
-			this.chtKarma.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			chartArea1.Name = "ChartArea1";
-			this.chtKarma.ChartAreas.Add(chartArea1);
-			this.chtKarma.Location = new System.Drawing.Point(0, 391);
-			this.chtKarma.Name = "chtKarma";
-			this.chtKarma.Size = new System.Drawing.Size(409, 208);
-			this.chtKarma.TabIndex = 4;
-			this.chtKarma.Text = "chart1";
 			// 
 			// cmdKarmaEdit
 			// 
@@ -11215,17 +11196,6 @@
 			this.tsWeaponRenameLocation.Text = "&Rename Location";
 			this.tsWeaponRenameLocation.Click += new System.EventHandler(this.tsWeaponRenameLocation_Click);
 			// 
-			// chtNuyen
-			// 
-			this.chtNuyen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-			chartArea2.Name = "ChartArea1";
-			this.chtNuyen.ChartAreas.Add(chartArea2);
-			this.chtNuyen.Location = new System.Drawing.Point(0, 391);
-			this.chtNuyen.Name = "chtNuyen";
-			this.chtNuyen.Size = new System.Drawing.Size(410, 208);
-			this.chtNuyen.TabIndex = 7;
-			this.chtNuyen.Text = "chart1";
-			// 
 			// cmdAddMartialArt
 			// 
 			this.cmdAddMartialArt.AutoSize = true;
@@ -11554,7 +11524,6 @@
 			this.splitKarmaNuyen.Panel2.PerformLayout();
 			((System.ComponentModel.ISupportInitialize)(this.splitKarmaNuyen)).EndInit();
 			this.splitKarmaNuyen.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.chtKarma)).EndInit();
 			this.tabCalendar.ResumeLayout(false);
 			this.tabCalendar.PerformLayout();
 			this.tabNotes.ResumeLayout(false);
@@ -11608,7 +11577,6 @@
 			this.cmsVehicleWeaponAccessoryGear.ResumeLayout(false);
 			this.cmsVehicleWeaponMod.ResumeLayout(false);
 			this.cmsWeaponLocation.ResumeLayout(false);
-			((System.ComponentModel.ISupportInitialize)(this.chtNuyen)).EndInit();
 			this.ResumeLayout(false);
 			this.PerformLayout();
 
@@ -12528,8 +12496,6 @@
 		private System.Windows.Forms.NumericUpDown nudComplexFormRating;
 		private System.Windows.Forms.ToolStripMenuItem mnuSpecialAddBiowareSuite;
 		private System.Windows.Forms.ToolStripMenuItem mnuSpecialAddCyberwareSuite;
-		private System.Windows.Forms.DataVisualization.Charting.Chart chtKarma;
-		private System.Windows.Forms.DataVisualization.Charting.Chart chtNuyen;
     }
 }
 

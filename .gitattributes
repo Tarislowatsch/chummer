@@ -35,6 +35,9 @@ tests/fixtures/prints/** -text
 # - translated-load baselines, compared byte for byte like the prints
 tests/fixtures/translations/** -text
 
+# - run on Linux and macOS: a CRLF checkout breaks the shebang and every line
+tools/mono/** text eol=lf
+
 *.png binary
 *.ico binary
 *.zip binary

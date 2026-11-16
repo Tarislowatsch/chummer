@@ -1,0 +1,115 @@
+name: Mono
+
+# Does Chummer start through tools/mono/start-*.sh? See docs/LINUX-MACOS.md.
+# - manual only: macOS runners can queue for a long time
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      # The image's Debian sources are archived, but the build needs nothing from apt.
+      - name: Build with Mono MSBuild
+        run: >
+          docker run --rm -u "$(id -u):$(id -g)" -e HOME=/tmp
+          -v "$PWD:/src" -w /src mono:6.12
+          msbuild Chummer/Chummer.csproj -restore -p:Configuration=Debug -p:Platform=x86 -v:m -nologo
+
+      - name: Add test characters
+        run: |
+          cp "tests/fixtures/characters/examples/Combat Mage.chum" Chummer/bin/Debug/create.chum
+          cp "tests/fixtures/characters/10 Mercs/Team Zero/Team Zero Operator.chum" Chummer/bin/Debug/career.chum
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: chummer-mono
+          path: Chummer/bin/Debug
+
+  run:
+    needs: build
+    name: run (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: chummer-mono
+          path: Chummer/bin/Debug
+
+      - name: Install Mono (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends mono-complete xvfb x11-apps netpbm
+
+      - name: Install Mono and XQuartz (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install mono mono-libgdiplus pkgconf libx11 netpbm
+          brew install --cask xquartz
+          echo "/opt/X11/bin" >> "$GITHUB_PATH"
+
+      - name: Set up through the start script
+        run: |
+          start=tools/mono/start-${{ runner.os == 'macOS' && 'macos' || 'linux' }}.sh
+          echo "START=$start" >> "$GITHUB_ENV"
+          Xvfb :99 -screen 0 1600x1000x24 > /dev/null 2>&1 &
+          echo "DISPLAY=:99" >> "$GITHUB_ENV"
+          sleep 3
+          DISPLAY=:99 "$start" --setup
+
+      - name: Start Chummer and take screenshots
+        run: |
+          set -u
+          mkdir -p out
+          { uname -a; mono --version | head -1; } > out/system.txt
+
+          status=0
+          for c in create career xquartz; do
+            chum=$c
+            display=$DISPLAY
+            if [ "$c" = xquartz ]; then
+              [ "$RUNNER_OS" = macOS ] || continue
+              # - no DISPLAY: start-macos.sh has to start XQuartz itself
+              chum=career
+              display=""
+            fi
+            DISPLAY=$display "$START" "Chummer/bin/Debug/$chum.chum" > "out/$c.log" 2>&1 &
+            pid=$!
+            sleep 45
+            if [ "$c" = xquartz ]; then
+              # - XQuartz draws onto the macOS desktop: its X11 root window stays black
+              screencapture -x "out/$c.png" || true
+            else
+              xwd -root -silent -out "out/$c.xwd" || true
+            fi
+            if kill -0 "$pid" 2>/dev/null; then
+              echo "$c: running after 45 s" | tee -a out/result.txt
+              kill "$pid" || true
+            else
+              echo "$c: exited early" | tee -a out/result.txt
+              status=1
+            fi
+            sleep 2
+          done
+          exit $status
+
+      # - own step: a failed conversion costs only the PNGs
+      - name: Convert screenshots
+        if: always()
+        run: |
+          for f in out/*.xwd; do [ -e "$f" ] && { xwdtopnm "$f" | pnmtopng > "${f%.xwd}.png" || true; }; done; true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mono-results-${{ runner.os }}
+          path: out

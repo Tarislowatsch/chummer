@@ -594,7 +594,7 @@ namespace Chummer.Tests.Rulebook
 				"\"qualityrestriction/\"",
 				"metatypes.xml", "/chummer/metatypes/metatype/qualityrestriction/negative/quality", Qualities),
 
-			Rule("vessel powers", "frmCareer.cs:2957",
+			Rule("vessel powers", "frmCareer.cs:2958",
 				"objSelected.SelectNodes(\"powers/power\")",
 				"vessels.xml", "/chummer/metatypes/metatype/powers/power", CritterPowers),
 			Rule("tradition spirits", "SpiritControl.cs:408",
@@ -610,7 +610,7 @@ namespace Chummer.Tests.Rulebook
 			Rule("quality addqualities", "frmCreate.cs:7782",
 				"objXmlQuality.SelectNodes(\"addqualities/addquality\")",
 				"qualities.xml", "/chummer/qualities/quality/addqualities/addquality", Qualities),
-			Rule("quality latentsource", "frmCareer.cs:8820",
+			Rule("quality latentsource", "frmCareer.cs:8821",
 				"objXmlQuality[\"latentsource\"].InnerText == objQuality.Name",
 				"qualities.xml", "/chummer/qualities/quality/latentsource", Qualities),
 

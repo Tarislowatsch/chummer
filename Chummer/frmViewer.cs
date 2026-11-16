@@ -14,7 +14,17 @@ namespace Chummer
 		private XmlDocument _objCharacterXML = new XmlDocument();
 		private string _strSelectedSheet = "Shadowrun 4";
 		private bool _blnLoading = false;
-		
+		// Mono has no WebBrowser engine: the sheet goes to the system browser instead.
+		private readonly string _strExternalFile = Path.Combine(Path.GetTempPath(), "chummer-" + Guid.NewGuid().ToString() + ".htm");
+		private readonly object _objExternalFileLock = new object();
+		private bool _blnExternalShown = false;
+		private string _strOutput = string.Empty;
+		private static readonly List<string> _lstExternalFiles = new List<string>();
+		private static string MugshotDirectory
+		{
+			get { return Application.StartupPath + Path.DirectorySeparatorChar + "mugshots"; }
+		}
+
 		#region Control Events
 		public frmViewer()
 		{
@@ -23,6 +33,16 @@ namespace Chummer
 			InitializeComponent();
 			LanguageManager.Instance.Load(GlobalOptions.Instance.Language, this);
 			MoveControls();
+			if (Platform.IsMono)
+			{
+				Controls.Remove(webBrowser1);
+				lock (_lstExternalFiles)
+				{
+					if (_lstExternalFiles.Count == 0)
+						Application.ApplicationExit += DeleteExternalFiles;
+					_lstExternalFiles.Add(_strExternalFile);
+				}
+			}
 		}
 
 		private void frmViewer_Load(object sender, EventArgs e)
@@ -110,17 +130,28 @@ namespace Chummer
 			{
 				_strSelectedSheet = cboXSLT.SelectedValue.ToString();
 				GenerateOutput();
+				// Unlike a background refresh, a new sheet is worth a new browser tab.
+				if (Platform.IsMono)
+					Platform.OpenWithDefaultApplication(_strExternalFile);
 			}
 		}
 
 		private void cmdPrint_Click(object sender, EventArgs e)
 		{
+			if (Platform.IsMono)
+			{
+				// Printing happens from the browser.
+				Platform.OpenWithDefaultApplication(_strExternalFile);
+				return;
+			}
 			webBrowser1.ShowPrintDialog();
 		}
 
 		private void cmdSaveHTML_Click(object sender, EventArgs e)
 		{
 			// Save the generated output as HTML.
+			if (Platform.IsMono && _strOutput.Length == 0)
+				return;
 			string strSaveFile = "";
 			SaveFileDialog1.Filter = "HTML Page|*.htm";
 			SaveFileDialog1.Title = LanguageManager.Instance.GetString("Button_Viewer_SaveAsHtml");
@@ -131,7 +162,7 @@ namespace Chummer
 				return;
 
 			TextWriter objWriter = new StreamWriter(strSaveFile, false, Encoding.UTF8);
-			objWriter.Write(webBrowser1.DocumentText);
+			objWriter.Write(Platform.IsMono ? _strOutput : webBrowser1.DocumentText);
 			objWriter.Close();
 
 		}
@@ -153,13 +184,16 @@ namespace Chummer
 
 		private void frmViewer_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			// Remove the mugshots directory when the form closes.
-			try
+			// Mono keeps the mugshots until exit, see DeleteExternalFiles.
+			if (!Platform.IsMono)
 			{
-				Directory.Delete(Application.StartupPath + Path.DirectorySeparatorChar + "mugshots", true);
-			}
-			catch
-			{
+				try
+				{
+					Directory.Delete(MugshotDirectory, true);
+				}
+				catch
+				{
+				}
 			}
 
 			// Clear the reference to the character's Print window.
@@ -190,7 +224,20 @@ namespace Chummer
 			//objXSLTransform.Transform("D:\\temp\\print.xml", "D:\\temp\\output.htm");
 			//webBrowser1.Navigate("D:\\temp\\output.htm");
 
-			if (!GlobalOptions.Instance.PrintToFileFirst)
+			if (Platform.IsMono)
+			{
+				_strOutput = new StreamReader(objStream).ReadToEnd();
+				// AsyncRefresh runs this on a worker thread, a sheet change on the UI thread.
+				lock (_objExternalFileLock)
+					File.WriteAllText(_strExternalFile, _strOutput);
+				// Only once: later refreshes rewrite the file for a reload.
+				if (!_blnExternalShown)
+				{
+					_blnExternalShown = true;
+					Platform.OpenWithDefaultApplication(_strExternalFile);
+				}
+			}
+			else if (!GlobalOptions.Instance.PrintToFileFirst)
 			{
 				// Populate the browser using the DocumentStream.
 				webBrowser1.DocumentStream = objStream;
@@ -259,6 +306,34 @@ namespace Chummer
 
 			_objCharacterXML = objCharacterXML;
 			GenerateOutput();
+		}
+
+		// The system browser keeps reading the sheet and its mugshots after the viewer closes.
+		private static void DeleteExternalFiles(object sender, EventArgs e)
+		{
+			lock (_lstExternalFiles)
+			{
+				foreach (string strFile in _lstExternalFiles)
+				{
+					try
+					{
+						File.Delete(strFile);
+					}
+					catch (IOException)
+					{
+					}
+					catch (UnauthorizedAccessException)
+					{
+					}
+				}
+			}
+			try
+			{
+				Directory.Delete(MugshotDirectory, true);
+			}
+			catch
+			{
+			}
 		}
 
 		private void MoveControls()

@@ -51,6 +51,7 @@ namespace Chummer
 			_objImprovementManager = new ImprovementManager(_objCharacter);
 			_objController = new MainController(_objCharacter);
 			InitializeComponent();
+			CreateExpenseCharts();
 
 			// Add EventHandlers for the MAG and RES enabled events and tab enabled events.
 			_objCharacter.MAGEnabledChanged += objCharacter_MAGEnabledChanged;
@@ -1101,7 +1102,7 @@ namespace Chummer
 			treImprovements.DragDrop += treImprovements_DragDrop;
 
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 
 			// If this is a Sprite, re-label the Mental Attribute Labels.
@@ -1325,7 +1326,7 @@ namespace Chummer
 			if (!e.Cancel)
 			{
 				if (!_blnSkipToolStripRevert)
-					ToolStripManager.RevertMerge("toolStrip");
+					ToolStripMerge.RevertMerge("toolStrip");
 
 				// Unsubscribe from events.
 				_objCharacter.MAGEnabledChanged -= objCharacter_MAGEnabledChanged;
@@ -1449,7 +1450,7 @@ namespace Chummer
 		private void frmCareer_Activated(object sender, EventArgs e)
 		{
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 		}
 
@@ -20632,11 +20633,12 @@ namespace Chummer
 		#endregion
 
 		#region Splitter Resize Events
+		// Panel.Size, not .Width/.Height: Mono returns 0 for those while the panel's tab is hidden.
 		private void splitSkills_Panel1_Resize(object sender, EventArgs e)
 		{
-			panActiveSkills.Height = splitSkills.Panel1.Height - panActiveSkills.Top;
-			panSkillGroups.Height = splitSkills.Panel1.Height - panSkillGroups.Top;
-			panActiveSkills.Width = splitSkills.Panel1.Width - panActiveSkills.Left;
+			panActiveSkills.Height = splitSkills.Panel1.Size.Height - panActiveSkills.Top;
+			panSkillGroups.Height = splitSkills.Panel1.Size.Height - panSkillGroups.Top;
+			panActiveSkills.Width = splitSkills.Panel1.Size.Width - panActiveSkills.Left;
 			panSkillGroups.Width = panActiveSkills.Left - 6 - panSkillGroups.Left;
 
 			cmdAddExoticSkill.Left = panActiveSkills.Left + panActiveSkills.Width - cmdAddExoticSkill.Width - 3;
@@ -20645,29 +20647,34 @@ namespace Chummer
 
 		private void splitSkills_Panel2_Resize(object sender, EventArgs e)
 		{
-			panKnowledgeSkills.Width = splitSkills.Panel2.Width - 3;
-			panKnowledgeSkills.Height = splitSkills.Panel2.Height - panKnowledgeSkills.Top;
+			panKnowledgeSkills.Width = splitSkills.Panel2.Size.Width - 3;
+			panKnowledgeSkills.Height = splitSkills.Panel2.Size.Height - panKnowledgeSkills.Top;
 		}
 
 		private void splitContacts_Panel1_Resize(object sender, EventArgs e)
 		{
-			panContacts.Width = splitContacts.Panel1.Width - 3;
-			panContacts.Height = splitContacts.Panel1.Height - panContacts.Top;
+			panContacts.Width = splitContacts.Panel1.Size.Width - 3;
+			panContacts.Height = splitContacts.Panel1.Size.Height - panContacts.Top;
 		}
 
 		private void splitContacts_Panel2_Resize(object sender, EventArgs e)
 		{
-			panEnemies.Width = splitContacts.Panel2.Width - 3;
-			panEnemies.Height = splitContacts.Panel2.Height - panEnemies.Top;
+			panEnemies.Width = splitContacts.Panel2.Size.Width - 3;
+			panEnemies.Height = splitContacts.Panel2.Size.Height - panEnemies.Top;
 		}
 
 		private void splitKarmaNuyen_Panel1_Resize(object sender, EventArgs e)
 		{
-			lstKarma.Width = splitKarmaNuyen.Panel1.Width;
-			chtKarma.Width = splitKarmaNuyen.Panel1.Width;
-			chtKarma.Height = 210;
-			chtKarma.Top = splitKarmaNuyen.Panel1.Height - 6 - chtKarma.Height;
-			lstKarma.Height = chtKarma.Top - 6 - lstKarma.Top;
+			lstKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
+			if (chtKarma != null)
+			{
+				chtKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
+				chtKarma.Height = 210;
+				chtKarma.Top = splitKarmaNuyen.Panel1.Size.Height - 6 - chtKarma.Height;
+				lstKarma.Height = chtKarma.Top - 6 - lstKarma.Top;
+			}
+			else
+				lstKarma.Height = splitKarmaNuyen.Panel1.Size.Height - 6 - lstKarma.Top;
 			try
 			{
 				if (lstKarma.Width > 409)
@@ -20682,11 +20689,16 @@ namespace Chummer
 
 		private void splitKarmaNuyen_Panel2_Resize(object sender, EventArgs e)
 		{
-			lstNuyen.Width = splitKarmaNuyen.Panel2.Width;
-			chtNuyen.Width = splitKarmaNuyen.Panel2.Width;
-			chtNuyen.Height = 210;
-			chtNuyen.Top = splitKarmaNuyen.Panel2.Height - 6 - chtNuyen.Height;
-			lstNuyen.Height = chtNuyen.Top - 6 - lstNuyen.Top;
+			lstNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
+			if (chtNuyen != null)
+			{
+				chtNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
+				chtNuyen.Height = 210;
+				chtNuyen.Top = splitKarmaNuyen.Panel2.Size.Height - 6 - chtNuyen.Height;
+				lstNuyen.Height = chtNuyen.Top - 6 - lstNuyen.Top;
+			}
+			else
+				lstNuyen.Height = splitKarmaNuyen.Panel2.Size.Height - 6 - lstNuyen.Top;
 			try
 			{
 				if (lstNuyen.Width > 409)
@@ -25402,6 +25414,10 @@ namespace Chummer
 			lstKarma.Sort();
 			lstNuyen.Sort();
 
+			// No charts on Mono, see CreateExpenseCharts.
+			if (chtKarma == null)
+				return;
+
 			// Charting test for Expenses.
 			chtKarma.Series.Clear();
 			chtNuyen.Series.Clear();
@@ -25460,6 +25476,45 @@ namespace Chummer
 			//chtKarma.ChartAreas[0].AxisX.MaximumAutoSize = 100;
 			chtKarma.Invalidate();
 			chtNuyen.Invalidate();
+		}
+
+		// - built here, not in InitializeComponent: Mono's Chart stub throws NotImplementedException
+		// - declared here too: the designer would drop fields it does not initialize
+		// - on Mono both charts stay null
+		private Chart chtKarma;
+		private Chart chtNuyen;
+
+		private void CreateExpenseCharts()
+		{
+			if (!Platform.IsMono)
+			{
+				chtKarma = CreateExpenseChart("chtKarma", 409, 4);
+				chtNuyen = CreateExpenseChart("chtNuyen", 410, 7);
+				splitKarmaNuyen.Panel1.Controls.Add(chtKarma);
+				splitKarmaNuyen.Panel1.Controls.SetChildIndex(chtKarma, 0);
+				splitKarmaNuyen.Panel2.Controls.Add(chtNuyen);
+				splitKarmaNuyen.Panel2.Controls.SetChildIndex(chtNuyen, 0);
+			}
+			// The resize events fired during InitializeComponent, before the charts existed.
+			splitKarmaNuyen_Panel1_Resize(this, EventArgs.Empty);
+			splitKarmaNuyen_Panel2_Resize(this, EventArgs.Empty);
+		}
+
+		private static Chart CreateExpenseChart(string strName, int intWidth, int intTabIndex)
+		{
+			Chart objChart = new Chart();
+			((System.ComponentModel.ISupportInitialize)objChart).BeginInit();
+			objChart.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			ChartArea objArea = new ChartArea();
+			objArea.Name = "ChartArea1";
+			objChart.ChartAreas.Add(objArea);
+			objChart.Location = new System.Drawing.Point(0, 391);
+			objChart.Name = strName;
+			objChart.Size = new System.Drawing.Size(intWidth, 208);
+			objChart.TabIndex = intTabIndex;
+			objChart.Text = "chart1";
+			((System.ComponentModel.ISupportInitialize)objChart).EndInit();
+			return objChart;
 		}
 
 		/// <summary>

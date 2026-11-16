@@ -37,6 +37,20 @@ Enhancement Options* is different: it replaces existing gear and has no book.
 Its three files are alternatives (audio, vision or both), so copy only one of
 them. To remove a pack, delete its files from `data/` again.
 
+## Linux and macOS (experimental)
+
+Chummer is a Windows application, but it also starts under
+[Mono](https://www.mono-project.com/) on Linux and on macOS (through XQuartz).
+Put the start script from `tools/mono/` next to `Chummer.exe` and run it:
+
+- Linux: `start-linux.sh`, needs the distribution's `mono-complete` package.
+- macOS: `start-macos.sh`, needs Homebrew, XQuartz and the Xcode command line
+  tools. The first start builds a library and takes a few minutes.
+
+Each script names the missing packages with the command to install them. The
+karma and nuyen charts are missing there, and printing goes through the web
+browser. Details and known gaps: [`docs/LINUX-MACOS.md`](docs/LINUX-MACOS.md).
+
 ## Building
 
 See [`docs/BUILDING.md`](docs/BUILDING.md) for toolchain requirements, the

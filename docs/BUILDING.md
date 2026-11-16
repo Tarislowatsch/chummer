@@ -2,6 +2,8 @@
 
 ## Requirements
 
+For Linux and macOS (Mono, experimental) see [`LINUX-MACOS.md`](LINUX-MACOS.md).
+
 - Windows
 - MSBuild, from either Visual Studio (any edition, 2019 or newer) or the
   standalone [Build Tools for Visual Studio][buildtools]
