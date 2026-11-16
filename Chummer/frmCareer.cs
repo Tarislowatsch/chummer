@@ -20632,11 +20632,12 @@ namespace Chummer
 		#endregion
 
 		#region Splitter Resize Events
+		// Panel.Size, not .Width/.Height: Mono returns 0 for those while the panel's tab is hidden.
 		private void splitSkills_Panel1_Resize(object sender, EventArgs e)
 		{
-			panActiveSkills.Height = splitSkills.Panel1.Height - panActiveSkills.Top;
-			panSkillGroups.Height = splitSkills.Panel1.Height - panSkillGroups.Top;
-			panActiveSkills.Width = splitSkills.Panel1.Width - panActiveSkills.Left;
+			panActiveSkills.Height = splitSkills.Panel1.Size.Height - panActiveSkills.Top;
+			panSkillGroups.Height = splitSkills.Panel1.Size.Height - panSkillGroups.Top;
+			panActiveSkills.Width = splitSkills.Panel1.Size.Width - panActiveSkills.Left;
 			panSkillGroups.Width = panActiveSkills.Left - 6 - panSkillGroups.Left;
 
 			cmdAddExoticSkill.Left = panActiveSkills.Left + panActiveSkills.Width - cmdAddExoticSkill.Width - 3;
@@ -20645,28 +20646,28 @@ namespace Chummer
 
 		private void splitSkills_Panel2_Resize(object sender, EventArgs e)
 		{
-			panKnowledgeSkills.Width = splitSkills.Panel2.Width - 3;
-			panKnowledgeSkills.Height = splitSkills.Panel2.Height - panKnowledgeSkills.Top;
+			panKnowledgeSkills.Width = splitSkills.Panel2.Size.Width - 3;
+			panKnowledgeSkills.Height = splitSkills.Panel2.Size.Height - panKnowledgeSkills.Top;
 		}
 
 		private void splitContacts_Panel1_Resize(object sender, EventArgs e)
 		{
-			panContacts.Width = splitContacts.Panel1.Width - 3;
-			panContacts.Height = splitContacts.Panel1.Height - panContacts.Top;
+			panContacts.Width = splitContacts.Panel1.Size.Width - 3;
+			panContacts.Height = splitContacts.Panel1.Size.Height - panContacts.Top;
 		}
 
 		private void splitContacts_Panel2_Resize(object sender, EventArgs e)
 		{
-			panEnemies.Width = splitContacts.Panel2.Width - 3;
-			panEnemies.Height = splitContacts.Panel2.Height - panEnemies.Top;
+			panEnemies.Width = splitContacts.Panel2.Size.Width - 3;
+			panEnemies.Height = splitContacts.Panel2.Size.Height - panEnemies.Top;
 		}
 
 		private void splitKarmaNuyen_Panel1_Resize(object sender, EventArgs e)
 		{
-			lstKarma.Width = splitKarmaNuyen.Panel1.Width;
-			chtKarma.Width = splitKarmaNuyen.Panel1.Width;
+			lstKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
+			chtKarma.Width = splitKarmaNuyen.Panel1.Size.Width;
 			chtKarma.Height = 210;
-			chtKarma.Top = splitKarmaNuyen.Panel1.Height - 6 - chtKarma.Height;
+			chtKarma.Top = splitKarmaNuyen.Panel1.Size.Height - 6 - chtKarma.Height;
 			lstKarma.Height = chtKarma.Top - 6 - lstKarma.Top;
 			try
 			{
@@ -20682,10 +20683,10 @@ namespace Chummer
 
 		private void splitKarmaNuyen_Panel2_Resize(object sender, EventArgs e)
 		{
-			lstNuyen.Width = splitKarmaNuyen.Panel2.Width;
-			chtNuyen.Width = splitKarmaNuyen.Panel2.Width;
+			lstNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
+			chtNuyen.Width = splitKarmaNuyen.Panel2.Size.Width;
 			chtNuyen.Height = 210;
-			chtNuyen.Top = splitKarmaNuyen.Panel2.Height - 6 - chtNuyen.Height;
+			chtNuyen.Top = splitKarmaNuyen.Panel2.Size.Height - 6 - chtNuyen.Height;
 			lstNuyen.Height = chtNuyen.Top - 6 - lstNuyen.Top;
 			try
 			{
