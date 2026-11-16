@@ -1,10 +1,8 @@
-name: Mono spike
+name: Mono
 
 # Does Chummer start through tools/mono/start-*.sh? See docs/LINUX-MACOS.md.
-# - push trigger: workflow_dispatch only lists workflows already on main
+# - manual only: macOS runners can queue for a long time
 on:
-  push:
-    branches: [spike/mono-linux-macos]
   workflow_dispatch:
 
 jobs:
