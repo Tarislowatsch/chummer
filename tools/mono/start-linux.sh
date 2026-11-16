@@ -40,8 +40,13 @@ fi
 app=$(cd "$app" && pwd)
 
 command -v mono >/dev/null 2>&1 || fail "Mono is missing. Install it with:" "$(install_hint)"
-monolib="$(dirname "$(command -v mono)")/../lib/mono"
-[ -f "$monolib/4.5/System.Windows.Forms.dll" ] || fail "Mono's WinForms is missing. Install it with:" "$(install_hint)"
+# - only a warning: a Mono outside the usual layout must still be able to start
+mono=$(command -v mono)
+resolved=$(readlink -f "$mono" 2> /dev/null) && [ -n "$resolved" ] && mono=$resolved
+monolib="$(dirname "$mono")/../lib/mono"
+[ -f "$monolib/4.5/System.Windows.Forms.dll" ] ||
+	printf '%s\n' "Mono's WinForms was not found in $monolib. If Chummer fails, install it with:" \
+		"$(install_hint)" >&2
 [ -n "${DISPLAY:-}" ] || fail "DISPLAY is not set. Mono needs an X server, on Wayland that is XWayland."
 
 [ "${1:-}" = --setup ] && exit 0

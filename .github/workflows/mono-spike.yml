@@ -75,11 +75,19 @@ jobs:
           { uname -a; mono --version | head -1; } > out/system.txt
 
           status=0
-          for c in create career; do
-            "$START" "Chummer/bin/Debug/$c.chum" > "out/$c.log" 2>&1 &
+          for c in create career xquartz; do
+            chum=$c
+            display=$DISPLAY
+            if [ "$c" = xquartz ]; then
+              [ "$RUNNER_OS" = macOS ] || continue
+              # - no DISPLAY: start-macos.sh has to start XQuartz itself
+              chum=career
+              display=""
+            fi
+            DISPLAY=$display "$START" "Chummer/bin/Debug/$chum.chum" > "out/$c.log" 2>&1 &
             pid=$!
             sleep 45
-            xwd -root -silent -out "out/$c.xwd" || true
+            DISPLAY=${display:-:0} xwd -root -silent -out "out/$c.xwd" || true
             if kill -0 "$pid" 2>/dev/null; then
               echo "$c: running after 45 s" | tee -a out/result.txt
               kill "$pid" || true

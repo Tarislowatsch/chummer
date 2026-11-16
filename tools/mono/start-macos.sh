@@ -76,7 +76,12 @@ fi
 if [ -z "${DISPLAY:-}" ]; then
 	open -a XQuartz
 	export DISPLAY=:0
-	sleep 3
+	tries=0
+	until /opt/X11/bin/xset q > /dev/null 2>&1; do
+		tries=$((tries + 1))
+		[ "$tries" -lt 30 ] || fail "XQuartz did not start within 30 seconds."
+		sleep 1
+	done
 fi
 
 # - the X11 build of libgdiplus comes first, Homebrew's copy is on the fallback path too
