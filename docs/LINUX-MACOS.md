@@ -1,18 +1,57 @@
 # Running Chummer on Linux and macOS (spike)
 
-Status: **spike**. Chummer runs on Linux under Mono, unchanged as a net48
-WinForms application. macOS is untested. This page records what works, what
-was changed to get there, and what is still open.
+Status: **spike**. Chummer runs under Mono on Linux and on macOS (Apple
+Silicon, through XQuartz), unchanged as a net48 WinForms application. This page
+records how to start it, what was changed to get there, and what is still open.
 
 ## Approach
 
 Mono implements the .NET Framework 4.x API, including WinForms on X11, and runs
 the `Chummer.exe` that MSBuild produces. No port to .NET 8 and no new UI
-toolkit. Mono 6.12 is the last release; it is maintained by WineHQ now and gets
-no further WinForms work. That is fine for a spike and worth weighing before
-committing to it long-term.
+toolkit. Microsoft handed Mono to WineHQ in 2024; WineHQ released Mono 6.14 in
+2025, but WinForms gets no active development. That is fine for a spike and
+worth weighing before committing to it long-term.
 
-## Linux
+## Starting Chummer
+
+Each start script checks its requirements, names the missing packages with the
+command to install them, and then starts Chummer. Put the script next to
+`Chummer.exe`, or run it from the repository after a build:
+
+```
+tools/mono/start-linux.sh [file.chum]
+tools/mono/start-macos.sh [file.chum]
+```
+
+`--setup` only checks the requirements (and on macOS builds libgdiplus).
+
+### Linux
+
+Needs Mono with WinForms and libgdiplus from the distribution, usually the
+package `mono-complete` (Arch: `mono` and `libgdiplus`). Mono draws through X11;
+on Wayland that is XWayland. Chummer's options go to `~/.mono/registry`.
+
+### macOS
+
+Needs [Homebrew](https://brew.sh), XQuartz and the Xcode command line tools:
+
+```
+brew install mono mono-libgdiplus pkgconf libx11
+brew install --cask xquartz      # then log out and back in once
+xcode-select --install
+```
+
+The first start builds libgdiplus with X11 support into
+`~/.local/share/chummer`, which takes a few minutes. The script then sets:
+
+| Setting | Why |
+| --- | --- |
+| own libgdiplus build | Homebrew's is configured `--without-x11`, which Mono's X11 driver needs |
+| `MONO_MWF_MAC_FORCE_X11=1` | Mono's native macOS driver is 32-bit Carbon and fails on 64-bit macOS |
+| `MONO_WINFORMS_XIM_STYLE=disabled` | the variadic `XGetIMValues` crashes under P/Invoke on Apple arm64; no X input methods as a result |
+| `DYLD_LIBRARY_PATH`, `DYLD_FALLBACK_LIBRARY_PATH` | Homebrew and XQuartz libraries are not on Mono's search path |
+
+### Building
 
 Building needs Mono's MSBuild. Ubuntu and Debian ship Mono 6.8 without MSBuild,
 so the toolchain comes from the `mono:6.12` Docker image. Docker is the only
@@ -24,25 +63,12 @@ tools/mono/chummer.sh run                      # empty main window
 tools/mono/chummer.sh run path/to/file.chum    # open a character
 ```
 
-`run` uses the host's X server (`DISPLAY`, `/tmp/.X11-unix`). On Wayland that is
-XWayland; if the window does not appear, run `xhost +SI:localuser:$USER` once.
-Chummer's options go to `~/.mono/registry` on the host.
-
-Instead of Docker, an installed Mono runtime can run the output directly:
-`cd Chummer/bin/Debug && mono Chummer.exe`. It needs `libgdiplus` and the
-WinForms assemblies (`mono-complete` covers both).
-
-## macOS (untested)
-
-Mono 6.12 has a macOS installer that includes WinForms. Whether its native
-driver works on current macOS, and on Apple Silicon, was not checked. The
-fallback is X11 via XQuartz (`MONO_MWF_MAC_FORCE_X11=1`). The code changes
-below are not Linux-specific; `Platform.OpenWithDefaultApplication` uses `open`
-on macOS.
+`run` uses the host's X server (`DISPLAY`, `/tmp/.X11-unix`). If the window does
+not appear, run `xhost +SI:localuser:$USER` once.
 
 ## What was verified
 
-Under Xvfb in the container, with screenshots:
+Linux, under Xvfb in the container, with screenshots:
 
 | Area | Result |
 | --- | --- |
@@ -52,8 +78,13 @@ Under Xvfb in the container, with screenshots:
 | Career mode, `Combat Bodyguard`, `Team Zero Operator` | loads; tabs, calendar and expense lists work |
 | Print (`File → Print`) | XSLT runs, the sheet is written as HTML and handed to the system browser |
 
+macOS 26 on Apple Silicon, Mono 6.14.1 from Homebrew, through the
+`Mono spike` workflow: `Combat Mage` and `Team Zero Operator` open completely,
+with no exceptions in the log.
+
 Not verified: the test projects under Mono, saving and reloading a character,
-the many selection dialogs, other languages, macOS.
+the many selection dialogs, other languages, printing on macOS, a real XQuartz
+session instead of Xvfb.
 
 ## What had to change
 
@@ -89,3 +120,8 @@ still covered only by CI and by a manual check.
   a private `startupPath` field. Neither exists on Mono, so the golden master
   tests would need a Mono path there.
 - **Build warning** `NETSDK1107` under Mono MSBuild is harmless.
+- **macOS for end users**: XQuartz stays a requirement, since Mono's WinForms
+  draws only through X11 there. A `Chummer.app` bundle with Mono, libgdiplus and
+  the start script inside would remove Homebrew and the build step. Without an
+  Apple developer account it stays unsigned, and macOS asks once before the
+  first start.
