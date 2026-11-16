@@ -25,13 +25,19 @@ install_hint() {
 
 here=$(cd "$(dirname "$0")" && pwd)
 app=""
-for dir in "$here" "$here/../../Chummer/bin/Release" "$here/../../Chummer/bin/Debug"; do
-	if [ -f "$dir/Chummer.exe" ]; then
-		app=$(cd "$dir" && pwd)
-		break
-	fi
-done
+if [ -f "$here/Chummer.exe" ]; then
+	app=$here
+else
+	# - in the repository the newer build wins: chummer.sh builds Debug next to an old Release
+	for dir in "$here/../../Chummer/bin/Debug" "$here/../../Chummer/bin/Release"; do
+		[ -f "$dir/Chummer.exe" ] || continue
+		if [ -z "$app" ] || [ "$dir/Chummer.exe" -nt "$app/Chummer.exe" ]; then
+			app=$dir
+		fi
+	done
+fi
 [ -n "$app" ] || fail "Chummer.exe not found. Put this script next to Chummer.exe."
+app=$(cd "$app" && pwd)
 
 command -v mono >/dev/null 2>&1 || fail "Mono is missing. Install it with:" "$(install_hint)"
 monolib="$(dirname "$(command -v mono)")/../lib/mono"
@@ -42,6 +48,7 @@ monolib="$(dirname "$(command -v mono)")/../lib/mono"
 
 file=""
 if [ $# -gt 0 ]; then
+	[ -f "$1" ] || fail "File not found: $1"
 	file="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 fi
 

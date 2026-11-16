@@ -11,13 +11,19 @@ fail() {
 
 here=$(cd "$(dirname "$0")" && pwd)
 app=""
-for dir in "$here" "$here/../../Chummer/bin/Release" "$here/../../Chummer/bin/Debug"; do
-	if [ -f "$dir/Chummer.exe" ]; then
-		app=$(cd "$dir" && pwd)
-		break
-	fi
-done
+if [ -f "$here/Chummer.exe" ]; then
+	app=$here
+else
+	# - in the repository the newer build wins: chummer.sh builds Debug next to an old Release
+	for dir in "$here/../../Chummer/bin/Debug" "$here/../../Chummer/bin/Release"; do
+		[ -f "$dir/Chummer.exe" ] || continue
+		if [ -z "$app" ] || [ "$dir/Chummer.exe" -nt "$app/Chummer.exe" ]; then
+			app=$dir
+		fi
+	done
+fi
 [ -n "$app" ] || fail "Chummer.exe not found. Put this script next to Chummer.exe."
+app=$(cd "$app" && pwd)
 
 command -v brew >/dev/null 2>&1 || fail "Homebrew is missing, see https://brew.sh"
 prefix=$(brew --prefix)
@@ -34,18 +40,28 @@ xcode-select -p >/dev/null 2>&1 || fail "The Xcode command line tools are missin
 
 # - Homebrew builds libgdiplus --without-x11: Mono's X11 driver needs those calls
 gdiplus="$HOME/.local/share/chummer/libgdiplus-x11"
-if [ ! -f "$gdiplus/lib/libgdiplus.dylib" ]; then
+if [ ! -f "$gdiplus/.complete" ]; then
 	echo "Building libgdiplus with X11 support. This happens once and takes a few minutes."
 	work=$(mktemp -d)
-	curl -fsSL https://dl.winehq.org/mono/sources/libgdiplus/libgdiplus-6.2.tar.gz | tar xz -C "$work"
+	tarball="$work/libgdiplus-6.2.tar.gz"
+	curl -fsSL -o "$tarball" https://dl.winehq.org/mono/sources/libgdiplus/libgdiplus-6.2.tar.gz ||
+		fail "Downloading libgdiplus failed."
+	# - pinned to the hash Homebrew's mono-libgdiplus formula uses
+	echo "683adb7d99d03f6ee7985173a206a2243f76632682334ced4cae2fcd20c83bc9  $tarball" |
+		shasum -a 256 -c - > /dev/null || fail "The libgdiplus download has an unexpected checksum."
+	tar xzf "$tarball" -C "$work" || fail "Unpacking libgdiplus failed."
+	rm -rf "$gdiplus"
+	# - an && chain: set -e does not apply inside a subshell left of ||
 	(
-		cd "$work/libgdiplus-6.2"
-		export CPPFLAGS="-I$prefix/include" LDFLAGS="-L$prefix/lib"
-		./configure --prefix="$gdiplus" > "$work/configure.log" 2>&1
-		grep -q "X11 = yes" "$work/configure.log"
-		make -j"$(sysctl -n hw.ncpu)" > "$work/make.log" 2>&1
-		make install > /dev/null
+		cd "$work/libgdiplus-6.2" &&
+			CPPFLAGS="-I$prefix/include" LDFLAGS="-L$prefix/lib" \
+				./configure --prefix="$gdiplus" > "$work/configure.log" 2>&1 &&
+			grep -q "X11 = yes" "$work/configure.log" &&
+			make -j"$(sysctl -n hw.ncpu)" > "$work/make.log" 2>&1 &&
+			make install > /dev/null
 	) || fail "Building libgdiplus failed. The logs are in $work"
+	# - the marker comes last: a broken build has no .complete and is rebuilt
+	touch "$gdiplus/.complete"
 	rm -rf "$work"
 fi
 
@@ -53,6 +69,7 @@ fi
 
 file=""
 if [ $# -gt 0 ]; then
+	[ -f "$1" ] || fail "File not found: $1"
 	file="$(cd "$(dirname "$1")" && pwd)/$(basename "$1")"
 fi
 
