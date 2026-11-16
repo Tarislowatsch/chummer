@@ -60,6 +60,11 @@
     <Reference Include="System.Windows.Forms.DataVisualization" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(MSBuildRuntimeType)' == 'Mono'">
+    <!-- - Mono's bundled SDK ignores UseWindowsForms for net48 -->
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
   <ItemGroup>
     <!-- InheritedListView.cs exists in the source tree but was never listed in
          the old project file - it has a single commit, the 2013 import, and no
