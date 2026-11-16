@@ -105,6 +105,8 @@ jobs:
             export DYLD_LIBRARY_PATH="$HOME/gdiplus-x11/lib"
             Xvfb :99 -screen 0 1600x1000x24 > out/xvfb.log 2>&1 &
             export DISPLAY=:99 MONO_MWF_MAC_FORCE_X11=1
+            # - no XIM: the variadic XGetIMValues crashes under P/Invoke on Apple arm64
+            export MONO_WINFORMS_XIM_STYLE=disabled
             sleep 3
           fi
 
