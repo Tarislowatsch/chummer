@@ -78,13 +78,18 @@ Linux, under Xvfb in the container, with screenshots:
 | Career mode, `Combat Bodyguard`, `Team Zero Operator` | loads; tabs, calendar and expense lists work |
 | Print (`File → Print`) | XSLT runs, the sheet is written as HTML and handed to the system browser |
 
-macOS 26 on Apple Silicon, Mono 6.14.1 from Homebrew, through the
-`Mono spike` workflow: `Combat Mage` and `Team Zero Operator` open completely,
-with no exceptions in the log.
+The `Mono` workflow (`.github/workflows/mono.yml`, started by hand) runs both
+start scripts. `Combat Mage` and `Team Zero Operator` open completely, with no
+exceptions in the log:
+
+- Ubuntu 24.04 with the distribution's Mono 6.8, under Xvfb.
+- macOS 26 on Apple Silicon with Mono 6.14.1 from Homebrew, under Xvfb.
+- The same Mac without `DISPLAY`: `start-macos.sh` starts XQuartz itself, and
+  the window appears on the macOS desktop.
 
 Not verified: the test projects under Mono, saving and reloading a character,
-the many selection dialogs, other languages, printing on macOS, a real XQuartz
-session instead of Xvfb.
+the many selection dialogs, other languages, printing on macOS, an interactive
+session on a real Mac.
 
 ## What had to change
 
@@ -115,7 +120,8 @@ still covered only by CI and by a manual check.
     normal exit.
 - **Layout**: on hidden tabs, Mono's anchoring can leave containers smaller than
   the tab, for example the karma/nuyen split container. This is cosmetic and
-  probably needs case-by-case fixes.
+  probably needs case-by-case fixes. Mono 6.14 on macOS also shows the tab
+  "Vehicles && Drones" with both ampersands, Mono 6.8 on Linux shows one.
 - **Tests**: `AppHost` isolates the registry with `advapi32` P/Invokes and sets
   a private `startupPath` field. Neither exists on Mono, so the golden master
   tests would need a Mono path there.
