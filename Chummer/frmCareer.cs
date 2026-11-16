@@ -1101,7 +1101,7 @@ namespace Chummer
 			treImprovements.DragDrop += treImprovements_DragDrop;
 
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 
 			// If this is a Sprite, re-label the Mental Attribute Labels.
@@ -1325,7 +1325,7 @@ namespace Chummer
 			if (!e.Cancel)
 			{
 				if (!_blnSkipToolStripRevert)
-					ToolStripManager.RevertMerge("toolStrip");
+					ToolStripMerge.RevertMerge("toolStrip");
 
 				// Unsubscribe from events.
 				_objCharacter.MAGEnabledChanged -= objCharacter_MAGEnabledChanged;
@@ -1449,7 +1449,7 @@ namespace Chummer
 		private void frmCareer_Activated(object sender, EventArgs e)
 		{
 			// Merge the ToolStrips.
-			ToolStripManager.RevertMerge("toolStrip");
+			ToolStripMerge.RevertMerge("toolStrip");
 			ToolStripManager.Merge(toolStrip, "toolStrip");
 		}
 
